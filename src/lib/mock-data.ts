@@ -12,16 +12,28 @@ export type JobType = "install" | "maintenance" | "repair" | "inspection";
 export type JobPriority = "low" | "normal" | "high" | "urgent";
 export type ElevatorStatus = "operational" | "maintenance_due" | "out_of_order" | "under_install";
 
+export interface Tenant {
+  id: string;
+  name: string;
+  domain?: string;
+}
+
+export interface TenantMembership {
+  tenantId: string;
+  memberships: TenantMembership[];
+}
+
 export interface User {
   id: string;
   name: string;
   email: string;
   phone: string;
-  role: Role;
+  memberships: TenantMembership[];
   avatar?: string;
 }
 
 export interface Customer {
+  tenantId: string;
   id: string;
   name: string;
   contactPerson: string;
@@ -36,6 +48,7 @@ export interface Customer {
 }
 
 export interface Lead {
+  tenantId: string;
   id: string;
   name: string;
   phone: string;
@@ -51,6 +64,7 @@ export interface Lead {
 }
 
 export interface Contract {
+  tenantId: string;
   id: string;
   code: string;
   customerId: string;
@@ -65,6 +79,7 @@ export interface Contract {
 }
 
 export interface Elevator {
+  tenantId: string;
   id: string;
   code: string;
   customerId: string;
@@ -82,6 +97,7 @@ export interface Elevator {
 }
 
 export interface Job {
+  tenantId: string;
   id: string;
   code: string;
   type: JobType;
@@ -102,6 +118,7 @@ export interface Job {
 }
 
 export interface InventoryItem {
+  tenantId: string;
   id: string;
   code: string;
   name: string;
@@ -115,6 +132,7 @@ export interface InventoryItem {
 }
 
 export interface IssueReport {
+  tenantId: string;
   id: string;
   elevatorId: string;
   customerId: string;
@@ -125,15 +143,22 @@ export interface IssueReport {
 }
 
 // ---------- USERS ----------
+// ---------- TENANTS ----------
+export const mockTenants: Tenant[] = [
+  { id: "t-1", name: "Lift Service Co.", domain: "liftservice.vn" },
+  { id: "t-2", name: "Thang Máy Ánh Dương", domain: "anhduonglift.com.vn" }
+];
+
+// ---------- USERS ----------
 export const mockUsers: User[] = [
-  { id: "u-admin", name: "Nguyễn Quốc Khánh", email: "admin@elevatorpro.vn", phone: "0901 234 567", role: "admin" },
-  { id: "u-tech-1", name: "Trần Văn Hùng", email: "hung.tv@elevatorpro.vn", phone: "0912 345 678", role: "technician" },
-  { id: "u-tech-2", name: "Lê Minh Tuấn", email: "tuan.lm@elevatorpro.vn", phone: "0913 456 789", role: "technician" },
-  { id: "u-cus-1", name: "Phạm Thị Hoa", email: "hoa.pham@vinhome.vn", phone: "0987 654 321", role: "customer" },
+  { id: "u-admin", name: "Nguyễn Quốc Khánh", email: "admin@elevatorpro.vn", phone: "0901 234 567", memberships: [{ tenantId: "t-1", role: "admin" }, { tenantId: "t-2", role: "admin" }] },
+  { id: "u-tech-1", name: "Trần Văn Hùng", email: "hung.tv@elevatorpro.vn", phone: "0912 345 678", memberships: [{ tenantId: "t-1", role: "technician" }] },
+  { id: "u-tech-2", name: "Lê Minh Tuấn", email: "tuan.lm@elevatorpro.vn", phone: "0913 456 789", memberships: [{ tenantId: "t-1", role: "technician" }, { tenantId: "t-2", role: "technician" }] },
+  { id: "u-cus-1", name: "Phạm Thị Hoa", email: "hoa.pham@vinhome.vn", phone: "0987 654 321", memberships: [{ tenantId: "t-1", role: "customer" }] },
 ];
 
 // ---------- CUSTOMERS ----------
-export const mockCustomers: Customer[] = [
+const _mockCustomers: Omit<Customer, "tenantId">[] = [
   { id: "c-1", name: "Vinhomes Ocean Park", contactPerson: "Phạm Thị Hoa", phone: "0987 654 321", email: "hoa.pham@vinhome.vn", address: "Đa Tốn, Gia Lâm, Hà Nội", type: "business", elevatorCount: 4, createdAt: "2024-03-15", lat: 20.9796, lng: 105.9419 },
   { id: "c-2", name: "Tòa nhà Sunshine Tower", contactPerson: "Trần Đình Bảo", phone: "0911 223 344", email: "bao.td@sunshine.vn", address: "16 Phạm Hùng, Nam Từ Liêm, Hà Nội", type: "business", elevatorCount: 6, createdAt: "2023-11-02", lat: 21.0150, lng: 105.7818 },
   { id: "c-3", name: "Khách sạn Mường Thanh", contactPerson: "Lý Hoàng Nam", phone: "0934 556 677", email: "nam.ly@muongthanh.vn", address: "78 Trần Phú, Hà Đông, Hà Nội", type: "business", elevatorCount: 3, createdAt: "2024-06-20", lat: 20.9712, lng: 105.7762 },
@@ -149,7 +174,7 @@ export const mockCustomers: Customer[] = [
 ];
 
 // ---------- LEADS ----------
-export const mockLeads: Lead[] = [
+const _mockLeads: Omit<Lead, "tenantId">[] = [
   { id: "l-1", name: "Tòa nhà Goldmark City", phone: "0901 111 222", email: "info@goldmark.vn", source: "Giới thiệu", address: "136 Hồ Tùng Mậu, Bắc Từ Liêm", note: "Cần lắp 4 thang máy mới cho block C", status: "negotiating", assignedTo: "u-admin", estimatedValue: 2400000000, nextFollowUp: "2026-04-25", createdAt: "2026-03-12" },
   { id: "l-2", name: "Văn phòng Capital Tower", phone: "0922 333 444", email: "lan.nguyen@capital.vn", source: "Website", address: "109 Trần Hưng Đạo, Hoàn Kiếm", note: "Quan tâm dịch vụ bảo trì 6 thang", status: "quoted", assignedTo: "u-admin", estimatedValue: 540000000, nextFollowUp: "2026-04-22", createdAt: "2026-03-28" },
   { id: "l-3", name: "Anh Hoàng - nhà phố", phone: "0966 222 111", email: "", source: "Facebook Ads", address: "Mỹ Đình, Nam Từ Liêm", note: "Lắp 1 thang gia đình 5 tầng", status: "contacted", assignedTo: "u-admin", estimatedValue: 380000000, nextFollowUp: "2026-04-20", createdAt: "2026-04-05" },
@@ -165,7 +190,7 @@ export const mockLeads: Lead[] = [
 ];
 
 // ---------- CONTRACTS ----------
-export const mockContracts: Contract[] = [
+const _mockContracts: Omit<Contract, "tenantId">[] = [
   { id: "ct-1", code: "HD-2024-0142", customerId: "c-1", type: "maintenance", value: 240000000, paid: 240000000, startDate: "2024-04-01", endDate: "2026-04-30", status: "expiring", items: ["Bảo trì 4 thang Mitsubishi định kỳ 1 tháng/lần"], signedAt: "2024-03-20" },
   { id: "ct-2", code: "HD-2023-0218", customerId: "c-2", type: "install", value: 3600000000, paid: 3600000000, startDate: "2023-11-15", endDate: "2025-11-15", status: "active", items: ["Lắp đặt 6 thang máy Otis 21 tầng"], signedAt: "2023-11-10" },
   { id: "ct-3", code: "HD-2024-0301", customerId: "c-3", type: "maintenance", value: 162000000, paid: 81000000, startDate: "2024-07-01", endDate: "2026-06-30", status: "active", items: ["Bảo trì 3 thang khách sạn"], signedAt: "2024-06-25" },
@@ -183,7 +208,7 @@ export const mockContracts: Contract[] = [
 ];
 
 // ---------- ELEVATORS ----------
-export const mockElevators: Elevator[] = [
+const _mockElevators: Omit<Elevator, "tenantId">[] = [
   { id: "e-1", code: "VHOP-A1-01", customerId: "c-1", contractId: "ct-1", building: "Tòa A1", address: "Vinhomes Ocean Park", brand: "Mitsubishi", model: "NEXIEZ-MR", floors: 25, installedAt: "2022-04-15", warrantyUntil: "2024-04-15", lastMaintenance: "2026-03-15", nextMaintenance: "2026-04-15", status: "maintenance_due" },
   { id: "e-2", code: "VHOP-A1-02", customerId: "c-1", contractId: "ct-1", building: "Tòa A1", address: "Vinhomes Ocean Park", brand: "Mitsubishi", model: "NEXIEZ-MR", floors: 25, installedAt: "2022-04-15", warrantyUntil: "2024-04-15", lastMaintenance: "2026-03-15", nextMaintenance: "2026-04-15", status: "operational" },
   { id: "e-3", code: "VHOP-B2-01", customerId: "c-1", contractId: "ct-1", building: "Tòa B2", address: "Vinhomes Ocean Park", brand: "Mitsubishi", model: "NEXIEZ-MR", floors: 22, installedAt: "2022-06-20", warrantyUntil: "2024-06-20", lastMaintenance: "2026-03-20", nextMaintenance: "2026-04-20", status: "operational" },
@@ -202,7 +227,7 @@ export const mockElevators: Elevator[] = [
 ];
 
 // ---------- JOBS ----------
-export const mockJobs: Job[] = [
+const _mockJobs: Omit<Job, "tenantId">[] = [
   { id: "j-1", code: "CV-2026-0418", type: "maintenance", title: "Bảo trì định kỳ tháng 4 - VHOP A1", description: "Bảo trì định kỳ 2 thang tòa A1", customerId: "c-1", elevatorId: "e-1", contractId: "ct-1", assignedTo: "u-tech-1", priority: "normal", status: "scheduled", scheduledFor: "2026-04-19T08:00:00", beforePhotos: [], afterPhotos: [], createdAt: "2026-04-15" },
   { id: "j-2", code: "CV-2026-0419", type: "repair", title: "Sửa lỗi cửa thang SST-02", description: "Cửa thang đóng mở chậm, cần kiểm tra cảm biến", customerId: "c-2", elevatorId: "e-6", assignedTo: "u-tech-1", priority: "urgent", status: "in_progress", scheduledFor: "2026-04-18T09:30:00", beforePhotos: ["before1.jpg"], afterPhotos: [], createdAt: "2026-04-18" },
   { id: "j-3", code: "CV-2026-0420", type: "maintenance", title: "Bảo trì Mường Thanh Hà Đông", description: "Bảo trì định kỳ 3 thang", customerId: "c-3", elevatorId: "e-8", contractId: "ct-3", assignedTo: "u-tech-2", priority: "normal", status: "scheduled", scheduledFor: "2026-04-20T08:00:00", beforePhotos: [], afterPhotos: [], createdAt: "2026-04-16" },
@@ -218,7 +243,7 @@ export const mockJobs: Job[] = [
 ];
 
 // ---------- INVENTORY ----------
-export const mockInventory: InventoryItem[] = [
+const _mockInventory: Omit<InventoryItem, "tenantId">[] = [
   { id: "i-1", code: "MOTOR-MIT-15", name: "Mô tơ thang Mitsubishi 15kW", category: "Motor", unit: "Cái", stock: 4, reserved: 1, reorderLevel: 2, unitPrice: 45000000, location: "Kho A - Hà Nội" },
   { id: "i-2", code: "CTRL-OTIS-V8", name: "Tủ điều khiển Otis V8", category: "Tủ điều khiển", unit: "Cái", stock: 2, reserved: 0, reorderLevel: 1, unitPrice: 78000000, location: "Kho A - Hà Nội" },
   { id: "i-3", code: "CABLE-8X11", name: "Cáp thép 8x11mm", category: "Cáp", unit: "Mét", stock: 320, reserved: 50, reorderLevel: 100, unitPrice: 280000, location: "Kho A - Hà Nội" },
@@ -234,11 +259,20 @@ export const mockInventory: InventoryItem[] = [
 ];
 
 // ---------- ISSUE REPORTS ----------
-export const mockIssues: IssueReport[] = [
+const _mockIssues: Omit<IssueReport, "tenantId">[] = [
   { id: "is-1", elevatorId: "e-6", customerId: "c-2", description: "Cửa thang đóng mở chậm, có tiếng kêu", reportedAt: "2026-04-18T08:15:00", status: "scheduled", jobId: "j-2" },
   { id: "is-2", elevatorId: "e-1", customerId: "c-1", description: "Thang rung lắc nhẹ khi lên xuống", reportedAt: "2026-04-17T16:30:00", status: "scheduled", jobId: "j-1" },
   { id: "is-3", elevatorId: "e-8", customerId: "c-3", description: "Đèn cabin số 2 bị hỏng", reportedAt: "2026-04-16T10:00:00", status: "open" },
 ];
+
+
+export const mockCustomers = _mockCustomers.map(x => ({...x, tenantId: 't-1'}) as Customer);
+export const mockLeads = _mockLeads.map(x => ({...x, tenantId: 't-1'}) as Lead);
+export const mockContracts = _mockContracts.map(x => ({...x, tenantId: 't-1'}) as Contract);
+export const mockElevators = _mockElevators.map(x => ({...x, tenantId: 't-1'}) as Elevator);
+export const mockJobs = _mockJobs.map(x => ({...x, tenantId: 't-1'}) as Job);
+export const mockInventory = _mockInventory.map(x => ({...x, tenantId: 't-1'}) as InventoryItem);
+export const mockIssues = _mockIssues.map(x => ({...x, tenantId: 't-1'}) as IssueReport);
 
 // Helper getters
 export function getCustomer(id: string) { return mockCustomers.find(c => c.id === id); }

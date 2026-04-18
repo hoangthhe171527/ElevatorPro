@@ -72,7 +72,9 @@ function PortalElevators() {
                     <Building2 className="h-4 w-4" />
                   </div>
                   <div>
-                    <div className="font-mono text-sm font-semibold">{e.code}</div>
+                    <Link to="/portal/elevators/$elevatorId" params={{ elevatorId: e.id }}>
+                      <div className="font-mono text-sm font-semibold text-primary hover:underline underline-offset-4">{e.code}</div>
+                    </Link>
                     <div className="text-xs text-muted-foreground">{e.brand} {e.model}</div>
                   </div>
                 </div>
@@ -94,10 +96,15 @@ function PortalElevators() {
                 </div>
               </div>
 
-              <div className="mt-3 pt-3 border-t flex gap-2">
-                <Link to="/qr/$elevatorId" params={{ elevatorId: e.id }} className="flex-1">
-                  <Button variant="outline" size="sm" className="w-full gap-1.5">
-                    <QrCode className="h-3.5 w-3.5" /> Xem QR
+              <div className="mt-4 pt-4 border-t flex gap-2">
+                <Link to="/portal/elevators/$elevatorId" params={{ elevatorId: e.id }} className="flex-1">
+                  <Button variant="default" size="sm" className="w-full gap-1.5">
+                    Chi tiết
+                  </Button>
+                </Link>
+                <Link to="/qr/$elevatorId" params={{ elevatorId: e.id }} title="Xem QR" className="flex-none">
+                  <Button variant="outline" size="sm" className="w-9 px-0">
+                    <QrCode className="h-4 w-4 text-muted-foreground" />
                   </Button>
                 </Link>
                 <Link to="/portal/issues" className="flex-1">
@@ -106,7 +113,7 @@ function PortalElevators() {
                     variant={e.status === "out_of_order" ? "destructive" : "outline"}
                     className="w-full gap-1.5"
                   >
-                    <AlertTriangle className="h-3.5 w-3.5" /> Báo lỗi
+                    <AlertTriangle className="h-4 w-4" /> Báo sự cố
                   </Button>
                 </Link>
               </div>

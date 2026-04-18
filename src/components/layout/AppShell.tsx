@@ -2,6 +2,7 @@
 import { Link, useLocation } from "@tanstack/react-router";
 import { useAppStore, useCurrentUser } from "@/lib/store";
 import type { Role } from "@/lib/mock-data";
+import { mockTenants } from "@/lib/mock-data";
 import {
   LayoutDashboard,
   Users,
@@ -104,6 +105,8 @@ const roleLabels: Record<Role, string> = {
 export function AppShell({ children }: { children: React.ReactNode }) {
   const role = useAppStore((s) => s.role);
   const setRole = useAppStore((s) => s.setRole);
+  const activeTenantId = useAppStore((s) => s.activeTenantId);
+  const setTenantId = useAppStore((s) => s.setTenantId);
   const user = useCurrentUser();
   const location = useLocation();
   const groups = navByRole[role];
@@ -217,6 +220,37 @@ export function AppShell({ children }: { children: React.ReactNode }) {
 
           {/* Global search */}
           <GlobalSearch />
+
+          {/* Tenant switcher */}
+          <div className="hidden md:flex items-center ml-auto mr-2 pr-4 border-r">
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button variant="ghost" size="sm" className="gap-2 shrink-0 h-8 font-medium">
+                  <Building2 className="h-4 w-4 text-primary" />
+                  <span>{mockTenants.find(t => t.id === activeTenantId)?.name || 'Select Tenant'}</span>
+                  <ChevronDown className="h-3 w-3 opacity-50" />
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end" className="w-56">
+                <DropdownMenuLabel>Tổ chức (SaaS Tenant)</DropdownMenuLabel>
+                <DropdownMenuSeparator />
+                {mockTenants.map((t) => (
+                  <DropdownMenuItem
+                    key={t.id}
+                    onClick={() => {
+                      setTenantId(t.id);
+                      window.location.reload();
+                    }}
+                  >
+                    {t.name}
+                    {activeTenantId === t.id && (
+                      <Badge variant="secondary" className="ml-auto">Hiện tại</Badge>
+                    )}
+                  </DropdownMenuItem>
+                ))}
+              </DropdownMenuContent>
+            </DropdownMenu>
+          </div>
 
           {/* Role switcher */}
           <DropdownMenu>

@@ -29,6 +29,7 @@ import { Route as AdminDispatchRouteImport } from './routes/admin.dispatch'
 import { Route as AdminCustomersRouteImport } from './routes/admin.customers'
 import { Route as AdminContractsRouteImport } from './routes/admin.contracts'
 import { Route as TechJobsJobIdRouteImport } from './routes/tech.jobs.$jobId'
+import { Route as PortalElevatorsElevatorIdRouteImport } from './routes/portal.elevators.$elevatorId'
 import { Route as AdminJobsJobIdRouteImport } from './routes/admin.jobs.$jobId'
 import { Route as AdminElevatorsElevatorIdRouteImport } from './routes/admin.elevators.$elevatorId'
 import { Route as AdminCustomersCustomerIdRouteImport } from './routes/admin.customers.$customerId'
@@ -133,6 +134,12 @@ const TechJobsJobIdRoute = TechJobsJobIdRouteImport.update({
   path: '/$jobId',
   getParentRoute: () => TechJobsRoute,
 } as any)
+const PortalElevatorsElevatorIdRoute =
+  PortalElevatorsElevatorIdRouteImport.update({
+    id: '/$elevatorId',
+    path: '/$elevatorId',
+    getParentRoute: () => PortalElevatorsRoute,
+  } as any)
 const AdminJobsJobIdRoute = AdminJobsJobIdRouteImport.update({
   id: '/$jobId',
   path: '/$jobId',
@@ -162,7 +169,7 @@ export interface FileRoutesByFullPath {
   '/admin/leads': typeof AdminLeadsRoute
   '/admin/reports': typeof AdminReportsRoute
   '/portal/contracts': typeof PortalContractsRoute
-  '/portal/elevators': typeof PortalElevatorsRoute
+  '/portal/elevators': typeof PortalElevatorsRouteWithChildren
   '/portal/issues': typeof PortalIssuesRoute
   '/qr/$elevatorId': typeof QrElevatorIdRoute
   '/tech/jobs': typeof TechJobsRouteWithChildren
@@ -174,6 +181,7 @@ export interface FileRoutesByFullPath {
   '/admin/customers/$customerId': typeof AdminCustomersCustomerIdRoute
   '/admin/elevators/$elevatorId': typeof AdminElevatorsElevatorIdRoute
   '/admin/jobs/$jobId': typeof AdminJobsJobIdRoute
+  '/portal/elevators/$elevatorId': typeof PortalElevatorsElevatorIdRoute
   '/tech/jobs/$jobId': typeof TechJobsJobIdRoute
 }
 export interface FileRoutesByTo {
@@ -187,7 +195,7 @@ export interface FileRoutesByTo {
   '/admin/leads': typeof AdminLeadsRoute
   '/admin/reports': typeof AdminReportsRoute
   '/portal/contracts': typeof PortalContractsRoute
-  '/portal/elevators': typeof PortalElevatorsRoute
+  '/portal/elevators': typeof PortalElevatorsRouteWithChildren
   '/portal/issues': typeof PortalIssuesRoute
   '/qr/$elevatorId': typeof QrElevatorIdRoute
   '/tech/jobs': typeof TechJobsRouteWithChildren
@@ -199,6 +207,7 @@ export interface FileRoutesByTo {
   '/admin/customers/$customerId': typeof AdminCustomersCustomerIdRoute
   '/admin/elevators/$elevatorId': typeof AdminElevatorsElevatorIdRoute
   '/admin/jobs/$jobId': typeof AdminJobsJobIdRoute
+  '/portal/elevators/$elevatorId': typeof PortalElevatorsElevatorIdRoute
   '/tech/jobs/$jobId': typeof TechJobsJobIdRoute
 }
 export interface FileRoutesById {
@@ -213,7 +222,7 @@ export interface FileRoutesById {
   '/admin/leads': typeof AdminLeadsRoute
   '/admin/reports': typeof AdminReportsRoute
   '/portal/contracts': typeof PortalContractsRoute
-  '/portal/elevators': typeof PortalElevatorsRoute
+  '/portal/elevators': typeof PortalElevatorsRouteWithChildren
   '/portal/issues': typeof PortalIssuesRoute
   '/qr/$elevatorId': typeof QrElevatorIdRoute
   '/tech/jobs': typeof TechJobsRouteWithChildren
@@ -225,6 +234,7 @@ export interface FileRoutesById {
   '/admin/customers/$customerId': typeof AdminCustomersCustomerIdRoute
   '/admin/elevators/$elevatorId': typeof AdminElevatorsElevatorIdRoute
   '/admin/jobs/$jobId': typeof AdminJobsJobIdRoute
+  '/portal/elevators/$elevatorId': typeof PortalElevatorsElevatorIdRoute
   '/tech/jobs/$jobId': typeof TechJobsJobIdRoute
 }
 export interface FileRouteTypes {
@@ -252,6 +262,7 @@ export interface FileRouteTypes {
     | '/admin/customers/$customerId'
     | '/admin/elevators/$elevatorId'
     | '/admin/jobs/$jobId'
+    | '/portal/elevators/$elevatorId'
     | '/tech/jobs/$jobId'
   fileRoutesByTo: FileRoutesByTo
   to:
@@ -277,6 +288,7 @@ export interface FileRouteTypes {
     | '/admin/customers/$customerId'
     | '/admin/elevators/$elevatorId'
     | '/admin/jobs/$jobId'
+    | '/portal/elevators/$elevatorId'
     | '/tech/jobs/$jobId'
   id:
     | '__root__'
@@ -302,6 +314,7 @@ export interface FileRouteTypes {
     | '/admin/customers/$customerId'
     | '/admin/elevators/$elevatorId'
     | '/admin/jobs/$jobId'
+    | '/portal/elevators/$elevatorId'
     | '/tech/jobs/$jobId'
   fileRoutesById: FileRoutesById
 }
@@ -316,7 +329,7 @@ export interface RootRouteChildren {
   AdminLeadsRoute: typeof AdminLeadsRoute
   AdminReportsRoute: typeof AdminReportsRoute
   PortalContractsRoute: typeof PortalContractsRoute
-  PortalElevatorsRoute: typeof PortalElevatorsRoute
+  PortalElevatorsRoute: typeof PortalElevatorsRouteWithChildren
   PortalIssuesRoute: typeof PortalIssuesRoute
   QrElevatorIdRoute: typeof QrElevatorIdRoute
   TechJobsRoute: typeof TechJobsRouteWithChildren
@@ -469,6 +482,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof TechJobsJobIdRouteImport
       parentRoute: typeof TechJobsRoute
     }
+    '/portal/elevators/$elevatorId': {
+      id: '/portal/elevators/$elevatorId'
+      path: '/$elevatorId'
+      fullPath: '/portal/elevators/$elevatorId'
+      preLoaderRoute: typeof PortalElevatorsElevatorIdRouteImport
+      parentRoute: typeof PortalElevatorsRoute
+    }
     '/admin/jobs/$jobId': {
       id: '/admin/jobs/$jobId'
       path: '/$jobId'
@@ -529,6 +549,18 @@ const AdminJobsRouteWithChildren = AdminJobsRoute._addFileChildren(
   AdminJobsRouteChildren,
 )
 
+interface PortalElevatorsRouteChildren {
+  PortalElevatorsElevatorIdRoute: typeof PortalElevatorsElevatorIdRoute
+}
+
+const PortalElevatorsRouteChildren: PortalElevatorsRouteChildren = {
+  PortalElevatorsElevatorIdRoute: PortalElevatorsElevatorIdRoute,
+}
+
+const PortalElevatorsRouteWithChildren = PortalElevatorsRoute._addFileChildren(
+  PortalElevatorsRouteChildren,
+)
+
 interface TechJobsRouteChildren {
   TechJobsJobIdRoute: typeof TechJobsJobIdRoute
 }
@@ -552,7 +584,7 @@ const rootRouteChildren: RootRouteChildren = {
   AdminLeadsRoute: AdminLeadsRoute,
   AdminReportsRoute: AdminReportsRoute,
   PortalContractsRoute: PortalContractsRoute,
-  PortalElevatorsRoute: PortalElevatorsRoute,
+  PortalElevatorsRoute: PortalElevatorsRouteWithChildren,
   PortalIssuesRoute: PortalIssuesRoute,
   QrElevatorIdRoute: QrElevatorIdRoute,
   TechJobsRoute: TechJobsRouteWithChildren,
