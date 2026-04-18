@@ -67,7 +67,6 @@ const navByRole: Record<Role, { group: string; items: NavItem[] }[]> = {
       group: "Vận hành",
       items: [
         { to: "/admin/jobs", label: "Công việc", icon: Briefcase },
-        { to: "/admin/dispatch", label: "Bản đồ & Điều phối", icon: Map },
         { to: "/admin/elevators", label: "Thang máy", icon: Building2 },
         { to: "/admin/inventory", label: "Kho vật tư", icon: Package },
       ],

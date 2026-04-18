@@ -860,6 +860,84 @@ export function ConfirmScheduleModal({ open, onClose, jobTitle, scheduledFor }: 
       </DialogContent>
     </Dialog>
   );
+}
 
-  
+// ─────────────────────────────────────────────
+// 10. MODAL THÊM LEAD MỚI
+// ─────────────────────────────────────────────
+interface CreateLeadModalProps {
+  open: boolean;
+  onClose: () => void;
+}
+
+export function CreateLeadModal({ open, onClose }: CreateLeadModalProps) {
+  const [name, setName] = useState("");
+  const [phone, setPhone] = useState("");
+  const [email, setEmail] = useState("");
+  const [address, setAddress] = useState("");
+  const [source, setSource] = useState("Website");
+  const [note, setNote] = useState("");
+  const [loading, setLoading] = useState(false);
+
+  const handle = async () => {
+    if (!name.trim() || !phone.trim()) { toast.error("Vui lòng nhập tên và số điện thoại lead"); return; }
+    setLoading(true);
+    await new Promise(r => setTimeout(r, 500));
+    setLoading(false);
+    toast.success(`Đã thêm lead mới: "${name}"`);
+    setName(""); setPhone(""); setEmail(""); setAddress(""); setSource("Website"); setNote("");
+    onClose();
+  };
+
+  return (
+    <Dialog open={open} onOpenChange={onClose}>
+      <DialogContent className="max-w-lg">
+        <DialogHeader>
+          <DialogTitle className="flex items-center gap-2">
+            <UserCog className="h-5 w-5 text-primary" /> Thêm Lead Mới
+          </DialogTitle>
+        </DialogHeader>
+        <div className="space-y-3 py-2">
+          <div>
+            <label className="text-sm font-medium">Tên khách hàng / Tổ chức <span className="text-destructive">*</span></label>
+            <Input className="mt-1" placeholder="VD: Tòa nhà Sunshine" value={name} onChange={(e) => setName(e.target.value)} />
+          </div>
+          <div className="grid grid-cols-2 gap-3">
+            <div>
+              <label className="text-sm font-medium">Số điện thoại <span className="text-destructive">*</span></label>
+              <Input className="mt-1" placeholder="0901 234 567" value={phone} onChange={(e) => setPhone(e.target.value)} />
+            </div>
+            <div>
+              <label className="text-sm font-medium">Nguồn liên hệ</label>
+              <Select value={source} onValueChange={setSource}>
+                <SelectTrigger className="mt-1"><SelectValue /></SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="Website">Website</SelectItem>
+                  <SelectItem value="Facebook Ads">Facebook Ads</SelectItem>
+                  <SelectItem value="Giới thiệu">Khách giới thiệu</SelectItem>
+                  <SelectItem value="Cold call">Cold call</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+          </div>
+          <div>
+            <label className="text-sm font-medium">Email</label>
+            <Input className="mt-1" type="email" placeholder="email@example.com" value={email} onChange={(e) => setEmail(e.target.value)} />
+          </div>
+          <div>
+            <label className="text-sm font-medium">Địa chỉ</label>
+            <Input className="mt-1" placeholder="Địa chỉ dự kiến lắp đặt/bảo trì" value={address} onChange={(e) => setAddress(e.target.value)} />
+          </div>
+          <div>
+            <label className="text-sm font-medium">Ghi chú nhu cầu</label>
+            <Textarea className="mt-1" placeholder="VD: Khách cần lắp 2 thang máy gia đình 5 tầng" value={note} onChange={(e) => setNote(e.target.value)} rows={3} />
+          </div>
+        </div>
+        <DialogFooter>
+          <Button variant="outline" onClick={onClose} disabled={loading}>Hủy</Button>
+          <Button onClick={handle} disabled={loading}>{loading ? "Đang thêm..." : "Thêm Lead"}</Button>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
+  );
 }

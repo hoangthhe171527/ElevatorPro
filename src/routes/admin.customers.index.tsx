@@ -22,7 +22,7 @@ import {
 } from "lucide-react";
 import { CreateCustomerModal } from "@/components/common/Modals";
 
-export const Route = createFileRoute("/admin/customers")({
+export const Route = createFileRoute("/admin/customers/")({
   head: () => ({ meta: [{ title: "Khách hàng — ElevatorPro" }] }),
   component: CustomersPage,
 });

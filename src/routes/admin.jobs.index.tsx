@@ -19,7 +19,7 @@ import { mockJobs, formatDateTime, getCustomer, getUser } from "@/lib/mock-data"
 import { Plus, Search, Briefcase, Calendar, User } from "lucide-react";
 import { CreateJobModal } from "@/components/common/Modals";
 
-export const Route = createFileRoute("/admin/jobs")({
+export const Route = createFileRoute("/admin/jobs/")({
   head: () => ({ meta: [{ title: "Công việc — ElevatorPro" }] }),
   component: JobsPage,
 });

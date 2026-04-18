@@ -11,7 +11,7 @@ import { StatusBadge, elevatorStatusLabel, elevatorStatusVariant } from "@/compo
 import { mockElevators, formatDate } from "@/lib/mock-data";
 import { Building2, QrCode, MapPin, Search, AlertTriangle } from "lucide-react";
 
-export const Route = createFileRoute("/portal/elevators")({
+export const Route = createFileRoute("/portal/elevators/")({
   head: () => ({ meta: [{ title: "Thang máy của tôi" }] }),
   component: PortalElevators,
 });

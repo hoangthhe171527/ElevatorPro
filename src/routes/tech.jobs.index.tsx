@@ -38,7 +38,7 @@ import {
 } from "lucide-react";
 import { toast } from "sonner";
 
-export const Route = createFileRoute("/tech/jobs")({
+export const Route = createFileRoute("/tech/jobs/")({
   head: () => ({ meta: [{ title: "Công việc của tôi" }] }),
   component: TechJobs,
 });

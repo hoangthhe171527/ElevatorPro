@@ -11,7 +11,7 @@ import { DataPagination } from "@/components/common/DataPagination";
 import { StatusBadge, leadStatusLabel, leadStatusVariant } from "@/components/common/StatusBadge";
 import { mockLeads, formatVND, formatDate, type Lead } from "@/lib/mock-data";
 import { Plus, Phone, Mail, MapPin, Search, UserCog } from "lucide-react";
-import { ConvertLeadModal } from "@/components/common/Modals";
+import { ConvertLeadModal, CreateLeadModal } from "@/components/common/Modals";
 import { toast } from "sonner";
 
 export const Route = createFileRoute("/admin/leads")({
@@ -26,6 +26,7 @@ function LeadsPage() {
   const [search, setSearch] = useState("");
   const [statusFilter, setStatusFilter] = useState<string>("all");
   const [convertLead, setConvertLead] = useState<Lead | null>(null);
+  const [createOpen, setCreateOpen] = useState(false);
 
   const filtered = mockLeads.filter((l) => {
     const matchSearch =
@@ -44,7 +45,7 @@ function LeadsPage() {
         title="Khách hàng tiềm năng"
         description="Lưu trữ và chăm sóc lead để chuyển đổi thành khách hàng"
         actions={
-          <Button>
+          <Button onClick={() => setCreateOpen(true)}>
             <Plus className="h-4 w-4 mr-1.5" /> Thêm lead
           </Button>
         }
@@ -159,6 +160,11 @@ function LeadsPage() {
           lead={convertLead}
         />
       )}
+
+      <CreateLeadModal
+        open={createOpen}
+        onClose={() => setCreateOpen(false)}
+      />
     </AppShell>
   );
 }

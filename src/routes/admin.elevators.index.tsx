@@ -13,7 +13,7 @@ import { mockElevators, formatDate, getCustomer } from "@/lib/mock-data";
 import { Plus, Search, Building2, QrCode, MapPin } from "lucide-react";
 import { CreateElevatorModal } from "@/components/common/Modals";
 
-export const Route = createFileRoute("/admin/elevators")({
+export const Route = createFileRoute("/admin/elevators/")({
   head: () => ({ meta: [{ title: "Thang máy — ElevatorPro" }] }),
   component: ElevatorsPage,
 });
