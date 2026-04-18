@@ -1,4 +1,4 @@
-// src/routes/admin.inventory.tsx  ← THAY THẾ FILE CŨ
+// src/routes/admin.inventory.index.tsx  ← ĐÃ ĐỔI TÊN ĐỂ TRÁNH LỖI OVERLAP THEO TANSTACK ROUTER V1
 import { createFileRoute } from "@tanstack/react-router";
 import { useState } from "react";
 import { AppShell } from "@/components/layout/AppShell";
@@ -11,11 +11,11 @@ import { DataPagination } from "@/components/common/DataPagination";
 import { Progress } from "@/components/ui/progress";
 import { StatusBadge } from "@/components/common/StatusBadge";
 import { mockInventory, formatVND, type InventoryItem } from "@/lib/mock-data";
-import { Plus, Search, Package, AlertTriangle, PackagePlus } from "lucide-react";
+import { Plus, Search, Package, AlertTriangle, ArrowRightLeft, PackageOpen, LayoutGrid, List } from "lucide-react";
 import { ReceiveInventoryModal } from "@/components/common/Modals";
 import { toast } from "sonner";
 
-export const Route = createFileRoute("/admin/inventory")({
+export const Route = createFileRoute("/admin/inventory/")({
   head: () => ({ meta: [{ title: "Kho vật tư — ElevatorPro" }] }),
   component: InventoryPage,
 });

@@ -70,9 +70,9 @@ export function CreateJobModal({
 }: CreateJobModalProps) {
   const [title, setTitle] = useState("");
   const [type, setType] = useState<JobType>("maintenance");
-  const [customerId, setCustomerId] = useState(defaultCustomerId);
-  const [elevatorId, setElevatorId] = useState(defaultElevatorId);
-  const [contractId, setContractId] = useState(defaultContractId);
+  const [customerId, setCustomerId] = useState(defaultCustomerId || "");
+  const [elevatorId, setElevatorId] = useState(defaultElevatorId || "");
+  const [contractId, setContractId] = useState(defaultContractId || "");
   const [techId, setTechId] = useState("");
   const [scheduledFor, setScheduledFor] = useState(() => {
     const d = new Date();
@@ -84,7 +84,7 @@ export function CreateJobModal({
   const [description, setDescription] = useState("");
   const [loading, setLoading] = useState(false);
 
-  const technicians = mockUsers.filter((u) => u.role === "technician");
+  const technicians = mockUsers.filter((u) => u.memberships?.some(m => m.role === "technician"));
   const customerElevators = mockElevators.filter((e) => e.customerId === customerId);
   const customerContracts = mockContracts.filter((c) => c.customerId === customerId);
 

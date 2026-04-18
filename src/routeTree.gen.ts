@@ -20,11 +20,11 @@ import { Route as PortalIssuesRouteImport } from './routes/portal.issues'
 import { Route as PortalContractsRouteImport } from './routes/portal.contracts'
 import { Route as AdminReportsRouteImport } from './routes/admin.reports'
 import { Route as AdminLeadsRouteImport } from './routes/admin.leads'
-import { Route as AdminInventoryRouteImport } from './routes/admin.inventory'
 import { Route as AdminContractsRouteImport } from './routes/admin.contracts'
 import { Route as TechJobsIndexRouteImport } from './routes/tech.jobs.index'
 import { Route as PortalElevatorsIndexRouteImport } from './routes/portal.elevators.index'
 import { Route as AdminJobsIndexRouteImport } from './routes/admin.jobs.index'
+import { Route as AdminInventoryIndexRouteImport } from './routes/admin.inventory.index'
 import { Route as AdminElevatorsIndexRouteImport } from './routes/admin.elevators.index'
 import { Route as AdminCustomersIndexRouteImport } from './routes/admin.customers.index'
 import { Route as TechJobsJobIdRouteImport } from './routes/tech.jobs.$jobId'
@@ -88,11 +88,6 @@ const AdminLeadsRoute = AdminLeadsRouteImport.update({
   path: '/admin/leads',
   getParentRoute: () => rootRouteImport,
 } as any)
-const AdminInventoryRoute = AdminInventoryRouteImport.update({
-  id: '/admin/inventory',
-  path: '/admin/inventory',
-  getParentRoute: () => rootRouteImport,
-} as any)
 const AdminContractsRoute = AdminContractsRouteImport.update({
   id: '/admin/contracts',
   path: '/admin/contracts',
@@ -111,6 +106,11 @@ const PortalElevatorsIndexRoute = PortalElevatorsIndexRouteImport.update({
 const AdminJobsIndexRoute = AdminJobsIndexRouteImport.update({
   id: '/admin/jobs/',
   path: '/admin/jobs/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AdminInventoryIndexRoute = AdminInventoryIndexRouteImport.update({
+  id: '/admin/inventory/',
+  path: '/admin/inventory/',
   getParentRoute: () => rootRouteImport,
 } as any)
 const AdminElevatorsIndexRoute = AdminElevatorsIndexRouteImport.update({
@@ -155,7 +155,6 @@ const AdminCustomersCustomerIdRoute =
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/admin/contracts': typeof AdminContractsRoute
-  '/admin/inventory': typeof AdminInventoryRoute
   '/admin/leads': typeof AdminLeadsRoute
   '/admin/reports': typeof AdminReportsRoute
   '/portal/contracts': typeof PortalContractsRoute
@@ -173,6 +172,7 @@ export interface FileRoutesByFullPath {
   '/tech/jobs/$jobId': typeof TechJobsJobIdRoute
   '/admin/customers/': typeof AdminCustomersIndexRoute
   '/admin/elevators/': typeof AdminElevatorsIndexRoute
+  '/admin/inventory/': typeof AdminInventoryIndexRoute
   '/admin/jobs/': typeof AdminJobsIndexRoute
   '/portal/elevators/': typeof PortalElevatorsIndexRoute
   '/tech/jobs/': typeof TechJobsIndexRoute
@@ -180,7 +180,6 @@ export interface FileRoutesByFullPath {
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/admin/contracts': typeof AdminContractsRoute
-  '/admin/inventory': typeof AdminInventoryRoute
   '/admin/leads': typeof AdminLeadsRoute
   '/admin/reports': typeof AdminReportsRoute
   '/portal/contracts': typeof PortalContractsRoute
@@ -198,6 +197,7 @@ export interface FileRoutesByTo {
   '/tech/jobs/$jobId': typeof TechJobsJobIdRoute
   '/admin/customers': typeof AdminCustomersIndexRoute
   '/admin/elevators': typeof AdminElevatorsIndexRoute
+  '/admin/inventory': typeof AdminInventoryIndexRoute
   '/admin/jobs': typeof AdminJobsIndexRoute
   '/portal/elevators': typeof PortalElevatorsIndexRoute
   '/tech/jobs': typeof TechJobsIndexRoute
@@ -206,7 +206,6 @@ export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
   '/admin/contracts': typeof AdminContractsRoute
-  '/admin/inventory': typeof AdminInventoryRoute
   '/admin/leads': typeof AdminLeadsRoute
   '/admin/reports': typeof AdminReportsRoute
   '/portal/contracts': typeof PortalContractsRoute
@@ -224,6 +223,7 @@ export interface FileRoutesById {
   '/tech/jobs/$jobId': typeof TechJobsJobIdRoute
   '/admin/customers/': typeof AdminCustomersIndexRoute
   '/admin/elevators/': typeof AdminElevatorsIndexRoute
+  '/admin/inventory/': typeof AdminInventoryIndexRoute
   '/admin/jobs/': typeof AdminJobsIndexRoute
   '/portal/elevators/': typeof PortalElevatorsIndexRoute
   '/tech/jobs/': typeof TechJobsIndexRoute
@@ -233,7 +233,6 @@ export interface FileRouteTypes {
   fullPaths:
     | '/'
     | '/admin/contracts'
-    | '/admin/inventory'
     | '/admin/leads'
     | '/admin/reports'
     | '/portal/contracts'
@@ -251,6 +250,7 @@ export interface FileRouteTypes {
     | '/tech/jobs/$jobId'
     | '/admin/customers/'
     | '/admin/elevators/'
+    | '/admin/inventory/'
     | '/admin/jobs/'
     | '/portal/elevators/'
     | '/tech/jobs/'
@@ -258,7 +258,6 @@ export interface FileRouteTypes {
   to:
     | '/'
     | '/admin/contracts'
-    | '/admin/inventory'
     | '/admin/leads'
     | '/admin/reports'
     | '/portal/contracts'
@@ -276,6 +275,7 @@ export interface FileRouteTypes {
     | '/tech/jobs/$jobId'
     | '/admin/customers'
     | '/admin/elevators'
+    | '/admin/inventory'
     | '/admin/jobs'
     | '/portal/elevators'
     | '/tech/jobs'
@@ -283,7 +283,6 @@ export interface FileRouteTypes {
     | '__root__'
     | '/'
     | '/admin/contracts'
-    | '/admin/inventory'
     | '/admin/leads'
     | '/admin/reports'
     | '/portal/contracts'
@@ -301,6 +300,7 @@ export interface FileRouteTypes {
     | '/tech/jobs/$jobId'
     | '/admin/customers/'
     | '/admin/elevators/'
+    | '/admin/inventory/'
     | '/admin/jobs/'
     | '/portal/elevators/'
     | '/tech/jobs/'
@@ -309,7 +309,6 @@ export interface FileRouteTypes {
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   AdminContractsRoute: typeof AdminContractsRoute
-  AdminInventoryRoute: typeof AdminInventoryRoute
   AdminLeadsRoute: typeof AdminLeadsRoute
   AdminReportsRoute: typeof AdminReportsRoute
   PortalContractsRoute: typeof PortalContractsRoute
@@ -327,6 +326,7 @@ export interface RootRouteChildren {
   TechJobsJobIdRoute: typeof TechJobsJobIdRoute
   AdminCustomersIndexRoute: typeof AdminCustomersIndexRoute
   AdminElevatorsIndexRoute: typeof AdminElevatorsIndexRoute
+  AdminInventoryIndexRoute: typeof AdminInventoryIndexRoute
   AdminJobsIndexRoute: typeof AdminJobsIndexRoute
   PortalElevatorsIndexRoute: typeof PortalElevatorsIndexRoute
   TechJobsIndexRoute: typeof TechJobsIndexRoute
@@ -411,13 +411,6 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AdminLeadsRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/admin/inventory': {
-      id: '/admin/inventory'
-      path: '/admin/inventory'
-      fullPath: '/admin/inventory'
-      preLoaderRoute: typeof AdminInventoryRouteImport
-      parentRoute: typeof rootRouteImport
-    }
     '/admin/contracts': {
       id: '/admin/contracts'
       path: '/admin/contracts'
@@ -444,6 +437,13 @@ declare module '@tanstack/react-router' {
       path: '/admin/jobs'
       fullPath: '/admin/jobs/'
       preLoaderRoute: typeof AdminJobsIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/admin/inventory/': {
+      id: '/admin/inventory/'
+      path: '/admin/inventory'
+      fullPath: '/admin/inventory/'
+      preLoaderRoute: typeof AdminInventoryIndexRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/admin/elevators/': {
@@ -501,7 +501,6 @@ declare module '@tanstack/react-router' {
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AdminContractsRoute: AdminContractsRoute,
-  AdminInventoryRoute: AdminInventoryRoute,
   AdminLeadsRoute: AdminLeadsRoute,
   AdminReportsRoute: AdminReportsRoute,
   PortalContractsRoute: PortalContractsRoute,
@@ -519,6 +518,7 @@ const rootRouteChildren: RootRouteChildren = {
   TechJobsJobIdRoute: TechJobsJobIdRoute,
   AdminCustomersIndexRoute: AdminCustomersIndexRoute,
   AdminElevatorsIndexRoute: AdminElevatorsIndexRoute,
+  AdminInventoryIndexRoute: AdminInventoryIndexRoute,
   AdminJobsIndexRoute: AdminJobsIndexRoute,
   PortalElevatorsIndexRoute: PortalElevatorsIndexRoute,
   TechJobsIndexRoute: TechJobsIndexRoute,
