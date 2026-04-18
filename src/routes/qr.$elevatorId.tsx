@@ -13,7 +13,8 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { StatusBadge, elevatorStatusLabel, elevatorStatusVariant } from "@/components/common/StatusBadge";
-import { mockElevators, mockJobs, getCustomer, formatDate, formatDateTime } from "@/lib/mock-data";
+import { mockElevators, mockJobs, getCustomer, formatDate, formatDateTime, type IssueReport } from "@/lib/mock-data";
+import { useAppStore } from "@/lib/store";
 import {
   Building2,
   AlertTriangle,
@@ -83,6 +84,10 @@ function QRPage() {
 
   const [step, setStep] = useState<Step>("home");
   const [historyOpen, setHistoryOpen] = useState(false);
+  
+  // App context (to detect internal staff)
+  const role = useAppStore(s => s.role);
+  const isStaff = role === "admin" || role === "technician";
 
   // Report form state
   const [issueType, setIssueType] = useState("");
@@ -145,11 +150,15 @@ function QRPage() {
         {step === "home" && (
           <div className="space-y-4">
             {/* Elevator hero */}
-            <Card className="p-5 text-center bg-gradient-to-br from-primary to-primary/80 text-primary-foreground">
-              <div className="inline-flex h-14 w-14 items-center justify-center rounded-2xl bg-primary-foreground/20 mb-3">
-                <Building2 className="h-7 w-7" />
+            <Card className="p-5 text-center bg-gradient-to-br from-primary to-primary/80 text-primary-foreground relative overflow-hidden">
+              <div className="absolute top-0 right-0 p-4 opacity-20">
+                <Shield className="w-24 h-24" />
               </div>
-              <h1 className="text-2xl font-bold font-mono">{elevator.code}</h1>
+              <div className="relative z-10">
+                <div className="inline-flex h-14 w-14 items-center justify-center rounded-2xl bg-primary-foreground/20 mb-3">
+                  <Building2 className="h-7 w-7" />
+                </div>
+                <h1 className="text-2xl font-bold font-mono">{elevator.code}</h1>
               <p className="text-sm opacity-90 mt-0.5">
                 {elevator.brand} {elevator.model} · {elevator.floors} tầng
               </p>
@@ -162,7 +171,25 @@ function QRPage() {
                   {elevatorStatusLabel[elevator.status]}
                 </StatusBadge>
               </div>
+              </div>
             </Card>
+
+            {/* Staff shortcut */}
+            {isStaff && (
+              <Link 
+                to={role === "admin" ? "/admin/elevators/$elevatorId" : "/tech"} 
+                params={role === "admin" ? { elevatorId: elevator.id } : {}}
+              >
+                <div className="flex items-center gap-3 p-3 mt-1 rounded-xl bg-orange-500 text-white shadow-sm hover:opacity-90 transition-opacity">
+                  <Shield className="h-5 w-5 shrink-0" />
+                  <div className="flex-1">
+                    <div className="text-sm font-semibold">Quyền nhân viên nội bộ</div>
+                    <div className="text-xs opacity-90">Mở trong bảng điều khiển ngay</div>
+                  </div>
+                  <ArrowLeft className="h-4 w-4 rotate-180" />
+                </div>
+              </Link>
+            )}
 
             {/* 2 main actions */}
             <div className="grid grid-cols-2 gap-3">
