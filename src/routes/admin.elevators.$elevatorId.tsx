@@ -83,7 +83,7 @@ function ElevatorDetail() {
         description={`${elevator.brand} ${elevator.model} · ${elevator.floors} tầng · ${elevator.building}`}
         actions={
           <div className="flex gap-2">
-            <Link to="/qr/$elevatorId" params={{ elevatorId: elevator.id }}>
+            <Link to="/admin/elevators/$elevatorId/qr" params={{ elevatorId: elevator.id }}>
               <Button variant="outline">
                 <QrCode className="h-4 w-4 mr-1.5" /> Xem QR
               </Button>
