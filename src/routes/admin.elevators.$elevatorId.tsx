@@ -36,7 +36,7 @@ import {
 } from "lucide-react";
 import { toast } from "sonner";
 
-export const Route = createFileRoute("/admin/jobs/$jobId")({
+export const Route = createFileRoute("/admin/elevators/$elevatorId")({
   loader: ({ params }) => {
     const elevator = mockElevators.find((e) => e.id === params.elevatorId);
     if (!elevator) throw notFound();

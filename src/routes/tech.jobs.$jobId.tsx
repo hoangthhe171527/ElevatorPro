@@ -1,3 +1,4 @@
+// src/routes/tech.jobs.$jobId.tsx  ← THAY THẾ FILE CŨ
 import { createFileRoute, Link, notFound } from "@tanstack/react-router";
 import { useMemo, useState } from "react";
 import { AppShell } from "@/components/layout/AppShell";
@@ -35,14 +36,14 @@ export const Route = createFileRoute("/tech/jobs/$jobId")({
     if (!job) throw notFound();
     return { job };
   },
-  head: ({ loaderData }) => ({ meta: [{ title: `${loaderData?.job.code ?? "Công việc"}` }] }),
+  head: ({ loaderData }) => ({
+    meta: [{ title: `${loaderData?.job.code ?? "Công việc"}` }],
+  }),
   notFoundComponent: () => (
     <AppShell>
       <div className="p-12 text-center">
         <p>Không tìm thấy</p>
-        <Link to="/tech/jobs">
-          <Button className="mt-4">Quay lại</Button>
-        </Link>
+        <Link to="/tech/jobs"><Button className="mt-4">Quay lại</Button></Link>
       </div>
     </AppShell>
   ),
@@ -54,12 +55,12 @@ function TechJobDetail() {
   const userId = useAppStore((s) => s.userId);
   const cus = getCustomer(job.customerId);
   const elev = job.elevatorId ? getElevator(job.elevatorId) : undefined;
+
   const [beforeCount, setBeforeCount] = useState<number>(job.beforePhotos.length);
   const [afterCount, setAfterCount] = useState<number>(job.afterPhotos.length);
   const [report, setReport] = useState<string>(job.report || "");
   const [status, setStatus] = useState<typeof job.status>(job.status);
 
-  // Tính lộ trình tối ưu trong ngày của KTV để hiển thị vị trí công việc này trên bản đồ
   const route = useMemo(() => {
     const dayKey = job.scheduledFor.split("T")[0];
     const sameDayJobs = mockJobs.filter(
@@ -89,7 +90,7 @@ function TechJobDetail() {
     };
     if (!navigator.geolocation) {
       launch();
-      toast.warning("Thiết bị không hỗ trợ định vị, mở bản đồ theo điểm đích.");
+      toast.warning("Thiết bị không hỗ trợ định vị.");
       return;
     }
     navigator.geolocation.getCurrentPosition(
@@ -99,7 +100,7 @@ function TechJobDetail() {
       },
       () => {
         launch();
-        toast.warning("Không lấy được vị trí hiện tại, mở bản đồ theo điểm đích.");
+        toast.warning("Không lấy được vị trí, mở bản đồ theo điểm đích.");
       },
       { enableHighAccuracy: true, timeout: 8000 },
     );
@@ -119,7 +120,7 @@ function TechJobDetail() {
       <div className="grid gap-4 lg:grid-cols-3">
         <div className="lg:col-span-2 space-y-4">
           <Card className="p-5">
-            <div className="flex items-center gap-2 mb-3">
+            <div className="flex items-center gap-2 mb-3 flex-wrap">
               <StatusBadge variant={jobStatusVariant[status]}>{jobStatusLabel[status]}</StatusBadge>
               <StatusBadge variant={priorityVariant[job.priority]}>
                 {priorityLabel[job.priority]}
@@ -138,8 +139,9 @@ function TechJobDetail() {
               <h3 className="font-semibold text-sm">Vị trí trên lộ trình</h3>
               {myStop && (
                 <span className="ml-auto text-xs text-muted-foreground">
-                  Điểm dừng <span className="font-semibold text-foreground">#{stopIndex + 1}</span>{" "}
-                  · {myStop.legKm.toFixed(1)} km · ~{myStop.etaMinutes} phút
+                  Điểm <span className="font-semibold text-foreground">#{stopIndex + 1}</span>
+                  {" · "}
+                  {myStop.legKm.toFixed(1)} km · ~{myStop.etaMinutes} phút
                 </span>
               )}
             </div>
@@ -152,7 +154,7 @@ function TechJobDetail() {
             />
             <div className="flex items-center justify-between gap-2 p-3 border-t bg-muted/30">
               <Link to="/tech/jobs" className="text-xs text-primary hover:underline">
-                Xem luồng công việc & lộ trình →
+                Xem lộ trình hôm nay →
               </Link>
               <Button size="sm" variant="outline" className="gap-1.5" onClick={openMapToJob}>
                 <Navigation className="h-3.5 w-3.5" /> Chỉ đường tới đây
@@ -160,6 +162,7 @@ function TechJobDetail() {
             </div>
           </Card>
 
+          {/* Photos */}
           <Card className="p-5">
             <div className="flex items-center gap-2 mb-4">
               <Camera className="h-4 w-4" />
@@ -170,18 +173,12 @@ function TechJobDetail() {
                 <div className="text-xs font-medium mb-2">Trước ({beforeCount})</div>
                 <div className="grid grid-cols-2 gap-2">
                   {Array.from({ length: beforeCount }).map((_, i) => (
-                    <div
-                      key={i}
-                      className="aspect-square rounded-lg bg-muted flex items-center justify-center"
-                    >
+                    <div key={i} className="aspect-square rounded-lg bg-muted flex items-center justify-center">
                       <Camera className="h-5 w-5 text-muted-foreground" />
                     </div>
                   ))}
                   <button
-                    onClick={() => {
-                      setBeforeCount((c: number) => c + 1);
-                      toast.success("Đã thêm ảnh trước");
-                    }}
+                    onClick={() => { setBeforeCount((c) => c + 1); toast.success("Đã thêm ảnh trước"); }}
                     className="aspect-square rounded-lg border-2 border-dashed flex items-center justify-center hover:bg-muted transition-colors"
                   >
                     <Plus className="h-5 w-5 text-muted-foreground" />
@@ -192,18 +189,12 @@ function TechJobDetail() {
                 <div className="text-xs font-medium mb-2">Sau ({afterCount})</div>
                 <div className="grid grid-cols-2 gap-2">
                   {Array.from({ length: afterCount }).map((_, i) => (
-                    <div
-                      key={i}
-                      className="aspect-square rounded-lg bg-muted flex items-center justify-center"
-                    >
+                    <div key={i} className="aspect-square rounded-lg bg-muted flex items-center justify-center">
                       <Camera className="h-5 w-5 text-muted-foreground" />
                     </div>
                   ))}
                   <button
-                    onClick={() => {
-                      setAfterCount((c: number) => c + 1);
-                      toast.success("Đã thêm ảnh sau");
-                    }}
+                    onClick={() => { setAfterCount((c) => c + 1); toast.success("Đã thêm ảnh sau"); }}
                     className="aspect-square rounded-lg border-2 border-dashed flex items-center justify-center hover:bg-muted transition-colors"
                   >
                     <Plus className="h-5 w-5 text-muted-foreground" />
@@ -213,6 +204,7 @@ function TechJobDetail() {
             </div>
           </Card>
 
+          {/* Report + action buttons */}
           <Card className="p-5">
             <div className="flex items-center gap-2 mb-3">
               <FileText className="h-4 w-4" />
@@ -225,24 +217,37 @@ function TechJobDetail() {
               rows={5}
             />
             <div className="mt-3 flex flex-wrap gap-2">
-              <Button
-                variant="outline"
-                onClick={() => {
-                  setStatus("in_progress");
-                  toast.success("Đã bắt đầu công việc");
-                }}
-              >
-                Bắt đầu
-              </Button>
-              <Button
-                onClick={() => {
-                  setStatus("completed");
-                  toast.success("Đã hoàn thành & gửi biên bản cho khách hàng");
-                }}
-                className="gap-1.5"
-              >
-                <CheckCircle2 className="h-4 w-4" /> Hoàn thành
-              </Button>
+              {status === "scheduled" && (
+                <Button
+                  variant="outline"
+                  onClick={() => {
+                    setStatus("in_progress");
+                    toast.success("Đã bắt đầu công việc");
+                  }}
+                >
+                  Bắt đầu
+                </Button>
+              )}
+              {status !== "completed" && (
+                <Button
+                  onClick={() => {
+                    if (!report.trim()) {
+                      toast.error("Vui lòng điền biên bản trước khi hoàn thành");
+                      return;
+                    }
+                    setStatus("completed");
+                    toast.success("Đã hoàn thành & gửi biên bản cho khách hàng");
+                  }}
+                  className="gap-1.5"
+                >
+                  <CheckCircle2 className="h-4 w-4" /> Hoàn thành
+                </Button>
+              )}
+              {status === "completed" && (
+                <div className="flex items-center gap-2 text-success text-sm">
+                  <CheckCircle2 className="h-4 w-4" /> Đã hoàn thành
+                </div>
+              )}
             </div>
           </Card>
         </div>
@@ -254,10 +259,7 @@ function TechJobDetail() {
               <div className="space-y-2 text-sm">
                 <div className="font-medium">{cus.name}</div>
                 <div className="text-xs text-muted-foreground">{cus.contactPerson}</div>
-                <a
-                  href={`tel:${cus.phone}`}
-                  className="flex items-center gap-1.5 text-xs text-primary"
-                >
+                <a href={`tel:${cus.phone}`} className="flex items-center gap-1.5 text-xs text-primary">
                   <Phone className="h-3 w-3" /> {cus.phone}
                 </a>
                 <div className="flex items-start gap-1.5 text-xs">

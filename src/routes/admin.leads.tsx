@@ -1,3 +1,4 @@
+// src/routes/admin.leads.tsx  ← THAY THẾ FILE CŨ
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useState } from "react";
 import { AppShell } from "@/components/layout/AppShell";
@@ -8,8 +9,10 @@ import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { DataPagination } from "@/components/common/DataPagination";
 import { StatusBadge, leadStatusLabel, leadStatusVariant } from "@/components/common/StatusBadge";
-import { mockLeads, formatVND, formatDate } from "@/lib/mock-data";
+import { mockLeads, formatVND, formatDate, type Lead } from "@/lib/mock-data";
 import { Plus, Phone, Mail, MapPin, Search, UserCog } from "lucide-react";
+import { ConvertLeadModal } from "@/components/common/Modals";
+import { toast } from "sonner";
 
 export const Route = createFileRoute("/admin/leads")({
   head: () => ({ meta: [{ title: "Khách hàng tiềm năng — ElevatorPro" }] }),
@@ -22,9 +25,13 @@ function LeadsPage() {
   const [page, setPage] = useState(1);
   const [search, setSearch] = useState("");
   const [statusFilter, setStatusFilter] = useState<string>("all");
+  const [convertLead, setConvertLead] = useState<Lead | null>(null);
 
-  const filtered = mockLeads.filter(l => {
-    const matchSearch = !search || l.name.toLowerCase().includes(search.toLowerCase()) || l.phone.includes(search);
+  const filtered = mockLeads.filter((l) => {
+    const matchSearch =
+      !search ||
+      l.name.toLowerCase().includes(search.toLowerCase()) ||
+      l.phone.includes(search);
     const matchStatus = statusFilter === "all" || l.status === statusFilter;
     return matchSearch && matchStatus;
   });
@@ -36,7 +43,11 @@ function LeadsPage() {
       <PageHeader
         title="Khách hàng tiềm năng"
         description="Lưu trữ và chăm sóc lead để chuyển đổi thành khách hàng"
-        actions={<Button><Plus className="h-4 w-4 mr-1.5" /> Thêm lead</Button>}
+        actions={
+          <Button>
+            <Plus className="h-4 w-4 mr-1.5" /> Thêm lead
+          </Button>
+        }
       />
 
       <div className="grid gap-4 sm:grid-cols-3 mb-6">
@@ -46,7 +57,9 @@ function LeadsPage() {
         </Card>
         <Card className="p-4">
           <div className="text-xs text-muted-foreground">Đang theo dõi</div>
-          <div className="mt-1 text-2xl font-bold">{mockLeads.filter(l => !["won", "lost"].includes(l.status)).length}</div>
+          <div className="mt-1 text-2xl font-bold">
+            {mockLeads.filter((l) => !["won", "lost"].includes(l.status)).length}
+          </div>
         </Card>
         <Card className="p-4">
           <div className="text-xs text-muted-foreground">Giá trị tiềm năng</div>
@@ -58,7 +71,12 @@ function LeadsPage() {
         <div className="flex flex-col sm:flex-row gap-3 p-4 border-b">
           <div className="flex-1 relative">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-            <Input placeholder="Tìm theo tên, số điện thoại..." className="pl-9" value={search} onChange={(e) => { setSearch(e.target.value); setPage(1); }} />
+            <Input
+              placeholder="Tìm theo tên, số điện thoại..."
+              className="pl-9"
+              value={search}
+              onChange={(e) => { setSearch(e.target.value); setPage(1); }}
+            />
           </div>
           <Select value={statusFilter} onValueChange={(v) => { setStatusFilter(v); setPage(1); }}>
             <SelectTrigger className="w-full sm:w-48"><SelectValue /></SelectTrigger>
@@ -72,7 +90,7 @@ function LeadsPage() {
         </div>
 
         <div className="divide-y">
-          {paged.map(l => (
+          {paged.map((l) => (
             <div key={l.id} className="p-4 hover:bg-muted/30 transition-colors">
               <div className="flex flex-col lg:flex-row lg:items-center gap-4">
                 <div className="flex items-start gap-3 flex-1 min-w-0">
@@ -82,37 +100,65 @@ function LeadsPage() {
                   <div className="min-w-0 flex-1">
                     <div className="flex items-center gap-2 flex-wrap">
                       <h3 className="font-semibold truncate">{l.name}</h3>
-                      <StatusBadge variant={leadStatusVariant[l.status]}>{leadStatusLabel[l.status]}</StatusBadge>
+                      <StatusBadge variant={leadStatusVariant[l.status]}>
+                        {leadStatusLabel[l.status]}
+                      </StatusBadge>
                     </div>
                     <div className="mt-1.5 flex flex-wrap gap-x-4 gap-y-1 text-xs text-muted-foreground">
                       <span className="flex items-center gap-1"><Phone className="h-3 w-3" /> {l.phone}</span>
                       {l.email && <span className="flex items-center gap-1"><Mail className="h-3 w-3" /> {l.email}</span>}
                       <span className="flex items-center gap-1"><MapPin className="h-3 w-3" /> {l.address}</span>
                     </div>
-                    {l.note && <p className="mt-2 text-xs text-muted-foreground italic">"{l.note}"</p>}
+                    {l.note && (
+                      <p className="mt-2 text-xs text-muted-foreground italic">"{l.note}"</p>
+                    )}
                   </div>
                 </div>
                 <div className="flex flex-row lg:flex-col items-start lg:items-end gap-2 lg:gap-1 lg:min-w-[180px]">
                   <div className="text-sm font-bold text-primary">{formatVND(l.estimatedValue)}</div>
                   <div className="text-xs text-muted-foreground">Nguồn: {l.source}</div>
                   {l.nextFollowUp && (
-                    <div className="text-xs">Theo dõi: <span className="font-medium">{formatDate(l.nextFollowUp)}</span></div>
+                    <div className="text-xs">
+                      Theo dõi: <span className="font-medium">{formatDate(l.nextFollowUp)}</span>
+                    </div>
                   )}
                 </div>
                 <div className="flex gap-2">
-                  <Button variant="outline" size="sm">Liên hệ</Button>
-                  <Button size="sm">Chuyển KH</Button>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => toast.success(`Đã ghi nhận liên hệ với ${l.name}`)}
+                  >
+                    Liên hệ
+                  </Button>
+                  <Button
+                    size="sm"
+                    disabled={l.status === "lost"}
+                    onClick={() => setConvertLead(l)}
+                  >
+                    Chuyển KH
+                  </Button>
                 </div>
               </div>
             </div>
           ))}
           {paged.length === 0 && (
-            <div className="p-12 text-center text-sm text-muted-foreground">Không có lead nào phù hợp</div>
+            <div className="p-12 text-center text-sm text-muted-foreground">
+              Không có lead nào phù hợp
+            </div>
           )}
         </div>
 
         <DataPagination page={page} pageSize={PAGE_SIZE} total={filtered.length} onPageChange={setPage} />
       </Card>
+
+      {convertLead && (
+        <ConvertLeadModal
+          open={true}
+          onClose={() => setConvertLead(null)}
+          lead={convertLead}
+        />
+      )}
     </AppShell>
   );
 }
