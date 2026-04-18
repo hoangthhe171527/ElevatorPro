@@ -185,7 +185,7 @@ function CustomerDetail() {
                     <StatusBadge variant={elevatorStatusVariant[e.status]}>
                       {elevatorStatusLabel[e.status]}
                     </StatusBadge>
-                    <Link to="/qr/$elevatorId" params={{ elevatorId: e.id }}>
+                    <Link to="/admin/elevators/$elevatorId/qr" params={{ elevatorId: e.id }}>
                       <Button variant="ghost" size="icon" className="h-7 w-7">
                         <QrCode className="h-3.5 w-3.5" />
                       </Button>

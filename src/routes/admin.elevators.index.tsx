@@ -112,7 +112,7 @@ function ElevatorsPage() {
                   </div>
                 </div>
                 <div className="mt-3 pt-3 border-t flex gap-2">
-                  <Link to="/qr/$elevatorId" params={{ elevatorId: e.id }} className="flex-1">
+                  <Link to="/admin/elevators/$elevatorId/qr" params={{ elevatorId: e.id }} className="flex-1">
                     <Button variant="outline" size="sm" className="w-full">
                       <QrCode className="h-3.5 w-3.5 mr-1" /> Xem QR
                     </Button>
