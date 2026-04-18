@@ -176,19 +176,21 @@ function QRPage() {
 
             {/* Staff shortcut */}
             {isStaff && (
-              <Link 
-                to={role === "admin" ? "/admin/elevators/$elevatorId" : "/tech"} 
-                params={role === "admin" ? { elevatorId: elevator.id } : {}}
-              >
-                <div className="flex items-center gap-3 p-3 mt-1 rounded-xl bg-orange-500 text-white shadow-sm hover:opacity-90 transition-opacity">
-                  <Shield className="h-5 w-5 shrink-0" />
-                  <div className="flex-1">
-                    <div className="text-sm font-semibold">Quyền nhân viên nội bộ</div>
-                    <div className="text-xs opacity-90">Mở trong bảng điều khiển ngay</div>
+              <div className="mt-4">
+                <Link 
+                  to={role === "admin" ? "/admin/elevators/$elevatorId" : "/tech"} 
+                  params={role === "admin" ? { elevatorId: elevator.id } : {}}
+                >
+                  <div className="flex items-center gap-3 p-4 rounded-xl bg-orange-500 text-white shadow-md hover:opacity-90 transition-opacity">
+                    <Shield className="h-6 w-6 shrink-0" />
+                    <div className="flex-1">
+                      <div className="text-sm font-semibold">Quyền nhân viên nội bộ</div>
+                      <div className="text-xs opacity-90">Mở trong bảng điều khiển ngay</div>
+                    </div>
+                    <ArrowLeft className="h-5 w-5 rotate-180" />
                   </div>
-                  <ArrowLeft className="h-4 w-4 rotate-180" />
-                </div>
-              </Link>
+                </Link>
+              </div>
             )}
 
             {/* 2 main actions */}
