@@ -1,4 +1,4 @@
-import { createFileRoute, Link, notFound } from "@tanstack/react-router";
+import { createFileRoute, Link, notFound, Outlet, useMatches } from "@tanstack/react-router";
 import { useState } from "react";
 import { AppShell } from "@/components/layout/AppShell";
 import { PageHeader } from "@/components/common/PageHeader";
@@ -57,8 +57,19 @@ export const Route = createFileRoute("/admin/elevators/$elevatorId")({
       </div>
     </AppShell>
   ),
-  component: ElevatorDetail,
+  component: ElevatorShell,
 });
+
+function ElevatorShell() {
+  const matches = useMatches();
+  // If the deepest active route is a child (e.g. /qr), render only Outlet
+  const isChildActive = matches.some(
+    (m) => m.routeId === "/admin/elevators/$elevatorId/qr"
+  );
+  if (isChildActive) return <Outlet />;
+  return <ElevatorDetail />;
+}
+
 
 function ElevatorDetail() {
   const { elevator } = Route.useLoaderData();

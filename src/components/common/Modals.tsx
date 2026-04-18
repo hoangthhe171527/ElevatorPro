@@ -157,20 +157,26 @@ export function CreateJobModal({
             <div className="grid grid-cols-2 gap-3">
               <div>
                 <label className="text-sm font-medium">Thang máy (nếu có)</label>
-                <Select value={elevatorId} onValueChange={setElevatorId}>
+                <Select
+                  value={elevatorId || "none"}
+                  onValueChange={(v) => setElevatorId(v === "none" ? "" : v)}
+                >
                   <SelectTrigger className="mt-1"><SelectValue placeholder="Chọn thang..." /></SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="">— Không chọn —</SelectItem>
+                    <SelectItem value="none">— Không chọn —</SelectItem>
                     {customerElevators.map(e => <SelectItem key={e.id} value={e.id}>{e.code} — {e.building}</SelectItem>)}
                   </SelectContent>
                 </Select>
               </div>
               <div>
                 <label className="text-sm font-medium">Hợp đồng liên quan</label>
-                <Select value={contractId} onValueChange={setContractId}>
+                <Select
+                  value={contractId || "none"}
+                  onValueChange={(v) => setContractId(v === "none" ? "" : v)}
+                >
                   <SelectTrigger className="mt-1"><SelectValue placeholder="Chọn HĐ..." /></SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="">— Không chọn —</SelectItem>
+                    <SelectItem value="none">— Không chọn —</SelectItem>
                     {customerContracts.map(c => <SelectItem key={c.id} value={c.id}>{c.code}</SelectItem>)}
                   </SelectContent>
                 </Select>
