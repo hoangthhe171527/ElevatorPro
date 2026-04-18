@@ -7,4 +7,7 @@ import tsconfigPaths from "vite-tsconfig-paths";
 
 export default defineConfig({
   plugins: [tanstackStart(), nitro({ preset: "vercel" }), react(), tailwindcss(), tsconfigPaths()],
+  ssr: {
+    noExternal: ["tslib", "zustand", "sonner"],
+  },
 });
