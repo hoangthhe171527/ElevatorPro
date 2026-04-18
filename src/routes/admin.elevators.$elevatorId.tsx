@@ -17,6 +17,7 @@ import {
   mockJobs,
   getCustomer,
   getContract,
+  getProject,
   formatDate,
   formatDateTime,
 } from "@/lib/mock-data";
@@ -63,7 +64,8 @@ function ElevatorDetail() {
   const { elevator } = Route.useLoaderData();
   const [jobOpen, setJobOpen] = useState(false);
 
-  const customer = getCustomer(elevator.customerId);
+  const project = getProject(elevator.projectId);
+  const customer = project ? getCustomer(project.customerId) : undefined;
   const contract = elevator.contractId ? getContract(elevator.contractId) : undefined;
   const history = mockJobs
     .filter((j) => j.elevatorId === elevator.id)
@@ -345,7 +347,7 @@ function ElevatorDetail() {
       <CreateJobModal
         open={jobOpen}
         onClose={() => setJobOpen(false)}
-        defaultCustomerId={elevator.customerId}
+        defaultCustomerId={project?.customerId}
         defaultElevatorId={elevator.id}
         defaultContractId={elevator.contractId}
       />

@@ -288,7 +288,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
           <NotificationPanel />
 
           {/* Demo QR */}
-          <Link to="/qr/e-1" className="hidden sm:flex">
+          <Link to="/qr/$elevatorId" params={{ elevatorId: "e-1" }} className="hidden sm:flex">
             <Button variant="ghost" size="icon" title="Demo QR thang máy">
               <QrCode className="h-4 w-4" />
             </Button>

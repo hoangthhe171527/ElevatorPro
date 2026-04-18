@@ -21,6 +21,8 @@ import {
   mockContracts,
   mockElevators,
   mockJobs,
+  mockProjects,
+  getProject,
   formatVND,
   formatDate,
   formatDateTime,
@@ -72,7 +74,9 @@ function CustomerDetail() {
   const [elevatorOpen, setElevatorOpen] = useState(false);
 
   const contracts = mockContracts.filter((c) => c.customerId === customer.id);
-  const elevators = mockElevators.filter((e) => e.customerId === customer.id);
+  const customerProjects = mockProjects.filter((p) => p.customerId === customer.id);
+  const projectIds = customerProjects.map((p) => p.id);
+  const elevators = mockElevators.filter((e) => projectIds.includes(e.projectId));
   const jobs = mockJobs.filter((j) => j.customerId === customer.id).slice(0, 6);
   const totalRevenue = contracts.reduce((s, c) => s + c.paid, 0);
   const totalContractValue = contracts.reduce((s, c) => s + c.value, 0);

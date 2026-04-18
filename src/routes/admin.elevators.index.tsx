@@ -9,7 +9,7 @@ import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { DataPagination } from "@/components/common/DataPagination";
 import { StatusBadge, elevatorStatusLabel, elevatorStatusVariant } from "@/components/common/StatusBadge";
-import { mockElevators, formatDate, getCustomer } from "@/lib/mock-data";
+import { mockElevators, formatDate, getCustomer, getProject } from "@/lib/mock-data";
 import { Plus, Search, Building2, QrCode, MapPin } from "lucide-react";
 import { CreateElevatorModal } from "@/components/common/Modals";
 
@@ -27,7 +27,8 @@ function ElevatorsPage() {
   const [createOpen, setCreateOpen] = useState(false);
 
   const filtered = mockElevators.filter((e) => {
-    const cus = getCustomer(e.customerId);
+    const project = getProject(e.projectId);
+    const cus = project ? getCustomer(project.customerId) : undefined;
     const m1 =
       !search ||
       e.code.toLowerCase().includes(search.toLowerCase()) ||
@@ -73,7 +74,8 @@ function ElevatorsPage() {
 
         <div className="grid gap-3 p-4 sm:grid-cols-2 lg:grid-cols-3">
           {paged.map((e) => {
-            const cus = getCustomer(e.customerId);
+            const project = getProject(e.projectId);
+            const cus = project ? getCustomer(project.customerId) : undefined;
             return (
               <Card key={e.id} className="p-4 hover:shadow-elevated transition-shadow">
                 <div className="flex items-start justify-between gap-2 mb-3">
@@ -94,7 +96,7 @@ function ElevatorsPage() {
                 </div>
                 <div className="space-y-1.5 text-xs">
                   <div className="text-muted-foreground">
-                    Khách: <span className="text-foreground font-medium">{cus?.name}</span>
+                    Khách: <span className="text-foreground font-medium">{cus?.name ?? project?.name ?? "—"}</span>
                   </div>
                   <div className="text-muted-foreground flex items-start gap-1">
                     <MapPin className="h-3 w-3 mt-0.5 shrink-0" /> {e.building}, {e.address}

@@ -7,7 +7,7 @@ import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { StatCard } from "@/components/common/StatCard";
 import { StatusBadge, elevatorStatusLabel, elevatorStatusVariant } from "@/components/common/StatusBadge";
-import { mockElevators, mockContracts, mockJobs, formatDate, formatDateTime } from "@/lib/mock-data";
+import { mockElevators, mockContracts, mockJobs, mockProjects, formatDate, formatDateTime } from "@/lib/mock-data";
 import { useAppStore } from "@/lib/store";
 import { Building2, FileText, AlertTriangle, QrCode, ArrowRight } from "lucide-react";
 import { ConfirmScheduleModal } from "@/components/common/Modals";
@@ -23,7 +23,8 @@ function PortalIndex() {
   useAppStore();
   const [confirmOpen, setConfirmOpen] = useState(false);
 
-  const myElevators = mockElevators.filter((e) => e.customerId === CUSTOMER_ID);
+  const customerProjectIds = mockProjects.filter((p) => p.customerId === CUSTOMER_ID).map((p) => p.id);
+  const myElevators = mockElevators.filter((e) => customerProjectIds.includes(e.projectId));
   const myContracts = mockContracts.filter((c) => c.customerId === CUSTOMER_ID);
   const myJobs = mockJobs.filter((j) => j.customerId === CUSTOMER_ID);
   const upcomingJob = myJobs.find((j) => j.status === "scheduled" || j.status === "in_progress");

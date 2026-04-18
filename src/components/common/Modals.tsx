@@ -28,6 +28,8 @@ import {
   mockContracts,
   mockUsers,
   mockJobs,
+  mockProjects,
+  getProject,
   formatVND,
   type JobType,
   type JobPriority,
@@ -85,7 +87,12 @@ export function CreateJobModal({
   const [loading, setLoading] = useState(false);
 
   const technicians = mockUsers.filter((u) => u.memberships?.some(m => m.role === "technician"));
-  const customerElevators = mockElevators.filter((e) => e.customerId === customerId);
+  // Filter elevators belonging to customer's projects
+  const customerProjects = mockProjects.filter((p) => p.customerId === customerId);
+  const customerProjectIds = customerProjects.map((p) => p.id);
+  const customerElevators = customerId
+    ? mockElevators.filter((e) => customerProjectIds.includes(e.projectId))
+    : mockElevators;
   const customerContracts = mockContracts.filter((c) => c.customerId === customerId);
 
   const handleSubmit = async () => {

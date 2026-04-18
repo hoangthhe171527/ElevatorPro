@@ -13,7 +13,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { StatusBadge, elevatorStatusLabel, elevatorStatusVariant } from "@/components/common/StatusBadge";
-import { mockElevators, mockJobs, getCustomer, formatDate, formatDateTime, type IssueReport } from "@/lib/mock-data";
+import { mockElevators, mockJobs, getCustomer, getProject, formatDate, formatDateTime, type IssueReport } from "@/lib/mock-data";
 import { useAppStore } from "@/lib/store";
 import {
   Building2,
@@ -76,7 +76,8 @@ const issueTypes = [
 // ─── Main component ───────────────────────────────────────────
 function QRPage() {
   const { elevator } = Route.useLoaderData();
-  const customer = getCustomer(elevator.customerId);
+  const project = getProject(elevator.projectId);
+  const customer = project ? getCustomer(project.customerId) : undefined;
   const history = mockJobs
     .filter((j) => j.elevatorId === elevator.id)
     .sort((a, b) => b.scheduledFor.localeCompare(a.scheduledFor))

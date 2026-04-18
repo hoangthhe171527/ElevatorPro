@@ -9,7 +9,7 @@ import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { DataPagination } from "@/components/common/DataPagination";
 import { Badge } from "@/components/ui/badge";
-import { mockCustomers, mockContracts, mockElevators, formatDate } from "@/lib/mock-data";
+import { mockCustomers, mockContracts, mockElevators, mockProjects, formatDate } from "@/lib/mock-data";
 import {
   Plus,
   Search,
@@ -81,7 +81,8 @@ function CustomersPage() {
         <div className="divide-y">
           {paged.map((c) => {
             const contracts = mockContracts.filter((ct) => ct.customerId === c.id).length;
-            const elevators = mockElevators.filter((e) => e.customerId === c.id).length;
+            const projectIds = mockProjects.filter((p) => p.customerId === c.id).map((p) => p.id);
+            const elevators = mockElevators.filter((e) => projectIds.includes(e.projectId)).length;
             return (
               <div key={c.id} className="p-4 hover:bg-muted/30 transition-colors">
                 <div className="flex flex-col md:flex-row md:items-center gap-4">

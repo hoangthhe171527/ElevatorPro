@@ -8,7 +8,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { DataPagination } from "@/components/common/DataPagination";
 import { StatusBadge, elevatorStatusLabel, elevatorStatusVariant } from "@/components/common/StatusBadge";
-import { mockElevators, formatDate } from "@/lib/mock-data";
+import { mockElevators, mockProjects, getProject, formatDate } from "@/lib/mock-data";
 import { Building2, QrCode, MapPin, Search, AlertTriangle } from "lucide-react";
 
 export const Route = createFileRoute("/portal/elevators/")({
@@ -23,8 +23,12 @@ function PortalElevators() {
   const [page, setPage] = useState(1);
   const [search, setSearch] = useState("");
 
+  // In a real app, get CUSTOMER_ID from auth context
+  const CUSTOMER_ID = "c-1";
+  const customerProjectIds = mockProjects.filter((p) => p.customerId === CUSTOMER_ID).map((p) => p.id);
+
   const filtered = mockElevators
-    .filter((e) => e.customerId === CUSTOMER_ID)
+    .filter((e) => customerProjectIds.includes(e.projectId))
     .filter(
       (e) =>
         !search ||

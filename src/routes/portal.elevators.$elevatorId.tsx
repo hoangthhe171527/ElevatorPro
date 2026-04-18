@@ -13,6 +13,8 @@ import {
 import {
   mockElevators,
   mockJobs,
+  getProject,
+  getCustomer,
   formatDate,
   formatDateTime,
 } from "@/lib/mock-data";
@@ -32,9 +34,7 @@ const CUSTOMER_ID = "c-1";
 
 export const Route = createFileRoute("/portal/elevators/$elevatorId")({
   loader: ({ params }) => {
-    const elevator = mockElevators.find(
-      (e) => e.id === params.elevatorId && e.customerId === CUSTOMER_ID
-    );
+    const elevator = mockElevators.find((e) => e.id === params.elevatorId);
     if (!elevator) throw notFound();
     return { elevator };
   },

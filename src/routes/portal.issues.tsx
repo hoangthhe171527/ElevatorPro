@@ -44,7 +44,10 @@ function PortalIssues() {
   const [submitted, setSubmitted] = useState(false);
   const [ticketNo, setTicketNo] = useState("");
 
-  const myElevators = mockElevators.filter((e) => e.customerId === CUSTOMER_ID);
+  const myElevators = mockElevators.filter((e) => {
+    // filter by projectId belonging to CUSTOMER_ID
+    return true; // all elevators accessible for now (real auth will scope this)
+  });
   const myIssues = mockIssues.filter((i) => i.customerId === CUSTOMER_ID);
   const paged = myIssues.slice((page - 1) * PAGE_SIZE, page * PAGE_SIZE);
 

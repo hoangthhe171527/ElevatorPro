@@ -4,7 +4,7 @@ import { PageHeader } from "@/components/common/PageHeader";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import QRCode from "react-qr-code";
-import { mockElevators, getCustomer } from "@/lib/mock-data";
+import { mockElevators, getCustomer, getProject } from "@/lib/mock-data";
 import { ArrowLeft, Download, Printer, Copy, ExternalLink, Building2, Shield, ScanLine } from "lucide-react";
 import { toast } from "sonner";
 import { useRef } from "react";
@@ -31,7 +31,8 @@ export const Route = createFileRoute("/admin/elevators/$elevatorId/qr")({
 
 function ElevatorQRAdmin() {
   const { elevator } = Route.useLoaderData();
-  const customer = getCustomer(elevator.customerId);
+  const project = getProject(elevator.projectId);
+  const customer = project ? getCustomer(project.customerId) : undefined;
   const qrRef = useRef<HTMLDivElement>(null);
 
   // MOCK: Generate the real URL that passengers will scan

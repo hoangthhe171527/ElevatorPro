@@ -20,7 +20,7 @@ export interface Tenant {
 
 export interface TenantMembership {
   tenantId: string;
-  memberships: TenantMembership[];
+  role: Role; // role of the user in this tenant
 }
 
 export interface User {
@@ -47,6 +47,57 @@ export interface Customer {
   lng: number;
 }
 
+// New model: Project (Công trình)
+export interface Project {
+  tenantId: string;
+  id: string;
+  name: string;
+  address: string;
+  customerId: string;
+  startDate: string;
+  endDate?: string;
+  status: "planning" | "in_progress" | "completed";
+}
+
+export const mockProjects: Project[] = [
+  {
+    tenantId: "t-1",
+    id: "p-1",
+    name: "Dự án Vinhomes Ocean Park",
+    address: "Đa Tốn, Gia Lâm, Hà Nội",
+    customerId: "c-1",
+    startDate: "2024-01-01",
+    status: "in_progress",
+  },
+  {
+    tenantId: "t-1",
+    id: "p-2",
+    name: "Dự án Sunshine Tower",
+    address: "16 Phạm Hùng, Nam Từ Liêm, Hà Nội",
+    customerId: "c-2",
+    startDate: "2023-11-01",
+    status: "completed",
+  },
+  {
+    tenantId: "t-1",
+    id: "p-3",
+    name: "Dự án Mường Thanh Hà Đông",
+    address: "78 Trần Phú, Hà Đông, Hà Nội",
+    customerId: "c-3",
+    startDate: "2024-06-01",
+    status: "in_progress",
+  },
+  {
+    tenantId: "t-1",
+    id: "p-4",
+    name: "Nhà phố Nguyễn Văn An",
+    address: "Số 12, ngõ 45 Đào Tấn, Ba Đình",
+    customerId: "c-4",
+    startDate: "2025-01-10",
+    status: "in_progress",
+  },
+];
+
 export interface Lead {
   tenantId: string;
   id: string;
@@ -61,6 +112,7 @@ export interface Lead {
   estimatedValue: number;
   nextFollowUp: string;
   createdAt: string;
+  customerId?: string; // optional link to existing Customer
 }
 
 export interface Contract {
@@ -68,6 +120,9 @@ export interface Contract {
   id: string;
   code: string;
   customerId: string;
+  projectId?: string; // optional link to Project
+  elevatorId?: string; // optional link to Elevator
+  phase?: LifecyclePhase; // lifecycle phase for multi‑stage contracts
   type: ContractType;
   value: number;
   paid: number;
@@ -78,11 +133,23 @@ export interface Contract {
   signedAt: string;
 }
 
+export type LifecyclePhase =
+  | "sales"
+  | "contract_signed"
+  | "tech_survey"
+  | "procurement"
+  | "delivery"
+  | "mechanic_install"
+  | "electric_install"
+  | "safety_inspection"
+  | "handover"
+  | "maintenance";
+
 export interface Elevator {
   tenantId: string;
   id: string;
   code: string;
-  customerId: string;
+  projectId: string; // reference to Project
   contractId?: string;
   building: string;
   address: string;
@@ -94,6 +161,7 @@ export interface Elevator {
   lastMaintenance: string;
   nextMaintenance: string;
   status: ElevatorStatus;
+  lifecyclePhase: LifecyclePhase;
 }
 
 export interface Job {
@@ -105,6 +173,7 @@ export interface Job {
   description: string;
   customerId: string;
   elevatorId?: string;
+  projectId?: string; // new link to Project
   contractId?: string;
   assignedTo: string; // technician id
   priority: JobPriority;
@@ -209,22 +278,24 @@ const _mockContracts: Omit<Contract, "tenantId">[] = [
 
 // ---------- ELEVATORS ----------
 const _mockElevators: Omit<Elevator, "tenantId">[] = [
-  { id: "e-1", code: "VHOP-A1-01", customerId: "c-1", contractId: "ct-1", building: "Tòa A1", address: "Vinhomes Ocean Park", brand: "Mitsubishi", model: "NEXIEZ-MR", floors: 25, installedAt: "2022-04-15", warrantyUntil: "2024-04-15", lastMaintenance: "2026-03-15", nextMaintenance: "2026-04-15", status: "maintenance_due" },
-  { id: "e-2", code: "VHOP-A1-02", customerId: "c-1", contractId: "ct-1", building: "Tòa A1", address: "Vinhomes Ocean Park", brand: "Mitsubishi", model: "NEXIEZ-MR", floors: 25, installedAt: "2022-04-15", warrantyUntil: "2024-04-15", lastMaintenance: "2026-03-15", nextMaintenance: "2026-04-15", status: "operational" },
-  { id: "e-3", code: "VHOP-B2-01", customerId: "c-1", contractId: "ct-1", building: "Tòa B2", address: "Vinhomes Ocean Park", brand: "Mitsubishi", model: "NEXIEZ-MR", floors: 22, installedAt: "2022-06-20", warrantyUntil: "2024-06-20", lastMaintenance: "2026-03-20", nextMaintenance: "2026-04-20", status: "operational" },
-  { id: "e-4", code: "VHOP-B2-02", customerId: "c-1", contractId: "ct-1", building: "Tòa B2", address: "Vinhomes Ocean Park", brand: "Mitsubishi", model: "NEXIEZ-MR", floors: 22, installedAt: "2022-06-20", warrantyUntil: "2024-06-20", lastMaintenance: "2026-03-20", nextMaintenance: "2026-04-20", status: "operational" },
-  { id: "e-5", code: "SST-01", customerId: "c-2", contractId: "ct-2", building: "Sunshine Tower", address: "16 Phạm Hùng", brand: "Otis", model: "GeN2", floors: 21, installedAt: "2024-02-10", warrantyUntil: "2026-02-10", lastMaintenance: "2026-03-25", nextMaintenance: "2026-04-25", status: "operational" },
-  { id: "e-6", code: "SST-02", customerId: "c-2", contractId: "ct-2", building: "Sunshine Tower", address: "16 Phạm Hùng", brand: "Otis", model: "GeN2", floors: 21, installedAt: "2024-02-10", warrantyUntil: "2026-02-10", lastMaintenance: "2026-03-25", nextMaintenance: "2026-04-25", status: "out_of_order" },
-  { id: "e-7", code: "SST-03", customerId: "c-2", contractId: "ct-2", building: "Sunshine Tower", address: "16 Phạm Hùng", brand: "Otis", model: "GeN2", floors: 21, installedAt: "2024-02-10", warrantyUntil: "2026-02-10", lastMaintenance: "2026-03-25", nextMaintenance: "2026-04-25", status: "operational" },
-  { id: "e-8", code: "MTH-01", customerId: "c-3", contractId: "ct-3", building: "Mường Thanh Hà Đông", address: "78 Trần Phú", brand: "Hyundai", model: "Luxen", floors: 18, installedAt: "2023-08-01", warrantyUntil: "2025-08-01", lastMaintenance: "2026-03-10", nextMaintenance: "2026-04-10", status: "maintenance_due" },
-  { id: "e-9", code: "MTH-02", customerId: "c-3", contractId: "ct-3", building: "Mường Thanh Hà Đông", address: "78 Trần Phú", brand: "Hyundai", model: "Luxen", floors: 18, installedAt: "2023-08-01", warrantyUntil: "2025-08-01", lastMaintenance: "2026-03-10", nextMaintenance: "2026-04-10", status: "operational" },
-  { id: "e-10", code: "DPL-01", customerId: "c-5", contractId: "ct-5", building: "Diamond Plaza", address: "25 Lê Duẩn", brand: "Kone", model: "MonoSpace", floors: 15, installedAt: "2023-03-15", warrantyUntil: "2025-03-15", lastMaintenance: "2026-03-30", nextMaintenance: "2026-04-30", status: "operational" },
-  { id: "e-11", code: "TC-A-01", customerId: "c-6", contractId: "ct-6", building: "Times City T1", address: "458 Minh Khai", brand: "Schindler", model: "5500", floors: 28, installedAt: "2024-09-10", warrantyUntil: "2026-09-10", lastMaintenance: "2026-04-01", nextMaintenance: "2026-05-01", status: "operational" },
-  { id: "e-12", code: "TC-A-02", customerId: "c-6", contractId: "ct-6", building: "Times City T1", address: "458 Minh Khai", brand: "Schindler", model: "5500", floors: 28, installedAt: "2024-09-10", warrantyUntil: "2026-09-10", lastMaintenance: "2026-04-01", nextMaintenance: "2026-05-01", status: "operational" },
-  { id: "e-13", code: "BVHN-01", customerId: "c-8", contractId: "ct-8", building: "Bệnh viện Hồng Ngọc", address: "55 Yên Ninh", brand: "Mitsubishi", model: "ELENESSA", floors: 12, installedAt: "2022-04-20", warrantyUntil: "2024-04-20", lastMaintenance: "2026-04-05", nextMaintenance: "2026-05-05", status: "operational" },
-  { id: "e-14", code: "LOTTE-01", customerId: "c-10", contractId: "ct-10", building: "Lotte Center", address: "54 Liễu Giai", brand: "Otis", model: "SkyRise", floors: 65, installedAt: "2022-12-01", warrantyUntil: "2024-12-01", lastMaintenance: "2026-04-08", nextMaintenance: "2026-05-08", status: "operational" },
-  { id: "e-15", code: "LOTTE-02", customerId: "c-10", contractId: "ct-10", building: "Lotte Center", address: "54 Liễu Giai", brand: "Otis", model: "SkyRise", floors: 65, installedAt: "2022-12-01", warrantyUntil: "2024-12-01", lastMaintenance: "2026-04-08", nextMaintenance: "2026-05-08", status: "operational" },
+  { id: "e-1",  code: "VHOP-A1-01", projectId: "p-1", contractId: "ct-1",  building: "Tòa A1",              address: "Vinhomes Ocean Park", brand: "Mitsubishi", model: "NEXIEZ-MR",  floors: 25, installedAt: "2022-04-15", warrantyUntil: "2024-04-15", lastMaintenance: "2026-03-15", nextMaintenance: "2026-04-15", status: "maintenance_due", lifecyclePhase: "maintenance" },
+  { id: "e-2",  code: "VHOP-A1-02", projectId: "p-1", contractId: "ct-1",  building: "Tòa A1",              address: "Vinhomes Ocean Park", brand: "Mitsubishi", model: "NEXIEZ-MR",  floors: 25, installedAt: "2022-04-15", warrantyUntil: "2024-04-15", lastMaintenance: "2026-03-15", nextMaintenance: "2026-04-15", status: "operational",     lifecyclePhase: "maintenance" },
+  { id: "e-3",  code: "VHOP-B2-01", projectId: "p-1", contractId: "ct-1",  building: "Tòa B2",              address: "Vinhomes Ocean Park", brand: "Mitsubishi", model: "NEXIEZ-MR",  floors: 22, installedAt: "2022-06-20", warrantyUntil: "2024-06-20", lastMaintenance: "2026-03-20", nextMaintenance: "2026-04-20", status: "operational",     lifecyclePhase: "maintenance" },
+  { id: "e-4",  code: "VHOP-B2-02", projectId: "p-1", contractId: "ct-1",  building: "Tòa B2",              address: "Vinhomes Ocean Park", brand: "Mitsubishi", model: "NEXIEZ-MR",  floors: 22, installedAt: "2022-06-20", warrantyUntil: "2024-06-20", lastMaintenance: "2026-03-20", nextMaintenance: "2026-04-20", status: "operational",     lifecyclePhase: "maintenance" },
+  { id: "e-5",  code: "SST-01",     projectId: "p-2", contractId: "ct-2",  building: "Sunshine Tower",       address: "16 Phạm Hùng",       brand: "Otis",       model: "GeN2",        floors: 21, installedAt: "2024-02-10", warrantyUntil: "2026-02-10", lastMaintenance: "2026-03-25", nextMaintenance: "2026-04-25", status: "operational",     lifecyclePhase: "maintenance" },
+  { id: "e-6",  code: "SST-02",     projectId: "p-2", contractId: "ct-2",  building: "Sunshine Tower",       address: "16 Phạm Hùng",       brand: "Otis",       model: "GeN2",        floors: 21, installedAt: "2024-02-10", warrantyUntil: "2026-02-10", lastMaintenance: "2026-03-25", nextMaintenance: "2026-04-25", status: "out_of_order",    lifecyclePhase: "maintenance" },
+  { id: "e-7",  code: "SST-03",     projectId: "p-2", contractId: "ct-2",  building: "Sunshine Tower",       address: "16 Phạm Hùng",       brand: "Otis",       model: "GeN2",        floors: 21, installedAt: "2024-02-10", warrantyUntil: "2026-02-10", lastMaintenance: "2026-03-25", nextMaintenance: "2026-04-25", status: "operational",     lifecyclePhase: "maintenance" },
+  { id: "e-8",  code: "MTH-01",     projectId: "p-3", contractId: "ct-3",  building: "Mường Thanh Hà Đông",  address: "78 Trần Phú",        brand: "Hyundai",    model: "Luxen",       floors: 18, installedAt: "2023-08-01", warrantyUntil: "2025-08-01", lastMaintenance: "2026-03-10", nextMaintenance: "2026-04-10", status: "maintenance_due", lifecyclePhase: "maintenance" },
+  { id: "e-9",  code: "MTH-02",     projectId: "p-3", contractId: "ct-3",  building: "Mường Thanh Hà Đông",  address: "78 Trần Phú",        brand: "Hyundai",    model: "Luxen",       floors: 18, installedAt: "2023-08-01", warrantyUntil: "2025-08-01", lastMaintenance: "2026-03-10", nextMaintenance: "2026-04-10", status: "operational",     lifecyclePhase: "maintenance" },
+  { id: "e-10", code: "DPL-01",     projectId: "p-3", contractId: "ct-5",  building: "Diamond Plaza",        address: "25 Lê Duẩn",         brand: "Kone",       model: "MonoSpace",   floors: 15, installedAt: "2023-03-15", warrantyUntil: "2025-03-15", lastMaintenance: "2026-03-30", nextMaintenance: "2026-04-30", status: "operational",     lifecyclePhase: "safety_inspection" },
+  { id: "e-11", code: "TC-A-01",    projectId: "p-2", contractId: "ct-6",  building: "Times City T1",        address: "458 Minh Khai",      brand: "Schindler",  model: "5500",        floors: 28, installedAt: "2024-09-10", warrantyUntil: "2026-09-10", lastMaintenance: "2026-04-01", nextMaintenance: "2026-05-01", status: "operational",     lifecyclePhase: "maintenance" },
+  { id: "e-12", code: "TC-A-02",    projectId: "p-2", contractId: "ct-6",  building: "Times City T1",        address: "458 Minh Khai",      brand: "Schindler",  model: "5500",        floors: 28, installedAt: "2024-09-10", warrantyUntil: "2026-09-10", lastMaintenance: "2026-04-01", nextMaintenance: "2026-05-01", status: "operational",     lifecyclePhase: "maintenance" },
+  { id: "e-13", code: "BVHN-01",    projectId: "p-3", contractId: "ct-8",  building: "Bệnh viện Hồng Ngọc",  address: "55 Yên Ninh",        brand: "Mitsubishi", model: "ELENESSA",    floors: 12, installedAt: "2022-04-20", warrantyUntil: "2024-04-20", lastMaintenance: "2026-04-05", nextMaintenance: "2026-05-05", status: "operational",     lifecyclePhase: "maintenance" },
+  { id: "e-14", code: "LOTTE-01",   projectId: "p-2", contractId: "ct-10", building: "Lotte Center",          address: "54 Liễu Giai",       brand: "Otis",       model: "SkyRise",     floors: 65, installedAt: "2022-12-01", warrantyUntil: "2024-12-01", lastMaintenance: "2026-04-08", nextMaintenance: "2026-05-08", status: "operational",     lifecyclePhase: "maintenance" },
+  { id: "e-15", code: "LOTTE-02",   projectId: "p-2", contractId: "ct-10", building: "Lotte Center",          address: "54 Liễu Giai",       brand: "Otis",       model: "SkyRise",     floors: 65, installedAt: "2022-12-01", warrantyUntil: "2024-12-01", lastMaintenance: "2026-04-08", nextMaintenance: "2026-05-08", status: "operational",     lifecyclePhase: "mechanic_install" },
+  { id: "e-16", code: "NVA-01",     projectId: "p-4", contractId: "ct-4",  building: "Nhà phố Nguyễn Văn An", address: "Số 12 ngõ 45 Đào Tấn", brand: "Hyundai", model: "Luxen",       floors: 5,  installedAt: "2025-03-01", warrantyUntil: "2030-03-01", lastMaintenance: "",           nextMaintenance: "2025-09-01", status: "under_install",   lifecyclePhase: "electric_install" },
 ];
+
 
 // ---------- JOBS ----------
 const _mockJobs: Omit<Job, "tenantId">[] = [
@@ -279,6 +350,52 @@ export function getCustomer(id: string) { return mockCustomers.find(c => c.id ==
 export function getElevator(id: string) { return mockElevators.find(e => e.id === id); }
 export function getContract(id: string) { return mockContracts.find(c => c.id === id); }
 export function getUser(id: string) { return mockUsers.find(u => u.id === id); }
+
+// Additional helpers
+export function getProject(id: string) { return mockProjects.find(p => p.id === id); }
+export function getLeadsByCustomer(customerId: string) { return mockLeads.filter(l => l.customerId === customerId); }
+export function getContractsByElevator(elevatorId: string) { return mockContracts.filter(c => c.elevatorId === elevatorId); }
+
+// Create Issue Report + auto repair job
+export function createIssueReport(elevatorId: string, description: string) {
+  const elevator = getElevator(elevatorId);
+  if (!elevator) return null;
+  const project = getProject(elevator.projectId);
+  const customerId = project?.customerId ?? "";
+  const newReport: IssueReport = {
+    tenantId: "t-1",
+    id: `ir-${Date.now()}`,
+    elevatorId,
+    customerId,
+    description,
+    reportedAt: new Date().toISOString(),
+    status: "open",
+  };
+  mockIssues.push(newReport);
+  // Auto‑create repair job linked to this issue
+  const newJob: Job = {
+    tenantId: "t-1",
+    id: `j-${Date.now()}`,
+    code: `JOB-${Math.random().toString(36).substr(2,5).toUpperCase()}`,
+    type: "repair",
+    title: "Báo lỗi từ QR",
+    description,
+    customerId,
+    elevatorId,
+    projectId: elevator.projectId,
+    contractId: undefined,
+    assignedTo: "u-tech-1",
+    priority: "high",
+    status: "pending",
+    scheduledFor: new Date().toISOString(),
+    beforePhotos: [],
+    afterPhotos: [],
+    createdAt: new Date().toISOString(),
+  };
+  mockJobs.push(newJob);
+  return newReport;
+}
+
 
 export function formatVND(value: number) {
   return new Intl.NumberFormat("vi-VN", { style: "currency", currency: "VND", maximumFractionDigits: 0 }).format(value);
