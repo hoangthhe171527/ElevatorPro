@@ -11,8 +11,10 @@ import { Progress } from "@/components/ui/progress";
 import { StatusBadge } from "@/components/common/StatusBadge";
 import { mockInventory, formatVND, type InventoryItem } from "@/lib/mock-data";
 import { Plus, Search, Package, AlertTriangle, ArrowRightLeft, PackageOpen, LayoutGrid, List } from "lucide-react";
-import { ReceiveInventoryModal } from "@/components/common/Modals";
+import { ReceiveInventoryModal, TransferInventoryModal } from "@/components/common/Modals";
 import { toast } from "sonner";
+import { useAppStore, useCanWrite } from "@/lib/store";
+import { Badge } from "@/components/ui/badge";
 
 export const Route = createFileRoute("/admin/inventory/")({
   head: () => ({ meta: [{ title: "Kho vật tư — ElevatorPro" }] }),
@@ -22,14 +24,20 @@ export const Route = createFileRoute("/admin/inventory/")({
 const PAGE_SIZE = 9;
 
 function InventoryPage() {
+  const activeTenantId = useAppStore(s => s.activeTenantId);
+  const canModify = useCanWrite("inventory");
   const [page, setPage] = useState(1);
   const [search, setSearch] = useState("");
   const [catFilter, setCatFilter] = useState("all");
   const [viewMode, setViewMode] = useState<"grid" | "list">("grid");
   const [receiveItem, setReceiveItem] = useState<InventoryItem | null>(null);
+  const [transferOpen, setTransferOpen] = useState(false);
 
-  const categories = Array.from(new Set(mockInventory.map((i) => i.category)));
-  const filtered = mockInventory.filter((i) => {
+  // Filter inventory by tenant
+  const tenantInventory = mockInventory.filter(i => i.tenantId === activeTenantId);
+
+  const categories = Array.from(new Set(tenantInventory.map((i) => i.category)));
+  const filtered = tenantInventory.filter((i) => {
     const m1 =
       !search ||
       i.name.toLowerCase().includes(search.toLowerCase()) ||
@@ -38,8 +46,8 @@ function InventoryPage() {
     return m1 && m2;
   });
   const paged = filtered.slice((page - 1) * PAGE_SIZE, page * PAGE_SIZE);
-  const lowStock = mockInventory.filter((i) => i.stock - i.reserved <= i.reorderLevel).length;
-  const totalValue = mockInventory.reduce((s, i) => s + i.stock * i.unitPrice, 0);
+  const lowStock = tenantInventory.filter((i) => i.stock - i.reserved <= i.reorderLevel).length;
+  const totalValue = tenantInventory.reduce((s, i) => s + i.stock * i.unitPrice, 0);
 
   return (
     <AppShell>
@@ -47,21 +55,25 @@ function InventoryPage() {
         title="Quản lý Kho vật tư"
         description="Theo dõi số lượng tồn kho theo thời gian thực"
         actions={
-          <div className="flex gap-2">
-            <Button
-              variant="outline"
-              className="bg-background shadow-sm hover:bg-muted"
-              onClick={() => toast.success("Đang tạo phiếu chuyển kho...")}
-            >
-              <ArrowRightLeft className="h-4 w-4 md:mr-1.5" /> <span className="hidden md:inline">Chuyển kho</span>
-            </Button>
-            <Button
-              className="shadow-md bg-gradient-to-r from-primary to-primary/80 hover:opacity-90 transition-opacity"
-              onClick={() => toast.info("Chọn vật tư bên dưới để nhập kho")}
-            >
-              <Plus className="h-4 w-4 md:mr-1.5" /> <span className="hidden md:inline">Nhập vật tư mới</span>
-            </Button>
-          </div>
+          canModify ? (
+            <div className="flex gap-2">
+              <Button
+                variant="outline"
+                className="bg-background shadow-sm hover:bg-muted"
+                onClick={() => setTransferOpen(true)}
+              >
+                <ArrowRightLeft className="h-4 w-4 md:mr-1.5" /> <span className="hidden md:inline">Chuyển kho</span>
+              </Button>
+              <Button
+                className="shadow-md bg-gradient-to-r from-primary to-primary/80 hover:opacity-90 transition-opacity"
+                onClick={() => toast.info("Chọn vật tư bên dưới để nhập kho")}
+              >
+                <Plus className="h-4 w-4 md:mr-1.5" /> <span className="hidden md:inline">Nhập vật tư mới</span>
+              </Button>
+            </div>
+          ) : (
+            <Badge variant="outline" className="text-muted-foreground italic border-dashed px-4 py-2 bg-muted/20">Chế độ xem tồn kho</Badge>
+          )
         }
       />
 
@@ -150,14 +162,17 @@ function InventoryPage() {
         </div>
       </Card>
 
-      {receiveItem && (
-        <ReceiveInventoryModal
-          open={true}
-          onClose={() => setReceiveItem(null)}
-          itemName={receiveItem.name}
-          itemCode={receiveItem.code}
-        />
-      )}
+      <ReceiveInventoryModal
+        open={!!receiveItem}
+        onClose={() => setReceiveItem(null)}
+        itemName={receiveItem?.name || ""}
+        itemCode={receiveItem?.code || ""}
+      />
+
+      <TransferInventoryModal 
+        open={transferOpen}
+        onClose={() => setTransferOpen(false)}
+      />
     </AppShell>
   );
 }

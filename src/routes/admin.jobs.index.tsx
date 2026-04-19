@@ -16,8 +16,8 @@ import {
   priorityVariant,
 } from "@/components/common/StatusBadge";
 import { mockJobs, formatDateTime, getCustomer, getUser } from "@/lib/mock-data";
-import { Plus, Search, Briefcase, Calendar, User } from "lucide-react";
-import { CreateJobModal } from "@/components/common/Modals";
+import { Plus, Search, Briefcase, Calendar, User, ArrowRight } from "lucide-react";
+import { CreateJobModal, DispatchJobModal } from "@/components/common/Modals";
 
 export const Route = createFileRoute("/admin/jobs/")({
   head: () => ({ meta: [{ title: "Công việc — ElevatorPro" }] }),
@@ -38,6 +38,24 @@ function JobsPage() {
   const [statusFilter, setStatusFilter] = useState("all");
   const [typeFilter, setTypeFilter] = useState("all");
   const [createOpen, setCreateOpen] = useState(false);
+  const [dispatchJob, setDispatchJob] = useState<any>(null);
+
+  // Mở modal
+  const openDispatch = (job: any, e: React.MouseEvent) => {
+    e.preventDefault();
+    setDispatchJob(job);
+  };
+
+  // Xử lý logic dispatch (mô phỏng)
+  const handleDispatch = (jobId: string, techId: string) => {
+    const job = mockJobs.find(j => j.id === jobId);
+    if (job) {
+      job.assignedTo = techId;
+      job.status = "scheduled";
+    }
+    // force re-render bằng cách trigger state. Trong React Router, có thể gọi router.invalidate() hoặc set lại page.
+    setPage((p) => p);
+  };
 
   const filtered = mockJobs
     .filter((j) => {
@@ -141,16 +159,27 @@ function JobsPage() {
                         </StatusBadge>
                       </div>
                       <h3 className="mt-1 font-semibold truncate">{j.title}</h3>
-                      <div className="mt-1 text-xs text-muted-foreground flex flex-wrap gap-x-4 gap-y-1">
+                      <div className="mt-1 text-xs text-muted-foreground flex flex-wrap gap-x-4 gap-y-1 items-center">
                         <span className="flex items-center gap-1"><User className="h-3 w-3" /> {cus?.name}</span>
                         <span className="flex items-center gap-1"><Calendar className="h-3 w-3" /> {formatDateTime(j.scheduledFor)}</span>
-                        <span>KT: {tech?.name}</span>
+                        {tech ? (
+                          <span>KT: {tech.name}</span>
+                        ) : (
+                          <span className="text-warning-foreground font-semibold flex items-center gap-1">Chưa phân công</span>
+                        )}
                       </div>
                     </div>
                   </div>
-                  <StatusBadge variant={jobStatusVariant[j.status]}>
-                    {jobStatusLabel[j.status]}
-                  </StatusBadge>
+                  <div className="flex items-center gap-3">
+                    {!j.assignedTo && j.status === "pending" && (
+                      <Button size="sm" variant="outline" className="h-7 text-xs border-primary text-primary hover:bg-primary/10 gap-1" onClick={(e) => openDispatch(j, e)}>
+                        Điều phối <ArrowRight className="h-3 w-3" />
+                      </Button>
+                    )}
+                    <StatusBadge variant={jobStatusVariant[j.status]}>
+                      {jobStatusLabel[j.status]}
+                    </StatusBadge>
+                  </div>
                 </div>
               </Link>
             );
@@ -161,6 +190,12 @@ function JobsPage() {
       </Card>
 
       <CreateJobModal open={createOpen} onClose={() => setCreateOpen(false)} />
+      <DispatchJobModal 
+        open={!!dispatchJob} 
+        onClose={() => setDispatchJob(null)} 
+        job={dispatchJob} 
+        onDispatch={handleDispatch} 
+      />
     </AppShell>
   );
 }

@@ -10,6 +10,7 @@ import { mockJobs, mockContracts, mockCustomers, mockElevators, mockLeads, forma
 import { Briefcase, Users, FileText, AlertTriangle, Building2, TrendingUp, Calendar, ArrowUpRight, Plus } from "lucide-react";
 import { CreateJobModal } from "@/components/common/Modals";
 import { useState } from "react";
+import { useAppStore } from "@/lib/store";
 
 export const Route = createFileRoute("/admin/")({
   head: () => ({ meta: [{ title: "Dashboard — ElevatorPro" }] }),
@@ -18,20 +19,28 @@ export const Route = createFileRoute("/admin/")({
 
 function AdminDashboard() {
   const navigate = useNavigate();
+  const activeTenantId = useAppStore(s => s.activeTenantId);
   const [createJobOpen, setCreateJobOpen] = useState(false);
 
-  const totalRevenue = mockContracts.reduce((s, c) => s + c.paid, 0);
-  const expiringContracts = mockContracts.filter((c) => c.status === "expiring").length;
-  const overdueElevators = mockElevators.filter((e) => e.status === "maintenance_due" || e.status === "out_of_order").length;
-  const activeJobs = mockJobs.filter((j) => j.status === "in_progress" || j.status === "scheduled").length;
-  const newLeads = mockLeads.filter((l) => l.status === "new" || l.status === "contacted").length;
+  // Filter all data by activeTenantId
+  const tenantContracts = mockContracts.filter(c => c.tenantId === activeTenantId);
+  const tenantElevators = mockElevators.filter(e => e.tenantId === activeTenantId);
+  const tenantJobs = mockJobs.filter(j => j.tenantId === activeTenantId);
+  const tenantCustomers = mockCustomers.filter(c => c.tenantId === activeTenantId);
+  const tenantLeads = mockLeads.filter(l => l.tenantId === activeTenantId);
 
-  const upcomingJobs = [...mockJobs]
+  const totalRevenue = tenantContracts.reduce((s, c) => s + c.paid, 0);
+  const expiringContracts = tenantContracts.filter((c) => c.status === "expiring").length;
+  const overdueElevators = tenantElevators.filter((e) => e.status === "maintenance_due" || e.status === "out_of_order").length;
+  const activeJobs = tenantJobs.filter((j) => j.status === "in_progress" || j.status === "scheduled").length;
+  const newLeads = tenantLeads.filter((l) => l.status === "new" || l.status === "contacted").length;
+
+  const upcomingJobs = [...tenantJobs]
     .filter((j) => j.status === "scheduled" || j.status === "in_progress")
     .sort((a, b) => a.scheduledFor.localeCompare(b.scheduledFor))
     .slice(0, 6);
 
-  const recentContracts = [...mockContracts]
+  const recentContracts = [...tenantContracts]
     .sort((a, b) => b.signedAt.localeCompare(a.signedAt))
     .slice(0, 5);
 
@@ -65,10 +74,10 @@ function AdminDashboard() {
 
       <div className="grid gap-4 lg:grid-cols-3 mb-6">
         <div className="cursor-pointer" onClick={() => navigate({ to: "/admin/customers" })}>
-          <StatCard label="Tổng khách hàng" value={mockCustomers.length} icon={Users} accent="primary" />
+          <StatCard label="Tổng khách hàng" value={tenantCustomers.length} icon={Users} accent="primary" />
         </div>
         <div className="cursor-pointer" onClick={() => navigate({ to: "/admin/elevators" })}>
-          <StatCard label="Tổng thang máy" value={mockElevators.length} icon={Building2} accent="primary" />
+          <StatCard label="Tổng thang máy" value={tenantElevators.length} icon={Building2} accent="primary" />
         </div>
         <div className="cursor-pointer" onClick={() => navigate({ to: "/admin/leads" })}>
           <StatCard label="Lead đang theo dõi" value={newLeads} icon={ArrowUpRight} accent="info" />

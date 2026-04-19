@@ -12,7 +12,7 @@ import { StatusBadge, contractStatusLabel, contractStatusVariant } from "@/compo
 import { Progress } from "@/components/ui/progress";
 import { mockContracts, formatVND, formatDate, getCustomer, type Contract } from "@/lib/mock-data";
 import { Plus, Search, FileText, Calendar, User, Banknote, RefreshCw } from "lucide-react";
-import { RecordPaymentModal, CreateContractModal } from "@/components/common/Modals";
+import { RecordPaymentModal, CreateContractModal, RenewContractModal } from "@/components/common/Modals";
 import { toast } from "sonner";
 
 export const Route = createFileRoute("/admin/contracts")({
@@ -33,6 +33,7 @@ function ContractsPage() {
   const [statusFilter, setStatusFilter] = useState("all");
   const [typeFilter, setTypeFilter] = useState("all");
   const [paymentContract, setPaymentContract] = useState<Contract | null>(null);
+  const [renewContract, setRenewContract] = useState<Contract | null>(null);
   const [createOpen, setCreateOpen] = useState(false);
 
   const filtered = mockContracts.filter((c) => {
@@ -179,7 +180,7 @@ function ContractsPage() {
                         <Button
                           size="sm"
                           className="flex-1 gap-1.5 text-xs"
-                          onClick={() => toast.success(`Đã tạo nháp tái ký cho ${c.code}`)}
+                          onClick={() => setRenewContract(c)}
                         >
                           <RefreshCw className="h-3.5 w-3.5" /> Tái ký
                         </Button>
@@ -206,6 +207,14 @@ function ContractsPage() {
       )}
 
       <CreateContractModal open={createOpen} onClose={() => setCreateOpen(false)} />
+
+      {renewContract && (
+        <RenewContractModal 
+          open={true}
+          onClose={() => setRenewContract(null)}
+          contractCode={renewContract.code}
+        />
+      )}
     </AppShell>
   );
 }

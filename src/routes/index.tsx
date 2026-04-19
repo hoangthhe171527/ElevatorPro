@@ -3,10 +3,10 @@ import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import {
   Cog, Users, FileText, Briefcase, Building2, Package, BarChart3, QrCode,
-  ArrowRight, ShieldCheck, Zap, MapPin, Wrench
+  ArrowRight, ShieldCheck, Zap, MapPin, Wrench, Wallet, Building
 } from "lucide-react";
 import { useAppStore } from "@/lib/store";
-import type { Role } from "@/lib/mock-data";
+import { mockUsers } from "@/lib/mock-data";
 
 export const Route = createFileRoute("/")({
   head: () => ({
@@ -18,10 +18,12 @@ export const Route = createFileRoute("/")({
   component: LandingPage,
 });
 
-const roles: { id: Role; title: string; desc: string; href: string; color: string }[] = [
-  { id: "admin", title: "Quản trị viên", desc: "Tổng quan toàn hệ thống, KH, hợp đồng, công việc, kho, báo cáo.", href: "/admin", color: "bg-primary" },
-  { id: "technician", title: "Kỹ thuật viên", desc: "Nhận công việc, ghi nhận hiện trường, lập biên bản bảo trì/sửa chữa.", href: "/tech", color: "bg-info" },
-  { id: "customer", title: "Khách hàng", desc: "Theo dõi thang, hợp đồng, lịch bảo trì và báo lỗi nhanh.", href: "/portal", color: "bg-success" },
+const personas = [
+  { id: "u-director", title: "Giám đốc (Full Quyền)", desc: "Trải nghiệm tính năng của tất cả các phòng ban, tổng quan vận hành, báo cáo dòng tiền.", href: "/admin", color: "bg-primary", icon: ShieldCheck },
+  { id: "u-sm-biz", title: "Sales & QL Kỹ thuật (Cty Nhỏ)", desc: "Nhân sự đa nhiệm: Vừa kiểm soát kinh doanh hợp đồng, vừa phân công thợ lắp đặt bảo trì.", href: "/admin", color: "bg-orange-500", icon: Users },
+  { id: "u-accounting", title: "Phòng Kế Toán (Cty Lớn)", desc: "Môi trường chuyên biệt hóa: Chỉ xem hóa đơn, hợp đồng và phê duyệt công tác phí.", href: "/admin/accounting", color: "bg-emerald-500", icon: Wallet },
+  { id: "u-tech-1", title: "Kỹ thuật viên", desc: "Sử dụng Mobile App để nhận việc, báo cáo checklist, check-in, chụp ảnh trước-sau.", href: "/tech", color: "bg-info", icon: Wrench },
+  { id: "u-cus-1", title: "Khách hàng", desc: "Quét QR để theo dõi thang, xác nhận biên bản online, thông tin hợp đồng.", href: "/portal", color: "bg-success", icon: Building },
 ];
 
 const features = [
@@ -36,7 +38,7 @@ const features = [
 ];
 
 function LandingPage() {
-  const setRole = useAppStore((s) => s.setRole);
+  const setUserId = useAppStore((s) => s.setUserId);
 
   return (
     <div className="min-h-screen bg-background">
@@ -54,7 +56,7 @@ function LandingPage() {
           </div>
           <div className="hidden md:flex items-center gap-6 text-sm">
             <a href="#features" className="text-muted-foreground hover:text-foreground">Tính năng</a>
-            <a href="#roles" className="text-muted-foreground hover:text-foreground">Vai trò</a>
+            <a href="#personas" className="text-muted-foreground hover:text-foreground">Phân quyền RBAC</a>
             <a href="#workflow" className="text-muted-foreground hover:text-foreground">Quy trình</a>
           </div>
           <Link to="/admin">
@@ -66,45 +68,47 @@ function LandingPage() {
       {/* Hero */}
       <section className="container mx-auto px-4 py-16 lg:py-24 text-center">
         <div className="inline-flex items-center gap-2 rounded-full border bg-muted/50 px-3 py-1 text-xs text-muted-foreground mb-6">
-          <Zap className="h-3 w-3 text-primary" /> Prototype demo — dữ liệu mẫu
+          <Zap className="h-3 w-3 text-primary" /> Prototype demo — Hệ thống phân quyền động
         </div>
         <h1 className="mx-auto max-w-3xl text-4xl lg:text-6xl font-bold tracking-tight text-foreground">
-          Toàn bộ dịch vụ thang máy
+          Được thiết kế linh hoạt cho
           <br />
-          <span className="text-primary">trong một hệ thống</span>
+          <span className="text-primary">mọi quy mô doanh nghiệp</span>
         </h1>
         <p className="mx-auto mt-6 max-w-2xl text-lg text-muted-foreground">
-          Quản lý khách hàng, hợp đồng, lắp đặt, bảo trì, sửa chữa và kho vật tư.
-          Linh hoạt theo thực tế vận hành — không cứng nhắc theo quy trình cố định.
+          Quản lý từ một tập thể vài người "đa nhiệm" (Multi-role) đến các tổng công ty chia tách độc lập các phòng Kế toán, Kinh doanh, Điều phối Kỹ thuật.
         </p>
         <div className="mt-8 flex flex-wrap items-center justify-center gap-3">
-          <Link to="/admin"><Button size="lg" className="gap-2">Xem dashboard quản trị <ArrowRight className="h-4 w-4" /></Button></Link>
-          <Link to="/tech"><Button size="lg" variant="outline" onClick={() => setRole("technician")}>Giao diện kỹ thuật</Button></Link>
-          <Link to="/portal"><Button size="lg" variant="outline" onClick={() => setRole("customer")}>Cổng khách hàng</Button></Link>
+          <Link to="/admin" onClick={() => setUserId("u-director")}><Button size="lg" className="gap-2">Xem Full Quyền (BOD) <ArrowRight className="h-4 w-4" /></Button></Link>
+          <Link to="/admin" onClick={() => setUserId("u-sm-biz")}><Button size="lg" variant="outline">Team Đa Năng (Nhỏ)</Button></Link>
+          <Link to="/admin/accounting" onClick={() => setUserId("u-accounting")}><Button size="lg" variant="outline">Kế toán chuyên trách</Button></Link>
         </div>
       </section>
 
       {/* Roles */}
-      <section id="roles" className="container mx-auto px-4 py-12">
+      <section id="personas" className="container mx-auto px-4 py-12">
         <div className="text-center mb-10">
-          <h2 className="text-3xl font-bold">Chọn vai trò để khám phá</h2>
-          <p className="mt-2 text-muted-foreground">3 trải nghiệm tách biệt cho từng nhóm người dùng</p>
+          <h2 className="text-3xl font-bold">Chọn mô hình nhân sự để trải nghiệm</h2>
+          <p className="mt-2 text-muted-foreground">Hệ thống phân quyền được tinh chỉnh cá nhân hóa cho từng bộ phận</p>
         </div>
-        <div className="grid gap-5 md:grid-cols-3">
-          {roles.map((r) => (
-            <Link key={r.id} to={r.href} onClick={() => setRole(r.id)}>
-              <Card className="p-6 hover:shadow-elevated transition-all hover:-translate-y-0.5 h-full">
-                <div className={`flex h-11 w-11 items-center justify-center rounded-lg ${r.color} text-white mb-4`}>
-                  {r.id === "admin" ? <ShieldCheck className="h-5 w-5" /> : r.id === "technician" ? <Wrench className="h-5 w-5" /> : <Users className="h-5 w-5" />}
-                </div>
-                <h3 className="text-lg font-semibold">{r.title}</h3>
-                <p className="mt-1.5 text-sm text-muted-foreground">{r.desc}</p>
-                <div className="mt-4 flex items-center text-sm text-primary font-medium">
-                  Truy cập <ArrowRight className="ml-1 h-3.5 w-3.5" />
-                </div>
-              </Card>
-            </Link>
-          ))}
+        <div className="grid gap-5 md:grid-cols-2 lg:grid-cols-3">
+          {personas.map((p) => {
+            const Icon = p.icon;
+            return (
+              <Link key={p.id} to={p.href} onClick={() => setUserId(p.id)}>
+                <Card className="p-6 hover:shadow-elevated transition-all hover:-translate-y-0.5 h-full border-primary/20 bg-background/50">
+                  <div className={`flex h-11 w-11 items-center justify-center rounded-lg ${p.color} text-white mb-4 shadow-sm`}>
+                    <Icon className="h-5 w-5" />
+                  </div>
+                  <h3 className="text-lg font-semibold whitespace-pre-wrap leading-tight">{p.title}</h3>
+                  <p className="mt-2 text-sm text-muted-foreground">{p.desc}</p>
+                  <div className="mt-4 flex items-center text-sm text-primary font-medium group">
+                    Khám phá quyền hạn <ArrowRight className="ml-1 h-3.5 w-3.5 transition-transform group-hover:translate-x-1" />
+                  </div>
+                </Card>
+              </Link>
+            )
+          })}
         </div>
       </section>
 
@@ -161,11 +165,11 @@ function LandingPage() {
       <section className="container mx-auto px-4 py-16">
         <Card className="p-10 text-center bg-sidebar text-sidebar-foreground">
           <h2 className="text-3xl font-bold">Sẵn sàng trải nghiệm?</h2>
-          <p className="mt-2 text-sidebar-foreground/70">Vào thẳng dashboard — không cần đăng nhập</p>
+          <p className="mt-2 text-sidebar-foreground/70">Vào thẳng giao diện — không cần đăng nhập</p>
           <div className="mt-6 flex flex-wrap items-center justify-center gap-3">
-            <Link to="/admin"><Button size="lg" variant="default">Quản trị viên</Button></Link>
-            <Link to="/tech"><Button size="lg" variant="secondary" onClick={() => setRole("technician")}>Kỹ thuật viên</Button></Link>
-            <Link to="/portal"><Button size="lg" variant="secondary" onClick={() => setRole("customer")}>Khách hàng</Button></Link>
+            <Link to="/admin" onClick={() => setUserId("u-director")}><Button size="lg" variant="default">Login Giám đốc</Button></Link>
+            <Link to="/admin" onClick={() => setUserId("u-sm-biz")}><Button size="lg" variant="secondary">Cty Nhỏ Đa Nhiệm</Button></Link>
+            <Link to="/admin/accounting" onClick={() => setUserId("u-accounting")}><Button size="lg" variant="secondary" className="border-secondary text-primary hover:bg-secondary">Kế toán chuyên biệt</Button></Link>
           </div>
         </Card>
       </section>

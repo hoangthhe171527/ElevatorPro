@@ -36,7 +36,7 @@ import {
   type ContractType,
   type LeadStatus,
 } from "@/lib/mock-data";
-import { CheckCircle2, AlertTriangle, User, Building2, FileText, Banknote, Briefcase, UserCog, X } from "lucide-react";
+import { CheckCircle2, AlertTriangle, User, Building2, FileText, Banknote, Briefcase, UserCog, X, Wallet, RefreshCw, ArrowRightLeft } from "lucide-react";
 
 // ─────────────────────────────────────────────
 // 1. MODAL TẠO CÔNG VIỆC MỚI
@@ -86,7 +86,7 @@ export function CreateJobModal({
   const [description, setDescription] = useState("");
   const [loading, setLoading] = useState(false);
 
-  const technicians = mockUsers.filter((u) => u.memberships?.some(m => m.role === "technician"));
+  const technicians = mockUsers.filter((u) => u.memberships?.some(m => m.permissions.includes("field_tech")));
   // Filter elevators belonging to customer's projects
   const customerProjects = mockProjects.filter((p) => p.customerId === customerId);
   const customerProjectIds = customerProjects.map((p) => p.id);
@@ -866,9 +866,9 @@ export function ConfirmScheduleModal({ open, onClose, jobTitle, scheduledFor }: 
           </div>
         </div>
         <DialogFooter className="flex-col sm:flex-row gap-2">
-          <Button variant="outline" onClick={handleReschedule} className="sm:mr-auto">Đổi lịch</Button>
+          <Button variant="outline" onClick={handleReschedule} className="sm:mr-auto">Đề xuất đổi ngày</Button>
           <Button variant="outline" onClick={onClose} disabled={loading}>Hủy</Button>
-          <Button onClick={handle} disabled={loading}>{loading ? "Đang xác nhận..." : "✓ Xác nhận lịch"}</Button>
+          <Button onClick={handle} disabled={loading}>{loading ? "Đang xác nhận..." : "✓ Đồng ý lịch"}</Button>
         </DialogFooter>
       </DialogContent>
     </Dialog>
@@ -949,6 +949,253 @@ export function CreateLeadModal({ open, onClose }: CreateLeadModalProps) {
         <DialogFooter>
           <Button variant="outline" onClick={onClose} disabled={loading}>Hủy</Button>
           <Button onClick={handle} disabled={loading}>{loading ? "Đang thêm..." : "Thêm Lead"}</Button>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
+  );
+}
+
+// ─────────────────────────────────────────────
+// 11. MODAL ĐIỀU PHỐI (DISPATCH)
+// ─────────────────────────────────────────────
+interface DispatchJobModalProps {
+  open: boolean;
+  onClose: () => void;
+  job: any; // Using any for simplicity in this demo component
+  onDispatch: (jobId: string, techId: string) => void;
+}
+
+export function DispatchJobModal({ open, onClose, job, onDispatch }: DispatchJobModalProps) {
+  const [techId, setTechId] = useState("");
+  const [loading, setLoading] = useState(false);
+
+  const technicians = mockUsers.filter((u) => u.memberships?.some(m => m.permissions.includes("field_tech")));
+
+  const handle = async () => {
+    if (!techId) {
+      toast.error("Vui lòng chọn kỹ thuật viên để phân công");
+      return;
+    }
+    setLoading(true);
+    await new Promise(r => setTimeout(r, 600));
+    setLoading(false);
+    onDispatch(job.id, techId);
+    toast.success(`Đã giao việc cho ${mockUsers.find(u => u.id === techId)?.name}`);
+    setTechId("");
+    onClose();
+  };
+
+  if (!job) return null;
+  const cus = mockCustomers.find(c => c.id === job.customerId);
+
+  return (
+    <Dialog open={open} onOpenChange={onClose}>
+      <DialogContent className="max-w-md">
+        <DialogHeader>
+          <DialogTitle className="flex items-center gap-2">
+            <Briefcase className="h-5 w-5 text-primary" /> Phân công công việc (Dispatch)
+          </DialogTitle>
+        </DialogHeader>
+        <div className="space-y-4 py-2">
+          <div className="p-3 rounded-lg bg-warning/10 border border-warning/20">
+            <div className="font-medium text-warning-foreground">{job.title}</div>
+            <div className="text-sm mt-1">{job.description}</div>
+            <div className="text-xs text-muted-foreground mt-2 flex items-center gap-1">
+              <User className="h-3 w-3" /> {cus?.name}
+            </div>
+          </div>
+          <div>
+            <label className="text-sm font-medium">Kỹ thuật viên phụ trách <span className="text-destructive">*</span></label>
+            <Select value={techId} onValueChange={setTechId}>
+              <SelectTrigger className="mt-1">
+                <SelectValue placeholder="Chọn thợ đang rảnh..." />
+              </SelectTrigger>
+              <SelectContent>
+                {technicians.map(u => (
+                  <SelectItem key={u.id} value={u.id}>
+                    {u.name}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+            <p className="text-xs text-muted-foreground mt-1.5 flex items-start gap-1">
+              <AlertTriangle className="h-3.5 w-3.5 shrink-0 text-info" />
+              Giao việc sẽ chuyển trạng thái công việc sang "Đã lên lịch" và báo cho thợ.
+            </p>
+          </div>
+        </div>
+        <DialogFooter>
+          <Button variant="outline" onClick={onClose} disabled={loading}>Hủy</Button>
+          <Button onClick={handle} disabled={loading}>
+            {loading ? "Đang phân công..." : "Xác nhận Dispatch"}
+          </Button>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
+  );
+}
+
+// ─────────────────────────────────────────────
+// 12. MODAL THANH TOÁN LƯƠNG
+// ─────────────────────────────────────────────
+interface PaySalaryModalProps {
+  open: boolean;
+  onClose: () => void;
+  users: any[];
+}
+
+export function PaySalaryModal({ open, onClose, users }: PaySalaryModalProps) {
+  const [loading, setLoading] = useState(false);
+  const total = users.reduce((sum, u) => sum + (u.salary || 0), 0);
+
+  const handle = async () => {
+    setLoading(true);
+    await new Promise(r => setTimeout(r, 1000));
+    setLoading(false);
+    toast.success(`Đã thanh toán tổng cộng ${new Intl.NumberFormat("vi-VN", { style: "currency", currency: "VND" }).format(total)} cho ${users.length} nhân viên`);
+    onClose();
+  };
+
+  return (
+    <Dialog open={open} onOpenChange={onClose}>
+      <DialogContent className="max-w-md">
+        <DialogHeader>
+          <DialogTitle className="flex items-center gap-2 text-success">
+            <Wallet className="h-5 w-5" /> Xác nhận thanh toán lương
+          </DialogTitle>
+        </DialogHeader>
+        <div className="space-y-4 py-2">
+          <div className="p-4 rounded-xl bg-success/5 border border-success/20 text-center">
+            <div className="text-sm text-muted-foreground uppercase tracking-wider">Tổng quỹ lương trả đợt này</div>
+            <div className="text-3xl font-bold text-success mt-1">
+              {new Intl.NumberFormat("vi-VN", { style: "currency", currency: "VND" }).format(total)}
+            </div>
+            <div className="text-xs text-muted-foreground mt-2">Dự kiến chi trả cho {users.length} nhân sự</div>
+          </div>
+          <p className="text-sm text-balance text-center text-muted-foreground">
+            Hệ thống sẽ thực hiện lệnh chuyển khoản hàng loạt đến tài khoản ngân hàng của từng nhân sự. Hành động này không thể hoàn tác.
+          </p>
+        </div>
+        <DialogFooter className="gap-2 sm:gap-0">
+          <Button variant="outline" onClick={onClose} disabled={loading} className="flex-1">Hủy</Button>
+          <Button onClick={handle} disabled={loading} className="flex-1 bg-success hover:bg-success/90">
+            {loading ? "Đang xử lý..." : "Xác nhận Chi trả"}
+          </Button>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
+  );
+}
+
+// ─────────────────────────────────────────────
+// 13. MODAL TÁI KÝ HỢP ĐỒNG
+// ─────────────────────────────────────────────
+interface RenewContractModalProps {
+  open: boolean;
+  onClose: () => void;
+  contractCode: string;
+}
+
+export function RenewContractModal({ open, onClose, contractCode }: RenewContractModalProps) {
+  const [loading, setLoading] = useState(false);
+  const [newTotal, setNewTotal] = useState("0");
+
+  const handle = async () => {
+    setLoading(true);
+    await new Promise(r => setTimeout(r, 600));
+    setLoading(false);
+    toast.success(`Đã tạo bản nháp tái ký cho HĐ ${contractCode}`);
+    onClose();
+  };
+
+  return (
+    <Dialog open={open} onOpenChange={onClose}>
+      <DialogContent className="max-w-md">
+        <DialogHeader>
+          <DialogTitle className="flex items-center gap-2">
+            <RefreshCw className="h-5 w-5 text-primary" /> Tái ký hợp đồng
+          </DialogTitle>
+        </DialogHeader>
+        <div className="space-y-4 py-4">
+          <div className="text-sm">
+            Bạn đang yêu cầu tạo bản nháp tái ký cho hợp đồng <span className="font-bold underline">{contractCode}</span>.
+          </div>
+          <div>
+            <label className="text-sm font-medium">Giá trị hợp đồng mới dự kiến (VND)</label>
+            <Input 
+              type="number" 
+              className="mt-1" 
+              placeholder="VD: 50000000" 
+              value={newTotal} 
+              onChange={(e) => setNewTotal(e.target.value)}
+            />
+          </div>
+          <p className="text-xs text-muted-foreground italic">
+            * Sau khi xác nhận, hệ thống sẽ sinh 1 hợp đồng nháp mới với các thông tin kế thừa và chuyển sang trạng thái "Thương thảo".
+          </p>
+        </div>
+        <DialogFooter>
+          <Button variant="outline" onClick={onClose} disabled={loading}>Hủy</Button>
+          <Button onClick={handle} disabled={loading}>
+            {loading ? "Đang tạo..." : "Xác nhận tạo nháp"}
+          </Button>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
+  );
+}
+
+// ─────────────────────────────────────────────
+// 14. MODAL CHUYỂN KHO
+// ─────────────────────────────────────────────
+export function TransferInventoryModal({ open, onClose }: { open: boolean, onClose: () => void }) {
+  const [loading, setLoading] = useState(false);
+  const [target, setTarget] = useState("");
+
+  const handle = async () => {
+    if (!target) { toast.error("Vui lòng nhập kho đích"); return; }
+    setLoading(true);
+    await new Promise(r => setTimeout(r, 800));
+    setLoading(false);
+    toast.success(`Lệnh chuyển kho đã được tạo — Đang chờ kho đích xác nhận`);
+    onClose();
+  };
+
+  return (
+    <Dialog open={open} onOpenChange={onClose}>
+      <DialogContent className="max-w-md">
+        <DialogHeader>
+          <DialogTitle className="flex items-center gap-2">
+            <ArrowRightLeft className="h-5 w-5 text-primary" /> Yêu cầu chuyển kho
+          </DialogTitle>
+        </DialogHeader>
+        <div className="space-y-4 py-4">
+          <div>
+            <label className="text-sm font-medium">Kho đích</label>
+            <Select value={target} onValueChange={setTarget}>
+              <SelectTrigger className="mt-1">
+                <SelectValue placeholder="Chọn kho nhận..." />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="Kho B - Hà Đông">Kho B - Hà Đông</SelectItem>
+                <SelectItem value="Kho C - Gia Lâm">Kho C - Gia Lâm</SelectItem>
+                <SelectItem value="Kho Mobile - Kỹ thuật">Kho Mobile - Xe kỹ thuật 01</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
+          <div>
+            <label className="text-sm font-medium">Ghi chú vận chuyển</label>
+            <Input className="mt-1" placeholder="Lý do chuyển..." />
+          </div>
+          <p className="text-xs text-muted-foreground">
+            * Sau khi xác nhận, số lượng vật tư sẽ được đưa vào trạng thái "Đang trung chuyển" và trừ khỏi kho hiện tại.
+          </p>
+        </div>
+        <DialogFooter>
+          <Button variant="outline" onClick={onClose} disabled={loading}>Hủy</Button>
+          <Button onClick={handle} disabled={loading}>
+            {loading ? "Đang xử lý..." : "Xác nhận chuyển"}
+          </Button>
         </DialogFooter>
       </DialogContent>
     </Dialog>

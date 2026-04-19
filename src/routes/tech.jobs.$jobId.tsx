@@ -4,6 +4,13 @@ import { useMemo, useState } from "react";
 import { AppShell } from "@/components/layout/AppShell";
 import { PageHeader } from "@/components/common/PageHeader";
 import { Card } from "@/components/ui/card";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { RouteMap } from "@/components/common/RouteMap";
@@ -14,7 +21,7 @@ import {
   priorityLabel,
   priorityVariant,
 } from "@/components/common/StatusBadge";
-import { mockJobs, getCustomer, getElevator, formatDateTime, optimizeRoute } from "@/lib/mock-data";
+import { mockJobs, getCustomer, getElevator, formatDateTime, optimizeRoute, mockInventory } from "@/lib/mock-data";
 import { useAppStore } from "@/lib/store";
 import {
   ArrowLeft,
@@ -27,6 +34,8 @@ import {
   Plus,
   Map as MapIcon,
   Navigation,
+  Package,
+  Trash2,
 } from "lucide-react";
 import { toast } from "sonner";
 
@@ -60,6 +69,27 @@ function TechJobDetail() {
   const [afterCount, setAfterCount] = useState<number>(job.afterPhotos.length);
   const [report, setReport] = useState<string>(job.report || "");
   const [status, setStatus] = useState<typeof job.status>(job.status);
+  const [usedParts, setUsedParts] = useState<{ id: string; qty: number }[]>([]);
+  const [selectedPartId, setSelectedPartId] = useState("");
+  
+  const addPart = () => {
+    if (!selectedPartId) return;
+    if (usedParts.find(p => p.id === selectedPartId)) {
+      toast.error("Vật tư này đã có trong danh sách");
+      return;
+    }
+    setUsedParts([...usedParts, { id: selectedPartId, qty: 1 }]);
+    setSelectedPartId("");
+  };
+
+  const updatePartQty = (id: string, qty: number) => {
+    if (qty < 1) return;
+    setUsedParts(usedParts.map(p => p.id === id ? { ...p, qty } : p));
+  };
+
+  const removePart = (id: string) => {
+    setUsedParts(usedParts.filter(p => p.id !== id));
+  };
 
   const route = useMemo(() => {
     const dayKey = job.scheduledFor.split("T")[0];
@@ -202,6 +232,62 @@ function TechJobDetail() {
                 </div>
               </div>
             </div>
+          </Card>
+
+          {/* Parts Used */}
+          <Card className="p-5">
+            <div className="flex items-center justify-between mb-4">
+              <div className="flex items-center gap-2">
+                <Package className="h-4 w-4" />
+                <h3 className="font-semibold">Vật tư thay thế</h3>
+              </div>
+            </div>
+            <div className="flex items-center gap-2 mb-4">
+              <Select value={selectedPartId} onValueChange={setSelectedPartId}>
+                <SelectTrigger className="flex-1">
+                  <SelectValue placeholder="Chọn vật tư từ kho..." />
+                </SelectTrigger>
+                <SelectContent>
+                  {mockInventory.map(item => (
+                    <SelectItem key={item.id} value={item.id}>
+                      {item.name} ({item.stock} {item.unit} sẵn có)
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+              <Button onClick={addPart} variant="secondary">Thêm</Button>
+            </div>
+            
+            {usedParts.length > 0 ? (
+              <div className="border rounded-lg overflow-hidden">
+                {usedParts.map((p, idx) => {
+                  const part = mockInventory.find(i => i.id === p.id);
+                  if (!part) return null;
+                  return (
+                    <div key={p.id} className={`flex items-center justify-between p-3 ${idx < usedParts.length - 1 ? 'border-b' : ''}`}>
+                      <div className="min-w-0 flex-1">
+                        <div className="font-medium text-sm truncate">{part.name}</div>
+                        <div className="text-xs text-muted-foreground">{part.code}</div>
+                      </div>
+                      <div className="flex items-center gap-3">
+                        <div className="flex items-center gap-2">
+                          <Button size="icon" variant="outline" className="h-7 w-7" onClick={() => updatePartQty(p.id, p.qty - 1)}>-</Button>
+                          <span className="w-6 text-center text-sm font-medium">{p.qty}</span>
+                          <Button size="icon" variant="outline" className="h-7 w-7" onClick={() => updatePartQty(p.id, p.qty + 1)}>+</Button>
+                        </div>
+                        <Button size="icon" variant="ghost" className="h-7 w-7 text-destructive hover:text-destructive hover:bg-destructive/10" onClick={() => removePart(p.id)}>
+                          <Trash2 className="h-4 w-4" />
+                        </Button>
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            ) : (
+              <div className="text-sm text-muted-foreground text-center py-4 bg-muted/30 rounded border border-dashed">
+                Chưa thêm vật tư nào.
+              </div>
+            )}
           </Card>
 
           {/* Report + action buttons */}

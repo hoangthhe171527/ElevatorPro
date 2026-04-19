@@ -13,8 +13,8 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { StatusBadge, elevatorStatusLabel, elevatorStatusVariant } from "@/components/common/StatusBadge";
-import { mockElevators, mockJobs, getCustomer, getProject, formatDate, formatDateTime, type IssueReport } from "@/lib/mock-data";
-import { useAppStore } from "@/lib/store";
+import { mockElevators, mockJobs, mockIssues, getCustomer, getProject, getUser, formatDate, formatDateTime, type IssueReport } from "@/lib/mock-data";
+import { useAppStore, useCurrentPermissions } from "@/lib/store";
 import {
   Building2,
   AlertTriangle,
@@ -79,16 +79,22 @@ function QRPage() {
   const project = getProject(elevator.projectId);
   const customer = project ? getCustomer(project.customerId) : undefined;
   const history = mockJobs
-    .filter((j) => j.elevatorId === elevator.id)
+    .filter((j) => j.elevatorId === elevator.id && j.status === "completed")
     .sort((a, b) => b.scheduledFor.localeCompare(a.scheduledFor))
     .slice(0, 5);
+
+  const activeJob = mockJobs
+    .filter((j) => j.elevatorId === elevator.id && (j.status === "pending" || j.status === "scheduled" || j.status === "in_progress") && (j.type === "repair" || j.type === "maintenance"))
+    .sort((a, b) => b.scheduledFor.localeCompare(a.scheduledFor))[0];
+
+  const assignedTech = activeJob && activeJob.assignedTo ? getUser(activeJob.assignedTo) : null;
 
   const [step, setStep] = useState<Step>("home");
   const [historyOpen, setHistoryOpen] = useState(false);
   
-  // App context (to detect internal staff)
-  const role = useAppStore(s => s.role);
-  const isStaff = role === "admin" || role === "technician";
+  const permissions = useCurrentPermissions();
+  const isStaff = !permissions.includes("customer");
+  const isAdmin = permissions.some(p => ["director", "maintenance_mgmt", "install_mgmt", "accounting", "hr_admin", "sales"].includes(p));
 
   // Report form state
   const [issueType, setIssueType] = useState("");
@@ -179,8 +185,8 @@ function QRPage() {
             {isStaff && (
               <div className="mt-4">
                 <Link 
-                  to={role === "admin" ? "/admin/elevators/$elevatorId" : "/tech"} 
-                  params={role === "admin" ? { elevatorId: elevator.id } : {}}
+                  to={isAdmin ? "/admin/elevators/$elevatorId" : "/tech"} 
+                  params={isAdmin ? { elevatorId: elevator.id } : {}}
                 >
                   <div className="flex items-center gap-3 p-4 rounded-xl bg-orange-500 text-white shadow-md hover:opacity-90 transition-opacity">
                     <Shield className="h-6 w-6 shrink-0" />
@@ -282,6 +288,63 @@ function QRPage() {
               <p className="text-sm text-muted-foreground">Thang {elevator.code} · {elevator.building}</p>
             </div>
 
+            {activeJob && (
+              <Card className="p-4 bg-primary/5 border-primary/20">
+                <div className="flex items-start gap-3 mb-3">
+                  <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-primary/20 text-primary">
+                    <Wrench className="h-5 w-5" />
+                  </div>
+                  <div>
+                    <h3 className="font-bold text-primary">Đã ghi nhận sự cố!</h3>
+                    <p className="text-sm text-muted-foreground leading-tight mt-0.5">Thang máy này đang trong quá trình được xử lý.</p>
+                  </div>
+                </div>
+                
+                <div className="space-y-3 relative before:absolute before:inset-0 before:ml-[1.125rem] before:-translate-x-px md:before:mx-auto md:before:translate-x-0 before:h-full before:w-0.5 before:bg-gradient-to-b before:from-transparent before:via-primary/20 before:to-transparent">
+                  <div className="relative flex items-center justify-between md:justify-normal md:odd:flex-row-reverse group is-active">
+                    <div className="flex items-center justify-center w-6 h-6 rounded-full border-2 border-white bg-success text-white shadow shrink-0 md:order-1 md:group-odd:-translate-x-1/2 md:group-even:translate-x-1/2 z-10">
+                      <CheckCircle2 className="h-3 w-3" />
+                    </div>
+                    <div className="w-[calc(100%-2.5rem)] md:w-[calc(50%-1.5rem)] ml-3 md:ml-0 p-3 rounded bg-white shadow-sm border text-sm">
+                      <div className="font-semibold text-primary">Tiếp nhận yêu cầu</div>
+                      <div className="text-xs text-muted-foreground">Hệ thống đã nhận tin báo.</div>
+                    </div>
+                  </div>
+                  
+                  <div className="relative flex items-center justify-between md:justify-normal md:odd:flex-row-reverse group is-active">
+                    <div className={`flex items-center justify-center w-6 h-6 rounded-full border-2 border-white ${activeJob.status === "scheduled" || activeJob.status === "in_progress" ? "bg-success text-white" : "bg-muted text-muted-foreground"} shadow shrink-0 md:order-1 md:group-odd:-translate-x-1/2 md:group-even:translate-x-1/2 z-10`}>
+                      {(activeJob.status === "scheduled" || activeJob.status === "in_progress") ? <CheckCircle2 className="h-3 w-3" /> : <div className="h-2 w-2 rounded-full bg-current" />}
+                    </div>
+                    <div className="w-[calc(100%-2.5rem)] md:w-[calc(50%-1.5rem)] ml-3 md:ml-0 p-3 rounded bg-white shadow-sm border text-sm">
+                      <div className={`font-semibold ${activeJob.assignedTo ? "text-primary" : "text-muted-foreground"}`}>Bố trí nhân sự</div>
+                      <div className="text-xs text-muted-foreground">
+                        {activeJob.assignedTo ? `Đã phân công: ${assignedTech?.name || 'Kỹ thuật viên'}` : 'Đang chờ Admin phân công thợ.'}
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="relative flex items-center justify-between md:justify-normal md:odd:flex-row-reverse group is-active">
+                     <div className={`flex items-center justify-center w-6 h-6 rounded-full border-2 border-white ${activeJob.status === "in_progress" ? "bg-primary text-white" : "bg-muted text-muted-foreground"} shadow shrink-0 md:order-1 md:group-odd:-translate-x-1/2 md:group-even:translate-x-1/2 z-10`}>
+                      {activeJob.status === "in_progress" ? <Cog className="h-3 w-3 animate-spin duration-3000" /> : <div className="h-2 w-2 rounded-full bg-current" />}
+                    </div>
+                    <div className="w-[calc(100%-2.5rem)] md:w-[calc(50%-1.5rem)] ml-3 md:ml-0 p-3 rounded bg-white shadow-sm border text-sm">
+                      <div className={`font-semibold ${activeJob.status === "in_progress" ? "text-primary" : "text-muted-foreground"}`}>Đang xử lý</div>
+                      <div className="text-xs text-muted-foreground">
+                        {activeJob.status === "in_progress" ? "Thợ đang làm việc tại hiện trường." : 'Chờ thợ di chuyển tới nơi.'}
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                <Button variant="outline" className="w-full mt-4" onClick={() => setStep("home")}>
+                  Quay lại
+                </Button>
+              </Card>
+            )}
+
+            {!activeJob && (
+              <>
+
             {/* Urgent banner */}
             {isUrgent && (
               <div className="flex items-center gap-3 p-4 rounded-xl bg-destructive text-white">
@@ -363,6 +426,8 @@ function QRPage() {
             <p className="text-center text-xs text-muted-foreground">
               Hoặc gọi thẳng <a href="tel:19001234" className="text-destructive font-semibold">1900 1234</a> nếu khẩn cấp
             </p>
+            </>
+            )}
           </div>
         )}
 

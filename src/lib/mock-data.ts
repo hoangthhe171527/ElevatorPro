@@ -2,7 +2,17 @@
 // All entities are kept simple and string-id'd so they can be swapped with
 // a real backend later without changing UI code.
 
-export type Role = "admin" | "technician" | "customer";
+export type Permission = 
+  | "director"             // Ban Giám đốc (Full quyền)
+  | "sales"                // Kinh doanh (Thang mới)
+  | "sales_maintenance"    // Kinh doanh bảo trì
+  | "tech_survey"          // Kỹ thuật - Khảo sát
+  | "install_mgmt"         // Kỹ thuật - Quản lý lắp đặt
+  | "maintenance_mgmt"     // Kỹ thuật - Quản lý bảo trì
+  | "accounting"           // Kế toán
+  | "hr_admin"             // Hành chính nhân sự
+  | "field_tech"           // Kỹ thuật viên hiện trường
+  | "customer";            // Khách hàng
 
 export type LeadStatus = "new" | "contacted" | "quoted" | "negotiating" | "won" | "lost";
 export type ContractStatus = "active" | "expiring" | "expired" | "draft";
@@ -20,7 +30,7 @@ export interface Tenant {
 
 export interface TenantMembership {
   tenantId: string;
-  role: Role; // role of the user in this tenant
+  permissions: Permission[];
 }
 
 export interface User {
@@ -48,6 +58,49 @@ export interface Customer {
 }
 
 // New model: Project (Công trình)
+export type ProjectStage = 
+  | "survey"          // Khảo sát & Ký HĐ
+  | "design"          // Bản vẽ & Kỹ thuật
+  | "procurement"     // Đặt hàng nhà máy
+  | "in_transit"      // Hàng đang về
+  | "mechanic_install"// Thi công cơ khí
+  | "electric_install"// Thi công điện
+  | "inspection"      // Kiểm định an toàn
+  | "handover";       // Bàn giao
+
+export type RequestType = "material" | "budget" | "project_advance" | "completion";
+export type RequestStatus = "pending" | "approved" | "rejected";
+
+export interface ApprovalRequest {
+  tenantId: string;
+  id: string;
+  type: RequestType;
+  title: string;
+  description: string;
+  requestedBy: string; // User ID
+  requestedAt: string;
+  status: RequestStatus;
+  urgency: "normal" | "high" | "critical";
+  amount?: number; // Optional money 
+  targetId?: string; // ID of the related Project/Job/Contract
+}
+
+export const PROJECT_STAGES: ProjectStage[] = [
+  "survey", "design", "procurement", "in_transit", 
+  "mechanic_install", "electric_install", "inspection", "handover"
+];
+
+export const PROJECT_STAGE_LABELS: Record<ProjectStage, string> = {
+  survey: "Khảo sát",
+  design: "Bản vẽ",
+  procurement: "Đặt hàng",
+  in_transit: "Hàng về",
+  mechanic_install: "Lắp cơ khí",
+  electric_install: "Lắp điện",
+  inspection: "Kiểm định",
+  handover: "Bàn giao",
+};
+
 export interface Project {
   tenantId: string;
   id: string;
@@ -57,6 +110,7 @@ export interface Project {
   startDate: string;
   endDate?: string;
   status: "planning" | "in_progress" | "completed";
+  stage: ProjectStage;
 }
 
 export const mockProjects: Project[] = [
@@ -68,6 +122,7 @@ export const mockProjects: Project[] = [
     customerId: "c-1",
     startDate: "2024-01-01",
     status: "in_progress",
+    stage: "electric_install",
   },
   {
     tenantId: "t-1",
@@ -77,6 +132,7 @@ export const mockProjects: Project[] = [
     customerId: "c-2",
     startDate: "2023-11-01",
     status: "completed",
+    stage: "handover",
   },
   {
     tenantId: "t-1",
@@ -86,6 +142,7 @@ export const mockProjects: Project[] = [
     customerId: "c-3",
     startDate: "2024-06-01",
     status: "in_progress",
+    stage: "mechanic_install",
   },
   {
     tenantId: "t-1",
@@ -95,6 +152,7 @@ export const mockProjects: Project[] = [
     customerId: "c-4",
     startDate: "2025-01-10",
     status: "in_progress",
+    stage: "in_transit",
   },
 ];
 
@@ -115,6 +173,15 @@ export interface Lead {
   customerId?: string; // optional link to existing Customer
 }
 
+export interface PaymentMilestone {
+  id: string;
+  name: string;
+  amount: number;
+  dueDate: string;
+  status: "pending" | "paid" | "overdue";
+  paidDate?: string;
+}
+
 export interface Contract {
   tenantId: string;
   id: string;
@@ -131,6 +198,7 @@ export interface Contract {
   status: ContractStatus;
   items: string[];
   signedAt: string;
+  milestones: PaymentMilestone[];
 }
 
 export type LifecyclePhase =
@@ -214,16 +282,28 @@ export interface IssueReport {
 // ---------- USERS ----------
 // ---------- TENANTS ----------
 export const mockTenants: Tenant[] = [
-  { id: "t-1", name: "Lift Service Co.", domain: "liftservice.vn" },
-  { id: "t-2", name: "Thang Máy Ánh Dương", domain: "anhduonglift.com.vn" }
+  { id: "t-1", name: "CÔNG TY LỚN (Chuyên môn hóa)" },
+  { id: "t-2", name: "CÔNG TY NHỎ (Kiêm nhiệm)" }
 ];
 
 // ---------- USERS ----------
 export const mockUsers: User[] = [
-  { id: "u-admin", name: "Nguyễn Quốc Khánh", email: "admin@elevatorpro.vn", phone: "0901 234 567", memberships: [{ tenantId: "t-1", role: "admin" }, { tenantId: "t-2", role: "admin" }] },
-  { id: "u-tech-1", name: "Trần Văn Hùng", email: "hung.tv@elevatorpro.vn", phone: "0912 345 678", memberships: [{ tenantId: "t-1", role: "technician" }] },
-  { id: "u-tech-2", name: "Lê Minh Tuấn", email: "tuan.lm@elevatorpro.vn", phone: "0913 456 789", memberships: [{ tenantId: "t-1", role: "technician" }, { tenantId: "t-2", role: "technician" }] },
-  { id: "u-cus-1", name: "Phạm Thị Hoa", email: "hoa.pham@vinhome.vn", phone: "0987 654 321", memberships: [{ tenantId: "t-1", role: "customer" }] },
+  // --- T-1: CÔNG TY LỚN (Phân quyền chi tiết, chuyên môn hóa) ---
+  { id: "u-director-1", name: "Nguyễn Tổng (Giám đốc)", email: "director@bigco.vn", phone: "0901 111 111", memberships: [{ tenantId: "t-1", permissions: ["director"] }] },
+  { id: "u-sales-1", name: "Trần Trưởng Phòng Sales", email: "sales@bigco.vn", phone: "0901 222 222", memberships: [{ tenantId: "t-1", permissions: ["sales", "sales_maintenance"] }] },
+  { id: "u-mgmt-install-1", name: "Lê Quản Lý Lắp Đặt", email: "install@bigco.vn", phone: "0901 333 333", memberships: [{ tenantId: "t-1", permissions: ["install_mgmt"] }] },
+  { id: "u-mgmt-maint-1", name: "Phạm Quản Lý Bảo Trì", email: "maintenance@bigco.vn", phone: "0901 444 444", memberships: [{ tenantId: "t-1", permissions: ["maintenance_mgmt"] }] },
+  { id: "u-accounting-1", name: "Lý Kế Toán Trưởng", email: "account@bigco.vn", phone: "0901 555 555", memberships: [{ tenantId: "t-1", permissions: ["accounting"] }] },
+  { id: "u-hr-1", name: "Võ Hành Chính Nhân Sự", email: "hr@bigco.vn", phone: "0901 666 666", memberships: [{ tenantId: "t-1", permissions: ["hr_admin"] }] },
+  { id: "u-tech-1", name: "Đinh Thợ Bảo Trì Hiện Trường", email: "tech1@bigco.vn", phone: "0901 777 777", memberships: [{ tenantId: "t-1", permissions: ["field_tech"] }] },
+  
+  // --- T-2: CÔNG TY NHỎ (Một người ôm nhiều việc) ---
+  { id: "u-director-2", name: "Lâm Sếp Đa Năng", email: "boss@smallco.vn", phone: "0902 111 111", memberships: [{ tenantId: "t-2", permissions: ["director", "sales", "hr_admin", "install_mgmt", "accounting"] }] },
+  { id: "u-tech-all-2", name: "Hoàng Kỹ Sư Đa Năng", email: "tech@smallco.vn", phone: "0902 222 222", memberships: [{ tenantId: "t-2", permissions: ["maintenance_mgmt", "tech_survey", "field_tech"] }] },
+  { id: "u-accounting-2", name: "Chị Lan Kế Toán kiêm HC", email: "lan@smallco.vn", phone: "0902 333 333", memberships: [{ tenantId: "t-2", permissions: ["accounting", "hr_admin"] }] },
+
+  // --- Khách hàng (Dùng chung cho demo dễ) ---
+  { id: "u-cus-1", name: "Hoàng Văn Khách Hàng (Portal)", email: "customer@gmail.com", phone: "0987 654 321", memberships: [{ tenantId: "t-1", permissions: ["customer"] }, { tenantId: "t-2", permissions: ["customer"] }] },
 ];
 
 // ---------- CUSTOMERS ----------
@@ -260,20 +340,21 @@ const _mockLeads: Omit<Lead, "tenantId">[] = [
 
 // ---------- CONTRACTS ----------
 const _mockContracts: Omit<Contract, "tenantId">[] = [
-  { id: "ct-1", code: "HD-2024-0142", customerId: "c-1", type: "maintenance", value: 240000000, paid: 240000000, startDate: "2024-04-01", endDate: "2026-04-30", status: "expiring", items: ["Bảo trì 4 thang Mitsubishi định kỳ 1 tháng/lần"], signedAt: "2024-03-20" },
-  { id: "ct-2", code: "HD-2023-0218", customerId: "c-2", type: "install", value: 3600000000, paid: 3600000000, startDate: "2023-11-15", endDate: "2025-11-15", status: "active", items: ["Lắp đặt 6 thang máy Otis 21 tầng"], signedAt: "2023-11-10" },
-  { id: "ct-3", code: "HD-2024-0301", customerId: "c-3", type: "maintenance", value: 162000000, paid: 81000000, startDate: "2024-07-01", endDate: "2026-06-30", status: "active", items: ["Bảo trì 3 thang khách sạn"], signedAt: "2024-06-25" },
-  { id: "ct-4", code: "HD-2025-0019", customerId: "c-4", type: "install", value: 320000000, paid: 160000000, startDate: "2025-01-15", endDate: "2027-01-15", status: "active", items: ["Lắp 1 thang gia đình 4 tầng"], signedAt: "2025-01-12" },
-  { id: "ct-5", code: "HD-2023-0156", customerId: "c-5", type: "maintenance", value: 270000000, paid: 270000000, startDate: "2023-09-01", endDate: "2026-08-31", status: "active", items: ["Bảo trì 5 thang Kone"], signedAt: "2023-08-28" },
-  { id: "ct-6", code: "HD-2024-0420", customerId: "c-6", type: "maintenance", value: 432000000, paid: 216000000, startDate: "2024-10-01", endDate: "2026-09-30", status: "active", items: ["Bảo trì 8 thang Schindler"], signedAt: "2024-09-20" },
-  { id: "ct-7", code: "HD-2025-0048", customerId: "c-7", type: "install", value: 290000000, paid: 90000000, startDate: "2025-03-01", endDate: "2027-03-01", status: "active", items: ["Lắp 1 thang gia đình"], signedAt: "2025-02-25" },
-  { id: "ct-8", code: "HD-2024-0312", customerId: "c-8", type: "maintenance", value: 216000000, paid: 216000000, startDate: "2024-05-01", endDate: "2026-04-30", status: "expiring", items: ["Bảo trì 4 thang bệnh viện ưu tiên 24/7"], signedAt: "2024-04-22" },
-  { id: "ct-9", code: "HD-2023-0089", customerId: "c-9", type: "maintenance", value: 378000000, paid: 378000000, startDate: "2023-06-01", endDate: "2026-05-31", status: "active", items: ["Bảo trì 7 thang trường học"], signedAt: "2023-05-25" },
-  { id: "ct-10", code: "HD-2022-0410", customerId: "c-10", type: "maintenance", value: 864000000, paid: 720000000, startDate: "2023-01-01", endDate: "2025-12-31", status: "expiring", items: ["Bảo trì 12 thang Lotte"], signedAt: "2022-12-15" },
-  { id: "ct-11", code: "HD-2025-0072", customerId: "c-11", type: "install", value: 280000000, paid: 140000000, startDate: "2025-04-01", endDate: "2027-04-01", status: "active", items: ["Lắp 1 thang gia đình"], signedAt: "2025-03-15" },
-  { id: "ct-12", code: "HD-2024-0501", customerId: "c-12", type: "maintenance", value: 486000000, paid: 243000000, startDate: "2024-08-01", endDate: "2026-07-31", status: "active", items: ["Bảo trì 9 thang Ecopark"], signedAt: "2024-07-25" },
-  { id: "ct-13", code: "HD-2026-0008", customerId: "c-2", type: "repair", value: 85000000, paid: 0, startDate: "2026-04-10", endDate: "2026-05-10", status: "active", items: ["Thay biến tần thang số 3"], signedAt: "2026-04-08" },
-  { id: "ct-14", code: "HD-2026-0012", customerId: "c-1", type: "maintenance", value: 264000000, paid: 0, startDate: "2026-05-01", endDate: "2028-04-30", status: "draft", items: ["Tái ký bảo trì 4 thang"], signedAt: "" },
+  { id: "ct-1", code: "HD-2024-0142", customerId: "c-1", type: "maintenance", value: 240000000, paid: 240000000, startDate: "2024-04-01", endDate: "2026-04-30", status: "expiring", items: ["Bảo trì 4 thang Mitsubishi định kỳ 1 tháng/lần"], signedAt: "2024-03-20", milestones: [] },
+  { id: "ct-2", code: "HD-2023-0218", customerId: "c-2", type: "install", value: 3600000000, paid: 3600000000, startDate: "2023-11-15", endDate: "2025-11-15", status: "active", items: ["Lắp đặt 6 thang máy Otis 21 tầng"], signedAt: "2023-11-10", milestones: [] },
+  { id: "ct-4", code: "HD-2025-0019", customerId: "c-4", type: "install", value: 320000000, paid: 160000000, startDate: "2025-01-15", endDate: "2027-01-15", status: "active", items: ["Lắp 1 thang gia đình 4 tầng"], signedAt: "2025-01-12",
+    milestones: [
+      { id: "ms-1", name: "Tạm ứng 30%", amount: 96000000, dueDate: "2025-01-15", status: "paid", paidDate: "2025-01-16" },
+      { id: "ms-2", name: "Hàng về (Cơ khí) 50%", amount: 160000000, dueDate: "2025-04-10", status: "pending" },
+      { id: "ms-3", name: "Quyết toán 20%", amount: 64000000, dueDate: "2025-06-01", status: "pending" },
+    ]
+  },
+  { id: "ct-7", code: "HD-2025-0048", customerId: "c-7", type: "install", value: 290000000, paid: 90000000, startDate: "2025-03-01", endDate: "2027-03-01", status: "active", items: ["Lắp 1 thang gia đình"], signedAt: "2025-02-25",
+    milestones: [
+      { id: "ms-4", name: "Tạm ứng HĐ", amount: 90000000, dueDate: "2025-03-01", status: "paid", paidDate: "2025-03-02" },
+      { id: "ms-5", name: "Giai đoạn thi công (Chờ thu)", amount: 120000000, dueDate: "2026-04-18", status: "overdue" },
+    ]
+  },
 ];
 
 // ---------- ELEVATORS ----------
@@ -337,13 +418,20 @@ const _mockIssues: Omit<IssueReport, "tenantId">[] = [
 ];
 
 
-export const mockCustomers = _mockCustomers.map(x => ({...x, tenantId: 't-1'}) as Customer);
-export const mockLeads = _mockLeads.map(x => ({...x, tenantId: 't-1'}) as Lead);
-export const mockContracts = _mockContracts.map(x => ({...x, tenantId: 't-1'}) as Contract);
-export const mockElevators = _mockElevators.map(x => ({...x, tenantId: 't-1'}) as Elevator);
-export const mockJobs = _mockJobs.map(x => ({...x, tenantId: 't-1'}) as Job);
-export const mockInventory = _mockInventory.map(x => ({...x, tenantId: 't-1'}) as InventoryItem);
-export const mockIssues = _mockIssues.map(x => ({...x, tenantId: 't-1'}) as IssueReport);
+export const mockCustomers = _mockCustomers.map((x, i) => ({...x, tenantId: i < 8 ? 't-1' : 't-2'}) as Customer);
+export const mockLeads = _mockLeads.map((x, i) => ({...x, tenantId: i < 8 ? 't-1' : 't-2'}) as Lead);
+export const mockContracts = _mockContracts.map((x, i) => ({...x, tenantId: i < 3 ? 't-1' : 't-2'}) as Contract);
+export const mockElevators = _mockElevators.map((x, i) => ({...x, tenantId: i < 10 ? 't-1' : 't-2'}) as Elevator);
+export const mockJobs = _mockJobs.map((x, i) => ({...x, tenantId: i < 8 ? 't-1' : 't-2'}) as Job);
+export const mockInventory = _mockInventory.map((x, i) => ({...x, tenantId: i < 8 ? 't-1' : 't-2'}) as InventoryItem);
+export const mockIssues = _mockIssues.map((x, i) => ({...x, tenantId: 't-1'}) as IssueReport);
+
+export const mockRequests: ApprovalRequest[] = [
+  { tenantId: "t-1", id: "req-1", type: "material", title: "Yêu cầu tủ điện Mitsubishi", description: "Cần gấp cho dự án Vinhomes block A1", requestedBy: "u-tech-1", requestedAt: "2026-04-18T10:00:00", status: "approved", urgency: "high", targetId: "p-1" },
+  { tenantId: "t-1", id: "req-2", type: "budget", title: "Chi phí thuê cẩu 20 tấn", description: "Vận chuyển máy kéo lên sân thượng tòa SST", requestedBy: "u-mgmt-install-1", requestedAt: "2026-04-20T08:30:00", status: "pending", urgency: "critical", amount: 15000000, targetId: "p-2" },
+  { tenantId: "t-1", id: "req-3", type: "completion", title: "Báo cáo hoàn tất electric_install", description: "Đã đấu nối xong 4 tủ điện", requestedBy: "u-tech-1", requestedAt: "2026-04-20T14:20:00", status: "pending", urgency: "normal", targetId: "p-1" },
+  { tenantId: "t-2", id: "req-4", type: "project_advance", title: "Xin duyệt giai đoạn Ray", description: "Cơ khí đã xong ray cho anh An", requestedBy: "u-tech-all-2", requestedAt: "2026-04-19T11:00:00", status: "pending", urgency: "normal", targetId: "p-4" },
+];
 
 // Helper getters
 export function getCustomer(id: string) { return mockCustomers.find(c => c.id === id); }
@@ -356,7 +444,6 @@ export function getProject(id: string) { return mockProjects.find(p => p.id === 
 export function getLeadsByCustomer(customerId: string) { return mockLeads.filter(l => l.customerId === customerId); }
 export function getContractsByElevator(elevatorId: string) { return mockContracts.filter(c => c.elevatorId === elevatorId); }
 
-// Create Issue Report + auto repair job
 export function createIssueReport(elevatorId: string, description: string) {
   const elevator = getElevator(elevatorId);
   if (!elevator) return null;
@@ -384,7 +471,7 @@ export function createIssueReport(elevatorId: string, description: string) {
     elevatorId,
     projectId: elevator.projectId,
     contractId: undefined,
-    assignedTo: "u-tech-1",
+    assignedTo: "", // Admin will dispatch this
     priority: "high",
     status: "pending",
     scheduledFor: new Date().toISOString(),
@@ -394,6 +481,27 @@ export function createIssueReport(elevatorId: string, description: string) {
   };
   mockJobs.push(newJob);
   return newReport;
+}
+
+export function advanceProjectStage(projectId: string) {
+  const proj = mockProjects.find(p => p.id === projectId);
+  if (!proj) return;
+  const currentIndex = PROJECT_STAGES.indexOf(proj.stage);
+  if (currentIndex < PROJECT_STAGES.length - 1) {
+    proj.stage = PROJECT_STAGES[currentIndex + 1];
+    if (proj.stage === "handover") proj.status = "completed";
+  }
+}
+
+export function markMilestonePaid(contractId: string, milestoneId: string) {
+  const contract = mockContracts.find(c => c.id === contractId);
+  if (!contract) return;
+  const ms = contract.milestones.find(m => m.id === milestoneId);
+  if (ms && ms.status !== "paid") {
+    ms.status = "paid";
+    ms.paidDate = new Date().toISOString().split("T")[0];
+    contract.paid += ms.amount;
+  }
 }
 
 

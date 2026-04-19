@@ -19,8 +19,12 @@ import { Route as QrElevatorIdRouteImport } from './routes/qr.$elevatorId'
 import { Route as PortalIssuesRouteImport } from './routes/portal.issues'
 import { Route as PortalContractsRouteImport } from './routes/portal.contracts'
 import { Route as AdminReportsRouteImport } from './routes/admin.reports'
+import { Route as AdminProjectsRouteImport } from './routes/admin.projects'
 import { Route as AdminLeadsRouteImport } from './routes/admin.leads'
+import { Route as AdminHrRouteImport } from './routes/admin.hr'
 import { Route as AdminContractsRouteImport } from './routes/admin.contracts'
+import { Route as AdminApprovalsRouteImport } from './routes/admin.approvals'
+import { Route as AdminAccountingRouteImport } from './routes/admin.accounting'
 import { Route as TechJobsIndexRouteImport } from './routes/tech.jobs.index'
 import { Route as PortalElevatorsIndexRouteImport } from './routes/portal.elevators.index'
 import { Route as AdminJobsIndexRouteImport } from './routes/admin.jobs.index'
@@ -84,14 +88,34 @@ const AdminReportsRoute = AdminReportsRouteImport.update({
   path: '/admin/reports',
   getParentRoute: () => rootRouteImport,
 } as any)
+const AdminProjectsRoute = AdminProjectsRouteImport.update({
+  id: '/admin/projects',
+  path: '/admin/projects',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const AdminLeadsRoute = AdminLeadsRouteImport.update({
   id: '/admin/leads',
   path: '/admin/leads',
   getParentRoute: () => rootRouteImport,
 } as any)
+const AdminHrRoute = AdminHrRouteImport.update({
+  id: '/admin/hr',
+  path: '/admin/hr',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const AdminContractsRoute = AdminContractsRouteImport.update({
   id: '/admin/contracts',
   path: '/admin/contracts',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AdminApprovalsRoute = AdminApprovalsRouteImport.update({
+  id: '/admin/approvals',
+  path: '/admin/approvals',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AdminAccountingRoute = AdminAccountingRouteImport.update({
+  id: '/admin/accounting',
+  path: '/admin/accounting',
   getParentRoute: () => rootRouteImport,
 } as any)
 const TechJobsIndexRoute = TechJobsIndexRouteImport.update({
@@ -161,8 +185,12 @@ const AdminElevatorsElevatorIdQrRoute =
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
+  '/admin/accounting': typeof AdminAccountingRoute
+  '/admin/approvals': typeof AdminApprovalsRoute
   '/admin/contracts': typeof AdminContractsRoute
+  '/admin/hr': typeof AdminHrRoute
   '/admin/leads': typeof AdminLeadsRoute
+  '/admin/projects': typeof AdminProjectsRoute
   '/admin/reports': typeof AdminReportsRoute
   '/portal/contracts': typeof PortalContractsRoute
   '/portal/issues': typeof PortalIssuesRoute
@@ -187,8 +215,12 @@ export interface FileRoutesByFullPath {
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/admin/accounting': typeof AdminAccountingRoute
+  '/admin/approvals': typeof AdminApprovalsRoute
   '/admin/contracts': typeof AdminContractsRoute
+  '/admin/hr': typeof AdminHrRoute
   '/admin/leads': typeof AdminLeadsRoute
+  '/admin/projects': typeof AdminProjectsRoute
   '/admin/reports': typeof AdminReportsRoute
   '/portal/contracts': typeof PortalContractsRoute
   '/portal/issues': typeof PortalIssuesRoute
@@ -214,8 +246,12 @@ export interface FileRoutesByTo {
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
+  '/admin/accounting': typeof AdminAccountingRoute
+  '/admin/approvals': typeof AdminApprovalsRoute
   '/admin/contracts': typeof AdminContractsRoute
+  '/admin/hr': typeof AdminHrRoute
   '/admin/leads': typeof AdminLeadsRoute
+  '/admin/projects': typeof AdminProjectsRoute
   '/admin/reports': typeof AdminReportsRoute
   '/portal/contracts': typeof PortalContractsRoute
   '/portal/issues': typeof PortalIssuesRoute
@@ -242,8 +278,12 @@ export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
   fullPaths:
     | '/'
+    | '/admin/accounting'
+    | '/admin/approvals'
     | '/admin/contracts'
+    | '/admin/hr'
     | '/admin/leads'
+    | '/admin/projects'
     | '/admin/reports'
     | '/portal/contracts'
     | '/portal/issues'
@@ -268,8 +308,12 @@ export interface FileRouteTypes {
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
+    | '/admin/accounting'
+    | '/admin/approvals'
     | '/admin/contracts'
+    | '/admin/hr'
     | '/admin/leads'
+    | '/admin/projects'
     | '/admin/reports'
     | '/portal/contracts'
     | '/portal/issues'
@@ -294,8 +338,12 @@ export interface FileRouteTypes {
   id:
     | '__root__'
     | '/'
+    | '/admin/accounting'
+    | '/admin/approvals'
     | '/admin/contracts'
+    | '/admin/hr'
     | '/admin/leads'
+    | '/admin/projects'
     | '/admin/reports'
     | '/portal/contracts'
     | '/portal/issues'
@@ -321,8 +369,12 @@ export interface FileRouteTypes {
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
+  AdminAccountingRoute: typeof AdminAccountingRoute
+  AdminApprovalsRoute: typeof AdminApprovalsRoute
   AdminContractsRoute: typeof AdminContractsRoute
+  AdminHrRoute: typeof AdminHrRoute
   AdminLeadsRoute: typeof AdminLeadsRoute
+  AdminProjectsRoute: typeof AdminProjectsRoute
   AdminReportsRoute: typeof AdminReportsRoute
   PortalContractsRoute: typeof PortalContractsRoute
   PortalIssuesRoute: typeof PortalIssuesRoute
@@ -417,6 +469,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AdminReportsRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/admin/projects': {
+      id: '/admin/projects'
+      path: '/admin/projects'
+      fullPath: '/admin/projects'
+      preLoaderRoute: typeof AdminProjectsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/admin/leads': {
       id: '/admin/leads'
       path: '/admin/leads'
@@ -424,11 +483,32 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AdminLeadsRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/admin/hr': {
+      id: '/admin/hr'
+      path: '/admin/hr'
+      fullPath: '/admin/hr'
+      preLoaderRoute: typeof AdminHrRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/admin/contracts': {
       id: '/admin/contracts'
       path: '/admin/contracts'
       fullPath: '/admin/contracts'
       preLoaderRoute: typeof AdminContractsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/admin/approvals': {
+      id: '/admin/approvals'
+      path: '/admin/approvals'
+      fullPath: '/admin/approvals'
+      preLoaderRoute: typeof AdminApprovalsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/admin/accounting': {
+      id: '/admin/accounting'
+      path: '/admin/accounting'
+      fullPath: '/admin/accounting'
+      preLoaderRoute: typeof AdminAccountingRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/tech/jobs/': {
@@ -534,8 +614,12 @@ const AdminElevatorsElevatorIdRouteWithChildren =
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
+  AdminAccountingRoute: AdminAccountingRoute,
+  AdminApprovalsRoute: AdminApprovalsRoute,
   AdminContractsRoute: AdminContractsRoute,
+  AdminHrRoute: AdminHrRoute,
   AdminLeadsRoute: AdminLeadsRoute,
+  AdminProjectsRoute: AdminProjectsRoute,
   AdminReportsRoute: AdminReportsRoute,
   PortalContractsRoute: PortalContractsRoute,
   PortalIssuesRoute: PortalIssuesRoute,
