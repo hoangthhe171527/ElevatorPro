@@ -1,5 +1,7 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { MobileShell } from "@/components/layout/MobileShell";
+import { canAccessMobilePath } from "@/lib/mobile-policy";
+import { useCurrentPermissions, useMainRole } from "@/lib/store";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Ambulance, PhoneCall, TriangleAlert, Wrench } from "lucide-react";
@@ -11,6 +13,25 @@ export const Route = createFileRoute("/mobile/support")({
 });
 
 function MobileSupport() {
+  const role = useMainRole();
+  const permissions = useCurrentPermissions();
+  const issuePath = role === "customer" ? "/mobile/portal/issues" : role === "tech" ? "/mobile/tech/jobs" : "/mobile/jobs";
+
+  if (!canAccessMobilePath("/mobile/support", role, permissions)) {
+    return (
+      <MobileShell title="Không có quyền truy cập">
+        <div className="min-h-screen bg-slate-50 px-4 pt-4 pb-36">
+          <Card className="p-6 text-center rounded-2xl border-slate-100">
+            <p className="text-sm font-semibold text-slate-900">Màn hỗ trợ khẩn cấp chỉ dành cho kỹ thuật và khách hàng.</p>
+            <Link to="/mobile" className="inline-block mt-4">
+              <Button className="rounded-xl">Về trang chính mobile</Button>
+            </Link>
+          </Card>
+        </div>
+      </MobileShell>
+    );
+  }
+
   const handleEmergency = () => {
     toast.error("Đã gửi yêu cầu cứu hộ khẩn cấp", {
       description: "Đội kỹ thuật trực gần nhất đang được điều phối.",
@@ -46,9 +67,9 @@ function MobileSupport() {
           <Button variant="outline" className="w-full justify-start rounded-xl h-11">
             <PhoneCall className="h-4 w-4 mr-2 text-indigo-600" /> Hotline 1900 6688
           </Button>
-          <Link to="/mobile/portal/issues" className="block">
+          <Link to={issuePath} className="block">
             <Button variant="outline" className="w-full justify-start rounded-xl h-11">
-              <Wrench className="h-4 w-4 mr-2 text-indigo-600" /> Tạo phiếu sự cố
+              <Wrench className="h-4 w-4 mr-2 text-indigo-600" /> {role === "customer" ? "Tạo phiếu sự cố" : "Mở danh sách xử lý"}
             </Button>
           </Link>
         </Card>

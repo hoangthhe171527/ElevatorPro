@@ -1,6 +1,6 @@
-// src/components/common/Modals.tsx
+﻿// src/components/common/Modals.tsx
 // =====================================================================
-// TẤT CẢ CÁC MODAL DÙNG CHUNG — thêm vào project
+// Táº¤T Cáº¢ CÃC MODAL DÃ™NG CHUNG â€” thÃªm vÃ o project
 // =====================================================================
 import { useState } from "react";
 import {
@@ -53,9 +53,9 @@ import {
   ArrowRightLeft,
 } from "lucide-react";
 
-// ─────────────────────────────────────────────
-// 1. MODAL TẠO CÔNG VIỆC MỚI
-// ─────────────────────────────────────────────
+// â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+// 1. MODAL Táº O CÃ”NG VIá»†C Má»šI
+// â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 interface CreateJobModalProps {
   open: boolean;
   onClose: () => void;
@@ -66,17 +66,17 @@ interface CreateJobModalProps {
 }
 
 const typeOptions: { value: JobType; label: string }[] = [
-  { value: "maintenance", label: "Bảo trì định kỳ" },
-  { value: "repair", label: "Sửa chữa" },
-  { value: "install", label: "Lắp đặt" },
-  { value: "inspection", label: "Khảo sát" },
+  { value: "maintenance", label: "Báº£o trÃ¬ Ä‘á»‹nh ká»³" },
+  { value: "repair", label: "Sá»­a chá»¯a" },
+  { value: "install", label: "Láº¯p Ä‘áº·t" },
+  { value: "inspection", label: "Kháº£o sÃ¡t" },
 ];
 
 const priorityOptions: { value: JobPriority; label: string }[] = [
-  { value: "low", label: "Thấp" },
-  { value: "normal", label: "Bình thường" },
+  { value: "low", label: "Tháº¥p" },
+  { value: "normal", label: "BÃ¬nh thÆ°á»ng" },
   { value: "high", label: "Cao" },
-  { value: "urgent", label: "Khẩn cấp" },
+  { value: "urgent", label: "Kháº©n cáº¥p" },
 ];
 
 export function CreateJobModal({
@@ -117,14 +117,14 @@ export function CreateJobModal({
 
   const handleSubmit = async () => {
     if (!title.trim() || !customerId || !techId || !scheduledFor) {
-      toast.error("Vui lòng điền đầy đủ thông tin bắt buộc");
+      toast.error("Vui lÃ²ng Ä‘iá»n Ä‘áº§y Ä‘á»§ thÃ´ng tin báº¯t buá»™c");
       return;
     }
     setLoading(true);
     await new Promise((r) => setTimeout(r, 600));
     setLoading(false);
     toast.success(
-      `Đã tạo công việc "${title}" — giao cho ${mockUsers.find((u) => u.id === techId)?.name}`,
+      `ÄÃ£ táº¡o cÃ´ng viá»‡c "${title}" â€” giao cho ${mockUsers.find((u) => u.id === techId)?.name}`,
     );
     onClose();
     // Reset
@@ -144,28 +144,28 @@ export function CreateJobModal({
       <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
-            <Briefcase className="h-5 w-5 text-primary" /> Tạo công việc mới
+            <Briefcase className="h-5 w-5 text-primary" /> Táº¡o cÃ´ng viá»‡c má»›i
           </DialogTitle>
         </DialogHeader>
 
         <div className="space-y-4 py-2">
-          {/* Tiêu đề */}
+          {/* TiÃªu Ä‘á» */}
           <div>
             <label className="text-sm font-medium">
-              Tiêu đề công việc <span className="text-destructive">*</span>
+              TiÃªu Ä‘á» cÃ´ng viá»‡c <span className="text-destructive">*</span>
             </label>
             <Input
               className="mt-1"
-              placeholder="VD: Bảo trì định kỳ tháng 5 — Vinhomes A1"
+              placeholder="VD: Báº£o trÃ¬ Ä‘á»‹nh ká»³ thÃ¡ng 5 â€” Vinhomes A1"
               value={title}
               onChange={(e) => setTitle(e.target.value)}
             />
           </div>
 
-          <div className="grid grid-cols-2 gap-3">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
             <div>
               <label className="text-sm font-medium">
-                Loại công việc <span className="text-destructive">*</span>
+                Loáº¡i cÃ´ng viá»‡c <span className="text-destructive">*</span>
               </label>
               <Select value={type} onValueChange={(v) => setType(v as JobType)}>
                 <SelectTrigger className="mt-1">
@@ -181,7 +181,7 @@ export function CreateJobModal({
               </Select>
             </div>
             <div>
-              <label className="text-sm font-medium">Mức ưu tiên</label>
+              <label className="text-sm font-medium">Má»©c Æ°u tiÃªn</label>
               <Select value={priority} onValueChange={(v) => setPriority(v as JobPriority)}>
                 <SelectTrigger className="mt-1">
                   <SelectValue />
@@ -197,10 +197,10 @@ export function CreateJobModal({
             </div>
           </div>
 
-          {/* Khách hàng */}
+          {/* KhÃ¡ch hÃ ng */}
           <div>
             <label className="text-sm font-medium">
-              Khách hàng <span className="text-destructive">*</span>
+              KhÃ¡ch hÃ ng <span className="text-destructive">*</span>
             </label>
             <Select
               value={customerId}
@@ -212,7 +212,7 @@ export function CreateJobModal({
               }}
             >
               <SelectTrigger className="mt-1">
-                <SelectValue placeholder="Chọn khách hàng..." />
+                <SelectValue placeholder="Chá»n khÃ¡ch hÃ ng..." />
               </SelectTrigger>
               <SelectContent>
                 {mockCustomers.map((c) => (
@@ -226,7 +226,7 @@ export function CreateJobModal({
 
           {customerId && (
             <div>
-              <label className="text-sm font-medium">Dự án liên quan</label>
+              <label className="text-sm font-medium">Dá»± Ã¡n liÃªn quan</label>
               <Select
                 value={projectId || "none"}
                 onValueChange={(v) => {
@@ -235,10 +235,10 @@ export function CreateJobModal({
                 }}
               >
                 <SelectTrigger className="mt-1">
-                  <SelectValue placeholder="Chọn dự án..." />
+                  <SelectValue placeholder="Chá»n dá»± Ã¡n..." />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="none">— Không chọn —</SelectItem>
+                  <SelectItem value="none">â€” KhÃ´ng chá»n â€”</SelectItem>
                   {customerProjects.map((p) => (
                     <SelectItem key={p.id} value={p.id}>
                       {p.name}
@@ -250,37 +250,37 @@ export function CreateJobModal({
           )}
 
           {customerId && (
-            <div className="grid grid-cols-2 gap-3">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
               <div>
-                <label className="text-sm font-medium">Thang máy (nếu có)</label>
+                <label className="text-sm font-medium">Thang mÃ¡y (náº¿u cÃ³)</label>
                 <Select
                   value={elevatorId || "none"}
                   onValueChange={(v) => setElevatorId(v === "none" ? "" : v)}
                 >
                   <SelectTrigger className="mt-1">
-                    <SelectValue placeholder="Chọn thang..." />
+                    <SelectValue placeholder="Chá»n thang..." />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="none">— Không chọn —</SelectItem>
+                    <SelectItem value="none">â€” KhÃ´ng chá»n â€”</SelectItem>
                     {customerElevators.map((e) => (
                       <SelectItem key={e.id} value={e.id}>
-                        {e.code} — {e.building}
+                        {e.code} â€” {e.building}
                       </SelectItem>
                     ))}
                   </SelectContent>
                 </Select>
               </div>
               <div>
-                <label className="text-sm font-medium">Hợp đồng liên quan</label>
+                <label className="text-sm font-medium">Há»£p Ä‘á»“ng liÃªn quan</label>
                 <Select
                   value={contractId || "none"}
                   onValueChange={(v) => setContractId(v === "none" ? "" : v)}
                 >
                   <SelectTrigger className="mt-1">
-                    <SelectValue placeholder="Chọn HĐ..." />
+                    <SelectValue placeholder="Chá»n HÄ..." />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="none">— Không chọn —</SelectItem>
+                    <SelectItem value="none">â€” KhÃ´ng chá»n â€”</SelectItem>
                     {customerContracts.map((c) => (
                       <SelectItem key={c.id} value={c.id}>
                         {c.code}
@@ -292,14 +292,14 @@ export function CreateJobModal({
             </div>
           )}
 
-          <div className="grid grid-cols-2 gap-3">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
             <div>
               <label className="text-sm font-medium">
-                Kỹ thuật viên phụ trách <span className="text-destructive">*</span>
+                Ká»¹ thuáº­t viÃªn phá»¥ trÃ¡ch <span className="text-destructive">*</span>
               </label>
               <Select value={techId} onValueChange={setTechId}>
                 <SelectTrigger className="mt-1">
-                  <SelectValue placeholder="Chọn kỹ thuật..." />
+                  <SelectValue placeholder="Chá»n ká»¹ thuáº­t..." />
                 </SelectTrigger>
                 <SelectContent>
                   {technicians.map((u) => (
@@ -312,7 +312,7 @@ export function CreateJobModal({
             </div>
             <div>
               <label className="text-sm font-medium">
-                Ngày giờ thực hiện <span className="text-destructive">*</span>
+                NgÃ y giá» thá»±c hiá»‡n <span className="text-destructive">*</span>
               </label>
               <Input
                 type="datetime-local"
@@ -324,10 +324,10 @@ export function CreateJobModal({
           </div>
 
           <div>
-            <label className="text-sm font-medium">Mô tả / Ghi chú</label>
+            <label className="text-sm font-medium">MÃ´ táº£ / Ghi chÃº</label>
             <Textarea
               className="mt-1"
-              placeholder="Mô tả chi tiết công việc cần thực hiện..."
+              placeholder="MÃ´ táº£ chi tiáº¿t cÃ´ng viá»‡c cáº§n thá»±c hiá»‡n..."
               rows={3}
               value={description}
               onChange={(e) => setDescription(e.target.value)}
@@ -337,10 +337,10 @@ export function CreateJobModal({
 
         <DialogFooter>
           <Button variant="outline" onClick={onClose} disabled={loading}>
-            Hủy
+            Há»§y
           </Button>
           <Button onClick={handleSubmit} disabled={loading}>
-            {loading ? "Đang tạo..." : "Tạo công việc"}
+            {loading ? "Äang táº¡o..." : "Táº¡o cÃ´ng viá»‡c"}
           </Button>
         </DialogFooter>
       </DialogContent>
@@ -348,9 +348,9 @@ export function CreateJobModal({
   );
 }
 
-// ─────────────────────────────────────────────
-// 2. MODAL CẬP NHẬT TRẠNG THÁI CÔNG VIỆC
-// ─────────────────────────────────────────────
+// â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+// 2. MODAL Cáº¬P NHáº¬T TRáº NG THÃI CÃ”NG VIá»†C
+// â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 interface UpdateJobStatusModalProps {
   open: boolean;
   onClose: () => void;
@@ -360,11 +360,11 @@ interface UpdateJobStatusModalProps {
 }
 
 const jobStatusOptions = [
-  { value: "pending", label: "⏳ Chờ xử lý" },
-  { value: "scheduled", label: "📅 Đã lên lịch" },
-  { value: "in_progress", label: "🔧 Đang thực hiện" },
-  { value: "completed", label: "✅ Hoàn thành" },
-  { value: "cancelled", label: "❌ Hủy" },
+  { value: "pending", label: "â³ Chá» xá»­ lÃ½" },
+  { value: "scheduled", label: "ðŸ“… ÄÃ£ lÃªn lá»‹ch" },
+  { value: "in_progress", label: "ðŸ”§ Äang thá»±c hiá»‡n" },
+  { value: "completed", label: "âœ… HoÃ n thÃ nh" },
+  { value: "cancelled", label: "âŒ Há»§y" },
 ];
 
 export function UpdateJobStatusModal({
@@ -379,7 +379,7 @@ export function UpdateJobStatusModal({
 
   const handle = () => {
     if (newStatus === currentStatus) {
-      toast.info("Trạng thái không thay đổi");
+      toast.info("Tráº¡ng thÃ¡i khÃ´ng thay Ä‘á»•i");
       return;
     }
     onConfirm(newStatus, note);
@@ -391,14 +391,14 @@ export function UpdateJobStatusModal({
     <Dialog open={open} onOpenChange={onClose}>
       <DialogContent className="max-w-md">
         <DialogHeader>
-          <DialogTitle>Cập nhật trạng thái công việc</DialogTitle>
+          <DialogTitle>Cáº­p nháº­t tráº¡ng thÃ¡i cÃ´ng viá»‡c</DialogTitle>
         </DialogHeader>
         <div className="space-y-4 py-2">
           <p className="text-sm text-muted-foreground">
-            Công việc: <span className="font-medium text-foreground">{jobTitle}</span>
+            CÃ´ng viá»‡c: <span className="font-medium text-foreground">{jobTitle}</span>
           </p>
           <div>
-            <label className="text-sm font-medium">Trạng thái mới</label>
+            <label className="text-sm font-medium">Tráº¡ng thÃ¡i má»›i</label>
             <Select value={newStatus} onValueChange={setNewStatus}>
               <SelectTrigger className="mt-1">
                 <SelectValue />
@@ -413,10 +413,10 @@ export function UpdateJobStatusModal({
             </Select>
           </div>
           <div>
-            <label className="text-sm font-medium">Ghi chú (không bắt buộc)</label>
+            <label className="text-sm font-medium">Ghi chÃº (khÃ´ng báº¯t buá»™c)</label>
             <Textarea
               className="mt-1"
-              placeholder="VD: Đã hoàn tất thay thế biến tần..."
+              placeholder="VD: ÄÃ£ hoÃ n táº¥t thay tháº¿ biáº¿n táº§n..."
               rows={3}
               value={note}
               onChange={(e) => setNote(e.target.value)}
@@ -425,24 +425,24 @@ export function UpdateJobStatusModal({
           {newStatus === "completed" && (
             <div className="flex items-start gap-2 p-3 rounded-lg bg-success/10 text-success text-sm">
               <CheckCircle2 className="h-4 w-4 mt-0.5 shrink-0" />
-              Biên bản sẽ được tự động gửi đến khách hàng khi hoàn thành.
+              BiÃªn báº£n sáº½ Ä‘Æ°á»£c tá»± Ä‘á»™ng gá»­i Ä‘áº¿n khÃ¡ch hÃ ng khi hoÃ n thÃ nh.
             </div>
           )}
         </div>
         <DialogFooter>
           <Button variant="outline" onClick={onClose}>
-            Hủy
+            Há»§y
           </Button>
-          <Button onClick={handle}>Xác nhận cập nhật</Button>
+          <Button onClick={handle}>XÃ¡c nháº­n cáº­p nháº­t</Button>
         </DialogFooter>
       </DialogContent>
     </Dialog>
   );
 }
 
-// ─────────────────────────────────────────────
-// 3. MODAL GHI NHẬN THANH TOÁN
-// ─────────────────────────────────────────────
+// â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+// 3. MODAL GHI NHáº¬N THANH TOÃN
+// â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 interface RecordPaymentModalProps {
   open: boolean;
   onClose: () => void;
@@ -471,17 +471,17 @@ export function RecordPaymentModal({
 
   const handle = async () => {
     if (!amount || numAmount <= 0) {
-      toast.error("Vui lòng nhập số tiền");
+      toast.error("Vui lÃ²ng nháº­p sá»‘ tiá»n");
       return;
     }
     if (numAmount > remaining) {
-      toast.error("Số tiền vượt quá số còn nợ");
+      toast.error("Sá»‘ tiá»n vÆ°á»£t quÃ¡ sá»‘ cÃ²n ná»£");
       return;
     }
     setLoading(true);
     await new Promise((r) => setTimeout(r, 500));
     setLoading(false);
-    toast.success(`Đã ghi nhận thu ${formatVND(numAmount)} — hợp đồng ${contractCode}`);
+    toast.success(`ÄÃ£ ghi nháº­n thu ${formatVND(numAmount)} â€” há»£p Ä‘á»“ng ${contractCode}`);
     setAmount("");
     setNote("");
     onClose();
@@ -492,32 +492,32 @@ export function RecordPaymentModal({
       <DialogContent className="max-w-md">
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
-            <Banknote className="h-5 w-5 text-success" /> Ghi nhận thanh toán
+            <Banknote className="h-5 w-5 text-success" /> Ghi nháº­n thanh toÃ¡n
           </DialogTitle>
         </DialogHeader>
         <div className="space-y-4 py-2">
           <div className="p-3 rounded-lg bg-muted/50 space-y-2 text-sm">
             <div className="flex justify-between">
-              <span className="text-muted-foreground">Hợp đồng</span>
+              <span className="text-muted-foreground">Há»£p Ä‘á»“ng</span>
               <span className="font-medium">{contractCode}</span>
             </div>
             <div className="flex justify-between">
-              <span className="text-muted-foreground">Tổng giá trị</span>
+              <span className="text-muted-foreground">Tá»•ng giÃ¡ trá»‹</span>
               <span className="font-medium">{formatVND(totalValue)}</span>
             </div>
             <div className="flex justify-between">
-              <span className="text-muted-foreground">Đã thu</span>
+              <span className="text-muted-foreground">ÄÃ£ thu</span>
               <span className="text-success font-medium">{formatVND(alreadyPaid)}</span>
             </div>
             <div className="flex justify-between">
-              <span className="text-muted-foreground">Còn nợ</span>
+              <span className="text-muted-foreground">CÃ²n ná»£</span>
               <span className="text-warning-foreground font-semibold">{formatVND(remaining)}</span>
             </div>
           </div>
 
           <div>
             <label className="text-sm font-medium">
-              Số tiền thu (VNĐ) <span className="text-destructive">*</span>
+              Sá»‘ tiá»n thu (VNÄ) <span className="text-destructive">*</span>
             </label>
             <Input
               className="mt-1"
@@ -530,22 +530,22 @@ export function RecordPaymentModal({
             )}
           </div>
 
-          <div className="grid grid-cols-2 gap-3">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
             <div>
-              <label className="text-sm font-medium">Hình thức</label>
+              <label className="text-sm font-medium">HÃ¬nh thá»©c</label>
               <Select value={method} onValueChange={setMethod}>
                 <SelectTrigger className="mt-1">
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="transfer">Chuyển khoản</SelectItem>
-                  <SelectItem value="cash">Tiền mặt</SelectItem>
-                  <SelectItem value="check">Séc</SelectItem>
+                  <SelectItem value="transfer">Chuyá»ƒn khoáº£n</SelectItem>
+                  <SelectItem value="cash">Tiá»n máº·t</SelectItem>
+                  <SelectItem value="check">SÃ©c</SelectItem>
                 </SelectContent>
               </Select>
             </div>
             <div>
-              <label className="text-sm font-medium">Ngày thu</label>
+              <label className="text-sm font-medium">NgÃ y thu</label>
               <Input
                 type="date"
                 className="mt-1"
@@ -558,7 +558,7 @@ export function RecordPaymentModal({
           {numAmount > 0 && (
             <div>
               <div className="flex justify-between text-xs mb-1">
-                <span className="text-muted-foreground">Tiến độ sau khi ghi nhận</span>
+                <span className="text-muted-foreground">Tiáº¿n Ä‘á»™ sau khi ghi nháº­n</span>
                 <span className="font-medium">{newPercent}%</span>
               </div>
               <Progress value={newPercent} className="h-2" />
@@ -566,10 +566,10 @@ export function RecordPaymentModal({
           )}
 
           <div>
-            <label className="text-sm font-medium">Ghi chú</label>
+            <label className="text-sm font-medium">Ghi chÃº</label>
             <Input
               className="mt-1"
-              placeholder="VD: Đợt 2 theo tiến độ"
+              placeholder="VD: Äá»£t 2 theo tiáº¿n Ä‘á»™"
               value={note}
               onChange={(e) => setNote(e.target.value)}
             />
@@ -577,10 +577,10 @@ export function RecordPaymentModal({
         </div>
         <DialogFooter>
           <Button variant="outline" onClick={onClose} disabled={loading}>
-            Hủy
+            Há»§y
           </Button>
           <Button onClick={handle} disabled={loading} className="bg-success hover:bg-success/90">
-            {loading ? "Đang lưu..." : "Ghi nhận thu tiền"}
+            {loading ? "Äang lÆ°u..." : "Ghi nháº­n thu tiá»n"}
           </Button>
         </DialogFooter>
       </DialogContent>
@@ -588,9 +588,9 @@ export function RecordPaymentModal({
   );
 }
 
-// ─────────────────────────────────────────────
-// 4. MODAL CHUYỂN LEAD → KHÁCH HÀNG
-// ─────────────────────────────────────────────
+// â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+// 4. MODAL CHUYá»‚N LEAD â†’ KHÃCH HÃ€NG
+// â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 interface ConvertLeadModalProps {
   open: boolean;
   onClose: () => void;
@@ -614,13 +614,13 @@ export function ConvertLeadModal({ open, onClose, lead }: ConvertLeadModalProps)
 
   const handle = async () => {
     if (!name.trim() || !phone.trim()) {
-      toast.error("Vui lòng nhập tên và số điện thoại");
+      toast.error("Vui lÃ²ng nháº­p tÃªn vÃ  sá»‘ Ä‘iá»‡n thoáº¡i");
       return;
     }
     setLoading(true);
     await new Promise((r) => setTimeout(r, 700));
     setLoading(false);
-    toast.success(`Đã chuyển lead thành khách hàng: "${name}" — có thể tạo hợp đồng ngay`);
+    toast.success(`ÄÃ£ chuyá»ƒn lead thÃ nh khÃ¡ch hÃ ng: "${name}" â€” cÃ³ thá»ƒ táº¡o há»£p Ä‘á»“ng ngay`);
     onClose();
   };
 
@@ -629,36 +629,36 @@ export function ConvertLeadModal({ open, onClose, lead }: ConvertLeadModalProps)
       <DialogContent className="max-w-lg">
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
-            <UserCog className="h-5 w-5 text-primary" /> Chuyển Lead thành Khách hàng
+            <UserCog className="h-5 w-5 text-primary" /> Chuyá»ƒn Lead thÃ nh KhÃ¡ch hÃ ng
           </DialogTitle>
         </DialogHeader>
         <div className="space-y-3 py-2">
           <div className="p-3 rounded-lg bg-primary/5 text-sm text-primary">
-            Lead "<span className="font-medium">{lead.name}</span>" sẽ được chuyển sang danh sách
-            Khách hàng. Kiểm tra và bổ sung thông tin bên dưới.
+            Lead "<span className="font-medium">{lead.name}</span>" sáº½ Ä‘Æ°á»£c chuyá»ƒn sang danh sÃ¡ch
+            KhÃ¡ch hÃ ng. Kiá»ƒm tra vÃ  bá»• sung thÃ´ng tin bÃªn dÆ°á»›i.
           </div>
           <div>
-            <label className="text-sm font-medium">Loại khách hàng</label>
+            <label className="text-sm font-medium">Loáº¡i khÃ¡ch hÃ ng</label>
             <Select value={type} onValueChange={(v) => setType(v as "business" | "individual")}>
               <SelectTrigger className="mt-1">
                 <SelectValue />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="business">Doanh nghiệp / Tòa nhà</SelectItem>
-                <SelectItem value="individual">Cá nhân / Hộ gia đình</SelectItem>
+                <SelectItem value="business">Doanh nghiá»‡p / TÃ²a nhÃ </SelectItem>
+                <SelectItem value="individual">CÃ¡ nhÃ¢n / Há»™ gia Ä‘Ã¬nh</SelectItem>
               </SelectContent>
             </Select>
           </div>
           <div>
             <label className="text-sm font-medium">
-              Tên {type === "business" ? "công ty / tòa nhà" : "khách hàng"}{" "}
+              TÃªn {type === "business" ? "cÃ´ng ty / tÃ²a nhÃ " : "khÃ¡ch hÃ ng"}{" "}
               <span className="text-destructive">*</span>
             </label>
             <Input className="mt-1" value={name} onChange={(e) => setName(e.target.value)} />
           </div>
-          <div className="grid grid-cols-2 gap-3">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
             <div>
-              <label className="text-sm font-medium">Người liên hệ</label>
+              <label className="text-sm font-medium">NgÆ°á»i liÃªn há»‡</label>
               <Input
                 className="mt-1"
                 value={contactPerson}
@@ -667,7 +667,7 @@ export function ConvertLeadModal({ open, onClose, lead }: ConvertLeadModalProps)
             </div>
             <div>
               <label className="text-sm font-medium">
-                Số điện thoại <span className="text-destructive">*</span>
+                Sá»‘ Ä‘iá»‡n thoáº¡i <span className="text-destructive">*</span>
               </label>
               <Input className="mt-1" value={phone} onChange={(e) => setPhone(e.target.value)} />
             </div>
@@ -682,16 +682,16 @@ export function ConvertLeadModal({ open, onClose, lead }: ConvertLeadModalProps)
             />
           </div>
           <div>
-            <label className="text-sm font-medium">Địa chỉ</label>
+            <label className="text-sm font-medium">Äá»‹a chá»‰</label>
             <Input className="mt-1" value={address} onChange={(e) => setAddress(e.target.value)} />
           </div>
         </div>
         <DialogFooter>
           <Button variant="outline" onClick={onClose} disabled={loading}>
-            Hủy
+            Há»§y
           </Button>
           <Button onClick={handle} disabled={loading}>
-            {loading ? "Đang chuyển..." : "Xác nhận chuyển KH"}
+            {loading ? "Äang chuyá»ƒn..." : "XÃ¡c nháº­n chuyá»ƒn KH"}
           </Button>
         </DialogFooter>
       </DialogContent>
@@ -699,9 +699,9 @@ export function ConvertLeadModal({ open, onClose, lead }: ConvertLeadModalProps)
   );
 }
 
-// ─────────────────────────────────────────────
-// 5. MODAL TẠO HỢP ĐỒNG
-// ─────────────────────────────────────────────
+// â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+// 5. MODAL Táº O Há»¢P Äá»’NG
+// â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 interface CreateContractModalProps {
   open: boolean;
   onClose: () => void;
@@ -729,20 +729,20 @@ export function CreateContractModal({
 
   const handle = async () => {
     if (!customerId || !value || !items.trim()) {
-      toast.error("Vui lòng điền đầy đủ các trường bắt buộc");
+      toast.error("Vui lÃ²ng Ä‘iá»n Ä‘áº§y Ä‘á»§ cÃ¡c trÆ°á»ng báº¯t buá»™c");
       return;
     }
     setLoading(true);
     await new Promise((r) => setTimeout(r, 600));
     setLoading(false);
-    toast.success(`Đã tạo hợp đồng ${autoCode} — Hệ thống sẽ tự sinh công việc theo lịch hợp đồng`);
+    toast.success(`ÄÃ£ táº¡o há»£p Ä‘á»“ng ${autoCode} â€” Há»‡ thá»‘ng sáº½ tá»± sinh cÃ´ng viá»‡c theo lá»‹ch há»£p Ä‘á»“ng`);
     onClose();
   };
 
   const contractTypeOptions: { value: ContractType; label: string }[] = [
-    { value: "maintenance", label: "Bảo trì định kỳ" },
-    { value: "install", label: "Lắp đặt" },
-    { value: "repair", label: "Sửa chữa / Cải tạo" },
+    { value: "maintenance", label: "Báº£o trÃ¬ Ä‘á»‹nh ká»³" },
+    { value: "install", label: "Láº¯p Ä‘áº·t" },
+    { value: "repair", label: "Sá»­a chá»¯a / Cáº£i táº¡o" },
   ];
 
   return (
@@ -750,21 +750,21 @@ export function CreateContractModal({
       <DialogContent className="max-w-lg max-h-[90vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
-            <FileText className="h-5 w-5 text-primary" /> Tạo hợp đồng mới
+            <FileText className="h-5 w-5 text-primary" /> Táº¡o há»£p Ä‘á»“ng má»›i
           </DialogTitle>
         </DialogHeader>
         <div className="space-y-4 py-2">
           <div className="flex items-center gap-2 p-2 rounded bg-muted/50 text-xs text-muted-foreground">
-            Mã hợp đồng (tự động):{" "}
+            MÃ£ há»£p Ä‘á»“ng (tá»± Ä‘á»™ng):{" "}
             <span className="font-mono font-semibold text-foreground ml-1">{autoCode}</span>
           </div>
           <div>
             <label className="text-sm font-medium">
-              Khách hàng <span className="text-destructive">*</span>
+              KhÃ¡ch hÃ ng <span className="text-destructive">*</span>
             </label>
             <Select value={customerId} onValueChange={setCustomerId}>
               <SelectTrigger className="mt-1">
-                <SelectValue placeholder="Chọn khách hàng..." />
+                <SelectValue placeholder="Chá»n khÃ¡ch hÃ ng..." />
               </SelectTrigger>
               <SelectContent>
                 {mockCustomers.map((c) => (
@@ -776,7 +776,7 @@ export function CreateContractModal({
             </Select>
           </div>
           <div>
-            <label className="text-sm font-medium">Loại hợp đồng</label>
+            <label className="text-sm font-medium">Loáº¡i há»£p Ä‘á»“ng</label>
             <Select value={type} onValueChange={(v) => setType(v as ContractType)}>
               <SelectTrigger className="mt-1">
                 <SelectValue />
@@ -792,7 +792,7 @@ export function CreateContractModal({
           </div>
           <div>
             <label className="text-sm font-medium">
-              Giá trị hợp đồng (VNĐ) <span className="text-destructive">*</span>
+              GiÃ¡ trá»‹ há»£p Ä‘á»“ng (VNÄ) <span className="text-destructive">*</span>
             </label>
             <Input
               className="mt-1"
@@ -804,9 +804,9 @@ export function CreateContractModal({
               <p className="text-xs text-muted-foreground mt-1">{formatVND(parseInt(value))}</p>
             )}
           </div>
-          <div className="grid grid-cols-2 gap-3">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
             <div>
-              <label className="text-sm font-medium">Ngày bắt đầu</label>
+              <label className="text-sm font-medium">NgÃ y báº¯t Ä‘áº§u</label>
               <Input
                 type="date"
                 className="mt-1"
@@ -815,7 +815,7 @@ export function CreateContractModal({
               />
             </div>
             <div>
-              <label className="text-sm font-medium">Ngày kết thúc</label>
+              <label className="text-sm font-medium">NgÃ y káº¿t thÃºc</label>
               <Input
                 type="date"
                 className="mt-1"
@@ -826,11 +826,11 @@ export function CreateContractModal({
           </div>
           <div>
             <label className="text-sm font-medium">
-              Hạng mục dịch vụ <span className="text-destructive">*</span>
+              Háº¡ng má»¥c dá»‹ch vá»¥ <span className="text-destructive">*</span>
             </label>
             <Textarea
               className="mt-1"
-              placeholder="VD: Bảo trì 4 thang Mitsubishi định kỳ 1 tháng/lần"
+              placeholder="VD: Báº£o trÃ¬ 4 thang Mitsubishi Ä‘á»‹nh ká»³ 1 thÃ¡ng/láº§n"
               rows={2}
               value={items}
               onChange={(e) => setItems(e.target.value)}
@@ -839,16 +839,16 @@ export function CreateContractModal({
           {type === "maintenance" && (
             <div className="flex items-start gap-2 p-3 rounded-lg bg-info/10 text-info text-sm">
               <AlertTriangle className="h-4 w-4 mt-0.5 shrink-0" />
-              Hợp đồng bảo trì sẽ tự động sinh công việc theo chu kỳ sau khi tạo.
+              Há»£p Ä‘á»“ng báº£o trÃ¬ sáº½ tá»± Ä‘á»™ng sinh cÃ´ng viá»‡c theo chu ká»³ sau khi táº¡o.
             </div>
           )}
         </div>
         <DialogFooter>
           <Button variant="outline" onClick={onClose} disabled={loading}>
-            Hủy
+            Há»§y
           </Button>
           <Button onClick={handle} disabled={loading}>
-            {loading ? "Đang tạo..." : "Tạo hợp đồng"}
+            {loading ? "Äang táº¡o..." : "Táº¡o há»£p Ä‘á»“ng"}
           </Button>
         </DialogFooter>
       </DialogContent>
@@ -856,9 +856,9 @@ export function CreateContractModal({
   );
 }
 
-// ─────────────────────────────────────────────
-// 6. MODAL THÊM THANG MÁY
-// ─────────────────────────────────────────────
+// â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+// 6. MODAL THÃŠM THANG MÃY
+// â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 interface CreateElevatorModalProps {
   open: boolean;
   onClose: () => void;
@@ -899,17 +899,17 @@ export function CreateElevatorModal({
         .map((w) => w[0])
         .join("")
         .toUpperCase()}-${String(mockElevators.length + 1).padStart(2, "0")}`
-    : "—";
+    : "â€”";
 
   const handle = async () => {
     if (!customerId || !building || !model) {
-      toast.error("Vui lòng điền đầy đủ thông tin");
+      toast.error("Vui lÃ²ng Ä‘iá»n Ä‘áº§y Ä‘á»§ thÃ´ng tin");
       return;
     }
     setLoading(true);
     await new Promise((r) => setTimeout(r, 500));
     setLoading(false);
-    toast.success(`Đã thêm thang máy ${autoCode} — ${brand} ${model} tại ${building}`);
+    toast.success(`ÄÃ£ thÃªm thang mÃ¡y ${autoCode} â€” ${brand} ${model} táº¡i ${building}`);
     onClose();
   };
 
@@ -918,17 +918,17 @@ export function CreateElevatorModal({
       <DialogContent className="max-w-lg max-h-[90vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
-            <Building2 className="h-5 w-5 text-primary" /> Thêm thang máy mới
+            <Building2 className="h-5 w-5 text-primary" /> ThÃªm thang mÃ¡y má»›i
           </DialogTitle>
         </DialogHeader>
         <div className="space-y-3 py-2">
           <div>
             <label className="text-sm font-medium">
-              Khách hàng <span className="text-destructive">*</span>
+              KhÃ¡ch hÃ ng <span className="text-destructive">*</span>
             </label>
             <Select value={customerId} onValueChange={setCustomerId}>
               <SelectTrigger className="mt-1">
-                <SelectValue placeholder="Chọn khách hàng..." />
+                <SelectValue placeholder="Chá»n khÃ¡ch hÃ ng..." />
               </SelectTrigger>
               <SelectContent>
                 {mockCustomers.map((c) => (
@@ -941,24 +941,24 @@ export function CreateElevatorModal({
           </div>
           {customerId && (
             <div className="text-xs text-muted-foreground p-2 bg-muted/50 rounded">
-              Mã thang tự động:{" "}
+              MÃ£ thang tá»± Ä‘á»™ng:{" "}
               <span className="font-mono font-semibold text-foreground">{autoCode}</span>
             </div>
           )}
           <div>
             <label className="text-sm font-medium">
-              Tên tòa nhà / vị trí <span className="text-destructive">*</span>
+              TÃªn tÃ²a nhÃ  / vá»‹ trÃ­ <span className="text-destructive">*</span>
             </label>
             <Input
               className="mt-1"
-              placeholder="VD: Tòa A1, Mường Thanh Hà Đông..."
+              placeholder="VD: TÃ²a A1, MÆ°á»ng Thanh HÃ  ÄÃ´ng..."
               value={building}
               onChange={(e) => setBuilding(e.target.value)}
             />
           </div>
-          <div className="grid grid-cols-2 gap-3">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
             <div>
-              <label className="text-sm font-medium">Hãng sản xuất</label>
+              <label className="text-sm font-medium">HÃ£ng sáº£n xuáº¥t</label>
               <Select value={brand} onValueChange={setBrand}>
                 <SelectTrigger className="mt-1">
                   <SelectValue />
@@ -986,7 +986,7 @@ export function CreateElevatorModal({
           </div>
           <div className="grid grid-cols-3 gap-3">
             <div>
-              <label className="text-sm font-medium">Số tầng</label>
+              <label className="text-sm font-medium">Sá»‘ táº§ng</label>
               <Input
                 type="number"
                 className="mt-1"
@@ -996,7 +996,7 @@ export function CreateElevatorModal({
               />
             </div>
             <div>
-              <label className="text-sm font-medium">Bảo hành (năm)</label>
+              <label className="text-sm font-medium">Báº£o hÃ nh (nÄƒm)</label>
               <Input
                 type="number"
                 className="mt-1"
@@ -1006,7 +1006,7 @@ export function CreateElevatorModal({
               />
             </div>
             <div>
-              <label className="text-sm font-medium">Chu kỳ BT (tháng)</label>
+              <label className="text-sm font-medium">Chu ká»³ BT (thÃ¡ng)</label>
               <Input
                 type="number"
                 className="mt-1"
@@ -1017,7 +1017,7 @@ export function CreateElevatorModal({
             </div>
           </div>
           <div>
-            <label className="text-sm font-medium">Ngày lắp đặt</label>
+            <label className="text-sm font-medium">NgÃ y láº¯p Ä‘áº·t</label>
             <Input
               type="date"
               className="mt-1"
@@ -1028,10 +1028,10 @@ export function CreateElevatorModal({
         </div>
         <DialogFooter>
           <Button variant="outline" onClick={onClose} disabled={loading}>
-            Hủy
+            Há»§y
           </Button>
           <Button onClick={handle} disabled={loading}>
-            {loading ? "Đang thêm..." : "Thêm thang máy"}
+            {loading ? "Äang thÃªm..." : "ThÃªm thang mÃ¡y"}
           </Button>
         </DialogFooter>
       </DialogContent>
@@ -1039,9 +1039,9 @@ export function CreateElevatorModal({
   );
 }
 
-// ─────────────────────────────────────────────
-// 7. MODAL THÊM KHÁCH HÀNG MỚI
-// ─────────────────────────────────────────────
+// â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+// 7. MODAL THÃŠM KHÃCH HÃ€NG Má»šI
+// â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 interface CreateCustomerModalProps {
   open: boolean;
   onClose: () => void;
@@ -1058,13 +1058,13 @@ export function CreateCustomerModal({ open, onClose }: CreateCustomerModalProps)
 
   const handle = async () => {
     if (!name.trim() || !phone.trim()) {
-      toast.error("Vui lòng nhập tên và số điện thoại");
+      toast.error("Vui lÃ²ng nháº­p tÃªn vÃ  sá»‘ Ä‘iá»‡n thoáº¡i");
       return;
     }
     setLoading(true);
     await new Promise((r) => setTimeout(r, 500));
     setLoading(false);
-    toast.success(`Đã thêm khách hàng "${name}"`);
+    toast.success(`ÄÃ£ thÃªm khÃ¡ch hÃ ng "${name}"`);
     setName("");
     setContactPerson("");
     setPhone("");
@@ -1079,49 +1079,49 @@ export function CreateCustomerModal({ open, onClose }: CreateCustomerModalProps)
       <DialogContent className="max-w-lg">
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
-            <UserIcon className="h-5 w-5 text-primary" /> Thêm khách hàng mới
+            <UserIcon className="h-5 w-5 text-primary" /> ThÃªm khÃ¡ch hÃ ng má»›i
           </DialogTitle>
         </DialogHeader>
         <div className="space-y-3 py-2">
           <div>
-            <label className="text-sm font-medium">Loại khách hàng</label>
+            <label className="text-sm font-medium">Loáº¡i khÃ¡ch hÃ ng</label>
             <Select value={type} onValueChange={(v) => setType(v as "business" | "individual")}>
               <SelectTrigger className="mt-1">
                 <SelectValue />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="business">Doanh nghiệp / Tòa nhà</SelectItem>
-                <SelectItem value="individual">Cá nhân / Hộ gia đình</SelectItem>
+                <SelectItem value="business">Doanh nghiá»‡p / TÃ²a nhÃ </SelectItem>
+                <SelectItem value="individual">CÃ¡ nhÃ¢n / Há»™ gia Ä‘Ã¬nh</SelectItem>
               </SelectContent>
             </Select>
           </div>
           <div>
             <label className="text-sm font-medium">
-              Tên {type === "business" ? "công ty / tòa nhà" : "khách hàng"}{" "}
+              TÃªn {type === "business" ? "cÃ´ng ty / tÃ²a nhÃ " : "khÃ¡ch hÃ ng"}{" "}
               <span className="text-destructive">*</span>
             </label>
             <Input
               className="mt-1"
               placeholder={
-                type === "business" ? "VD: Vinhomes Ocean Park" : "VD: Anh Nguyễn Văn An"
+                type === "business" ? "VD: Vinhomes Ocean Park" : "VD: Anh Nguyá»…n VÄƒn An"
               }
               value={name}
               onChange={(e) => setName(e.target.value)}
             />
           </div>
-          <div className="grid grid-cols-2 gap-3">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
             <div>
-              <label className="text-sm font-medium">Người liên hệ</label>
+              <label className="text-sm font-medium">NgÆ°á»i liÃªn há»‡</label>
               <Input
                 className="mt-1"
-                placeholder="Tên người liên hệ"
+                placeholder="TÃªn ngÆ°á»i liÃªn há»‡"
                 value={contactPerson}
                 onChange={(e) => setContactPerson(e.target.value)}
               />
             </div>
             <div>
               <label className="text-sm font-medium">
-                Số điện thoại <span className="text-destructive">*</span>
+                Sá»‘ Ä‘iá»‡n thoáº¡i <span className="text-destructive">*</span>
               </label>
               <Input
                 className="mt-1"
@@ -1142,10 +1142,10 @@ export function CreateCustomerModal({ open, onClose }: CreateCustomerModalProps)
             />
           </div>
           <div>
-            <label className="text-sm font-medium">Địa chỉ</label>
+            <label className="text-sm font-medium">Äá»‹a chá»‰</label>
             <Input
               className="mt-1"
-              placeholder="Địa chỉ đầy đủ"
+              placeholder="Äá»‹a chá»‰ Ä‘áº§y Ä‘á»§"
               value={address}
               onChange={(e) => setAddress(e.target.value)}
             />
@@ -1153,10 +1153,10 @@ export function CreateCustomerModal({ open, onClose }: CreateCustomerModalProps)
         </div>
         <DialogFooter>
           <Button variant="outline" onClick={onClose} disabled={loading}>
-            Hủy
+            Há»§y
           </Button>
           <Button onClick={handle} disabled={loading}>
-            {loading ? "Đang thêm..." : "Thêm khách hàng"}
+            {loading ? "Äang thÃªm..." : "ThÃªm khÃ¡ch hÃ ng"}
           </Button>
         </DialogFooter>
       </DialogContent>
@@ -1164,9 +1164,9 @@ export function CreateCustomerModal({ open, onClose }: CreateCustomerModalProps)
   );
 }
 
-// ─────────────────────────────────────────────
-// 8. MODAL NHẬP KHO VẬT TƯ
-// ─────────────────────────────────────────────
+// â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+// 8. MODAL NHáº¬P KHO Váº¬T TÆ¯
+// â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 interface ReceiveInventoryModalProps {
   open: boolean;
   onClose: () => void;
@@ -1188,13 +1188,13 @@ export function ReceiveInventoryModal({
 
   const handle = async () => {
     if (!qty || parseInt(qty) <= 0) {
-      toast.error("Số lượng phải lớn hơn 0");
+      toast.error("Sá»‘ lÆ°á»£ng pháº£i lá»›n hÆ¡n 0");
       return;
     }
     setLoading(true);
     await new Promise((r) => setTimeout(r, 400));
     setLoading(false);
-    toast.success(`Đã nhập ${qty} ${itemName} vào kho`);
+    toast.success(`ÄÃ£ nháº­p ${qty} ${itemName} vÃ o kho`);
     setQty("1");
     setSupplier("");
     setInvoiceNo("");
@@ -1206,12 +1206,12 @@ export function ReceiveInventoryModal({
     <Dialog open={open} onOpenChange={onClose}>
       <DialogContent className="max-w-md">
         <DialogHeader>
-          <DialogTitle>Nhập kho vật tư</DialogTitle>
+          <DialogTitle>Nháº­p kho váº­t tÆ°</DialogTitle>
         </DialogHeader>
         <div className="space-y-3 py-2">
           {itemName && (
             <div className="p-2 rounded bg-muted/50 text-sm">
-              Vật tư: <span className="font-medium">{itemName}</span>
+              Váº­t tÆ°: <span className="font-medium">{itemName}</span>
               {itemCode && (
                 <span className="text-muted-foreground ml-2 font-mono text-xs">{itemCode}</span>
               )}
@@ -1219,7 +1219,7 @@ export function ReceiveInventoryModal({
           )}
           <div>
             <label className="text-sm font-medium">
-              Số lượng nhập <span className="text-destructive">*</span>
+              Sá»‘ lÆ°á»£ng nháº­p <span className="text-destructive">*</span>
             </label>
             <Input
               type="number"
@@ -1230,16 +1230,16 @@ export function ReceiveInventoryModal({
             />
           </div>
           <div>
-            <label className="text-sm font-medium">Nhà cung cấp</label>
+            <label className="text-sm font-medium">NhÃ  cung cáº¥p</label>
             <Input
               className="mt-1"
-              placeholder="Tên nhà cung cấp"
+              placeholder="TÃªn nhÃ  cung cáº¥p"
               value={supplier}
               onChange={(e) => setSupplier(e.target.value)}
             />
           </div>
           <div>
-            <label className="text-sm font-medium">Số hóa đơn</label>
+            <label className="text-sm font-medium">Sá»‘ hÃ³a Ä‘Æ¡n</label>
             <Input
               className="mt-1"
               placeholder="VD: INV-2026-001"
@@ -1248,10 +1248,10 @@ export function ReceiveInventoryModal({
             />
           </div>
           <div>
-            <label className="text-sm font-medium">Ghi chú</label>
+            <label className="text-sm font-medium">Ghi chÃº</label>
             <Input
               className="mt-1"
-              placeholder="Ghi chú nếu có"
+              placeholder="Ghi chÃº náº¿u cÃ³"
               value={note}
               onChange={(e) => setNote(e.target.value)}
             />
@@ -1259,10 +1259,10 @@ export function ReceiveInventoryModal({
         </div>
         <DialogFooter>
           <Button variant="outline" onClick={onClose} disabled={loading}>
-            Hủy
+            Há»§y
           </Button>
           <Button onClick={handle} disabled={loading}>
-            {loading ? "Đang lưu..." : "Xác nhận nhập kho"}
+            {loading ? "Äang lÆ°u..." : "XÃ¡c nháº­n nháº­p kho"}
           </Button>
         </DialogFooter>
       </DialogContent>
@@ -1270,9 +1270,9 @@ export function ReceiveInventoryModal({
   );
 }
 
-// ─────────────────────────────────────────────
-// 9. MODAL XÁC NHẬN LỊCH (Portal khách hàng)
-// ─────────────────────────────────────────────
+// â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+// 9. MODAL XÃC NHáº¬N Lá»ŠCH (Portal khÃ¡ch hÃ ng)
+// â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 interface ConfirmScheduleModalProps {
   open: boolean;
   onClose: () => void;
@@ -1293,12 +1293,12 @@ export function ConfirmScheduleModal({
     setLoading(true);
     await new Promise((r) => setTimeout(r, 400));
     setLoading(false);
-    toast.success("Đã xác nhận lịch — Kỹ thuật viên sẽ đến đúng giờ");
+    toast.success("ÄÃ£ xÃ¡c nháº­n lá»‹ch â€” Ká»¹ thuáº­t viÃªn sáº½ Ä‘áº¿n Ä‘Ãºng giá»");
     onClose();
   };
 
   const handleReschedule = () => {
-    toast.info("Yêu cầu đổi lịch đã được ghi nhận — Nhân viên sẽ liên hệ trong 30 phút");
+    toast.info("YÃªu cáº§u Ä‘á»•i lá»‹ch Ä‘Ã£ Ä‘Æ°á»£c ghi nháº­n â€” NhÃ¢n viÃªn sáº½ liÃªn há»‡ trong 30 phÃºt");
     onClose();
   };
 
@@ -1306,7 +1306,7 @@ export function ConfirmScheduleModal({
     <Dialog open={open} onOpenChange={onClose}>
       <DialogContent className="max-w-md">
         <DialogHeader>
-          <DialogTitle>Xác nhận lịch bảo trì</DialogTitle>
+          <DialogTitle>XÃ¡c nháº­n lá»‹ch báº£o trÃ¬</DialogTitle>
         </DialogHeader>
         <div className="space-y-4 py-2">
           <div className="p-4 rounded-lg bg-primary/5 border border-primary/20">
@@ -1314,14 +1314,14 @@ export function ConfirmScheduleModal({
             <div className="text-sm text-muted-foreground mt-1">{scheduledFor}</div>
           </div>
           <p className="text-sm text-muted-foreground">
-            Vui lòng xác nhận bạn có thể tiếp đón kỹ thuật viên vào thời điểm trên. Nếu cần thay
-            đổi, nhấn "Đổi lịch".
+            Vui lÃ²ng xÃ¡c nháº­n báº¡n cÃ³ thá»ƒ tiáº¿p Ä‘Ã³n ká»¹ thuáº­t viÃªn vÃ o thá»i Ä‘iá»ƒm trÃªn. Náº¿u cáº§n thay
+            Ä‘á»•i, nháº¥n "Äá»•i lá»‹ch".
           </p>
           <div>
-            <label className="text-sm font-medium">Ghi chú cho kỹ thuật viên (nếu có)</label>
+            <label className="text-sm font-medium">Ghi chÃº cho ká»¹ thuáº­t viÃªn (náº¿u cÃ³)</label>
             <Textarea
               className="mt-1"
-              placeholder="VD: Gọi trước 30 phút, vào cổng B..."
+              placeholder="VD: Gá»i trÆ°á»›c 30 phÃºt, vÃ o cá»•ng B..."
               rows={2}
               value={note}
               onChange={(e) => setNote(e.target.value)}
@@ -1330,13 +1330,13 @@ export function ConfirmScheduleModal({
         </div>
         <DialogFooter className="flex-col sm:flex-row gap-2">
           <Button variant="outline" onClick={handleReschedule} className="sm:mr-auto">
-            Đề xuất đổi ngày
+            Äá» xuáº¥t Ä‘á»•i ngÃ y
           </Button>
           <Button variant="outline" onClick={onClose} disabled={loading}>
-            Hủy
+            Há»§y
           </Button>
           <Button onClick={handle} disabled={loading}>
-            {loading ? "Đang xác nhận..." : "✓ Đồng ý lịch"}
+            {loading ? "Äang xÃ¡c nháº­n..." : "âœ“ Äá»“ng Ã½ lá»‹ch"}
           </Button>
         </DialogFooter>
       </DialogContent>
@@ -1344,9 +1344,9 @@ export function ConfirmScheduleModal({
   );
 }
 
-// ─────────────────────────────────────────────
-// 10. MODAL THÊM LEAD MỚI
-// ─────────────────────────────────────────────
+// â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+// 10. MODAL THÃŠM LEAD Má»šI
+// â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 interface CreateLeadModalProps {
   open: boolean;
   onClose: () => void;
@@ -1363,13 +1363,13 @@ export function CreateLeadModal({ open, onClose }: CreateLeadModalProps) {
 
   const handle = async () => {
     if (!name.trim() || !phone.trim()) {
-      toast.error("Vui lòng nhập tên và số điện thoại lead");
+      toast.error("Vui lÃ²ng nháº­p tÃªn vÃ  sá»‘ Ä‘iá»‡n thoáº¡i lead");
       return;
     }
     setLoading(true);
     await new Promise((r) => setTimeout(r, 500));
     setLoading(false);
-    toast.success(`Đã thêm lead mới: "${name}"`);
+    toast.success(`ÄÃ£ thÃªm lead má»›i: "${name}"`);
     setName("");
     setPhone("");
     setEmail("");
@@ -1384,25 +1384,25 @@ export function CreateLeadModal({ open, onClose }: CreateLeadModalProps) {
       <DialogContent className="max-w-lg">
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
-            <UserCog className="h-5 w-5 text-primary" /> Thêm Lead Mới
+            <UserCog className="h-5 w-5 text-primary" /> ThÃªm Lead Má»›i
           </DialogTitle>
         </DialogHeader>
         <div className="space-y-3 py-2">
           <div>
             <label className="text-sm font-medium">
-              Tên khách hàng / Tổ chức <span className="text-destructive">*</span>
+              TÃªn khÃ¡ch hÃ ng / Tá»• chá»©c <span className="text-destructive">*</span>
             </label>
             <Input
               className="mt-1"
-              placeholder="VD: Tòa nhà Sunshine"
+              placeholder="VD: TÃ²a nhÃ  Sunshine"
               value={name}
               onChange={(e) => setName(e.target.value)}
             />
           </div>
-          <div className="grid grid-cols-2 gap-3">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
             <div>
               <label className="text-sm font-medium">
-                Số điện thoại <span className="text-destructive">*</span>
+                Sá»‘ Ä‘iá»‡n thoáº¡i <span className="text-destructive">*</span>
               </label>
               <Input
                 className="mt-1"
@@ -1412,7 +1412,7 @@ export function CreateLeadModal({ open, onClose }: CreateLeadModalProps) {
               />
             </div>
             <div>
-              <label className="text-sm font-medium">Nguồn liên hệ</label>
+              <label className="text-sm font-medium">Nguá»“n liÃªn há»‡</label>
               <Select value={source} onValueChange={setSource}>
                 <SelectTrigger className="mt-1">
                   <SelectValue />
@@ -1420,7 +1420,7 @@ export function CreateLeadModal({ open, onClose }: CreateLeadModalProps) {
                 <SelectContent>
                   <SelectItem value="Website">Website</SelectItem>
                   <SelectItem value="Facebook Ads">Facebook Ads</SelectItem>
-                  <SelectItem value="Giới thiệu">Khách giới thiệu</SelectItem>
+                  <SelectItem value="Giá»›i thiá»‡u">KhÃ¡ch giá»›i thiá»‡u</SelectItem>
                   <SelectItem value="Cold call">Cold call</SelectItem>
                 </SelectContent>
               </Select>
@@ -1437,19 +1437,19 @@ export function CreateLeadModal({ open, onClose }: CreateLeadModalProps) {
             />
           </div>
           <div>
-            <label className="text-sm font-medium">Địa chỉ</label>
+            <label className="text-sm font-medium">Äá»‹a chá»‰</label>
             <Input
               className="mt-1"
-              placeholder="Địa chỉ dự kiến lắp đặt/bảo trì"
+              placeholder="Äá»‹a chá»‰ dá»± kiáº¿n láº¯p Ä‘áº·t/báº£o trÃ¬"
               value={address}
               onChange={(e) => setAddress(e.target.value)}
             />
           </div>
           <div>
-            <label className="text-sm font-medium">Ghi chú nhu cầu</label>
+            <label className="text-sm font-medium">Ghi chÃº nhu cáº§u</label>
             <Textarea
               className="mt-1"
-              placeholder="VD: Khách cần lắp 2 thang máy gia đình 5 tầng"
+              placeholder="VD: KhÃ¡ch cáº§n láº¯p 2 thang mÃ¡y gia Ä‘Ã¬nh 5 táº§ng"
               value={note}
               onChange={(e) => setNote(e.target.value)}
               rows={3}
@@ -1458,10 +1458,10 @@ export function CreateLeadModal({ open, onClose }: CreateLeadModalProps) {
         </div>
         <DialogFooter>
           <Button variant="outline" onClick={onClose} disabled={loading}>
-            Hủy
+            Há»§y
           </Button>
           <Button onClick={handle} disabled={loading}>
-            {loading ? "Đang thêm..." : "Thêm Lead"}
+            {loading ? "Äang thÃªm..." : "ThÃªm Lead"}
           </Button>
         </DialogFooter>
       </DialogContent>
@@ -1469,9 +1469,9 @@ export function CreateLeadModal({ open, onClose }: CreateLeadModalProps) {
   );
 }
 
-// ─────────────────────────────────────────────
-// 11. MODAL ĐIỀU PHỐI (DISPATCH)
-// ─────────────────────────────────────────────
+// â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+// 11. MODAL ÄIá»€U PHá»I (DISPATCH)
+// â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 interface DispatchJobModalProps {
   open: boolean;
   onClose: () => void;
@@ -1489,14 +1489,14 @@ export function DispatchJobModal({ open, onClose, job, onDispatch }: DispatchJob
 
   const handle = async () => {
     if (!techId) {
-      toast.error("Vui lòng chọn kỹ thuật viên để phân công");
+      toast.error("Vui lÃ²ng chá»n ká»¹ thuáº­t viÃªn Ä‘á»ƒ phÃ¢n cÃ´ng");
       return;
     }
     setLoading(true);
     await new Promise((r) => setTimeout(r, 600));
     setLoading(false);
     onDispatch(job.id, techId);
-    toast.success(`Đã giao việc cho ${mockUsers.find((u) => u.id === techId)?.name}`);
+    toast.success(`ÄÃ£ giao viá»‡c cho ${mockUsers.find((u) => u.id === techId)?.name}`);
     setTechId("");
     onClose();
   };
@@ -1509,7 +1509,7 @@ export function DispatchJobModal({ open, onClose, job, onDispatch }: DispatchJob
       <DialogContent className="max-w-md">
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
-            <Briefcase className="h-5 w-5 text-primary" /> Phân công công việc (Dispatch)
+            <Briefcase className="h-5 w-5 text-primary" /> PhÃ¢n cÃ´ng cÃ´ng viá»‡c (Dispatch)
           </DialogTitle>
         </DialogHeader>
         <div className="space-y-4 py-2">
@@ -1522,11 +1522,11 @@ export function DispatchJobModal({ open, onClose, job, onDispatch }: DispatchJob
           </div>
           <div>
             <label className="text-sm font-medium">
-              Kỹ thuật viên phụ trách <span className="text-destructive">*</span>
+              Ká»¹ thuáº­t viÃªn phá»¥ trÃ¡ch <span className="text-destructive">*</span>
             </label>
             <Select value={techId} onValueChange={setTechId}>
               <SelectTrigger className="mt-1">
-                <SelectValue placeholder="Chọn thợ đang rảnh..." />
+                <SelectValue placeholder="Chá»n thá»£ Ä‘ang ráº£nh..." />
               </SelectTrigger>
               <SelectContent>
                 {technicians.map((u) => (
@@ -1538,16 +1538,16 @@ export function DispatchJobModal({ open, onClose, job, onDispatch }: DispatchJob
             </Select>
             <p className="text-xs text-muted-foreground mt-1.5 flex items-start gap-1">
               <AlertTriangle className="h-3.5 w-3.5 shrink-0 text-info" />
-              Giao việc sẽ chuyển trạng thái công việc sang "Đã lên lịch" và báo cho thợ.
+              Giao viá»‡c sáº½ chuyá»ƒn tráº¡ng thÃ¡i cÃ´ng viá»‡c sang "ÄÃ£ lÃªn lá»‹ch" vÃ  bÃ¡o cho thá»£.
             </p>
           </div>
         </div>
         <DialogFooter>
           <Button variant="outline" onClick={onClose} disabled={loading}>
-            Hủy
+            Há»§y
           </Button>
           <Button onClick={handle} disabled={loading}>
-            {loading ? "Đang phân công..." : "Xác nhận Dispatch"}
+            {loading ? "Äang phÃ¢n cÃ´ng..." : "XÃ¡c nháº­n Dispatch"}
           </Button>
         </DialogFooter>
       </DialogContent>
@@ -1555,9 +1555,9 @@ export function DispatchJobModal({ open, onClose, job, onDispatch }: DispatchJob
   );
 }
 
-// ─────────────────────────────────────────────
-// 12. MODAL THANH TOÁN LƯƠNG
-// ─────────────────────────────────────────────
+// â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+// 12. MODAL THANH TOÃN LÆ¯Æ NG
+// â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 interface PaySalaryModalProps {
   open: boolean;
   onClose: () => void;
@@ -1573,7 +1573,7 @@ export function PaySalaryModal({ open, onClose, users }: PaySalaryModalProps) {
     await new Promise((r) => setTimeout(r, 1000));
     setLoading(false);
     toast.success(
-      `Đã thanh toán tổng cộng ${new Intl.NumberFormat("vi-VN", { style: "currency", currency: "VND" }).format(total)} cho ${users.length} nhân viên`,
+      `ÄÃ£ thanh toÃ¡n tá»•ng cá»™ng ${new Intl.NumberFormat("vi-VN", { style: "currency", currency: "VND" }).format(total)} cho ${users.length} nhÃ¢n viÃªn`,
     );
     onClose();
   };
@@ -1583,36 +1583,36 @@ export function PaySalaryModal({ open, onClose, users }: PaySalaryModalProps) {
       <DialogContent className="max-w-md">
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2 text-success">
-            <Wallet className="h-5 w-5" /> Xác nhận thanh toán lương
+            <Wallet className="h-5 w-5" /> XÃ¡c nháº­n thanh toÃ¡n lÆ°Æ¡ng
           </DialogTitle>
         </DialogHeader>
         <div className="space-y-4 py-2">
           <div className="p-4 rounded-xl bg-success/5 border border-success/20 text-center">
             <div className="text-sm text-muted-foreground uppercase tracking-wider">
-              Tổng quỹ lương trả đợt này
+              Tá»•ng quá»¹ lÆ°Æ¡ng tráº£ Ä‘á»£t nÃ y
             </div>
             <div className="text-3xl font-bold text-success mt-1">
               {new Intl.NumberFormat("vi-VN", { style: "currency", currency: "VND" }).format(total)}
             </div>
             <div className="text-xs text-muted-foreground mt-2">
-              Dự kiến chi trả cho {users.length} nhân sự
+              Dá»± kiáº¿n chi tráº£ cho {users.length} nhÃ¢n sá»±
             </div>
           </div>
           <p className="text-sm text-balance text-center text-muted-foreground">
-            Hệ thống sẽ thực hiện lệnh chuyển khoản hàng loạt đến tài khoản ngân hàng của từng nhân
-            sự. Hành động này không thể hoàn tác.
+            Há»‡ thá»‘ng sáº½ thá»±c hiá»‡n lá»‡nh chuyá»ƒn khoáº£n hÃ ng loáº¡t Ä‘áº¿n tÃ i khoáº£n ngÃ¢n hÃ ng cá»§a tá»«ng nhÃ¢n
+            sá»±. HÃ nh Ä‘á»™ng nÃ y khÃ´ng thá»ƒ hoÃ n tÃ¡c.
           </p>
         </div>
         <DialogFooter className="gap-2 sm:gap-0">
           <Button variant="outline" onClick={onClose} disabled={loading} className="flex-1">
-            Hủy
+            Há»§y
           </Button>
           <Button
             onClick={handle}
             disabled={loading}
             className="flex-1 bg-success hover:bg-success/90"
           >
-            {loading ? "Đang xử lý..." : "Xác nhận Chi trả"}
+            {loading ? "Äang xá»­ lÃ½..." : "XÃ¡c nháº­n Chi tráº£"}
           </Button>
         </DialogFooter>
       </DialogContent>
@@ -1620,9 +1620,9 @@ export function PaySalaryModal({ open, onClose, users }: PaySalaryModalProps) {
   );
 }
 
-// ─────────────────────────────────────────────
-// 13. MODAL TÁI KÝ HỢP ĐỒNG
-// ─────────────────────────────────────────────
+// â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+// 13. MODAL TÃI KÃ Há»¢P Äá»’NG
+// â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 interface RenewContractModalProps {
   open: boolean;
   onClose: () => void;
@@ -1637,7 +1637,7 @@ export function RenewContractModal({ open, onClose, contractCode }: RenewContrac
     setLoading(true);
     await new Promise((r) => setTimeout(r, 600));
     setLoading(false);
-    toast.success(`Đã tạo bản nháp tái ký cho HĐ ${contractCode}`);
+    toast.success(`ÄÃ£ táº¡o báº£n nhÃ¡p tÃ¡i kÃ½ cho HÄ ${contractCode}`);
     onClose();
   };
 
@@ -1646,16 +1646,16 @@ export function RenewContractModal({ open, onClose, contractCode }: RenewContrac
       <DialogContent className="max-w-md">
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
-            <RefreshCw className="h-5 w-5 text-primary" /> Tái ký hợp đồng
+            <RefreshCw className="h-5 w-5 text-primary" /> TÃ¡i kÃ½ há»£p Ä‘á»“ng
           </DialogTitle>
         </DialogHeader>
         <div className="space-y-4 py-4">
           <div className="text-sm">
-            Bạn đang yêu cầu tạo bản nháp tái ký cho hợp đồng{" "}
+            Báº¡n Ä‘ang yÃªu cáº§u táº¡o báº£n nhÃ¡p tÃ¡i kÃ½ cho há»£p Ä‘á»“ng{" "}
             <span className="font-bold underline">{contractCode}</span>.
           </div>
           <div>
-            <label className="text-sm font-medium">Giá trị hợp đồng mới dự kiến (VND)</label>
+            <label className="text-sm font-medium">GiÃ¡ trá»‹ há»£p Ä‘á»“ng má»›i dá»± kiáº¿n (VND)</label>
             <Input
               type="number"
               className="mt-1"
@@ -1665,16 +1665,16 @@ export function RenewContractModal({ open, onClose, contractCode }: RenewContrac
             />
           </div>
           <p className="text-xs text-muted-foreground italic">
-            * Sau khi xác nhận, hệ thống sẽ sinh 1 hợp đồng nháp mới với các thông tin kế thừa và
-            chuyển sang trạng thái "Thương thảo".
+            * Sau khi xÃ¡c nháº­n, há»‡ thá»‘ng sáº½ sinh 1 há»£p Ä‘á»“ng nhÃ¡p má»›i vá»›i cÃ¡c thÃ´ng tin káº¿ thá»«a vÃ 
+            chuyá»ƒn sang tráº¡ng thÃ¡i "ThÆ°Æ¡ng tháº£o".
           </p>
         </div>
         <DialogFooter>
           <Button variant="outline" onClick={onClose} disabled={loading}>
-            Hủy
+            Há»§y
           </Button>
           <Button onClick={handle} disabled={loading}>
-            {loading ? "Đang tạo..." : "Xác nhận tạo nháp"}
+            {loading ? "Äang táº¡o..." : "XÃ¡c nháº­n táº¡o nhÃ¡p"}
           </Button>
         </DialogFooter>
       </DialogContent>
@@ -1682,22 +1682,22 @@ export function RenewContractModal({ open, onClose, contractCode }: RenewContrac
   );
 }
 
-// ─────────────────────────────────────────────
-// 14. MODAL CHUYỂN KHO
-// ─────────────────────────────────────────────
+// â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+// 14. MODAL CHUYá»‚N KHO
+// â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 export function TransferInventoryModal({ open, onClose }: { open: boolean; onClose: () => void }) {
   const [loading, setLoading] = useState(false);
   const [target, setTarget] = useState("");
 
   const handle = async () => {
     if (!target) {
-      toast.error("Vui lòng nhập kho đích");
+      toast.error("Vui lÃ²ng nháº­p kho Ä‘Ã­ch");
       return;
     }
     setLoading(true);
     await new Promise((r) => setTimeout(r, 800));
     setLoading(false);
-    toast.success(`Lệnh chuyển kho đã được tạo — Đang chờ kho đích xác nhận`);
+    toast.success(`Lá»‡nh chuyá»ƒn kho Ä‘Ã£ Ä‘Æ°á»£c táº¡o â€” Äang chá» kho Ä‘Ã­ch xÃ¡c nháº­n`);
     onClose();
   };
 
@@ -1706,41 +1706,42 @@ export function TransferInventoryModal({ open, onClose }: { open: boolean; onClo
       <DialogContent className="max-w-md">
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
-            <ArrowRightLeft className="h-5 w-5 text-primary" /> Yêu cầu chuyển kho
+            <ArrowRightLeft className="h-5 w-5 text-primary" /> YÃªu cáº§u chuyá»ƒn kho
           </DialogTitle>
         </DialogHeader>
         <div className="space-y-4 py-4">
           <div>
-            <label className="text-sm font-medium">Kho đích</label>
+            <label className="text-sm font-medium">Kho Ä‘Ã­ch</label>
             <Select value={target} onValueChange={setTarget}>
               <SelectTrigger className="mt-1">
-                <SelectValue placeholder="Chọn kho nhận..." />
+                <SelectValue placeholder="Chá»n kho nháº­n..." />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="Kho B - Hà Đông">Kho B - Hà Đông</SelectItem>
-                <SelectItem value="Kho C - Gia Lâm">Kho C - Gia Lâm</SelectItem>
-                <SelectItem value="Kho Mobile - Kỹ thuật">Kho Mobile - Xe kỹ thuật 01</SelectItem>
+                <SelectItem value="Kho B - HÃ  ÄÃ´ng">Kho B - HÃ  ÄÃ´ng</SelectItem>
+                <SelectItem value="Kho C - Gia LÃ¢m">Kho C - Gia LÃ¢m</SelectItem>
+                <SelectItem value="Kho Mobile - Ká»¹ thuáº­t">Kho Mobile - Xe ká»¹ thuáº­t 01</SelectItem>
               </SelectContent>
             </Select>
           </div>
           <div>
-            <label className="text-sm font-medium">Ghi chú vận chuyển</label>
-            <Input className="mt-1" placeholder="Lý do chuyển..." />
+            <label className="text-sm font-medium">Ghi chÃº váº­n chuyá»ƒn</label>
+            <Input className="mt-1" placeholder="LÃ½ do chuyá»ƒn..." />
           </div>
           <p className="text-xs text-muted-foreground">
-            * Sau khi xác nhận, số lượng vật tư sẽ được đưa vào trạng thái "Đang trung chuyển" và
-            trừ khỏi kho hiện tại.
+            * Sau khi xÃ¡c nháº­n, sá»‘ lÆ°á»£ng váº­t tÆ° sáº½ Ä‘Æ°á»£c Ä‘Æ°a vÃ o tráº¡ng thÃ¡i "Äang trung chuyá»ƒn" vÃ 
+            trá»« khá»i kho hiá»‡n táº¡i.
           </p>
         </div>
         <DialogFooter>
           <Button variant="outline" onClick={onClose} disabled={loading}>
-            Hủy
+            Há»§y
           </Button>
           <Button onClick={handle} disabled={loading}>
-            {loading ? "Đang xử lý..." : "Xác nhận chuyển"}
+            {loading ? "Äang xá»­ lÃ½..." : "XÃ¡c nháº­n chuyá»ƒn"}
           </Button>
         </DialogFooter>
       </DialogContent>
     </Dialog>
   );
 }
+

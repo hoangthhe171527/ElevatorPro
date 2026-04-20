@@ -6,6 +6,7 @@ import { StatCard } from "@/components/common/StatCard";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { StatusBadge } from "@/components/common/StatusBadge";
+import { cn } from "@/lib/utils";
 import {
   jobStatusLabel,
   jobStatusVariant,
@@ -33,6 +34,7 @@ import {
   Building2,
   TrendingUp,
   Calendar,
+  Clock,
   ArrowUpRight,
   Plus,
   Navigation,

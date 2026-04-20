@@ -1,5 +1,7 @@
 ﻿import { createFileRoute, Link } from "@tanstack/react-router";
 import { MobileShell } from "@/components/layout/MobileShell";
+import { canAccessMobilePath } from "@/lib/mobile-policy";
+import { useCurrentPermissions, useMainRole } from "@/lib/store";
 import { Card } from "@/components/ui/card";
 import { StatusBadge } from "@/components/common/StatusBadge";
 import { contractStatusLabel, contractStatusVariant } from "@/lib/status-variants";
@@ -14,6 +16,24 @@ export const Route = createFileRoute("/mobile/portal/billing")({
 const CUSTOMER_ID = "c-1";
 
 function CustomerBilling() {
+  const role = useMainRole();
+  const permissions = useCurrentPermissions();
+
+  if (!canAccessMobilePath("/mobile/portal/billing", role, permissions)) {
+    return (
+      <MobileShell title="Không có quyền truy cập">
+        <div className="min-h-screen bg-slate-50 px-4 pt-4 pb-36">
+          <Card className="p-6 text-center rounded-2xl border-slate-100">
+            <p className="text-sm font-semibold text-slate-900">Màn tài chính portal chỉ dành cho khách hàng.</p>
+            <Link to="/mobile" className="inline-block mt-4">
+              <span className="inline-flex h-10 items-center rounded-xl bg-slate-900 px-4 text-sm font-semibold text-white">Về trang chính mobile</span>
+            </Link>
+          </Card>
+        </div>
+      </MobileShell>
+    );
+  }
+
   const myContracts = mockContracts.filter((c) => c.customerId === CUSTOMER_ID);
   const totalValue = myContracts.reduce((sum, c) => sum + c.value, 0);
   const totalPaid = myContracts.reduce((sum, c) => sum + c.paid, 0);
@@ -54,7 +74,7 @@ function CustomerBilling() {
             <h3 className="text-[10px] font-black uppercase text-slate-400 tracking-[0.2em] mb-4 px-1">Lịch sử hợp đồng</h3>
             <div className="space-y-3">
               {myContracts.map((c) => (
-                <Link key={c.id} to="/mobile/contracts/$contractId" params={{ contractId: c.id }}>
+                <Link key={c.id} to="/mobile/portal/contracts/$contractId" params={{ contractId: c.id }}>
                   <Card className="p-5 border-none shadow-sm bg-white rounded-[2rem] active:scale-[0.98] transition-all">
                     <div className="flex justify-between items-start mb-4">
                       <div>

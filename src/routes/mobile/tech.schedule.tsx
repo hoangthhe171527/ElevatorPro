@@ -1,7 +1,7 @@
-﻿import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute } from "@tanstack/react-router";
 import { MobileWorkbenchList } from "@/components/mobile/MobileWorkbenchPage";
 
-export const Route = createFileRoute("/mobile/schedule")({
+export const Route = createFileRoute("/mobile/tech/schedule")({
   component: Screen,
 });
 

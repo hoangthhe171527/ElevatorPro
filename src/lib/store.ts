@@ -15,7 +15,7 @@ const ADMIN_PERMISSIONS: Permission[] = [
   "maintenance_mgmt",
 ];
 
-const TECH_PERMISSIONS: Permission[] = ["field_tech", "tech_survey", "maintenance_mgmt", "install_mgmt"];
+const TECH_PERMISSIONS: Permission[] = ["field_tech", "tech_survey"];
 const CUSTOMER_PERMISSIONS: Permission[] = ["customer"];
 
 function getPermissionsForTenant(userId: string, tenantId: string): Permission[] {
@@ -93,7 +93,10 @@ export const useAppStore = create<AppState>()(
       mainRole: "admin",
       setUserId: (userId) => {
         const user = mockUsers.find((u) => u.id === userId);
-        const activeTenantId = user?.memberships?.[0]?.tenantId || get().activeTenantId;
+        const currentTenant = get().activeTenantId;
+        const activeTenantId = user?.memberships?.some((m) => m.tenantId === currentTenant)
+          ? currentTenant
+          : user?.memberships?.[0]?.tenantId || currentTenant;
         const mainRole = resolveRoleForUser(userId, activeTenantId, get().mainRole);
         set({ userId, activeTenantId, mainRole, activeJobCheckIn: null });
       },
@@ -124,7 +127,10 @@ export const useAppStore = create<AppState>()(
       },
       setMainRole: (role) => {
         const tenantId = get().activeTenantId;
-        const nextUserId = findUserIdForRole(tenantId, role) || get().userId;
+        const currentUserId = get().userId;
+        const nextUserId = hasRoleInTenant(currentUserId, tenantId, role)
+          ? currentUserId
+          : findUserIdForRole(tenantId, role) || currentUserId;
         const nextRole = resolveRoleForUser(nextUserId, tenantId, role);
         set({ userId: nextUserId, mainRole: nextRole, activeJobCheckIn: null });
       },

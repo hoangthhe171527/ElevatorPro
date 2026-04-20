@@ -1,6 +1,9 @@
-﻿import { createFileRoute } from "@tanstack/react-router";
+﻿import { createFileRoute, Link } from "@tanstack/react-router";
 import { MobileShell } from "@/components/layout/MobileShell";
 import { Button } from "@/components/ui/button";
+import { Card } from "@/components/ui/card";
+import { canAccessMobilePath } from "@/lib/mobile-policy";
+import { useCurrentPermissions, useMainRole } from "@/lib/store";
 import { Scan, X, Zap, History, Info } from "lucide-react";
 import { useState } from "react";
 
@@ -9,7 +12,24 @@ export const Route = createFileRoute("/mobile/scanner")({
 });
 
 function MobileScanner() {
+   const role = useMainRole();
+   const permissions = useCurrentPermissions();
   const [isScanning, setIsScanning] = useState(true);
+
+   if (!canAccessMobilePath("/mobile/scanner", role, permissions)) {
+      return (
+         <MobileShell title="Không có quyền truy cập">
+            <div className="min-h-screen bg-slate-50 px-4 pt-4 pb-36">
+               <Card className="p-6 text-center rounded-2xl border-slate-100">
+                  <p className="text-sm font-semibold text-slate-900">Màn quét QR chỉ dành cho kỹ thuật hoặc khách hàng portal.</p>
+                  <Link to="/mobile" className="inline-block mt-4">
+                     <Button className="rounded-xl">Về trang chính mobile</Button>
+                  </Link>
+               </Card>
+            </div>
+         </MobileShell>
+      );
+   }
 
   return (
     <MobileShell title="Quét QR Thiết bị" hideHeader={true}>
