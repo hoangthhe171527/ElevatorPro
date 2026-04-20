@@ -81,15 +81,13 @@ function TechRoutePlanMobile() {
         </svg>
 
         <div className="absolute bottom-5 left-5 right-5 flex gap-3">
-              <Button 
-                size="icon" 
-                onClick={() => handleOpenMap("123 Lộ trình thông minh, TP.HCM")}
-                className="h-12 w-12 rounded-2xl bg-primary text-white shadow-xl shadow-primary/20 shrink-0"
-              >
-                <Navigation className="h-5 w-5" />
-              </Button>
-            </div>
-          </Card>
+          <Button 
+            size="icon" 
+            onClick={() => handleOpenMap("123 Lộ trình thông minh, TP.HCM")}
+            className="h-12 w-12 rounded-2xl bg-primary text-white shadow-xl shadow-primary/20 shrink-0"
+          >
+            <Navigation className="h-5 w-5" />
+          </Button>
           <Button 
             size="icon" 
             onClick={() => handleOpenMap("123 Lộ trình thông minh, TP.HCM")}

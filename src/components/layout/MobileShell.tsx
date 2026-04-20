@@ -131,18 +131,12 @@ export function MobileShell({ children, title, showBackButton, backLink, actions
 
   const currentRoleName = user.name.split("(")[1] ? user.name.split("(")[1].replace(")", "") : "Thành viên";
 
-  // Context-aware Floating Action Button
   const fabConfig = useMemo(() => {
     if (location.pathname.includes('/inventory')) return { icon: Scan, to: '/mobile/scanner', label: 'Quét mã' };
     if (location.pathname.includes('/leads')) return { icon: Plus, to: '/mobile/leads/new', label: 'Thêm Lead' };
     if (location.pathname.includes('/jobs')) return { icon: ClipboardCheck, to: '/mobile/jobs', label: 'Việc của tôi' };
     return null;
   }, [location.pathname]);
-
-  const isActive = (to: string) =>
-    location.pathname === to || (to !== "/mobile" && location.pathname.startsWith(to));
-
-  const currentRoleName = user.name.split("(")[1] ? user.name.split("(")[1].replace(")", "") : "Thành viên";
 
   return (
     <div className="min-h-screen bg-slate-50 flex items-center justify-center p-0 md:p-12">
