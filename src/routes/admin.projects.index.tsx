@@ -12,7 +12,7 @@ import { DataPagination } from "@/components/common/DataPagination";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
 import { ConfirmationDialog } from "@/components/common/ConfirmationDialog";
 
-export const Route = createFileRoute("/admin/projects")({
+export const Route = createFileRoute("/admin/projects/")({
   head: () => ({ meta: [{ title: "Tiến độ Dự án Lắp đặt — ElevatorPro" }] }),
   component: ProjectsPage,
 });
