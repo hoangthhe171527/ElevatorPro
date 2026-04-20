@@ -15,10 +15,10 @@ import {
   BellRing,
   FileText,
   Zap,
-  ArrowRight
+  ArrowRight,
+  CreditCard
 } from "lucide-react";
 import { toast } from "sonner";
-import { StatCard } from "@/components/common/StatCard";
 
 export const Route = createFileRoute("/mobile/portal")({
   head: () => ({ meta: [{ title: "Cổng khách hàng — Mobile" }] }),
@@ -98,67 +98,74 @@ function MobileCustomerPortal() {
             {upcomingJob && (
                 <section>
                     <h3 className="text-[10px] font-black uppercase text-slate-400 tracking-[0.2em] mb-4 px-1">Lịch làm việc sắp tới</h3>
-                    <Card className="p-5 border-none shadow-xl shadow-indigo-900/5 bg-white rounded-[2.2rem] border-l-8 border-l-indigo-600">
-                      <div className="flex gap-4">
-                        <div className="h-12 w-12 rounded-2xl bg-indigo-50 flex flex-col items-center justify-center shrink-0">
-                          <span className="text-[9px] font-black text-indigo-400 uppercase leading-none">THÁNG</span>
-                          <span className="text-xl font-black text-indigo-600 leading-none mt-1 italic">05</span>
+                    <Link to="/mobile/jobs/$jobId" params={{ jobId: upcomingJob.id }}>
+                      <Card className="p-5 border-none shadow-xl shadow-indigo-900/5 bg-white rounded-[2.2rem] border-l-8 border-l-indigo-600">
+                        <div className="flex gap-4">
+                          <div className="h-12 w-12 rounded-2xl bg-indigo-50 flex flex-col items-center justify-center shrink-0">
+                            <span className="text-[9px] font-black text-indigo-400 uppercase leading-none">THÁNG</span>
+                            <span className="text-xl font-black text-indigo-600 leading-none mt-1 italic">05</span>
+                          </div>
+                          <div className="flex-1 min-w-0">
+                            <h4 className="font-black text-sm text-slate-900 uppercase italic truncate">{upcomingJob.title}</h4>
+                            <p className="text-[10px] text-slate-400 font-bold mt-1 uppercase">Dự kiến: 09:30 | {upcomingJob.status}</p>
+                          </div>
+                          <Button variant="ghost" size="icon" className="h-10 w-10 rounded-full bg-slate-50">
+                              <ArrowRight className="h-4 w-4 text-slate-400" />
+                          </Button>
                         </div>
-                        <div className="flex-1 min-w-0">
-                          <h4 className="font-black text-sm text-slate-900 uppercase italic truncate">{upcomingJob.title}</h4>
-                          <p className="text-[10px] text-slate-400 font-bold mt-1 uppercase">Dự kiến: 09:30 | {upcomingJob.status}</p>
-                        </div>
-                        <Button variant="ghost" size="icon" className="h-10 w-10 rounded-full bg-slate-50">
-                            <ArrowRight className="h-4 w-4 text-slate-400" />
-                        </Button>
-                      </div>
-                    </Card>
+                      </Card>
+                    </Link>
                 </section>
             )}
+
+            {/* Quick Actions */}
+            <div className="grid grid-cols-2 gap-4">
+                <Link to="/mobile/portal/billing">
+                  <Button variant="outline" className="w-full h-20 rounded-[1.8rem] bg-white border-slate-100 flex-col gap-1.5 shadow-sm active:scale-95 transition-all text-indigo-600 hover:bg-white/80">
+                      <CreditCard className="h-6 w-6" />
+                      <span className="text-[9px] font-black uppercase tracking-widest">Tài chính</span>
+                  </Button>
+                </Link>
+                <Link to="/mobile/portal/issues">
+                  <Button variant="outline" className="w-full h-20 rounded-[1.8rem] bg-white border-slate-100 flex-col gap-1.5 shadow-sm active:scale-95 transition-all text-rose-600 hover:bg-white/80">
+                      <AlertCircle className="h-6 w-6" />
+                      <span className="text-[9px] font-black uppercase tracking-widest">Báo sự cố</span>
+                  </Button>
+                </Link>
+            </div>
 
             {/* Assets Summary */}
             <section>
                 <div className="flex items-center justify-between mb-4 px-1">
                     <h3 className="text-[10px] font-black uppercase text-slate-400 tracking-[0.2em]">Thang máy của bạn</h3>
-                    <Link to="/mobile/portal/issues">
+                    <Link to="/mobile/elevators">
                         <span className="text-[10px] font-black text-indigo-600 uppercase">Tất cả</span>
                     </Link>
                 </div>
                 <div className="space-y-3">
                     {myElevators.slice(0, 3).map((e) => (
-                        <Card
-                            key={e.id}
-                            className="p-4 border-none shadow-sm flex items-center gap-4 bg-white rounded-[1.8rem] active:bg-slate-50 transition-colors"
-                        >
-                            <div className="h-12 w-12 rounded-2xl bg-slate-50 flex items-center justify-center shrink-0">
-                                <Building2 className="h-6 w-6 text-slate-300" />
-                            </div>
-                            <div className="flex-1 min-w-0">
-                                <h4 className="font-black text-[13px] text-slate-900 uppercase italic truncate">{e.building}</h4>
-                                <div className="flex items-center gap-2 mt-1">
-                                    <span className="text-[10px] font-black text-slate-400 uppercase">{e.code}</span>
-                                    <StatusBadge variant={elevatorStatusVariant[e.status]} className="h-4 px-1 text-[8px]">
-                                        {elevatorStatusLabel[e.status]}
-                                    </StatusBadge>
-                                </div>
-                            </div>
-                            <ChevronRight className="h-4 w-4 text-slate-200" />
-                        </Card>
+                        <Link key={e.id} to="/mobile/elevators/$elevatorId" params={{ elevatorId: e.id }}>
+                          <Card
+                              className="p-4 border-none shadow-sm flex items-center gap-4 bg-white rounded-[1.8rem] active:bg-slate-50 transition-colors"
+                          >
+                              <div className="h-12 w-12 rounded-2xl bg-slate-50 flex items-center justify-center shrink-0">
+                                  <Building2 className="h-6 w-6 text-slate-300" />
+                              </div>
+                              <div className="flex-1 min-w-0">
+                                  <h4 className="font-black text-[13px] text-slate-900 uppercase italic truncate">{e.building}</h4>
+                                  <div className="flex items-center gap-2 mt-1">
+                                      <span className="text-[10px] font-black text-slate-400 uppercase">{e.code}</span>
+                                      <StatusBadge variant={elevatorStatusVariant[e.status]} className="h-4 px-1 text-[8px]">
+                                          {elevatorStatusLabel[e.status]}
+                                      </StatusBadge>
+                                  </div>
+                              </div>
+                              <ChevronRight className="h-4 w-4 text-slate-200" />
+                          </Card>
+                        </Link>
                     ))}
                 </div>
             </section>
-
-            {/* Quick Actions */}
-            <div className="grid grid-cols-2 gap-4 pt-4">
-                <Button variant="outline" className="h-20 rounded-[1.8rem] bg-white border-slate-100 flex-col gap-1.5 shadow-sm active:scale-95 transition-all text-rose-600 hover:bg-rose-50" onClick={() => window.location.href = "/mobile/portal/issues"}>
-                    <AlertCircle className="h-6 w-6" />
-                    <span className="text-[9px] font-black uppercase tracking-widest">Báo sự cố</span>
-                </Button>
-                <Button variant="outline" className="h-20 rounded-[1.8rem] bg-white border-slate-100 flex-col gap-1.5 shadow-sm active:scale-95 transition-all text-indigo-600 hover:bg-indigo-50">
-                    <FileText className="h-6 w-6" />
-                    <span className="text-[9px] font-black uppercase tracking-widest">Hợp đồng</span>
-                </Button>
-            </div>
         </div>
       </div>
     </MobileShell>
