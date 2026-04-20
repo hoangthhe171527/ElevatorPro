@@ -339,8 +339,12 @@ export function AppShell({ children }: { children: React.ReactNode }) {
             <DropdownMenuContent align="end">
               <DropdownMenuLabel>Tài khoản</DropdownMenuLabel>
               <DropdownMenuSeparator />
-              <DropdownMenuItem>Hồ sơ</DropdownMenuItem>
-              <DropdownMenuItem>Cài đặt</DropdownMenuItem>
+              <DropdownMenuItem asChild>
+                <Link to={"/admin/profile" as any}>Hồ sơ</Link>
+              </DropdownMenuItem>
+              <DropdownMenuItem asChild>
+                <Link to={"/admin/settings" as any}>Cài đặt</Link>
+              </DropdownMenuItem>
               <DropdownMenuSeparator />
               <DropdownMenuItem asChild>
                 <Link to="/">Đăng xuất</Link>
