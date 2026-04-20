@@ -24,7 +24,7 @@ export function MobileShell({ children, title, hideHeader = false }: MobileShell
   const router = useRouter();
 
   return (
-    <div className="flex flex-col min-h-screen bg-slate-50 text-slate-900 font-sans max-w-md mx-auto shadow-2xl relative overflow-hidden ring-1 ring-slate-200">
+    <div className="flex flex-col min-h-screen bg-slate-50 text-slate-900 font-sans relative overflow-hidden">
       {/* Dynamic Header */}
       {!hideHeader && (
         <header className="sticky top-0 z-50 bg-white/80 backdrop-blur-md border-b border-slate-100 px-5 py-4 flex items-center justify-between shadow-sm">
@@ -46,12 +46,12 @@ export function MobileShell({ children, title, hideHeader = false }: MobileShell
       )}
 
       {/* Main Content Area */}
-      <main className="flex-1 overflow-y-auto">
+      <main className="flex-1 overflow-y-auto overflow-x-hidden">
         {children}
       </main>
 
       {/* Modern Bottom Navigation */}
-      <nav className="fixed bottom-0 left-0 right-0 max-w-md mx-auto bg-white/90 backdrop-blur-xl border-t border-slate-100 px-6 py-3 pb-6 flex items-center justify-between z-50 shadow-[0_-4px_12px_rgba(0,0,0,0.03)] rounded-t-[1.5rem]">
+      <nav className="fixed bottom-0 left-0 right-0 max-w-[440px] mx-auto bg-white/90 backdrop-blur-xl border-t border-slate-100 px-6 py-3 pb-6 flex items-center justify-between z-50 shadow-[0_-4px_12px_rgba(0,0,0,0.03)] rounded-t-[1.5rem]">
         <Link to="/mobile/" className="flex flex-col items-center gap-1 group">
           <div className={cn("h-10 w-10 rounded-xl flex items-center justify-center transition-all group-active:scale-90", "text-slate-400")}>
             <Home className="h-5 w-5" />
