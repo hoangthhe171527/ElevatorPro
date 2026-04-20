@@ -55,6 +55,7 @@ import { Route as PortalElevatorsElevatorIdRouteImport } from './routes/portal.e
 import { Route as MobileProjectsProjectIdRouteImport } from './routes/mobile/projects.$projectId'
 import { Route as MobileJobsJobIdRouteImport } from './routes/mobile/jobs.$jobId'
 import { Route as MobileElevatorsElevatorIdRouteImport } from './routes/mobile/elevators.$elevatorId'
+import { Route as MobileCustomersCustomerIdRouteImport } from './routes/mobile/customers.$customerId'
 import { Route as AdminProjectsProjectIdRouteImport } from './routes/admin.projects.$projectId'
 import { Route as AdminJobsJobIdRouteImport } from './routes/admin.jobs.$jobId'
 import { Route as AdminElevatorsElevatorIdRouteImport } from './routes/admin.elevators.$elevatorId'
@@ -293,6 +294,12 @@ const MobileElevatorsElevatorIdRoute =
     path: '/$elevatorId',
     getParentRoute: () => MobileElevatorsRoute,
   } as any)
+const MobileCustomersCustomerIdRoute =
+  MobileCustomersCustomerIdRouteImport.update({
+    id: '/$customerId',
+    path: '/$customerId',
+    getParentRoute: () => MobileCustomersRoute,
+  } as any)
 const AdminProjectsProjectIdRoute = AdminProjectsProjectIdRouteImport.update({
   id: '/admin/projects/$projectId',
   path: '/admin/projects/$projectId',
@@ -334,7 +341,7 @@ export interface FileRoutesByFullPath {
   '/admin/settings': typeof AdminSettingsRoute
   '/mobile/accounting': typeof MobileAccountingRoute
   '/mobile/approvals': typeof MobileApprovalsRoute
-  '/mobile/customers': typeof MobileCustomersRoute
+  '/mobile/customers': typeof MobileCustomersRouteWithChildren
   '/mobile/elevators': typeof MobileElevatorsRouteWithChildren
   '/mobile/hr': typeof MobileHrRoute
   '/mobile/inventory': typeof MobileInventoryRoute
@@ -361,6 +368,7 @@ export interface FileRoutesByFullPath {
   '/admin/elevators/$elevatorId': typeof AdminElevatorsElevatorIdRouteWithChildren
   '/admin/jobs/$jobId': typeof AdminJobsJobIdRoute
   '/admin/projects/$projectId': typeof AdminProjectsProjectIdRoute
+  '/mobile/customers/$customerId': typeof MobileCustomersCustomerIdRoute
   '/mobile/elevators/$elevatorId': typeof MobileElevatorsElevatorIdRoute
   '/mobile/jobs/$jobId': typeof MobileJobsJobIdRoute
   '/mobile/projects/$projectId': typeof MobileProjectsProjectIdRoute
@@ -387,7 +395,7 @@ export interface FileRoutesByTo {
   '/admin/settings': typeof AdminSettingsRoute
   '/mobile/accounting': typeof MobileAccountingRoute
   '/mobile/approvals': typeof MobileApprovalsRoute
-  '/mobile/customers': typeof MobileCustomersRoute
+  '/mobile/customers': typeof MobileCustomersRouteWithChildren
   '/mobile/elevators': typeof MobileElevatorsRouteWithChildren
   '/mobile/hr': typeof MobileHrRoute
   '/mobile/inventory': typeof MobileInventoryRoute
@@ -414,6 +422,7 @@ export interface FileRoutesByTo {
   '/admin/elevators/$elevatorId': typeof AdminElevatorsElevatorIdRouteWithChildren
   '/admin/jobs/$jobId': typeof AdminJobsJobIdRoute
   '/admin/projects/$projectId': typeof AdminProjectsProjectIdRoute
+  '/mobile/customers/$customerId': typeof MobileCustomersCustomerIdRoute
   '/mobile/elevators/$elevatorId': typeof MobileElevatorsElevatorIdRoute
   '/mobile/jobs/$jobId': typeof MobileJobsJobIdRoute
   '/mobile/projects/$projectId': typeof MobileProjectsProjectIdRoute
@@ -441,7 +450,7 @@ export interface FileRoutesById {
   '/admin/settings': typeof AdminSettingsRoute
   '/mobile/accounting': typeof MobileAccountingRoute
   '/mobile/approvals': typeof MobileApprovalsRoute
-  '/mobile/customers': typeof MobileCustomersRoute
+  '/mobile/customers': typeof MobileCustomersRouteWithChildren
   '/mobile/elevators': typeof MobileElevatorsRouteWithChildren
   '/mobile/hr': typeof MobileHrRoute
   '/mobile/inventory': typeof MobileInventoryRoute
@@ -468,6 +477,7 @@ export interface FileRoutesById {
   '/admin/elevators/$elevatorId': typeof AdminElevatorsElevatorIdRouteWithChildren
   '/admin/jobs/$jobId': typeof AdminJobsJobIdRoute
   '/admin/projects/$projectId': typeof AdminProjectsProjectIdRoute
+  '/mobile/customers/$customerId': typeof MobileCustomersCustomerIdRoute
   '/mobile/elevators/$elevatorId': typeof MobileElevatorsElevatorIdRoute
   '/mobile/jobs/$jobId': typeof MobileJobsJobIdRoute
   '/mobile/projects/$projectId': typeof MobileProjectsProjectIdRoute
@@ -523,6 +533,7 @@ export interface FileRouteTypes {
     | '/admin/elevators/$elevatorId'
     | '/admin/jobs/$jobId'
     | '/admin/projects/$projectId'
+    | '/mobile/customers/$customerId'
     | '/mobile/elevators/$elevatorId'
     | '/mobile/jobs/$jobId'
     | '/mobile/projects/$projectId'
@@ -576,6 +587,7 @@ export interface FileRouteTypes {
     | '/admin/elevators/$elevatorId'
     | '/admin/jobs/$jobId'
     | '/admin/projects/$projectId'
+    | '/mobile/customers/$customerId'
     | '/mobile/elevators/$elevatorId'
     | '/mobile/jobs/$jobId'
     | '/mobile/projects/$projectId'
@@ -629,6 +641,7 @@ export interface FileRouteTypes {
     | '/admin/elevators/$elevatorId'
     | '/admin/jobs/$jobId'
     | '/admin/projects/$projectId'
+    | '/mobile/customers/$customerId'
     | '/mobile/elevators/$elevatorId'
     | '/mobile/jobs/$jobId'
     | '/mobile/projects/$projectId'
@@ -656,7 +669,7 @@ export interface RootRouteChildren {
   AdminSettingsRoute: typeof AdminSettingsRoute
   MobileAccountingRoute: typeof MobileAccountingRoute
   MobileApprovalsRoute: typeof MobileApprovalsRoute
-  MobileCustomersRoute: typeof MobileCustomersRoute
+  MobileCustomersRoute: typeof MobileCustomersRouteWithChildren
   MobileElevatorsRoute: typeof MobileElevatorsRouteWithChildren
   MobileHrRoute: typeof MobileHrRoute
   MobileInventoryRoute: typeof MobileInventoryRoute
@@ -1018,6 +1031,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof MobileElevatorsElevatorIdRouteImport
       parentRoute: typeof MobileElevatorsRoute
     }
+    '/mobile/customers/$customerId': {
+      id: '/mobile/customers/$customerId'
+      path: '/$customerId'
+      fullPath: '/mobile/customers/$customerId'
+      preLoaderRoute: typeof MobileCustomersCustomerIdRouteImport
+      parentRoute: typeof MobileCustomersRoute
+    }
     '/admin/projects/$projectId': {
       id: '/admin/projects/$projectId'
       path: '/admin/projects/$projectId'
@@ -1055,6 +1075,18 @@ declare module '@tanstack/react-router' {
     }
   }
 }
+
+interface MobileCustomersRouteChildren {
+  MobileCustomersCustomerIdRoute: typeof MobileCustomersCustomerIdRoute
+}
+
+const MobileCustomersRouteChildren: MobileCustomersRouteChildren = {
+  MobileCustomersCustomerIdRoute: MobileCustomersCustomerIdRoute,
+}
+
+const MobileCustomersRouteWithChildren = MobileCustomersRoute._addFileChildren(
+  MobileCustomersRouteChildren,
+)
 
 interface MobileElevatorsRouteChildren {
   MobileElevatorsElevatorIdRoute: typeof MobileElevatorsElevatorIdRoute
@@ -1118,7 +1150,7 @@ const rootRouteChildren: RootRouteChildren = {
   AdminSettingsRoute: AdminSettingsRoute,
   MobileAccountingRoute: MobileAccountingRoute,
   MobileApprovalsRoute: MobileApprovalsRoute,
-  MobileCustomersRoute: MobileCustomersRoute,
+  MobileCustomersRoute: MobileCustomersRouteWithChildren,
   MobileElevatorsRoute: MobileElevatorsRouteWithChildren,
   MobileHrRoute: MobileHrRoute,
   MobileInventoryRoute: MobileInventoryRoute,
@@ -1158,12 +1190,3 @@ const rootRouteChildren: RootRouteChildren = {
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
-
-import type { getRouter } from './router.tsx'
-import type { createStart } from '@tanstack/react-start'
-declare module '@tanstack/react-start' {
-  interface Register {
-    ssr: true
-    router: Awaited<ReturnType<typeof getRouter>>
-  }
-}

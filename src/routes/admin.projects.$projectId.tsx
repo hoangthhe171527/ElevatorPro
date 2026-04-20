@@ -88,7 +88,7 @@ function ProjectDetailPage() {
                 variant="outline"
                 className="border-primary text-primary hover:bg-primary/5"
               >
-                <Check className="h-4 w-4 mr-1.5" /> Hoàn tất: {PROJECT_STAGE_LABELS[project.stage]}
+                <Check className="h-4 w-4 mr-1.5" /> Hoàn tất: {PROJECT_STAGE_LABELS[project.stage as keyof typeof PROJECT_STAGE_LABELS]}
               </Button>
             )}
             <Button onClick={() => setCreateJobOpen(true)}>
@@ -188,7 +188,7 @@ function ProjectDetailPage() {
             </div>
             <div className="flex justify-between items-center py-2 border-b border-dashed">
               <span className="text-sm text-muted-foreground">Giai đoạn hiện tại</span>
-              <span className="font-bold text-primary">{PROJECT_STAGE_LABELS[project.stage]}</span>
+              <span className="font-bold text-primary">{PROJECT_STAGE_LABELS[project.stage as keyof typeof PROJECT_STAGE_LABELS]}</span>
             </div>
           </CardContent>
         </Card>
@@ -234,7 +234,7 @@ function ProjectDetailPage() {
                     <div
                       className={`text-[11px] text-center font-bold uppercase tracking-tight leading-tight ${isCurrent ? "text-primary" : "text-muted-foreground"}`}
                     >
-                      {PROJECT_STAGE_LABELS[stage]}
+                      {PROJECT_STAGE_LABELS[stage as keyof typeof PROJECT_STAGE_LABELS]}
                     </div>
                   </div>
                 );
@@ -322,7 +322,7 @@ function ProjectDetailPage() {
         open={confirmOpen}
         onOpenChange={setConfirmOpen}
         title="Xác nhận giai đoạn hoàn tất"
-        description={`Bạn có chắc chắn muốn xác nhận hoàn tất giai đoạn "${PROJECT_STAGE_LABELS[project.stage]}" cho dự án này không?`}
+        description={`Bạn có chắc chắn muốn xác nhận hoàn tất giai đoạn "${PROJECT_STAGE_LABELS[project.stage as keyof typeof PROJECT_STAGE_LABELS]}" cho dự án này không?`}
         onConfirm={handleAdvance}
         variant="success"
       />

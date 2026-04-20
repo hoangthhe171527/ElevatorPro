@@ -238,12 +238,14 @@ function JobsPage() {
       </Card>
 
       <CreateJobModal open={createOpen} onClose={() => setCreateOpen(false)} />
-      <DispatchJobModal
-        open={!!dispatchJob}
-        onClose={() => setDispatchJob(null)}
-        job={dispatchJob}
-        onDispatch={handleDispatch}
-      />
+      {dispatchJob && (
+        <DispatchJobModal
+          open={!!dispatchJob}
+          onClose={() => setDispatchJob(null)}
+          job={dispatchJob}
+          onDispatch={handleDispatch}
+        />
+      )}
     </AppShell>
   );
 }

@@ -57,186 +57,217 @@ function ProjectDetailMobile() {
   };
 
   return (
-    <MobileShell title="Chi tiết dự án" showBackButton>
-      <div className="p-4 space-y-5">
-        {/* Hero Card */}
-        <Card className="p-5 border-none shadow-sm bg-primary text-white overflow-hidden relative">
+    <MobileShell title={project.name} showBackButton>
+      <div className="flex flex-col pb-10">
+        {/* Header Hero Section */}
+        <div className="bg-primary pt-6 pb-12 px-6 relative overflow-hidden">
           <div className="relative z-10">
-            <div className="flex justify-between items-start mb-2">
-              <span className="text-[10px] font-bold uppercase tracking-widest opacity-80">
-                Đang thi công
-              </span>
-              <Building2 className="h-5 w-5 opacity-40" />
-            </div>
-            <h2 className="text-xl font-bold mb-1">{project.name}</h2>
-            <div className="flex items-center gap-2 text-[11px] opacity-90">
-              <MapPin className="h-3 w-3" />
-              {project.address}
-            </div>
-
-            <div className="mt-6 flex justify-between items-end">
+            <div className="flex justify-between items-start mb-4">
               <div className="flex flex-col gap-1">
-                <span className="text-[10px] uppercase font-bold opacity-70">Khởi công</span>
-                <span className="text-sm font-bold">{formatDateTime(project.startDate)}</span>
+                <StatusBadge variant="muted" className="bg-white/20 text-white border-none w-fit">
+                  Đang thi công
+                </StatusBadge>
+                <h2 className="text-2xl font-bold text-white mt-1 leading-tight">{project.name}</h2>
               </div>
-              <div className="h-10 w-10 rounded-full border-2 border-white/20 flex items-center justify-center font-bold text-xs">
-                {Math.round(((currentStageIndex + 1) / stages.length) * 100)}%
+              <div className="h-12 w-12 rounded-2xl bg-white/10 backdrop-blur-md flex items-center justify-center border border-white/20">
+                <Building2 className="h-6 w-6 text-white" />
+              </div>
+            </div>
+            
+            <div className="flex items-center gap-2 text-white/70 text-xs mb-6">
+              <MapPin className="h-3.5 w-3.5 shrink-0" />
+              <span className="truncate">{project.address}</span>
+            </div>
+
+            <div className="grid grid-cols-2 gap-4">
+              <div className="bg-white/10 backdrop-blur-md p-3 rounded-xl border border-white/20">
+                <p className="text-[10px] uppercase font-bold text-white/50 tracking-wider">Khởi công</p>
+                <p className="text-sm font-bold text-white mt-0.5">{formatDateTime(project.startDate)}</p>
+              </div>
+              <div className="bg-white/10 backdrop-blur-md p-3 rounded-xl border border-white/20 flex items-center justify-between">
+                <div>
+                  <p className="text-[10px] uppercase font-bold text-white/50 tracking-wider">Tiến độ</p>
+                  <p className="text-sm font-bold text-white mt-0.5">{Math.round(((currentStageIndex + 1) / stages.length) * 100)}%</p>
+                </div>
+                <TrendingUp className="h-4 w-4 text-emerald-400 shrink-0" />
               </div>
             </div>
           </div>
-          {/* Abstract Background Decoration */}
-          <div className="absolute top-0 right-0 w-32 h-32 bg-white/10 rounded-full blur-3xl -translate-y-1/2 translate-x-1/2" />
-        </Card>
+          
+          {/* Abstract Decorations */}
+          <div className="absolute top-[-20%] right-[-10%] w-64 h-64 bg-white/5 rounded-full blur-3xl pointer-events-none" />
+          <div className="absolute bottom-[-50%] left-[-10%] w-48 h-48 bg-primary-foreground/10 rounded-full blur-2xl pointer-events-none" />
+        </div>
 
-        {/* Client Quick View */}
-        <section>
-          <div className="flex items-center justify-between mb-3 px-1">
-            <h3 className="text-xs font-bold uppercase text-muted-foreground">Chủ đầu tư</h3>
-            <Button
-              variant="ghost"
-              size="sm"
-              className="h-6 text-[10px] font-bold text-primary px-1"
-            >
-              GỌI NGAY
-            </Button>
-          </div>
-          <Card className="p-4 border-none shadow-sm flex items-center justify-between">
-            <div className="flex items-center gap-3">
-              <div className="h-10 w-10 rounded-full bg-slate-100 flex items-center justify-center text-primary font-bold">
-                {customer?.name[0]}
+        {/* Content Body - Overlapping slightly with hero */}
+        <div className="px-6 -mt-6 relative z-20 space-y-8">
+          {/* Main Action Card */}
+          <Card className="p-4 border-none shadow-xl shadow-primary/5 flex items-center justify-between gap-4 bg-white rounded-3xl group active:scale-[0.98] transition-transform">
+            <div className="flex items-center gap-4">
+              <div className="h-12 w-12 rounded-2xl bg-primary/10 flex items-center justify-center shrink-0">
+                <CheckCircle2 className="h-6 w-6 text-primary" />
               </div>
               <div>
-                <p className="text-sm font-bold">{customer?.name}</p>
-                <p className="text-[10px] text-muted-foreground">{customer?.phone}</p>
+                <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider">Giai đoạn hiện tại</p>
+                <p className="text-sm font-bold text-slate-900">{PROJECT_STAGE_LABELS[project.stage]}</p>
               </div>
             </div>
-            <ChevronRight className="h-4 w-4 text-slate-300" />
+            <Button 
+               size="sm"
+               className="rounded-xl font-bold bg-primary text-white text-[10px] h-9"
+               onClick={() => setConfirmOpen(true)}
+            >
+              HOÀN TẤT
+            </Button>
           </Card>
-        </section>
 
-        {/* Action Button: Advance Stage */}
-        <Button
-          className="w-full h-14 rounded-2xl bg-primary text-white font-bold shadow-lg shadow-primary/20 gap-3"
-          onClick={() => setConfirmOpen(true)}
-        >
-          <CheckCircle2 className="h-5 w-5" /> CHỐT XONG: {PROJECT_STAGE_LABELS[project.stage]}
-        </Button>
+          {/* Client Info */}
+          <section>
+            <div className="flex items-center justify-between mb-4 px-1">
+              <h3 className="text-[11px] font-bold uppercase text-slate-400 tracking-widest">Khách hàng</h3>
+              <div className="h-1 flex-1 bg-slate-100 mx-4 rounded-full opacity-50" />
+            </div>
+            <Card className="p-4 border-slate-100 shadow-sm rounded-2xl flex items-center justify-between">
+              <div className="flex items-center gap-4">
+                <div className="h-12 w-12 rounded-full bg-slate-100 flex items-center justify-center text-primary font-bold text-lg border border-white">
+                  {customer?.name[0]}
+                </div>
+                <div>
+                  <p className="text-sm font-bold text-slate-900">{customer?.name}</p>
+                  <p className="text-xs text-muted-foreground mt-0.5">{customer?.phone}</p>
+                </div>
+              </div>
+              <Button variant="ghost" size="icon" className="h-10 w-10 rounded-full bg-primary/5 text-primary">
+                <Clock className="h-5 w-5" />
+              </Button>
+            </Card>
+          </section>
 
-        {/* Timeline Stage View */}
-        <section>
-          <div className="flex items-center justify-between mb-3 px-1">
-            <h3 className="text-xs font-bold uppercase text-muted-foreground">Lộ trình 8 bước</h3>
-            <TrendingUp className="h-4 w-4 text-primary opacity-50" />
-          </div>
-          <Card className="p-5 border-none shadow-sm h-48 overflow-y-auto no-scrollbar relative">
-            <div className="space-y-6">
-              {stages.map(([key, label], index) => {
-                const isCompleted = index < currentStageIndex;
-                const isCurrent = index === currentStageIndex;
+          {/* Timeline / Roadmap */}
+          <section>
+            <div className="flex items-center justify-between mb-4 px-1">
+              <h3 className="text-[11px] font-bold uppercase text-slate-400 tracking-widest">Lộ trình triển khai</h3>
+              <span className="text-[10px] font-bold text-primary bg-primary/10 px-2 py-0.5 rounded-full">
+                {currentStageIndex + 1} / {stages.length}
+              </span>
+            </div>
+            <Card className="p-6 border-slate-100 shadow-sm rounded-2xl relative overflow-hidden">
+              <div className="space-y-8">
+                {stages.map(([key, label], index) => {
+                  const isCompleted = index < currentStageIndex;
+                  const isCurrent = index === currentStageIndex;
 
-                return (
-                  <div key={key} className="flex gap-4 relative">
-                    {index !== stages.length - 1 && (
+                  return (
+                    <div key={key} className="flex gap-5 relative">
+                      {index !== stages.length - 1 && (
+                        <div
+                          className={cn(
+                            "absolute left-[13px] top-8 w-[2px] h-[calc(100%+32px)] transition-colors duration-500",
+                            isPast(index, currentStageIndex) ? "bg-primary" : "bg-slate-100",
+                          )}
+                        />
+                      )}
+
                       <div
                         className={cn(
-                          "absolute left-[11px] top-6 w-[2px] h-[calc(100%+24px)]",
-                          isPast(index, currentStageIndex) ? "bg-primary" : "bg-slate-100",
+                          "h-7 w-7 rounded-full flex items-center justify-center z-10 shrink-0 shadow-sm transition-all duration-500",
+                          isCompleted
+                            ? "bg-primary text-white ring-4 ring-primary/10"
+                            : isCurrent
+                              ? "bg-white border-2 border-primary text-primary ring-4 ring-primary/5"
+                              : "bg-slate-100 text-slate-400",
                         )}
-                      />
-                    )}
+                      >
+                        {isCompleted ? (
+                          <Check className="h-3.5 w-3.5" />
+                        ) : (
+                          <span className="text-[10px] font-bold">{index + 1}</span>
+                        )}
+                      </div>
 
-                    <div
-                      className={cn(
-                        "h-6 w-6 rounded-full flex items-center justify-center z-10 shrink-0",
-                        isCompleted
-                          ? "bg-primary text-white"
-                          : isCurrent
-                            ? "bg-white border-2 border-primary text-primary"
-                            : "bg-slate-100 text-slate-400",
-                      )}
-                    >
-                      {isCompleted ? (
-                        <Check className="h-3 w-3" />
-                      ) : (
-                        <div className="h-1.5 w-1.5 rounded-full bg-current" />
-                      )}
-                    </div>
-
-                    <div className={cn("flex-1", !isCompleted && !isCurrent && "opacity-50")}>
-                      <span className={cn("text-xs font-bold", isCurrent && "text-primary")}>
-                        {label}
-                      </span>
-                    </div>
-                  </div>
-                );
-              })}
-            </div>
-            {/* Fade at bottom */}
-            <div className="absolute bottom-0 left-0 right-0 h-8 bg-gradient-to-t from-white to-transparent pointer-events-none" />
-          </Card>
-        </section>
-
-        {/* Related Jobs List */}
-        <section>
-          <div className="flex items-center justify-between mb-3 px-1">
-            <h3 className="text-xs font-bold uppercase text-muted-foreground">
-              Hạng mục công việc ({relatedJobs.length})
-            </h3>
-            <Button
-              size="sm"
-              variant="ghost"
-              className="h-7 text-[10px] font-bold text-primary gap-1"
-            >
-              <Plus className="h-3 w-3" /> THÊM
-            </Button>
-          </div>
-          <div className="space-y-3">
-            {relatedJobs.map((job) => (
-              <Link key={job.id} to="/mobile/jobs/$jobId" params={{ jobId: job.id }}>
-                <Card className="p-4 border-none shadow-sm flex items-center justify-between bg-white active:bg-slate-50 transition-colors">
-                  <div className="flex gap-3">
-                    <div className="h-9 w-9 rounded-xl bg-slate-50 flex items-center justify-center text-slate-400">
-                      <Briefcase className="h-4.5 w-4.5" />
-                    </div>
-                    <div>
-                      <h4 className="text-[11px] font-bold text-slate-900 leading-tight">
-                        {job.title}
-                      </h4>
-                      <div className="flex items-center gap-1.5 mt-1">
-                        <StatusBadge variant={jobStatusVariant[job.status]}>
-                          {jobStatusLabel[job.status]}
-                        </StatusBadge>
-                        <span className="text-[9px] text-muted-foreground font-medium">
-                          {job.code}
-                        </span>
+                      <div className={cn("flex-1 pt-0.5", !isCompleted && !isCurrent && "opacity-50")}>
+                        <p className={cn("text-xs font-bold leading-tight", isCurrent ? "text-primary text-sm" : "text-slate-600")}>
+                          {label}
+                        </p>
+                        {isCurrent && (
+                          <p className="text-[10px] text-muted-foreground mt-1 animate-pulse">Đang triển khai...</p>
+                        )}
                       </div>
                     </div>
-                  </div>
-                  <ChevronRight className="h-4 w-4 text-slate-300" />
-                </Card>
-              </Link>
-            ))}
-          </div>
-        </section>
+                  );
+                })}
+              </div>
+            </Card>
+          </section>
 
-        {/* Financial Overview */}
-        <section>
-          <h3 className="text-xs font-bold uppercase text-muted-foreground mb-3 px-1">
-            Tài chính & Thanh toán
-          </h3>
-          <div className="grid grid-cols-2 gap-3">
-            <Card className="p-4 border-none shadow-sm bg-emerald-50 border-emerald-100">
-              <CreditCard className="h-4 w-4 text-emerald-600 mb-2" />
-              <p className="text-[10px] text-emerald-700 font-bold uppercase">Đã thu</p>
-              <p className="text-sm font-bold text-emerald-900 mt-0.5">1.250.000.000đ</p>
-            </Card>
-            <Card className="p-4 border-none shadow-sm bg-orange-50 border-orange-100">
-              <Clock className="h-4 w-4 text-orange-600 mb-2" />
-              <p className="text-[10px] text-orange-700 font-bold uppercase">Còn nợ</p>
-              <p className="text-sm font-bold text-orange-900 mt-0.5">350.000.000đ</p>
-            </Card>
-          </div>
-        </section>
+          {/* Related Jobs */}
+          <section>
+            <div className="flex items-center justify-between mb-4 px-1">
+              <h3 className="text-[11px] font-bold uppercase text-slate-400 tracking-widest">Hạng mục công việc</h3>
+              <Plus className="h-4 w-4 text-primary" />
+            </div>
+            <div className="space-y-4">
+              {relatedJobs.length > 0 ? (
+                relatedJobs.map((job) => (
+                  <Link key={job.id} to="/mobile/jobs/$jobId" params={{ jobId: job.id }}>
+                    <Card className="p-4 border-slate-100 shadow-sm rounded-2xl flex items-center justify-between bg-white active:bg-slate-50 active:scale-[0.98] transition-all">
+                      <div className="flex gap-4 min-w-0">
+                        <div className="h-12 w-12 rounded-2xl bg-slate-50 flex items-center justify-center text-slate-400 shrink-0">
+                          <Briefcase className="h-6 w-6" />
+                        </div>
+                        <div className="min-w-0">
+                          <h4 className="text-[13px] font-bold text-slate-900 leading-tight truncate">
+                            {job.title}
+                          </h4>
+                          <div className="flex items-center gap-2 mt-1.5 flex-wrap">
+                            <StatusBadge variant={jobStatusVariant[job.status]} className="px-2 py-0 h-4 text-[9px]">
+                              {jobStatusLabel[job.status]}
+                            </StatusBadge>
+                            <span className="text-[10px] text-muted-foreground font-medium shrink-0">
+                              {job.code}
+                            </span>
+                          </div>
+                        </div>
+                      </div>
+                      <ChevronRight className="h-5 w-5 text-slate-300 shrink-0 ml-2" />
+                    </Card>
+                  </Link>
+                ))
+              ) : (
+                <div className="text-center py-8 bg-slate-50 rounded-3xl border border-dashed border-slate-200">
+                  <p className="text-xs text-muted-foreground font-medium">Chưa có công việc phân công</p>
+                </div>
+              )}
+            </div>
+          </section>
+
+          {/* Financial Breakdown */}
+          <section>
+            <div className="flex items-center justify-between mb-4 px-1">
+              <h3 className="text-[11px] font-bold uppercase text-slate-400 tracking-widest">Tài chính</h3>
+            </div>
+            <div className="grid grid-cols-1 gap-4">
+              <div className="grid grid-cols-2 gap-4">
+                <Card className="p-4 border-none shadow-sm bg-emerald-500 text-white rounded-3xl overflow-hidden relative">
+                  <CreditCard className="h-8 w-8 text-white/20 absolute -right-2 -bottom-2" />
+                  <p className="text-[10px] font-bold uppercase text-white/70 tracking-wider">Đã thu</p>
+                  <p className="text-sm font-black mt-1">1.25B đ</p>
+                </Card>
+                <Card className="p-4 border-none shadow-sm bg-orange-500 text-white rounded-3xl overflow-hidden relative">
+                  <Clock className="h-8 w-8 text-white/20 absolute -right-2 -bottom-2" />
+                  <p className="text-[10px] font-bold uppercase text-white/70 tracking-wider">Còn nợ</p>
+                  <p className="text-sm font-black mt-1">350M đ</p>
+                </Card>
+              </div>
+              <Card className="p-4 border-slate-100 bg-white rounded-2xl flex items-center justify-between">
+                <div>
+                  <p className="text-[11px] font-bold text-slate-400">Tổng giá trị hợp đồng</p>
+                  <p className="text-lg font-black text-slate-900 mt-0.5">1.600.000.000đ</p>
+                </div>
+              </Card>
+            </div>
+          </section>
+        </div>
       </div>
 
       <ConfirmationDialog

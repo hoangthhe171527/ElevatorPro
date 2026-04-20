@@ -27,11 +27,13 @@ export const Route = createFileRoute("/mobile/hr")({
 function MobileHR() {
   const [search, setSearch] = useState("");
 
-  const filtered = mockUsers.filter(
-    (u) =>
+  const filtered = mockUsers.filter((u) => {
+    const roleLabel = u.name.split("(")[1]?.replace(")", "") || "Nhân viên";
+    return (
       u.name.toLowerCase().includes(search.toLowerCase()) ||
-      u.role.toLowerCase().includes(search.toLowerCase()),
-  );
+      roleLabel.toLowerCase().includes(search.toLowerCase())
+    );
+  });
 
   return (
     <MobileShell title="Quản lý nhân sự">
@@ -54,7 +56,8 @@ function MobileHR() {
             .slice(-2)
             .map((n) => n[0])
             .join("");
-          const isTech = user.role.includes("tech");
+          const roleLabel = user.name.split("(")[1]?.replace(")", "") || "Nhân viên";
+          const isTech = roleLabel.toLowerCase().includes("kỹ thuật") || roleLabel.toLowerCase().includes("tech");
 
           return (
             <Card
@@ -71,7 +74,7 @@ function MobileHR() {
                   <div className="flex justify-between items-start">
                     <div>
                       <h3 className="font-bold text-sm leading-tight text-slate-900 line-clamp-1">
-                        {user.name}
+                        {user.name.split("(")[0].trim()}
                       </h3>
                       <div className="flex items-center gap-1.5 mt-1">
                         <span
@@ -80,7 +83,7 @@ function MobileHR() {
                             isTech ? "bg-blue-50 text-blue-600" : "bg-purple-50 text-purple-600",
                           )}
                         >
-                          {user.role}
+                          {roleLabel}
                         </span>
                         <div className="flex items-center gap-0.5 ml-1">
                           <Star className="h-2.5 w-2.5 text-amber-400 fill-current" />

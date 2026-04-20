@@ -41,7 +41,7 @@ import {
 import {
   CheckCircle2,
   AlertTriangle,
-  User,
+  User as UserIcon,
   Building2,
   FileText,
   Banknote,
@@ -1079,7 +1079,7 @@ export function CreateCustomerModal({ open, onClose }: CreateCustomerModalProps)
       <DialogContent className="max-w-lg">
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
-            <User className="h-5 w-5 text-primary" /> Thêm khách hàng mới
+            <UserIcon className="h-5 w-5 text-primary" /> Thêm khách hàng mới
           </DialogTitle>
         </DialogHeader>
         <div className="space-y-3 py-2">
@@ -1517,7 +1517,7 @@ export function DispatchJobModal({ open, onClose, job, onDispatch }: DispatchJob
             <div className="font-medium text-warning-foreground">{job.title}</div>
             <div className="text-sm mt-1">{job.description}</div>
             <div className="text-xs text-muted-foreground mt-2 flex items-center gap-1">
-              <User className="h-3 w-3" /> {cus?.name}
+              <UserIcon className="h-3 w-3" /> {cus?.name}
             </div>
           </div>
           <div>

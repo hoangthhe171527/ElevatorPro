@@ -161,7 +161,7 @@ function AdminJobDetail() {
                 </h4>
                 {job.beforePhotos?.length > 0 ? (
                   <div className="flex gap-2">
-                    {job.beforePhotos.map((p, idx) => (
+                    {job.beforePhotos.map((p: string, idx: number) => (
                       <div
                         key={idx}
                         className="h-20 w-20 rounded-md bg-muted flex items-center justify-center text-xs text-muted-foreground overflow-hidden"
@@ -181,7 +181,7 @@ function AdminJobDetail() {
                 <h4 className="text-sm font-medium mb-3 text-muted-foreground">Nghiệm thu (Sau)</h4>
                 {job.afterPhotos?.length > 0 ? (
                   <div className="flex gap-2">
-                    {job.afterPhotos.map((p, idx) => (
+                    {job.afterPhotos.map((p: string, idx: number) => (
                       <div
                         key={idx}
                         className="h-20 w-20 rounded-md bg-muted flex items-center justify-center text-xs text-muted-foreground overflow-hidden border-2 border-success/30"
