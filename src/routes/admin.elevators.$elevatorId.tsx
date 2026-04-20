@@ -39,6 +39,7 @@ import {
   CheckCircle2
 } from "lucide-react";
 import { toast } from "sonner";
+import { ConfirmationDialog } from "@/components/common/ConfirmationDialog";
 
 export const Route = createFileRoute("/admin/elevators/$elevatorId")({
   loader: ({ params }) => {
@@ -74,6 +75,8 @@ function ElevatorShell() {
 function ElevatorDetail() {
   const { elevator } = Route.useLoaderData();
   const [jobOpen, setJobOpen] = useState(false);
+  const [confirmJobOpen, setConfirmJobOpen] = useState(false);
+  const [targetAction, setTargetAction] = useState<"dispatch" | "urgent">("dispatch");
 
   const project = getProject(elevator.projectId);
   const customer = project ? getCustomer(project.customerId) : undefined;
@@ -104,7 +107,7 @@ function ElevatorDetail() {
                 <QrCode className="h-4 w-4 mr-1.5" /> Xem QR thiết bị
               </Button>
             </Link>
-            <Button onClick={() => setJobOpen(true)}>
+            <Button onClick={() => { setTargetAction("dispatch"); setConfirmJobOpen(true); }}>
               <Plus className="h-4 w-4 mr-1.5" /> Điều phối công việc
             </Button>
           </div>
@@ -137,7 +140,7 @@ function ElevatorDetail() {
             size="sm"
             variant="default"
             className={`shrink-0 shadow-md ${isOut ? "bg-destructive text-destructive-foreground hover:bg-destructive/90" : "bg-warning-foreground text-white hover:opacity-90"}`}
-            onClick={() => setJobOpen(true)}
+            onClick={() => { setTargetAction("urgent"); setConfirmJobOpen(true); }}
           >
             Tạo phiếu xử lý ngay
           </Button>
@@ -355,12 +358,22 @@ function ElevatorDetail() {
         </TabsContent>
       </Tabs>
 
-      <CreateJobModal
-        open={jobOpen}
-        onClose={() => setJobOpen(false)}
-        defaultCustomerId={project?.customerId}
         defaultElevatorId={elevator.id}
         defaultContractId={elevator.contractId}
+      />
+
+      <ConfirmationDialog
+        open={confirmJobOpen}
+        onOpenChange={setConfirmJobOpen}
+        title={targetAction === "urgent" ? "Xác nhận tạo vé khẩn cấp" : "Xác nhận điều phối"}
+        description={targetAction === "urgent" 
+          ? "Bạn có chắc chắn muốn khởi tạo phiếu xử lý sự cố ngay lập tức cho thang máy này không? Đội kỹ thuật trực sẽ nhận được thông báo ngay." 
+          : "Mở form điều phối công việc cho thiết bị này?"}
+        onConfirm={() => {
+          setConfirmJobOpen(false);
+          setJobOpen(true);
+        }}
+        variant={targetAction === "urgent" ? "destructive" : "default"}
       />
     </AppShell>
   );

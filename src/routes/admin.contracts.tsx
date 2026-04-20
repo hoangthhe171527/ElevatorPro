@@ -14,6 +14,7 @@ import { mockContracts, formatVND, formatDate, getCustomer, type Contract } from
 import { Plus, Search, FileText, Calendar, User, Banknote, RefreshCw } from "lucide-react";
 import { RecordPaymentModal, CreateContractModal, RenewContractModal } from "@/components/common/Modals";
 import { toast } from "sonner";
+import { ConfirmationDialog } from "@/components/common/ConfirmationDialog";
 
 export const Route = createFileRoute("/admin/contracts")({
   head: () => ({ meta: [{ title: "Hợp đồng — ElevatorPro" }] }),
@@ -35,6 +36,8 @@ function ContractsPage() {
   const [paymentContract, setPaymentContract] = useState<Contract | null>(null);
   const [renewContract, setRenewContract] = useState<Contract | null>(null);
   const [createOpen, setCreateOpen] = useState(false);
+  const [confirmPaymentId, setConfirmPaymentId] = useState<string | null>(null);
+  const [confirmRenewId, setConfirmRenewId] = useState<string | null>(null);
 
   const filtered = mockContracts.filter((c) => {
     const cus = getCustomer(c.customerId);
@@ -171,7 +174,7 @@ function ContractsPage() {
                           size="sm"
                           variant="outline"
                           className="flex-1 gap-1.5 text-xs"
-                          onClick={() => setPaymentContract(c)}
+                          onClick={() => setConfirmPaymentId(c.id)}
                         >
                           <Banknote className="h-3.5 w-3.5" /> Ghi nhận thu
                         </Button>
@@ -180,7 +183,7 @@ function ContractsPage() {
                         <Button
                           size="sm"
                           className="flex-1 gap-1.5 text-xs"
-                          onClick={() => setRenewContract(c)}
+                          onClick={() => setConfirmRenewId(c.id)}
                         >
                           <RefreshCw className="h-3.5 w-3.5" /> Tái ký
                         </Button>
@@ -215,6 +218,33 @@ function ContractsPage() {
           contractCode={renewContract.code}
         />
       )}
+
+      <ConfirmationDialog
+        open={!!confirmPaymentId}
+        onOpenChange={(o) => !o && setConfirmPaymentId(null)}
+        title="Xác nhận ghi nhận thanh toán"
+        description="Bạn có chắc chắn muốn mở biểu mẫu ghi nhận dòng tiền cho hợp đồng này không? Hãy đảm bảo bạn đã nhận được vận đơn hoặc tiền mặt."
+        onConfirm={() => {
+          const c = mockContracts.find(contract => contract.id === confirmPaymentId);
+          if (c) setPaymentContract(c);
+          setConfirmPaymentId(null);
+        }}
+        confirmText="Mở ghi nhận thu"
+      />
+
+      <ConfirmationDialog
+        open={!!confirmRenewId}
+        onOpenChange={(o) => !o && setConfirmRenewId(null)}
+        title="Xác nhận tái ký hợp đồng"
+        description="Bắt đầu quy trình soạn thảo phụ lục tái ký cho hợp đồng sắp hết hạn này?"
+        onConfirm={() => {
+          const c = mockContracts.find(contract => contract.id === confirmRenewId);
+          if (c) setRenewContract(c);
+          setConfirmRenewId(null);
+        }}
+        confirmText="Bắt đầu tái ký"
+        variant="success"
+      />
     </AppShell>
   );
 }

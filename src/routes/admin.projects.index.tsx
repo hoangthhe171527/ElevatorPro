@@ -10,6 +10,7 @@ import { useState } from "react";
 import { useAppStore, useCanWrite } from "@/lib/store";
 import { DataPagination } from "@/components/common/DataPagination";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
+import { ConfirmationDialog } from "@/components/common/ConfirmationDialog";
 
 export const Route = createFileRoute("/admin/projects")({
   head: () => ({ meta: [{ title: "Tiến độ Dự án Lắp đặt — ElevatorPro" }] }),
@@ -156,20 +157,15 @@ function ProjectsPage() {
         />
       </div>
 
-      <Dialog open={!!confirmId} onOpenChange={(open) => !open && setConfirmId(null)}>
-        <DialogContent className="max-w-md">
-          <DialogHeader>
-            <DialogTitle>Xác nhận chuyển giai đoạn thi công</DialogTitle>
-          </DialogHeader>
-          <div className="py-4">
-            Bạn có chắc chắn dự án <span className="font-bold">{projects.find(p => p.id === confirmId)?.name}</span> đã hoàn tất bước này? Lịch sử sẽ được ghi nhận và báo cáo lên Giám đốc.
-          </div>
-          <DialogFooter>
-            <Button variant="outline" onClick={() => setConfirmId(null)}>Hủy</Button>
-            <Button className="bg-success text-success-foreground hover:bg-success/90" onClick={handleAdvance}>Đồng ý, chuyển trạng thái</Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
+      <ConfirmationDialog 
+        open={!!confirmId}
+        onOpenChange={(open) => !open && setConfirmId(null)}
+        title="Xác nhận chuyển giai đoạn thi công"
+        description={`Bạn có chắc chắn dự án ${projects.find(p => p.id === confirmId)?.name} đã hoàn tất bước này? Lịch sử sẽ được ghi nhận và báo cáo lên Giám đốc.`}
+        onConfirm={handleAdvance}
+        confirmText="Đồng ý, chuyển trạng thái"
+        variant="success"
+      />
     </AppShell>
   );
 }

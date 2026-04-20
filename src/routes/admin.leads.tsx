@@ -13,6 +13,7 @@ import { mockLeads, formatVND, formatDate, type Lead } from "@/lib/mock-data";
 import { Plus, Phone, Mail, MapPin, Search, UserCog } from "lucide-react";
 import { ConvertLeadModal, CreateLeadModal } from "@/components/common/Modals";
 import { toast } from "sonner";
+import { ConfirmationDialog } from "@/components/common/ConfirmationDialog";
 
 export const Route = createFileRoute("/admin/leads")({
   head: () => ({ meta: [{ title: "Khách hàng tiềm năng — ElevatorPro" }] }),
@@ -27,6 +28,8 @@ function LeadsPage() {
   const [statusFilter, setStatusFilter] = useState<string>("all");
   const [convertLead, setConvertLead] = useState<Lead | null>(null);
   const [createOpen, setCreateOpen] = useState(false);
+  const [confirmContact, setConfirmContact] = useState<Lead | null>(null);
+  const [confirmConvert, setConfirmConvert] = useState<Lead | null>(null);
 
   const filtered = mockLeads.filter((l) => {
     const matchSearch =
@@ -128,14 +131,14 @@ function LeadsPage() {
                   <Button
                     variant="outline"
                     size="sm"
-                    onClick={() => toast.success(`Đã ghi nhận liên hệ với ${l.name}`)}
+                    onClick={() => setConfirmContact(l)}
                   >
                     Liên hệ
                   </Button>
                   <Button
                     size="sm"
                     disabled={l.status === "lost"}
-                    onClick={() => setConvertLead(l)}
+                    onClick={() => setConfirmConvert(l)}
                   >
                     Chuyển KH
                   </Button>
@@ -164,6 +167,30 @@ function LeadsPage() {
       <CreateLeadModal
         open={createOpen}
         onClose={() => setCreateOpen(false)}
+      />
+
+      <ConfirmationDialog
+        open={!!confirmContact}
+        onOpenChange={(o) => !o && setConfirmContact(null)}
+        title="Xác nhận ghi nhận liên hệ"
+        description={`Bạn có chắc chắn muốn xác nhận đã thực hiện cuộc gọi/liên hệ với ${confirmContact?.name}? Thao tác này sẽ cập nhật nhật ký chăm sóc.`}
+        onConfirm={() => {
+          if (confirmContact) toast.success(`Đã ghi nhận liên hệ với ${confirmContact.name}`);
+          setConfirmContact(null);
+        }}
+      />
+
+      <ConfirmationDialog
+        open={!!confirmConvert}
+        onOpenChange={(o) => !o && setConfirmConvert(null)}
+        title="Xác nhận chuyển đổi khách hàng"
+        description={`Bạn có chắc chắn muốn bắt đầu quy trình chuyển đổi ${confirmConvert?.name} thành khách hàng chính thức?`}
+        onConfirm={() => {
+          if (confirmConvert) setConvertLead(confirmConvert);
+          setConfirmConvert(null);
+        }}
+        variant="success"
+        confirmText="Bắt đầu chuyển đổi"
       />
     </AppShell>
   );

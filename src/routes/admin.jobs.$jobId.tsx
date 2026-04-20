@@ -25,6 +25,7 @@ import {
   AlertCircle
 } from "lucide-react";
 import { toast } from "sonner";
+import { ConfirmationDialog } from "@/components/common/ConfirmationDialog";
 
 export const Route = createFileRoute("/admin/jobs/$jobId")({
   loader: ({ params }) => {
@@ -52,6 +53,8 @@ function AdminJobDetail() {
   const elevator = job.elevatorId ? getElevator(job.elevatorId) : undefined;
   const tech = job.assignedTo ? getUser(job.assignedTo) : undefined;
   const [status, setStatus] = useState(job.status);
+  const [editOpen, setEditOpen] = useState(false);
+  const [techOpen, setTechOpen] = useState(false);
 
   return (
     <AppShell>
@@ -67,7 +70,7 @@ function AdminJobDetail() {
         description={`Mã việc: ${job.code} · Cập nhật lần cuối: ${formatDateTime(job.createdAt)}`}
         actions={
           <div className="flex gap-2">
-             <Button variant="outline" onClick={() => toast.success("Đã mở form chỉnh sửa")}>
+             <Button variant="outline" onClick={() => setEditOpen(true)}>
                Sửa công việc
              </Button>
           </div>
@@ -192,10 +195,10 @@ function AdminJobDetail() {
                   <div className="font-medium text-sm">{tech.name}</div>
                   <div className="text-xs text-muted-foreground">Kỹ thuật viên</div>
                 </div>
-                <Button size="sm" variant="ghost" className="ml-auto text-xs" onClick={()=>toast.info("Mở Modal thay đổi người")}>Đổi</Button>
+                <Button size="sm" variant="ghost" className="ml-auto text-xs" onClick={()=>setTechOpen(true)}>Đổi</Button>
               </div>
             ) : (
-               <Button className="w-full" variant="outline" onClick={()=>toast.info("Mở chọn Đội ngũ")}>Chỉ định Kỹ thuật viên</Button>
+               <Button className="w-full" variant="outline" onClick={()=>setTechOpen(true)}>Chỉ định Kỹ thuật viên</Button>
             )}
           </Card>
 
@@ -243,6 +246,43 @@ function AdminJobDetail() {
 
         </div>
       </div>
+      <ConfirmationModals 
+        editOpen={editOpen} 
+        setEditOpen={setEditOpen} 
+        techOpen={techOpen} 
+        setTechOpen={setTechOpen} 
+      />
     </AppShell>
+  );
+}
+
+function ConfirmationModals({ 
+  editOpen, 
+  setEditOpen, 
+  techOpen, 
+  setTechOpen 
+}: { 
+  editOpen: boolean, 
+  setEditOpen: (o: boolean) => void, 
+  techOpen: boolean, 
+  setTechOpen: (o: boolean) => void 
+}) {
+  return (
+    <>
+      <ConfirmationDialog
+        open={editOpen}
+        onOpenChange={setEditOpen}
+        title="Xác nhận chỉnh sửa"
+        description="Bạn có chắc chắn muốn mở trình chỉnh sửa nội dung công việc này?"
+        onConfirm={() => toast.success("Đã mở form chỉnh sửa")}
+      />
+      <ConfirmationDialog
+        open={techOpen}
+        onOpenChange={setTechOpen}
+        title="Xác nhận thay đổi nhân sự"
+        description="Bạn có chắc chắn muốn thay đổi kỹ thuật viên phụ trách cho công việc này không?"
+        onConfirm={() => toast.info("Mở Modal thay đổi người")}
+      />
+    </>
   );
 }

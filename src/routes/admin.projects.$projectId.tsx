@@ -37,6 +37,7 @@ import {
   priorityVariant
 } from "@/components/common/StatusBadge";
 import { CreateJobModal } from "@/components/common/Modals";
+import { ConfirmationDialog } from "@/components/common/ConfirmationDialog";
 
 export const Route = createFileRoute("/admin/projects/$projectId")({
   loader: ({ params }) => {
@@ -54,6 +55,7 @@ function ProjectDetailPage() {
   const { project: initialProject } = Route.useLoaderData();
   const [project, setProject] = useState(initialProject);
   const [createJobOpen, setCreateJobOpen] = useState(false);
+  const [confirmOpen, setConfirmOpen] = useState(false);
 
   const customer = getCustomer(project.customerId);
   const jobs = mockJobs.filter((j) => j.projectId === project.id);
@@ -81,7 +83,7 @@ function ProjectDetailPage() {
         actions={
           <div className="flex gap-2">
             {!isCompleted && (
-              <Button onClick={() => handleAdvance()} variant="outline" className="border-primary text-primary hover:bg-primary/5">
+              <Button onClick={() => setConfirmOpen(true)} variant="outline" className="border-primary text-primary hover:bg-primary/5">
                 <Check className="h-4 w-4 mr-1.5" /> Hoàn tất: {PROJECT_STAGE_LABELS[project.stage]}
               </Button>
             )}
@@ -275,6 +277,15 @@ function ProjectDetailPage() {
         onClose={() => setCreateJobOpen(false)} 
         defaultProjectId={project.id}
         defaultCustomerId={project.customerId}
+      />
+
+      <ConfirmationDialog
+        open={confirmOpen}
+        onOpenChange={setConfirmOpen}
+        title="Xác nhận giai đoạn hoàn tất"
+        description={`Bạn có chắc chắn muốn xác nhận hoàn tất giai đoạn "${PROJECT_STAGE_LABELS[project.stage]}" cho dự án này không?`}
+        onConfirm={handleAdvance}
+        variant="success"
       />
     </AppShell>
   );
