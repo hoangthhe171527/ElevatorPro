@@ -1,135 +1,80 @@
 ﻿import { createFileRoute, Link } from "@tanstack/react-router";
 import { MobileShell } from "@/components/layout/MobileShell";
 import { Card } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
+import { mockJobs } from "@/lib/mock-data";
+import { StatusBadge } from "@/components/common/StatusBadge";
+import { jobStatusLabel, jobStatusVariant } from "@/lib/status-variants";
 import { 
   MapPin, 
-  Navigation, 
   Clock, 
-  ChevronRight, 
   Phone,
-  AlertCircle,
-  CheckCircle2,
-  MoreVertical,
-  ExternalLink
+  Navigation as NavIcon,
+  ChevronRight
 } from "lucide-react";
-import { mockJobs, formatDate, formatDateTime } from "@/lib/mock-data";
-import { jobStatusLabel, jobStatusVariant } from "@/lib/status-variants";
-import { StatusBadge } from "@/components/common/StatusBadge";
-import { cn } from "@/lib/utils";
 
 export const Route = createFileRoute("/mobile/tech/route-plan")({
-  component: RoutePlan,
+  component: TechRoutePlan,
 });
 
-function RoutePlan() {
-  const todayJobs = mockJobs.slice(0, 4);
-
-  const handleOpenMaps = (address: string) => {
-    window.open(`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(address)}`, "_blank");
-  };
-
+function TechRoutePlan() {
   return (
-    <MobileShell title="Lộ trình hôm nay">
-      <div className="flex flex-col pb-32">
-        {/* Route Header Info */}
-        <div className="px-6 pt-6 pb-12 bg-slate-900 relative overflow-hidden">
-          <div className="relative z-10">
-            <p className="text-[10px] font-black uppercase text-indigo-400 tracking-[0.2em] mb-2 italic">Tối ưu hóa hành trình</p>
-            <h1 className="text-2xl font-black text-white uppercase italic tracking-tight mb-4">4 Điểm dừng</h1>
-            
-            <div className="flex gap-3">
-              <div className="flex items-center gap-2 px-3 py-1.5 rounded-xl bg-white/10 border border-white/10 backdrop-blur-md">
-                <Clock className="h-3 w-3 text-indigo-300" />
-                <span className="text-[9px] font-black text-white uppercase tracking-wider">6.5 Giờ dự kiến</span>
-              </div>
-              <div className="flex items-center gap-2 px-3 py-1.5 rounded-xl bg-white/10 border border-white/10 backdrop-blur-md">
-                <Navigation className="h-3 w-3 text-indigo-300" />
-                <span className="text-[9px] font-black text-white uppercase tracking-wider">24 KM tổng</span>
-              </div>
-            </div>
-          </div>
-          <div className="absolute right-0 bottom-0 w-64 h-64 bg-indigo-500/10 rounded-full translate-x-1/3 translate-y-1/3 blur-3xl" />
+    <MobileShell title="Lộ trình di chuyển">
+      <div className="flex flex-col pb-24 bg-slate-50 min-h-screen">
+        {/* Compact Map Header Preview */}
+        <div className="h-28 bg-slate-200 w-full relative overflow-hidden border-b border-slate-300">
+           <div className="absolute inset-0 flex items-center justify-center bg-slate-100 italic text-[10px] font-bold text-slate-400 uppercase tracking-widest">
+             [ MAP ENGINE PREVIEW_ ]
+           </div>
+           <div className="absolute bottom-2 left-4 px-3 py-1 bg-indigo-600 text-white text-[9px] font-black rounded-full shadow-lg">
+             LIVE TRACKING
+           </div>
         </div>
 
-        {/* Vertical Timeline */}
-        <div className="px-6 -mt-6 space-y-2 relative z-20">
-          {todayJobs.map((job, idx) => (
-            <div key={job.id} className="relative pl-8 pb-8 last:pb-0">
-              {/* Timeline Connector */}
-              {idx !== todayJobs.length - 1 && (
-                <div className="absolute left-[11px] top-6 bottom-0 w-1 bg-slate-100 rounded-full" />
-              )}
-              
-              {/* Timeline Node */}
-              <div className={cn(
-                "absolute left-0 top-1 h-6 w-6 rounded-full border-4 border-white shadow-md flex items-center justify-center z-10",
-                idx === 0 ? "bg-indigo-600 animate-pulse" : "bg-slate-200"
-              )}>
-                {idx === 0 ? (
-                  <Navigation className="h-2.5 w-2.5 text-white" />
-                ) : (
-                  <div className="h-1.5 w-1.5 rounded-full bg-white" />
-                )}
-              </div>
-
-              {/* Job Card - Fix: Wrap the content in Link except for action buttons */}
-              <Card className="p-5 border-none shadow-xl shadow-slate-200/50 rounded-[2rem] bg-white group active:scale-[0.98] transition-all">
-                <div className="flex justify-between items-start mb-4">
-                  <div className="bg-slate-50 px-3 py-1 rounded-xl">
-                    <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest italic">Điểm {idx + 1}</span>
-                  </div>
-                  <StatusBadge variant={jobStatusVariant[job.status]} className="text-[8px] h-5">
-                    {jobStatusLabel[job.status]}
-                  </StatusBadge>
-                </div>
-
-                <Link to={`/mobile/jobs/${job.id}`} className="block mb-6">
-                    <h2 className="text-sm font-black text-slate-900 uppercase italic tracking-tight mb-2 group-hover:text-indigo-600 transition-colors">
-                      {job.title}
-                    </h2>
-                    <div className="flex items-center gap-4 text-slate-400">
-                      <div className="flex items-center gap-1.5">
-                        <Clock className="h-3 w-3" />
-                        <span className="text-[9px] font-black uppercase tracking-wider">{formatDateTime(job.scheduledFor).split(" ")[1]}</span>
-                      </div>
-                      <div className="flex items-center gap-1.5">
-                        <MapPin className="h-3 w-3" />
-                        <span className="text-[9px] font-black uppercase tracking-wider truncate max-w-[150px]">Vincom Center - Lê Thánh Tôn</span>
-                      </div>
+        {/* Vertical Simple Timeline */}
+        <div className="px-5 py-6">
+          <div className="relative border-l border-slate-200 ml-2 space-y-6">
+            {mockJobs.slice(0, 4).map((job, idx) => (
+              <div key={job.id} className="relative pl-7 text-left group">
+                {/* Timeline Dot */}
+                <div className={`absolute -left-[5px] top-1 h-2.5 w-2.5 rounded-full border-2 border-white shadow-sm ${idx === 0 ? "bg-indigo-600 ring-4 ring-indigo-50" : "bg-slate-300"}`} />
+                
+                <Link to={`/mobile/jobs/${job.id}`}>
+                  <Card className="p-3.5 border border-slate-100 shadow-sm rounded-xl bg-white active:bg-slate-50 transition-all">
+                    <div className="flex justify-between items-start mb-2">
+                       <span className="text-[10px] font-bold text-indigo-600 uppercase tracking-tight">Diem den #{idx + 1}</span>
+                       <StatusBadge variant={jobStatusVariant[job.status]} className="h-3.5 px-1 text-[7px] font-bold uppercase">
+                          {jobStatusLabel[job.status]}
+                       </StatusBadge>
                     </div>
+
+                    <h3 className="text-sm font-bold text-slate-900 leading-tight mb-2 truncate">{job.title}</h3>
+                    
+                    <div className="flex items-center gap-2 mb-3">
+                       <div className="h-5 w-5 rounded-md bg-slate-50 flex items-center justify-center border border-slate-100">
+                          <Clock className="h-3 w-3 text-slate-400" />
+                       </div>
+                       <span className="text-[10px] font-bold text-slate-500 uppercase">08:30 AM — 10:30 AM</span>
+                    </div>
+
+                    <div className="flex items-center justify-between pt-3 border-t border-slate-50">
+                       <div className="flex items-center gap-1.5 text-slate-400">
+                          <MapPin className="h-3 w-3 text-rose-500" />
+                          <span className="text-[9px] font-bold uppercase truncate max-w-[120px]">VINCOM CTR</span>
+                       </div>
+                       <div className="flex items-center gap-2">
+                          <button className="h-7 w-7 rounded-lg bg-emerald-50 flex items-center justify-center border border-emerald-100 active:scale-90 transition-transform">
+                             <Phone className="h-3.5 w-3.5 text-emerald-600" />
+                          </button>
+                          <button className="h-7 w-7 rounded-lg bg-indigo-50 flex items-center justify-center border border-indigo-100 active:scale-90 transition-transform">
+                             <NavIcon className="h-3.5 w-3.5 text-indigo-600" />
+                          </button>
+                       </div>
+                    </div>
+                  </Card>
                 </Link>
-
-                <div className="grid grid-cols-2 gap-3 pt-4 border-t border-slate-50">
-                   <Button 
-                    onClick={(e) => { e.preventDefault(); handleOpenMaps("Vincom Center, 72 Lê Thánh Tôn, Bến Nghé, Quận 1"); }}
-                    variant="outline" 
-                    className="h-10 rounded-2xl border-slate-100 bg-slate-50/50 text-[9px] font-black uppercase tracking-wider gap-2"
-                   >
-                     <Navigation className="h-3 w-3 text-indigo-500" />
-                     Chỉ đường
-                   </Button>
-                   <Button 
-                    onClick={(e) => { e.preventDefault(); window.location.href = "tel:0901234567"; }}
-                    variant="outline" 
-                    className="h-10 rounded-2xl border-slate-100 bg-slate-50/50 text-[9px] font-black uppercase tracking-wider gap-2"
-                   >
-                     <Phone className="h-3 w-3 text-emerald-500" />
-                     Liên hệ
-                   </Button>
-                </div>
-              </Card>
-            </div>
-          ))}
-        </div>
-
-        {/* Optimize Button Floating */}
-        <div className="fixed bottom-24 left-6 right-6 z-40">
-            <Button className="w-full h-14 rounded-2xl bg-indigo-600 text-white font-black uppercase tracking-[0.2em] italic text-xs shadow-xl shadow-indigo-200 gap-3">
-                <Navigation className="h-4 w-4" />
-                Bắt đầu di chuyển
-            </Button>
+              </div>
+            ))}
+          </div>
         </div>
       </div>
     </MobileShell>

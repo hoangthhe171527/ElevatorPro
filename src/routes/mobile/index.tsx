@@ -1,6 +1,6 @@
 ﻿import { createFileRoute, Link } from "@tanstack/react-router";
 export const Route = createFileRoute("/mobile/")({
-  head: () => ({ meta: [{ title: "Mobile Dashboard — ElevatorPro" }] }),
+  head: () => ({ meta: [{ title: "Dashboard — ElevatorPro" }] }),
   component: MobileDashboard,
 });
 
@@ -8,36 +8,21 @@ import { MobileShell } from "@/components/layout/MobileShell";
 import { cn } from "@/lib/utils";
 import {
   mockJobs,
-  mockProjects,
-  mockContracts,
-  mockRequests,
-  mockLeads,
-  mockInventory,
-  formatVND,
   formatDateTime,
-  getCustomer,
 } from "@/lib/mock-data";
 import { Card } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
 import { StatusBadge } from "@/components/common/StatusBadge";
-import { jobStatusLabel, jobStatusVariant, leadStatusLabel, leadStatusVariant } from "@/lib/status-variants";
+import { jobStatusLabel, jobStatusVariant } from "@/lib/status-variants";
 import {
   Briefcase,
-  AlertTriangle,
   ChevronRight,
   TrendingUp,
   Clock,
   MapPin,
-  CreditCard,
   Users,
   Bell,
-  ArrowUpRight,
-  Zap,
   Navigation,
-  Package,
-  Calendar,
   CheckCircle2,
-  DollarSign,
   Search,
   Filter,
   Activity
@@ -47,163 +32,121 @@ import { useCurrentUser, useMainRole, useAppStore } from "@/lib/store";
 function MobileDashboard() {
   const user = useCurrentUser();
   const role = useMainRole();
-  const activeJobId = useAppStore((s) => s.activeJobCheckIn);
-  const activeJob = mockJobs.find(j => j.id === activeJobId);
-  
   const filteredJobs = role === "tech" 
     ? mockJobs.filter(j => j.technicianId === user.id)
     : mockJobs;
 
   const workCenterItems = [
-    { 
-      to: "/mobile/jobs", 
-      icon: Briefcase, 
-      label: "TÁC VỤ", 
-      color: "text-blue-500 bg-blue-50/50",
-      roles: ["admin", "tech", "accounting"]
-    },
-    { 
-      to: "/mobile/projects", 
-      icon: Navigation, 
-      label: "DỰ ÁN", 
-      color: "text-indigo-500 bg-indigo-50/50",
-      roles: ["admin", "tech"]
-    },
-    { 
-      to: "/mobile/customers", 
-      icon: Users, 
-      label: "KHÁCH HÀNG", 
-      color: "text-emerald-500 bg-emerald-50/50",
-      roles: ["admin", "hr"]
-    },
-    { 
-      to: "/mobile/reports", 
-      icon: TrendingUp, 
-      label: "BÁO CÁO", 
-      color: "text-amber-500 bg-amber-50/50",
-      roles: ["admin", "accounting"]
-    },
+    { to: "/mobile/jobs", icon: Briefcase, label: "Tác vụ", color: "text-blue-600 bg-blue-50", roles: ["admin", "tech"] },
+    { to: "/mobile/projects", icon: Navigation, label: "Dự án", color: "text-indigo-600 bg-indigo-50", roles: ["admin", "tech"] },
+    { to: "/mobile/customers", icon: Users, label: "Khách", color: "text-emerald-600 bg-emerald-50", roles: ["admin", "hr"] },
+    { to: "/mobile/reports", icon: TrendingUp, label: "Báo cáo", color: "text-amber-600 bg-amber-50", roles: ["admin", "accounting"] },
   ].filter(item => item.roles.includes(role));
 
   return (
-    <MobileShell title="Hệ thống">
-      <div className="flex flex-col pb-36 font-sans">
-        {/* Header - Engineering Style */}
-        <div className="px-6 pt-10 pb-12 bg-slate-900 text-white relative overflow-hidden">
-          <div className="relative z-10 flex justify-between items-start">
-            <div className="space-y-2">
-              <div className="flex items-center gap-2 text-indigo-400">
-                <Activity className="h-3 w-3" />
-                <span className="text-[10px] font-bold tracking-[0.3em] uppercase">SYSTEM ONLINE</span>
+    <MobileShell title="Chào buổi sáng">
+      <div className="flex flex-col pb-24 font-sans bg-slate-50/50 min-h-screen">
+        {/* Header - Compact & Friendly */}
+        <div className="px-5 pt-8 pb-10 bg-white border-b border-slate-100 rounded-b-[2rem] shadow-sm">
+          <div className="flex justify-between items-center mb-6">
+            <div className="flex items-center gap-3">
+              <div className="h-10 w-10 rounded-full bg-slate-100 flex items-center justify-center border border-slate-200">
+                <Users className="h-5 w-5 text-slate-600" />
               </div>
-              <h1 className="text-3xl font-black italic tracking-tighter uppercase leading-none">
-                {user.name}
-              </h1>
-              <div className="flex items-center gap-2">
-                <span className="h-1.5 w-1.5 rounded-full bg-emerald-500 animate-pulse" />
-                <span className="text-[9px] font-bold text-slate-400 uppercase tracking-widest">{role} mode aktif</span>
+              <div className="flex flex-col">
+                <span className="text-[10px] font-medium text-slate-400 uppercase tracking-wider">Hệ thống sẵn sàng</span>
+                <h1 className="text-lg font-bold text-slate-900 leading-tight">Chào, {user.name.split(" ").pop()}!</h1>
               </div>
             </div>
-            <div className="h-14 w-14 rounded-2xl bg-white/5 border border-white/10 flex items-center justify-center backdrop-blur-xl relative">
-              <Bell className="h-6 w-6 text-slate-300" />
-              <span className="absolute top-3 right-3 h-2.5 w-2.5 bg-rose-500 rounded-full border-2 border-slate-900" />
+            <button className="h-10 w-10 rounded-xl bg-slate-50 border border-slate-100 flex items-center justify-center relative active:scale-95 transition-transform">
+              <Bell className="h-5 w-5 text-slate-600" />
+              <span className="absolute top-2.5 right-2.5 h-2 w-2 bg-rose-500 rounded-full border-2 border-white" />
+            </button>
+          </div>
+
+          {/* Quick Stats - Smaller Cards */}
+          <div className="grid grid-cols-2 gap-3">
+            <div className="p-4 rounded-2xl bg-indigo-50/50 border border-indigo-100 flex items-center gap-3">
+              <div className="h-8 w-8 rounded-lg bg-white flex items-center justify-center shadow-sm">
+                <Clock className="h-4 w-4 text-indigo-500" />
+              </div>
+              <div>
+                <p className="text-xs font-medium text-slate-500">Chờ xử lý</p>
+                <p className="text-sm font-bold text-slate-900">{filteredJobs.filter(j => j.status === "pending").length}</p>
+              </div>
+            </div>
+            <div className="p-4 rounded-2xl bg-emerald-50/50 border border-emerald-100 flex items-center gap-3">
+              <div className="h-8 w-8 rounded-lg bg-white flex items-center justify-center shadow-sm">
+                <CheckCircle2 className="h-4 w-4 text-emerald-500" />
+              </div>
+              <div>
+                <p className="text-xs font-medium text-slate-500">Hoàn thành</p>
+                <p className="text-sm font-bold text-slate-900">{filteredJobs.filter(j => j.status === "completed").length}</p>
+              </div>
             </div>
           </div>
-          <div className="absolute top-0 right-0 w-64 h-64 bg-indigo-500/10 rounded-full blur-3xl -translate-y-1/2 translate-x-1/2" />
         </div>
 
-        {/* Global Action Bar */}
-        <div className="px-6 -mt-7 mb-10">
-            <div className="bg-white border border-slate-100 p-2.5 rounded-3xl shadow-2xl flex items-center gap-3">
-                <div className="flex-1 flex items-center gap-3 px-4 py-3 bg-slate-50 rounded-2xl">
-                    <Search className="h-4 w-4 text-slate-400" />
-                    <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest italic font-mono">SEARCH ENGINE_</span>
-                </div>
-                <div className="h-12 w-12 flex items-center justify-center bg-slate-900 rounded-2xl shadow-lg shadow-slate-200 active:scale-95 transition-transform">
-                    <Filter className="h-5 w-5 text-white" />
-                </div>
+        {/* Search - Refined & Slim */}
+        <div className="px-5 -mt-5 mb-8">
+          <div className="bg-white border border-slate-100 p-1.5 rounded-2xl shadow-lg flex items-center gap-2">
+            <div className="flex-1 flex items-center gap-2 px-3 py-2 bg-slate-50 rounded-xl border border-slate-100">
+              <Search className="h-3.5 w-3.5 text-slate-400" />
+              <input placeholder="Tìm nhanh..." className="bg-transparent border-none text-xs focus:ring-0 w-full" />
             </div>
+            <button className="h-9 w-9 flex items-center justify-center bg-slate-900 rounded-xl active:scale-95 transition-transform shadow-md">
+              <Filter className="h-4 w-4 text-white" />
+            </button>
+          </div>
         </div>
 
-        {/* Stats Grid - Balanced Spacing */}
-        <div className="grid grid-cols-2 gap-5 px-6 mb-12">
-           <Card className="p-6 border-none shadow-sm rounded-[3rem] bg-indigo-50/30 border border-indigo-100/50">
-             <div className="h-12 w-12 rounded-2xl bg-white shadow-sm flex items-center justify-center mb-6">
-                <Clock className="h-6 w-6 text-indigo-500" />
-             </div>
-             <p className="text-4xl font-black text-slate-900 italic tracking-tighter mb-1 leading-none font-mono">
-               {filteredJobs.filter(j => j.status === "pending").length}
-             </p>
-             <p className="text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] italic">PENDING_</p>
-           </Card>
-           <Card className="p-6 border-none shadow-sm rounded-[3rem] bg-emerald-50/30 border border-emerald-100/50">
-             <div className="h-12 w-12 rounded-2xl bg-white shadow-sm flex items-center justify-center mb-6">
-                <CheckCircle2 className="h-6 w-6 text-emerald-500" />
-             </div>
-             <p className="text-4xl font-black text-slate-900 italic tracking-tighter mb-1 leading-none font-mono">
-                {filteredJobs.filter(j => j.status === "completed").length}
-             </p>
-             <p className="text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] italic">COMPLETED_</p>
-           </Card>
-        </div>
+        {/* App Grid - Simple Icons */}
+        <section className="px-5 mb-8">
+          <div className="grid grid-cols-4 gap-4">
+            {workCenterItems.map((item, idx) => (
+              <Link key={idx} to={item.to} className="flex flex-col items-center group">
+                <div className={cn("h-12 w-12 rounded-2xl flex items-center justify-center mb-2 shadow-sm border border-white group-active:scale-90 transition-all", item.color)}>
+                  <item.icon className="h-5 w-5" />
+                </div>
+                <span className="text-[10px] font-semibold text-slate-600 tracking-tight">{item.label}</span>
+              </Link>
+            ))}
+          </div>
+        </section>
 
-        {/* Action Grid - High Spacing */}
-        {workCenterItems.length > 0 && (
-          <section className="px-6 mb-14">
-            <h3 className="text-[10px] font-black uppercase text-slate-400 tracking-[0.3em] italic mb-8 px-1">MAIN_OPERATIONS</h3>
-            <div className="grid grid-cols-4 gap-6">
-              {workCenterItems.map((item, idx) => (
-                <Link key={idx} to={item.to} className="group flex flex-col items-center">
-                  <div className={cn("h-16 w-16 rounded-[2rem] flex items-center justify-center transition-all group-active:scale-90 border-2 border-white shadow-md group-hover:shadow-xl group-hover:-translate-y-1", item.color)}>
-                    <item.icon className="h-7 w-7" />
-                  </div>
-                  <span className="mt-4 text-[9px] font-black text-slate-500 uppercase tracking-tighter italic group-hover:text-slate-900">{item.label}</span>
-                </Link>
-              ))}
-            </div>
-          </section>
-        )}
-
-        {/* Schedule List - Improved Card Spacing and Modern Typography */}
-        <section className="px-6 space-y-8">
-          <div className="flex items-center justify-between px-1">
-            <h3 className="text-[10px] font-black uppercase text-slate-400 tracking-[0.3em] italic">TODAY_SCHEDULE</h3>
-            <Link to="/mobile/jobs" className="text-[10px] font-black uppercase text-indigo-500 tracking-widest border-b-2 border-indigo-100 pb-1">VIEW ALL</Link>
+        {/* Job List - Low Profile & High Performance Look */}
+        <section className="px-5">
+          <div className="flex items-center justify-between mb-4">
+            <h3 className="text-xs font-bold text-slate-900 uppercase tracking-wider">Lịch trình hôm nay</h3>
+            <Link to="/mobile/jobs" className="text-[10px] font-bold text-indigo-600">XEM HẾT</Link>
           </div>
           
-          <div className="space-y-6">
+          <div className="space-y-3">
              {filteredJobs.slice(0, 3).map((job) => (
                 <Link key={job.id} to={`/mobile/jobs/${job.id}`}>
-                  <Card className="p-6 border-none shadow-xl shadow-slate-100/50 rounded-[2.5rem] bg-white border border-slate-50 group active:scale-[0.98] transition-all relative overflow-hidden">
-                    <div className="flex items-start gap-6">
-                      <div className="h-16 w-16 rounded-2xl bg-slate-900 flex flex-col items-center justify-center shrink-0 border border-slate-800 shadow-lg group-hover:bg-indigo-600 transition-colors">
-                        <span className="text-[10px] font-black text-slate-400 group-hover:text-indigo-200 uppercase tracking-widest">{formatDateTime(job.scheduledFor).split(" ")[0].split("/")[0]}</span>
-                        <span className="text-lg font-black text-white uppercase italic tracking-tighter leading-none">TH{formatDateTime(job.scheduledFor).split(" ")[0].split("/")[1]}</span>
+                  <Card className="p-4 border border-slate-100 shadow-sm rounded-2xl bg-white active:scale-[0.98] transition-all flex items-center gap-4">
+                    <div className="h-12 w-12 rounded-xl bg-slate-50 flex flex-col items-center justify-center shrink-0 border border-slate-100">
+                      <span className="text-[8px] font-bold text-slate-400 uppercase">{formatDateTime(job.scheduledFor).split(" ")[1]}</span>
+                      <span className="text-xs font-bold text-slate-900">{formatDateTime(job.scheduledFor).split(" ")[0].split("/")[0]}/{formatDateTime(job.scheduledFor).split(" ")[0].split("/")[1]}</span>
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <div className="flex items-center gap-2 mb-1">
+                        <StatusBadge variant={jobStatusVariant[job.status]} className="h-4 px-1.5 text-[7px] font-bold uppercase tracking-tighter">
+                          {jobStatusLabel[job.status]}
+                        </StatusBadge>
+                        <span className="text-[9px] text-slate-400 font-medium truncate">• 15 phút trước</span>
                       </div>
-                      <div className="flex-1 min-w-0 pt-1">
-                        <div className="flex items-center justify-between mb-3">
-                          <StatusBadge variant={jobStatusVariant[job.status]} className="h-5 px-2.5 text-[8px] font-mono tracking-widest">
-                            {jobStatusLabel[job.status].toUpperCase()}
-                          </StatusBadge>
-                          <ChevronRight className="h-4 w-4 text-slate-300 group-hover:text-indigo-500 group-hover:translate-x-1 transition-all" />
-                        </div>
-                        <h2 className="text-[15px] font-black text-slate-900 uppercase italic tracking-tight mb-4 group-hover:text-indigo-600 transition-colors leading-snug">
-                          {job.title}
-                        </h2>
-                        <div className="flex flex-wrap items-center gap-x-5 gap-y-2">
-                          <div className="flex items-center gap-1.5 text-slate-400">
-                             <Clock className="h-3.5 w-3.5 text-indigo-400" />
-                             <span className="text-[10px] font-black uppercase tracking-widest italic font-mono">{formatDateTime(job.scheduledFor).split(" ")[1]}</span>
-                          </div>
-                          <div className="flex items-center gap-1.5 text-slate-400">
-                             <MapPin className="h-3.5 w-3.5 text-rose-400" />
-                             <span className="text-[10px] font-black uppercase tracking-widest italic truncate max-w-[120px]">VINCOM CTR</span>
-                          </div>
-                        </div>
+                      <h2 className="text-[13px] font-bold text-slate-900 truncate mb-1">
+                        {job.title}
+                      </h2>
+                      <div className="flex items-center gap-3 text-slate-400">
+                         <div className="flex items-center gap-1">
+                            <MapPin className="h-3 w-3" />
+                            <span className="text-[10px] font-medium truncate max-w-[100px]">Vincom Center</span>
+                         </div>
                       </div>
                     </div>
-                    {/* Industrial line detail */}
-                    <div className="absolute bottom-0 left-0 w-1.5 h-1/2 bg-slate-100 group-hover:bg-indigo-500 transition-colors" />
+                    <ChevronRight className="h-4 w-4 text-slate-300 shrink-0" />
                   </Card>
                 </Link>
              ))}
