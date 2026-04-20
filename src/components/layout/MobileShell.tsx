@@ -1,6 +1,6 @@
 ﻿import React, { useState } from "react";
 import { Link, useNavigate } from "@tanstack/react-router";
-import { useMainRole, useCurrentUser, setMainRole, useAppStore } from "@/lib/store";
+import { useMainRole, useCurrentUser, useCurrentPermissions, setMainRole, useAppStore } from "@/lib/store";
 import { 
   Home, 
   Briefcase, 
@@ -35,13 +35,35 @@ export function MobileShell({
 }: MobileShellProps) {
    const navigate = useNavigate();
   const role = useMainRole();
+   const permissions = useCurrentPermissions();
   const user = useCurrentUser();
   const companySize = useAppStore((s) => s.companySize);
    const setCompanySize = useAppStore((s) => s.setCompanySize);
   const [isMenuOpen, setIsMenuOpen] = useState(false);
 
+   const availableRoles: Array<"admin" | "tech" | "customer"> = [];
+   if (permissions.some((p) => ["director", "sales", "sales_maintenance", "accounting", "hr_admin", "install_mgmt", "maintenance_mgmt"].includes(p))) {
+      availableRoles.push("admin");
+   }
+   if (permissions.some((p) => ["field_tech", "tech_survey", "maintenance_mgmt", "install_mgmt"].includes(p))) {
+      availableRoles.push("tech");
+   }
+   if (permissions.includes("customer")) {
+      availableRoles.push("customer");
+   }
+
+   const roleLabel = role === "admin" ? "Executive Admin" : role === "tech" ? "Field Engineer" : "Portal Customer";
+   const homePath = role === "tech" ? "/mobile/tech/" : role === "customer" ? "/mobile/portal" : "/mobile/";
+   const tasksPath = role === "tech" ? "/mobile/tech/jobs/" : role === "customer" ? "/mobile/portal/issues" : "/mobile/jobs";
+
   const switchRole = () => {
-    const nextRole = role === "admin" ? "tech" : "admin";
+      if (availableRoles.length <= 1) {
+         setIsMenuOpen(false);
+         return;
+      }
+
+      const currentIndex = Math.max(availableRoles.indexOf(role), 0);
+      const nextRole = availableRoles[(currentIndex + 1) % availableRoles.length];
     setMainRole(nextRole);
     setIsMenuOpen(false);
   };
@@ -93,10 +115,10 @@ export function MobileShell({
       )}
 
       {/* Modern Sidebar Drawer */}
-      {isMenuOpen && (
+         {isMenuOpen && (
         <>
-          <div className="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-[100] animate-in fade-in duration-300" onClick={() => setIsMenuOpen(false)} />
-          <div className="fixed inset-y-0 right-0 w-[85%] max-w-[300px] bg-white z-[101] shadow-2xl flex flex-col p-0 overflow-hidden animate-in slide-in-from-right duration-500 ease-out">
+               <div className="absolute inset-0 bg-slate-900/60 backdrop-blur-sm z-[100] animate-in fade-in duration-300" onClick={() => setIsMenuOpen(false)} />
+               <div className="absolute inset-y-0 right-0 w-[85%] max-w-[300px] bg-white z-[101] shadow-2xl flex flex-col p-0 overflow-hidden animate-in slide-in-from-right duration-500 ease-out">
              {/* Profile Header */}
              <div className="p-8 pb-10 bg-indigo-950 text-white relative overflow-hidden shrink-0">
                 <div className="absolute top-0 right-0 w-48 h-48 bg-white/5 rounded-full -mr-24 -mt-24 blur-3xl" />
@@ -112,7 +134,7 @@ export function MobileShell({
                    <h3 className="text-xl font-bold tracking-tight leading-none mb-2">{user?.name || "Nguyễn Văn Director"}</h3>
                    <div className="flex items-center gap-2 px-3 py-1 bg-white/10 rounded-full border border-white/10 w-fit">
                       <Shield className="h-3.5 w-3.5 text-indigo-400" />
-                      <span className="text-[10px] font-black uppercase tracking-widest text-indigo-100">{role === "admin" ? "Executive Admin" : "Field Engineer"}</span>
+                      <span className="text-[10px] font-black uppercase tracking-widest text-indigo-100">{roleLabel}</span>
                    </div>
                 </div>
              </div>
@@ -126,7 +148,7 @@ export function MobileShell({
                    </div>
                    <div className="text-left">
                       <span className="block text-[12px] font-bold uppercase tracking-tight">Switch Role</span>
-                      <span className="block text-[9px] font-semibold text-slate-400">Chuyển sang {role === "admin" ? "Kỹ thuật" : "Quản trị"}</span>
+                      <span className="block text-[9px] font-semibold text-slate-400">{availableRoles.length > 1 ? "Chuyển vai trò kế tiếp" : "Chỉ có 1 vai trò khả dụng"}</span>
                    </div>
                 </button>
 
@@ -174,15 +196,15 @@ export function MobileShell({
       </main>
 
       {/* Fixed Navigation Bar - Professional Rounded Design with container constraints */}
-      <div className="fixed bottom-0 left-0 right-0 p-5 pointer-events-none z-50">
+         <div className="absolute bottom-0 left-0 right-0 p-5 pointer-events-none z-50">
         <nav className="max-w-md mx-auto h-20 bg-slate-900/90 backdrop-blur-2xl rounded-[1.8rem] px-5 flex items-center justify-between pointer-events-auto shadow-[0_20px_40px_rgba(0,0,0,0.3)] border border-white/10 border-t-white/20">
-               <Link to={role === "tech" ? "/mobile/tech/" : "/mobile/"} className="flex flex-col items-center transition-all active:scale-75 group select-none">
+               <Link to={homePath} className="flex flex-col items-center transition-all active:scale-75 group select-none">
             <Home className="h-6 w-6 text-white/50 group-data-[status=active]:text-white" />
             <span className="text-[8px] font-black text-white/30 uppercase tracking-widest mt-1.5 group-data-[status=active]:text-indigo-400">Home</span>
           </Link>
-               <Link to={role === "tech" ? "/mobile/tech/jobs/" : "/mobile/jobs"} className="flex flex-col items-center transition-all active:scale-75 group select-none">
+               <Link to={tasksPath} className="flex flex-col items-center transition-all active:scale-75 group select-none">
             <Briefcase className="h-6 w-6 text-white/50 group-data-[status=active]:text-white" />
-            <span className="text-[8px] font-black text-white/30 uppercase tracking-widest mt-1.5 group-data-[status=active]:text-indigo-400">Tasks</span>
+                  <span className="text-[8px] font-black text-white/30 uppercase tracking-widest mt-1.5 group-data-[status=active]:text-indigo-400">{role === "customer" ? "Support" : "Tasks"}</span>
           </Link>
           
           <Link to="/mobile/scanner" className="h-16 w-16 -mt-16 bg-gradient-to-br from-indigo-500 to-indigo-700 text-white rounded-[1.5rem] flex items-center justify-center shadow-[0_8px_25px_rgba(79,70,229,0.5)] border-4 border-slate-50 active:scale-90 transition-all active:shadow-indigo-500/20">

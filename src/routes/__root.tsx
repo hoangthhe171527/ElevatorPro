@@ -95,7 +95,7 @@ function RootComponent() {
     return (
       <div className="min-h-screen bg-gray-50 flex items-center justify-center p-0 sm:p-4">
         <div className="w-full max-w-[440px] h-screen sm:h-[850px] bg-white sm:rounded-[3rem] sm:shadow-2xl sm:border-[8px] sm:border-gray-900 overflow-hidden relative flex flex-col">
-          <div className="flex-1 overflow-y-auto overflow-x-hidden">
+          <div className="flex-1 h-full overflow-hidden">
             <Outlet />
           </div>
           <Toaster position="top-center" richColors />

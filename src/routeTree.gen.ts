@@ -19,6 +19,7 @@ import { Route as TechRoutePlanRouteImport } from './routes/tech.route-plan'
 import { Route as QrElevatorIdRouteImport } from './routes/qr.$elevatorId'
 import { Route as PortalIssuesRouteImport } from './routes/portal.issues'
 import { Route as PortalContractsRouteImport } from './routes/portal.contracts'
+import { Route as MobileSupportRouteImport } from './routes/mobile/support'
 import { Route as MobileSettingsRouteImport } from './routes/mobile/settings'
 import { Route as MobileScheduleRouteImport } from './routes/mobile/schedule'
 import { Route as MobileScannerRouteImport } from './routes/mobile/scanner'
@@ -33,6 +34,7 @@ import { Route as MobileInventoryRouteImport } from './routes/mobile/inventory'
 import { Route as MobileHrRouteImport } from './routes/mobile/hr'
 import { Route as MobileElevatorsRouteImport } from './routes/mobile/elevators'
 import { Route as MobileCustomersRouteImport } from './routes/mobile/customers'
+import { Route as MobileContractsRouteImport } from './routes/mobile/contracts'
 import { Route as MobileApprovalsRouteImport } from './routes/mobile/approvals'
 import { Route as MobileAccountingRouteImport } from './routes/mobile/accounting'
 import { Route as AdminSettingsRouteImport } from './routes/admin.settings'
@@ -45,6 +47,7 @@ import { Route as AdminApprovalsRouteImport } from './routes/admin.approvals'
 import { Route as AdminAccountingRouteImport } from './routes/admin.accounting'
 import { Route as TechJobsIndexRouteImport } from './routes/tech.jobs.index'
 import { Route as PortalElevatorsIndexRouteImport } from './routes/portal.elevators.index'
+import { Route as MobileTechIndexRouteImport } from './routes/mobile/tech.index'
 import { Route as AdminProjectsIndexRouteImport } from './routes/admin.projects.index'
 import { Route as AdminJobsIndexRouteImport } from './routes/admin.jobs.index'
 import { Route as AdminInventoryIndexRouteImport } from './routes/admin.inventory.index'
@@ -52,8 +55,12 @@ import { Route as AdminElevatorsIndexRouteImport } from './routes/admin.elevator
 import { Route as AdminCustomersIndexRouteImport } from './routes/admin.customers.index'
 import { Route as TechJobsJobIdRouteImport } from './routes/tech.jobs.$jobId'
 import { Route as PortalElevatorsElevatorIdRouteImport } from './routes/portal.elevators.$elevatorId'
+import { Route as MobileTechRoutePlanRouteImport } from './routes/mobile/tech.route-plan'
 import { Route as MobileProjectsProjectIdRouteImport } from './routes/mobile/projects.$projectId'
 import { Route as MobilePortalIssuesRouteImport } from './routes/mobile/portal.issues'
+import { Route as MobilePortalElevatorsRouteImport } from './routes/mobile/portal.elevators'
+import { Route as MobilePortalContractsRouteImport } from './routes/mobile/portal.contracts'
+import { Route as MobilePortalBillingRouteImport } from './routes/mobile/portal.billing'
 import { Route as MobileLeadsLeadIdRouteImport } from './routes/mobile/leads.$leadId'
 import { Route as MobileJobsJobIdRouteImport } from './routes/mobile/jobs.$jobId'
 import { Route as MobileInventoryItemIdRouteImport } from './routes/mobile/inventory.$itemId'
@@ -64,6 +71,9 @@ import { Route as AdminProjectsProjectIdRouteImport } from './routes/admin.proje
 import { Route as AdminJobsJobIdRouteImport } from './routes/admin.jobs.$jobId'
 import { Route as AdminElevatorsElevatorIdRouteImport } from './routes/admin.elevators.$elevatorId'
 import { Route as AdminCustomersCustomerIdRouteImport } from './routes/admin.customers.$customerId'
+import { Route as MobileTechJobsIndexRouteImport } from './routes/mobile/tech.jobs.index'
+import { Route as MobileTechJobsJobIdRouteImport } from './routes/mobile/tech.jobs.$jobId'
+import { Route as MobilePortalElevatorsElevatorIdRouteImport } from './routes/mobile/portal.elevators.$elevatorId'
 import { Route as AdminElevatorsElevatorIdQrRouteImport } from './routes/admin.elevators.$elevatorId.qr'
 
 const IndexRoute = IndexRouteImport.update({
@@ -114,6 +124,11 @@ const PortalIssuesRoute = PortalIssuesRouteImport.update({
 const PortalContractsRoute = PortalContractsRouteImport.update({
   id: '/portal/contracts',
   path: '/portal/contracts',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const MobileSupportRoute = MobileSupportRouteImport.update({
+  id: '/mobile/support',
+  path: '/mobile/support',
   getParentRoute: () => rootRouteImport,
 } as any)
 const MobileSettingsRoute = MobileSettingsRouteImport.update({
@@ -186,6 +201,11 @@ const MobileCustomersRoute = MobileCustomersRouteImport.update({
   path: '/mobile/customers',
   getParentRoute: () => rootRouteImport,
 } as any)
+const MobileContractsRoute = MobileContractsRouteImport.update({
+  id: '/mobile/contracts',
+  path: '/mobile/contracts',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const MobileApprovalsRoute = MobileApprovalsRouteImport.update({
   id: '/mobile/approvals',
   path: '/mobile/approvals',
@@ -246,6 +266,11 @@ const PortalElevatorsIndexRoute = PortalElevatorsIndexRouteImport.update({
   path: '/portal/elevators/',
   getParentRoute: () => rootRouteImport,
 } as any)
+const MobileTechIndexRoute = MobileTechIndexRouteImport.update({
+  id: '/mobile/tech/',
+  path: '/mobile/tech/',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const AdminProjectsIndexRoute = AdminProjectsIndexRouteImport.update({
   id: '/admin/projects/',
   path: '/admin/projects/',
@@ -282,6 +307,11 @@ const PortalElevatorsElevatorIdRoute =
     path: '/portal/elevators/$elevatorId',
     getParentRoute: () => rootRouteImport,
   } as any)
+const MobileTechRoutePlanRoute = MobileTechRoutePlanRouteImport.update({
+  id: '/mobile/tech/route-plan',
+  path: '/mobile/tech/route-plan',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const MobileProjectsProjectIdRoute = MobileProjectsProjectIdRouteImport.update({
   id: '/$projectId',
   path: '/$projectId',
@@ -290,6 +320,21 @@ const MobileProjectsProjectIdRoute = MobileProjectsProjectIdRouteImport.update({
 const MobilePortalIssuesRoute = MobilePortalIssuesRouteImport.update({
   id: '/issues',
   path: '/issues',
+  getParentRoute: () => MobilePortalRoute,
+} as any)
+const MobilePortalElevatorsRoute = MobilePortalElevatorsRouteImport.update({
+  id: '/elevators',
+  path: '/elevators',
+  getParentRoute: () => MobilePortalRoute,
+} as any)
+const MobilePortalContractsRoute = MobilePortalContractsRouteImport.update({
+  id: '/contracts',
+  path: '/contracts',
+  getParentRoute: () => MobilePortalRoute,
+} as any)
+const MobilePortalBillingRoute = MobilePortalBillingRouteImport.update({
+  id: '/billing',
+  path: '/billing',
   getParentRoute: () => MobilePortalRoute,
 } as any)
 const MobileLeadsLeadIdRoute = MobileLeadsLeadIdRouteImport.update({
@@ -321,9 +366,9 @@ const MobileCustomersCustomerIdRoute =
   } as any)
 const MobileContractsContractIdRoute =
   MobileContractsContractIdRouteImport.update({
-    id: '/mobile/contracts/$contractId',
-    path: '/mobile/contracts/$contractId',
-    getParentRoute: () => rootRouteImport,
+    id: '/$contractId',
+    path: '/$contractId',
+    getParentRoute: () => MobileContractsRoute,
   } as any)
 const AdminProjectsProjectIdRoute = AdminProjectsProjectIdRouteImport.update({
   id: '/admin/projects/$projectId',
@@ -347,6 +392,22 @@ const AdminCustomersCustomerIdRoute =
     path: '/admin/customers/$customerId',
     getParentRoute: () => rootRouteImport,
   } as any)
+const MobileTechJobsIndexRoute = MobileTechJobsIndexRouteImport.update({
+  id: '/mobile/tech/jobs/',
+  path: '/mobile/tech/jobs/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const MobileTechJobsJobIdRoute = MobileTechJobsJobIdRouteImport.update({
+  id: '/mobile/tech/jobs/$jobId',
+  path: '/mobile/tech/jobs/$jobId',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const MobilePortalElevatorsElevatorIdRoute =
+  MobilePortalElevatorsElevatorIdRouteImport.update({
+    id: '/$elevatorId',
+    path: '/$elevatorId',
+    getParentRoute: () => MobilePortalElevatorsRoute,
+  } as any)
 const AdminElevatorsElevatorIdQrRoute =
   AdminElevatorsElevatorIdQrRouteImport.update({
     id: '/qr',
@@ -366,6 +427,7 @@ export interface FileRoutesByFullPath {
   '/admin/settings': typeof AdminSettingsRoute
   '/mobile/accounting': typeof MobileAccountingRoute
   '/mobile/approvals': typeof MobileApprovalsRoute
+  '/mobile/contracts': typeof MobileContractsRouteWithChildren
   '/mobile/customers': typeof MobileCustomersRouteWithChildren
   '/mobile/elevators': typeof MobileElevatorsRouteWithChildren
   '/mobile/hr': typeof MobileHrRoute
@@ -380,6 +442,7 @@ export interface FileRoutesByFullPath {
   '/mobile/scanner': typeof MobileScannerRoute
   '/mobile/schedule': typeof MobileScheduleRoute
   '/mobile/settings': typeof MobileSettingsRoute
+  '/mobile/support': typeof MobileSupportRoute
   '/portal/contracts': typeof PortalContractsRoute
   '/portal/issues': typeof PortalIssuesRoute
   '/qr/$elevatorId': typeof QrElevatorIdRoute
@@ -399,8 +462,12 @@ export interface FileRoutesByFullPath {
   '/mobile/inventory/$itemId': typeof MobileInventoryItemIdRoute
   '/mobile/jobs/$jobId': typeof MobileJobsJobIdRoute
   '/mobile/leads/$leadId': typeof MobileLeadsLeadIdRoute
+  '/mobile/portal/billing': typeof MobilePortalBillingRoute
+  '/mobile/portal/contracts': typeof MobilePortalContractsRoute
+  '/mobile/portal/elevators': typeof MobilePortalElevatorsRouteWithChildren
   '/mobile/portal/issues': typeof MobilePortalIssuesRoute
   '/mobile/projects/$projectId': typeof MobileProjectsProjectIdRoute
+  '/mobile/tech/route-plan': typeof MobileTechRoutePlanRoute
   '/portal/elevators/$elevatorId': typeof PortalElevatorsElevatorIdRoute
   '/tech/jobs/$jobId': typeof TechJobsJobIdRoute
   '/admin/customers/': typeof AdminCustomersIndexRoute
@@ -408,9 +475,13 @@ export interface FileRoutesByFullPath {
   '/admin/inventory/': typeof AdminInventoryIndexRoute
   '/admin/jobs/': typeof AdminJobsIndexRoute
   '/admin/projects/': typeof AdminProjectsIndexRoute
+  '/mobile/tech/': typeof MobileTechIndexRoute
   '/portal/elevators/': typeof PortalElevatorsIndexRoute
   '/tech/jobs/': typeof TechJobsIndexRoute
   '/admin/elevators/$elevatorId/qr': typeof AdminElevatorsElevatorIdQrRoute
+  '/mobile/portal/elevators/$elevatorId': typeof MobilePortalElevatorsElevatorIdRoute
+  '/mobile/tech/jobs/$jobId': typeof MobileTechJobsJobIdRoute
+  '/mobile/tech/jobs/': typeof MobileTechJobsIndexRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -424,6 +495,7 @@ export interface FileRoutesByTo {
   '/admin/settings': typeof AdminSettingsRoute
   '/mobile/accounting': typeof MobileAccountingRoute
   '/mobile/approvals': typeof MobileApprovalsRoute
+  '/mobile/contracts': typeof MobileContractsRouteWithChildren
   '/mobile/customers': typeof MobileCustomersRouteWithChildren
   '/mobile/elevators': typeof MobileElevatorsRouteWithChildren
   '/mobile/hr': typeof MobileHrRoute
@@ -438,6 +510,7 @@ export interface FileRoutesByTo {
   '/mobile/scanner': typeof MobileScannerRoute
   '/mobile/schedule': typeof MobileScheduleRoute
   '/mobile/settings': typeof MobileSettingsRoute
+  '/mobile/support': typeof MobileSupportRoute
   '/portal/contracts': typeof PortalContractsRoute
   '/portal/issues': typeof PortalIssuesRoute
   '/qr/$elevatorId': typeof QrElevatorIdRoute
@@ -457,8 +530,12 @@ export interface FileRoutesByTo {
   '/mobile/inventory/$itemId': typeof MobileInventoryItemIdRoute
   '/mobile/jobs/$jobId': typeof MobileJobsJobIdRoute
   '/mobile/leads/$leadId': typeof MobileLeadsLeadIdRoute
+  '/mobile/portal/billing': typeof MobilePortalBillingRoute
+  '/mobile/portal/contracts': typeof MobilePortalContractsRoute
+  '/mobile/portal/elevators': typeof MobilePortalElevatorsRouteWithChildren
   '/mobile/portal/issues': typeof MobilePortalIssuesRoute
   '/mobile/projects/$projectId': typeof MobileProjectsProjectIdRoute
+  '/mobile/tech/route-plan': typeof MobileTechRoutePlanRoute
   '/portal/elevators/$elevatorId': typeof PortalElevatorsElevatorIdRoute
   '/tech/jobs/$jobId': typeof TechJobsJobIdRoute
   '/admin/customers': typeof AdminCustomersIndexRoute
@@ -466,9 +543,13 @@ export interface FileRoutesByTo {
   '/admin/inventory': typeof AdminInventoryIndexRoute
   '/admin/jobs': typeof AdminJobsIndexRoute
   '/admin/projects': typeof AdminProjectsIndexRoute
+  '/mobile/tech': typeof MobileTechIndexRoute
   '/portal/elevators': typeof PortalElevatorsIndexRoute
   '/tech/jobs': typeof TechJobsIndexRoute
   '/admin/elevators/$elevatorId/qr': typeof AdminElevatorsElevatorIdQrRoute
+  '/mobile/portal/elevators/$elevatorId': typeof MobilePortalElevatorsElevatorIdRoute
+  '/mobile/tech/jobs/$jobId': typeof MobileTechJobsJobIdRoute
+  '/mobile/tech/jobs': typeof MobileTechJobsIndexRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -483,6 +564,7 @@ export interface FileRoutesById {
   '/admin/settings': typeof AdminSettingsRoute
   '/mobile/accounting': typeof MobileAccountingRoute
   '/mobile/approvals': typeof MobileApprovalsRoute
+  '/mobile/contracts': typeof MobileContractsRouteWithChildren
   '/mobile/customers': typeof MobileCustomersRouteWithChildren
   '/mobile/elevators': typeof MobileElevatorsRouteWithChildren
   '/mobile/hr': typeof MobileHrRoute
@@ -497,6 +579,7 @@ export interface FileRoutesById {
   '/mobile/scanner': typeof MobileScannerRoute
   '/mobile/schedule': typeof MobileScheduleRoute
   '/mobile/settings': typeof MobileSettingsRoute
+  '/mobile/support': typeof MobileSupportRoute
   '/portal/contracts': typeof PortalContractsRoute
   '/portal/issues': typeof PortalIssuesRoute
   '/qr/$elevatorId': typeof QrElevatorIdRoute
@@ -516,8 +599,12 @@ export interface FileRoutesById {
   '/mobile/inventory/$itemId': typeof MobileInventoryItemIdRoute
   '/mobile/jobs/$jobId': typeof MobileJobsJobIdRoute
   '/mobile/leads/$leadId': typeof MobileLeadsLeadIdRoute
+  '/mobile/portal/billing': typeof MobilePortalBillingRoute
+  '/mobile/portal/contracts': typeof MobilePortalContractsRoute
+  '/mobile/portal/elevators': typeof MobilePortalElevatorsRouteWithChildren
   '/mobile/portal/issues': typeof MobilePortalIssuesRoute
   '/mobile/projects/$projectId': typeof MobileProjectsProjectIdRoute
+  '/mobile/tech/route-plan': typeof MobileTechRoutePlanRoute
   '/portal/elevators/$elevatorId': typeof PortalElevatorsElevatorIdRoute
   '/tech/jobs/$jobId': typeof TechJobsJobIdRoute
   '/admin/customers/': typeof AdminCustomersIndexRoute
@@ -525,9 +612,13 @@ export interface FileRoutesById {
   '/admin/inventory/': typeof AdminInventoryIndexRoute
   '/admin/jobs/': typeof AdminJobsIndexRoute
   '/admin/projects/': typeof AdminProjectsIndexRoute
+  '/mobile/tech/': typeof MobileTechIndexRoute
   '/portal/elevators/': typeof PortalElevatorsIndexRoute
   '/tech/jobs/': typeof TechJobsIndexRoute
   '/admin/elevators/$elevatorId/qr': typeof AdminElevatorsElevatorIdQrRoute
+  '/mobile/portal/elevators/$elevatorId': typeof MobilePortalElevatorsElevatorIdRoute
+  '/mobile/tech/jobs/$jobId': typeof MobileTechJobsJobIdRoute
+  '/mobile/tech/jobs/': typeof MobileTechJobsIndexRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -543,6 +634,7 @@ export interface FileRouteTypes {
     | '/admin/settings'
     | '/mobile/accounting'
     | '/mobile/approvals'
+    | '/mobile/contracts'
     | '/mobile/customers'
     | '/mobile/elevators'
     | '/mobile/hr'
@@ -557,6 +649,7 @@ export interface FileRouteTypes {
     | '/mobile/scanner'
     | '/mobile/schedule'
     | '/mobile/settings'
+    | '/mobile/support'
     | '/portal/contracts'
     | '/portal/issues'
     | '/qr/$elevatorId'
@@ -576,8 +669,12 @@ export interface FileRouteTypes {
     | '/mobile/inventory/$itemId'
     | '/mobile/jobs/$jobId'
     | '/mobile/leads/$leadId'
+    | '/mobile/portal/billing'
+    | '/mobile/portal/contracts'
+    | '/mobile/portal/elevators'
     | '/mobile/portal/issues'
     | '/mobile/projects/$projectId'
+    | '/mobile/tech/route-plan'
     | '/portal/elevators/$elevatorId'
     | '/tech/jobs/$jobId'
     | '/admin/customers/'
@@ -585,9 +682,13 @@ export interface FileRouteTypes {
     | '/admin/inventory/'
     | '/admin/jobs/'
     | '/admin/projects/'
+    | '/mobile/tech/'
     | '/portal/elevators/'
     | '/tech/jobs/'
     | '/admin/elevators/$elevatorId/qr'
+    | '/mobile/portal/elevators/$elevatorId'
+    | '/mobile/tech/jobs/$jobId'
+    | '/mobile/tech/jobs/'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
@@ -601,6 +702,7 @@ export interface FileRouteTypes {
     | '/admin/settings'
     | '/mobile/accounting'
     | '/mobile/approvals'
+    | '/mobile/contracts'
     | '/mobile/customers'
     | '/mobile/elevators'
     | '/mobile/hr'
@@ -615,6 +717,7 @@ export interface FileRouteTypes {
     | '/mobile/scanner'
     | '/mobile/schedule'
     | '/mobile/settings'
+    | '/mobile/support'
     | '/portal/contracts'
     | '/portal/issues'
     | '/qr/$elevatorId'
@@ -634,8 +737,12 @@ export interface FileRouteTypes {
     | '/mobile/inventory/$itemId'
     | '/mobile/jobs/$jobId'
     | '/mobile/leads/$leadId'
+    | '/mobile/portal/billing'
+    | '/mobile/portal/contracts'
+    | '/mobile/portal/elevators'
     | '/mobile/portal/issues'
     | '/mobile/projects/$projectId'
+    | '/mobile/tech/route-plan'
     | '/portal/elevators/$elevatorId'
     | '/tech/jobs/$jobId'
     | '/admin/customers'
@@ -643,9 +750,13 @@ export interface FileRouteTypes {
     | '/admin/inventory'
     | '/admin/jobs'
     | '/admin/projects'
+    | '/mobile/tech'
     | '/portal/elevators'
     | '/tech/jobs'
     | '/admin/elevators/$elevatorId/qr'
+    | '/mobile/portal/elevators/$elevatorId'
+    | '/mobile/tech/jobs/$jobId'
+    | '/mobile/tech/jobs'
   id:
     | '__root__'
     | '/'
@@ -659,6 +770,7 @@ export interface FileRouteTypes {
     | '/admin/settings'
     | '/mobile/accounting'
     | '/mobile/approvals'
+    | '/mobile/contracts'
     | '/mobile/customers'
     | '/mobile/elevators'
     | '/mobile/hr'
@@ -673,6 +785,7 @@ export interface FileRouteTypes {
     | '/mobile/scanner'
     | '/mobile/schedule'
     | '/mobile/settings'
+    | '/mobile/support'
     | '/portal/contracts'
     | '/portal/issues'
     | '/qr/$elevatorId'
@@ -692,8 +805,12 @@ export interface FileRouteTypes {
     | '/mobile/inventory/$itemId'
     | '/mobile/jobs/$jobId'
     | '/mobile/leads/$leadId'
+    | '/mobile/portal/billing'
+    | '/mobile/portal/contracts'
+    | '/mobile/portal/elevators'
     | '/mobile/portal/issues'
     | '/mobile/projects/$projectId'
+    | '/mobile/tech/route-plan'
     | '/portal/elevators/$elevatorId'
     | '/tech/jobs/$jobId'
     | '/admin/customers/'
@@ -701,9 +818,13 @@ export interface FileRouteTypes {
     | '/admin/inventory/'
     | '/admin/jobs/'
     | '/admin/projects/'
+    | '/mobile/tech/'
     | '/portal/elevators/'
     | '/tech/jobs/'
     | '/admin/elevators/$elevatorId/qr'
+    | '/mobile/portal/elevators/$elevatorId'
+    | '/mobile/tech/jobs/$jobId'
+    | '/mobile/tech/jobs/'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -718,6 +839,7 @@ export interface RootRouteChildren {
   AdminSettingsRoute: typeof AdminSettingsRoute
   MobileAccountingRoute: typeof MobileAccountingRoute
   MobileApprovalsRoute: typeof MobileApprovalsRoute
+  MobileContractsRoute: typeof MobileContractsRouteWithChildren
   MobileCustomersRoute: typeof MobileCustomersRouteWithChildren
   MobileElevatorsRoute: typeof MobileElevatorsRouteWithChildren
   MobileHrRoute: typeof MobileHrRoute
@@ -732,6 +854,7 @@ export interface RootRouteChildren {
   MobileScannerRoute: typeof MobileScannerRoute
   MobileScheduleRoute: typeof MobileScheduleRoute
   MobileSettingsRoute: typeof MobileSettingsRoute
+  MobileSupportRoute: typeof MobileSupportRoute
   PortalContractsRoute: typeof PortalContractsRoute
   PortalIssuesRoute: typeof PortalIssuesRoute
   QrElevatorIdRoute: typeof QrElevatorIdRoute
@@ -745,7 +868,7 @@ export interface RootRouteChildren {
   AdminElevatorsElevatorIdRoute: typeof AdminElevatorsElevatorIdRouteWithChildren
   AdminJobsJobIdRoute: typeof AdminJobsJobIdRoute
   AdminProjectsProjectIdRoute: typeof AdminProjectsProjectIdRoute
-  MobileContractsContractIdRoute: typeof MobileContractsContractIdRoute
+  MobileTechRoutePlanRoute: typeof MobileTechRoutePlanRoute
   PortalElevatorsElevatorIdRoute: typeof PortalElevatorsElevatorIdRoute
   TechJobsJobIdRoute: typeof TechJobsJobIdRoute
   AdminCustomersIndexRoute: typeof AdminCustomersIndexRoute
@@ -753,8 +876,11 @@ export interface RootRouteChildren {
   AdminInventoryIndexRoute: typeof AdminInventoryIndexRoute
   AdminJobsIndexRoute: typeof AdminJobsIndexRoute
   AdminProjectsIndexRoute: typeof AdminProjectsIndexRoute
+  MobileTechIndexRoute: typeof MobileTechIndexRoute
   PortalElevatorsIndexRoute: typeof PortalElevatorsIndexRoute
   TechJobsIndexRoute: typeof TechJobsIndexRoute
+  MobileTechJobsJobIdRoute: typeof MobileTechJobsJobIdRoute
+  MobileTechJobsIndexRoute: typeof MobileTechJobsIndexRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -827,6 +953,13 @@ declare module '@tanstack/react-router' {
       path: '/portal/contracts'
       fullPath: '/portal/contracts'
       preLoaderRoute: typeof PortalContractsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/mobile/support': {
+      id: '/mobile/support'
+      path: '/mobile/support'
+      fullPath: '/mobile/support'
+      preLoaderRoute: typeof MobileSupportRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/mobile/settings': {
@@ -927,6 +1060,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof MobileCustomersRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/mobile/contracts': {
+      id: '/mobile/contracts'
+      path: '/mobile/contracts'
+      fullPath: '/mobile/contracts'
+      preLoaderRoute: typeof MobileContractsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/mobile/approvals': {
       id: '/mobile/approvals'
       path: '/mobile/approvals'
@@ -1011,6 +1151,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof PortalElevatorsIndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/mobile/tech/': {
+      id: '/mobile/tech/'
+      path: '/mobile/tech'
+      fullPath: '/mobile/tech/'
+      preLoaderRoute: typeof MobileTechIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/admin/projects/': {
       id: '/admin/projects/'
       path: '/admin/projects'
@@ -1060,6 +1207,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof PortalElevatorsElevatorIdRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/mobile/tech/route-plan': {
+      id: '/mobile/tech/route-plan'
+      path: '/mobile/tech/route-plan'
+      fullPath: '/mobile/tech/route-plan'
+      preLoaderRoute: typeof MobileTechRoutePlanRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/mobile/projects/$projectId': {
       id: '/mobile/projects/$projectId'
       path: '/$projectId'
@@ -1072,6 +1226,27 @@ declare module '@tanstack/react-router' {
       path: '/issues'
       fullPath: '/mobile/portal/issues'
       preLoaderRoute: typeof MobilePortalIssuesRouteImport
+      parentRoute: typeof MobilePortalRoute
+    }
+    '/mobile/portal/elevators': {
+      id: '/mobile/portal/elevators'
+      path: '/elevators'
+      fullPath: '/mobile/portal/elevators'
+      preLoaderRoute: typeof MobilePortalElevatorsRouteImport
+      parentRoute: typeof MobilePortalRoute
+    }
+    '/mobile/portal/contracts': {
+      id: '/mobile/portal/contracts'
+      path: '/contracts'
+      fullPath: '/mobile/portal/contracts'
+      preLoaderRoute: typeof MobilePortalContractsRouteImport
+      parentRoute: typeof MobilePortalRoute
+    }
+    '/mobile/portal/billing': {
+      id: '/mobile/portal/billing'
+      path: '/billing'
+      fullPath: '/mobile/portal/billing'
+      preLoaderRoute: typeof MobilePortalBillingRouteImport
       parentRoute: typeof MobilePortalRoute
     }
     '/mobile/leads/$leadId': {
@@ -1111,10 +1286,10 @@ declare module '@tanstack/react-router' {
     }
     '/mobile/contracts/$contractId': {
       id: '/mobile/contracts/$contractId'
-      path: '/mobile/contracts/$contractId'
+      path: '/$contractId'
       fullPath: '/mobile/contracts/$contractId'
       preLoaderRoute: typeof MobileContractsContractIdRouteImport
-      parentRoute: typeof rootRouteImport
+      parentRoute: typeof MobileContractsRoute
     }
     '/admin/projects/$projectId': {
       id: '/admin/projects/$projectId'
@@ -1144,6 +1319,27 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AdminCustomersCustomerIdRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/mobile/tech/jobs/': {
+      id: '/mobile/tech/jobs/'
+      path: '/mobile/tech/jobs'
+      fullPath: '/mobile/tech/jobs/'
+      preLoaderRoute: typeof MobileTechJobsIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/mobile/tech/jobs/$jobId': {
+      id: '/mobile/tech/jobs/$jobId'
+      path: '/mobile/tech/jobs/$jobId'
+      fullPath: '/mobile/tech/jobs/$jobId'
+      preLoaderRoute: typeof MobileTechJobsJobIdRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/mobile/portal/elevators/$elevatorId': {
+      id: '/mobile/portal/elevators/$elevatorId'
+      path: '/$elevatorId'
+      fullPath: '/mobile/portal/elevators/$elevatorId'
+      preLoaderRoute: typeof MobilePortalElevatorsElevatorIdRouteImport
+      parentRoute: typeof MobilePortalElevatorsRoute
+    }
     '/admin/elevators/$elevatorId/qr': {
       id: '/admin/elevators/$elevatorId/qr'
       path: '/qr'
@@ -1153,6 +1349,18 @@ declare module '@tanstack/react-router' {
     }
   }
 }
+
+interface MobileContractsRouteChildren {
+  MobileContractsContractIdRoute: typeof MobileContractsContractIdRoute
+}
+
+const MobileContractsRouteChildren: MobileContractsRouteChildren = {
+  MobileContractsContractIdRoute: MobileContractsContractIdRoute,
+}
+
+const MobileContractsRouteWithChildren = MobileContractsRoute._addFileChildren(
+  MobileContractsRouteChildren,
+)
 
 interface MobileCustomersRouteChildren {
   MobileCustomersCustomerIdRoute: typeof MobileCustomersCustomerIdRoute
@@ -1214,11 +1422,30 @@ const MobileLeadsRouteWithChildren = MobileLeadsRoute._addFileChildren(
   MobileLeadsRouteChildren,
 )
 
+interface MobilePortalElevatorsRouteChildren {
+  MobilePortalElevatorsElevatorIdRoute: typeof MobilePortalElevatorsElevatorIdRoute
+}
+
+const MobilePortalElevatorsRouteChildren: MobilePortalElevatorsRouteChildren = {
+  MobilePortalElevatorsElevatorIdRoute: MobilePortalElevatorsElevatorIdRoute,
+}
+
+const MobilePortalElevatorsRouteWithChildren =
+  MobilePortalElevatorsRoute._addFileChildren(
+    MobilePortalElevatorsRouteChildren,
+  )
+
 interface MobilePortalRouteChildren {
+  MobilePortalBillingRoute: typeof MobilePortalBillingRoute
+  MobilePortalContractsRoute: typeof MobilePortalContractsRoute
+  MobilePortalElevatorsRoute: typeof MobilePortalElevatorsRouteWithChildren
   MobilePortalIssuesRoute: typeof MobilePortalIssuesRoute
 }
 
 const MobilePortalRouteChildren: MobilePortalRouteChildren = {
+  MobilePortalBillingRoute: MobilePortalBillingRoute,
+  MobilePortalContractsRoute: MobilePortalContractsRoute,
+  MobilePortalElevatorsRoute: MobilePortalElevatorsRouteWithChildren,
   MobilePortalIssuesRoute: MobilePortalIssuesRoute,
 }
 
@@ -1264,6 +1491,7 @@ const rootRouteChildren: RootRouteChildren = {
   AdminSettingsRoute: AdminSettingsRoute,
   MobileAccountingRoute: MobileAccountingRoute,
   MobileApprovalsRoute: MobileApprovalsRoute,
+  MobileContractsRoute: MobileContractsRouteWithChildren,
   MobileCustomersRoute: MobileCustomersRouteWithChildren,
   MobileElevatorsRoute: MobileElevatorsRouteWithChildren,
   MobileHrRoute: MobileHrRoute,
@@ -1278,6 +1506,7 @@ const rootRouteChildren: RootRouteChildren = {
   MobileScannerRoute: MobileScannerRoute,
   MobileScheduleRoute: MobileScheduleRoute,
   MobileSettingsRoute: MobileSettingsRoute,
+  MobileSupportRoute: MobileSupportRoute,
   PortalContractsRoute: PortalContractsRoute,
   PortalIssuesRoute: PortalIssuesRoute,
   QrElevatorIdRoute: QrElevatorIdRoute,
@@ -1291,7 +1520,7 @@ const rootRouteChildren: RootRouteChildren = {
   AdminElevatorsElevatorIdRoute: AdminElevatorsElevatorIdRouteWithChildren,
   AdminJobsJobIdRoute: AdminJobsJobIdRoute,
   AdminProjectsProjectIdRoute: AdminProjectsProjectIdRoute,
-  MobileContractsContractIdRoute: MobileContractsContractIdRoute,
+  MobileTechRoutePlanRoute: MobileTechRoutePlanRoute,
   PortalElevatorsElevatorIdRoute: PortalElevatorsElevatorIdRoute,
   TechJobsJobIdRoute: TechJobsJobIdRoute,
   AdminCustomersIndexRoute: AdminCustomersIndexRoute,
@@ -1299,8 +1528,11 @@ const rootRouteChildren: RootRouteChildren = {
   AdminInventoryIndexRoute: AdminInventoryIndexRoute,
   AdminJobsIndexRoute: AdminJobsIndexRoute,
   AdminProjectsIndexRoute: AdminProjectsIndexRoute,
+  MobileTechIndexRoute: MobileTechIndexRoute,
   PortalElevatorsIndexRoute: PortalElevatorsIndexRoute,
   TechJobsIndexRoute: TechJobsIndexRoute,
+  MobileTechJobsJobIdRoute: MobileTechJobsJobIdRoute,
+  MobileTechJobsIndexRoute: MobileTechJobsIndexRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)

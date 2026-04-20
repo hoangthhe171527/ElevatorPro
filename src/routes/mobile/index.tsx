@@ -21,7 +21,10 @@ import {
   UserPlus,
   ArrowUpRight,
   ClipboardCheck,
-  BellRing
+   FolderKanban,
+   HandCoins,
+   Wrench,
+   CalendarDays,
 } from "lucide-react";
 import { Card } from "@/components/ui/card";
 import { cn } from "@/lib/utils";
@@ -41,6 +44,8 @@ function MobileDashboard() {
     { label: "HR Admin", icon: Users, color: "bg-indigo-50 text-indigo-600", path: "/mobile/hr", desc: "Nhân sự & Chấm công" },
     { label: "Inventory", icon: Warehouse, color: "bg-amber-50 text-amber-600", path: "/mobile/inventory", desc: "Quản lý tồn kho" },
     { label: "Customers", icon: UserPlus, color: "bg-purple-50 text-purple-600", path: "/mobile/customers", desc: "CRM & Hợp đồng" },
+      { label: "Projects", icon: FolderKanban, color: "bg-sky-50 text-sky-600", path: "/mobile/projects", desc: "Theo dõi dự án" },
+      { label: "Leads", icon: HandCoins, color: "bg-lime-50 text-lime-600", path: "/mobile/leads", desc: "Cơ hội kinh doanh" },
     { label: "Advanced BI", icon: LineChart, color: "bg-rose-50 text-rose-600", path: "/mobile/reports", desc: "Báo cáo chuyên sâu" },
   ];
 
@@ -48,12 +53,23 @@ function MobileDashboard() {
     { label: "Scanner", icon: QrCode, color: "bg-indigo-600 text-white shadow-indigo-200", path: "/mobile/scanner", desc: "Check-in thiết bị" },
       { label: "My Tasks", icon: Briefcase, color: "bg-amber-50 text-amber-600", path: "/mobile/tech/jobs/", desc: "Công việc hằng ngày" },
     { label: "Inventory", icon: Warehouse, color: "bg-slate-50 text-slate-600", path: "/mobile/inventory", desc: "Yêu cầu vật tư" },
+      { label: "Schedule", icon: CalendarDays, color: "bg-cyan-50 text-cyan-600", path: "/mobile/schedule", desc: "Lịch công tác" },
     { label: "Smart Route", icon: RouteIcon, color: "bg-emerald-50 text-emerald-600", path: "/mobile/tech/route-plan", desc: "Lộ trình tối ưu" },
     { label: "Emergency", icon: Zap, color: "bg-rose-50 text-rose-600", path: "/mobile/support", desc: "Cứu hộ khẩn cấp" },
     { label: "Assets", icon: SettingsIcon, color: "bg-blue-50 text-blue-600", path: "/mobile/elevators", desc: "Tra cứu thiết bị" },
+      { label: "Reports", icon: LineChart, color: "bg-violet-50 text-violet-600", path: "/mobile/reports", desc: "Hiệu suất cá nhân" },
   ];
 
-  const modules = role === "admin" ? adminModules : techModules;
+   const customerModules = [
+      { label: "Portal Home", icon: Users, color: "bg-indigo-600 text-white shadow-indigo-200", path: "/mobile/portal", desc: "Tổng quan khách hàng" },
+      { label: "My Elevators", icon: SettingsIcon, color: "bg-blue-50 text-blue-600", path: "/mobile/portal/elevators", desc: "Danh sách thiết bị" },
+      { label: "Contracts", icon: FileText, color: "bg-emerald-50 text-emerald-600", path: "/mobile/portal/contracts", desc: "Theo dõi hợp đồng" },
+      { label: "Billing", icon: CreditCard, color: "bg-amber-50 text-amber-600", path: "/mobile/portal/billing", desc: "Thanh toán & công nợ" },
+      { label: "Issue Report", icon: Wrench, color: "bg-rose-50 text-rose-600", path: "/mobile/portal/issues", desc: "Báo lỗi nhanh" },
+      { label: "Emergency", icon: Zap, color: "bg-fuchsia-50 text-fuchsia-600", path: "/mobile/support", desc: "Yêu cầu khẩn cấp" },
+   ];
+
+   const modules = role === "admin" ? adminModules : role === "tech" ? techModules : customerModules;
 
   return (
     <MobileShell hideHeader={true}>
@@ -133,14 +149,14 @@ function MobileDashboard() {
               <h3 className="text-[10px] font-black text-slate-400 uppercase tracking-[0.25em] flex items-center gap-2">
                  <div className="w-2 h-2 rounded-full bg-indigo-500 animate-pulse" /> Live Activity_
               </h3>
-              <Link to={role === "tech" ? "/mobile/tech/jobs/" : "/mobile/jobs"} className="text-[10px] font-black text-indigo-600 uppercase flex items-center gap-1 group">
+              <Link to={role === "tech" ? "/mobile/tech/jobs/" : role === "customer" ? "/mobile/portal/issues" : "/mobile/jobs"} className="text-[10px] font-black text-indigo-600 uppercase flex items-center gap-1 group">
                  Tất cả <ArrowUpRight className="h-3 w-3 group-hover:translate-x-0.5 group-hover:-translate-y-0.5 transition-transform" />
               </Link>
            </div>
            
            <div className="space-y-4">
               {[1, 2].map((i) => (
-                 <Link key={i} to={role === "tech" ? "/mobile/tech/jobs/1" : "/mobile/jobs/1"}>
+                 <Link key={i} to={role === "tech" ? "/mobile/tech/jobs/1" : role === "customer" ? "/mobile/portal/elevators/e-1" : "/mobile/jobs/1"}>
                     <Card className="p-5 border-slate-100 shadow-[0_4px_20px_rgba(0,0,0,0.02)] rounded-[1.8rem] bg-white active:scale-[0.98] transition-all flex items-center gap-4 group">
                        <div className="h-12 w-12 bg-slate-900 rounded-2xl flex flex-col items-center justify-center shadow-lg group-hover:rotate-3 transition-transform">
                           <span className="text-[8px] font-bold text-white/40 uppercase">JOB</span>

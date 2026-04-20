@@ -17,7 +17,7 @@ import {
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 
-export const Route = createFileRoute("/mobile/jobs/")({
+export const Route = createFileRoute("/mobile/jobs")({
   component: MobileJobsList,
 });
 

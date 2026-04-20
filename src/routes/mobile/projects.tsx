@@ -13,7 +13,7 @@ import {
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
-export const Route = createFileRoute("/mobile/projects/")({
+export const Route = createFileRoute("/mobile/projects")({
   component: MobileProjectsList,
 });
 

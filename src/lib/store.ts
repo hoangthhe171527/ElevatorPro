@@ -3,7 +3,7 @@ import { persist } from "zustand/middleware";
 import type { Permission } from "./mock-data";
 import { mockUsers } from "./mock-data";
 
-type MobileRole = "admin" | "tech";
+type MobileRole = "admin" | "tech" | "customer";
 
 const ADMIN_PERMISSIONS: Permission[] = [
   "director",
@@ -16,6 +16,7 @@ const ADMIN_PERMISSIONS: Permission[] = [
 ];
 
 const TECH_PERMISSIONS: Permission[] = ["field_tech", "tech_survey", "maintenance_mgmt", "install_mgmt"];
+const CUSTOMER_PERMISSIONS: Permission[] = ["customer"];
 
 function getPermissionsForTenant(userId: string, tenantId: string): Permission[] {
   const user = mockUsers.find((u) => u.id === userId);
@@ -27,7 +28,12 @@ function hasRoleInTenant(userId: string, tenantId: string, role: MobileRole): bo
   const permissions = getPermissionsForTenant(userId, tenantId);
   if (!permissions.length) return false;
 
-  const rolePermissions = role === "admin" ? ADMIN_PERMISSIONS : TECH_PERMISSIONS;
+  const rolePermissions =
+    role === "admin"
+      ? ADMIN_PERMISSIONS
+      : role === "tech"
+        ? TECH_PERMISSIONS
+        : CUSTOMER_PERMISSIONS;
   return permissions.some((p) => rolePermissions.includes(p));
 }
 
@@ -54,6 +60,10 @@ function resolveRoleForUser(userId: string, tenantId: string, preferredRole?: Mo
     return "tech";
   }
 
+  if (hasRoleInTenant(userId, tenantId, "customer")) {
+    return "customer";
+  }
+
   return "admin";
 }
 
@@ -63,13 +73,13 @@ interface AppState {
   activeJobCheckIn: string | null;
   hasHydrated: boolean;
   companySize: "large" | "small";
-  mainRole: "admin" | "tech"; // Thêm để điều khiển dashboard Mobile
+  mainRole: MobileRole; // Thêm để điều khiển dashboard Mobile
   setUserId: (userId: string) => void;
   setTenantId: (tenantId: string) => void;
   setJobCheckIn: (jobId: string | null) => void;
   setHasHydrated: (val: boolean) => void;
   setCompanySize: (size: "large" | "small") => void;
-  setMainRole: (role: "admin" | "tech") => void;
+  setMainRole: (role: MobileRole) => void;
 }
 
 export const useAppStore = create<AppState>()(
@@ -137,7 +147,7 @@ export function useMainRole() {
   return useAppStore((s) => s.mainRole);
 }
 
-export function setMainRole(role: "admin" | "tech") {
+export function setMainRole(role: MobileRole) {
   useAppStore.getState().setMainRole(role);
 }
 
