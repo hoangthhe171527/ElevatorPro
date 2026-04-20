@@ -89,9 +89,19 @@ function MobileCustomerPortal() {
         {/* Next Scheduled Service */}
         {myNextJob && (
           <section>
-            <h3 className="text-xs font-bold uppercase text-muted-foreground mb-3 px-1">
-              Lịch bảo trì sắp tới
-            </h3>
+            <div className="flex items-center justify-between mb-3 px-1">
+              <h3 className="text-xs font-bold uppercase text-muted-foreground">
+                Lịch bảo trì sắp tới
+              </h3>
+              <Button 
+                variant="ghost" 
+                size="sm" 
+                className="h-8 rounded-lg px-2 text-primary font-bold text-[10px]"
+                onClick={() => window.location.href = '/mobile/portal/issues'}
+              >
+                + BÁO LỖI MỚI
+              </Button>
+            </div>
             <Card className="p-4 border-none shadow-sm bg-blue-50 border border-blue-100">
               <div className="flex gap-4">
                 <div className="h-12 w-12 rounded-xl bg-white flex flex-col items-center justify-center border border-blue-200 shrink-0">
@@ -115,16 +125,17 @@ function MobileCustomerPortal() {
           <Button
             variant="outline"
             className="h-16 rounded-2xl bg-white border-slate-100 flex-col gap-1 shadow-sm"
+            onClick={() => window.location.href = '/mobile/portal/issues'}
           >
-            <History className="h-5 w-5 text-slate-400" />
-            <span className="text-[10px] font-bold uppercase">Lịch sử sửa chữa</span>
+            <AlertCircle className="h-5 w-5 text-red-500" />
+            <span className="text-[10px] font-bold uppercase">Báo hỏng / Sự cố</span>
           </Button>
           <Button
             variant="outline"
             className="h-16 rounded-2xl bg-white border-slate-100 flex-col gap-1 shadow-sm"
           >
-            <ShieldCheck className="h-5 w-5 text-emerald-500" />
-            <span className="text-[10px] font-bold uppercase">Hợp đồng bảo trì</span>
+            <History className="h-5 w-5 text-slate-400" />
+            <span className="text-[10px] font-bold uppercase">Lịch sử bảo trì</span>
           </Button>
         </div>
       </div>

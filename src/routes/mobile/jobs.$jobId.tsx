@@ -191,14 +191,34 @@ function JobDetailMobile() {
                 <Camera className="h-4 w-4" /> Hình ảnh & Nghiệm thu
              </h3>
              <div className="grid grid-cols-2 gap-3">
-                <Button variant="outline" className="h-28 rounded-3xl border-dashed border-2 bg-slate-50 flex-col gap-2 p-0">
+                <Button 
+                  variant="outline" 
+                  className="h-28 rounded-3xl border-dashed border-2 bg-slate-50 flex-col gap-2 p-0 active:bg-blue-50 transition-colors"
+                  onClick={() => toast.info("Đang mở camera chụp ảnh Hiện trường...")}
+                >
                    <Camera className="h-6 w-6 text-slate-300" />
                    <span className="text-[9px] font-black text-slate-400 uppercase">Ảnh trước việc</span>
                 </Button>
-                <Button variant="outline" className="h-28 rounded-3xl border-dashed border-2 bg-slate-50 flex-col gap-2 p-0">
+                <Button 
+                  variant="outline" 
+                  className="h-28 rounded-3xl border-dashed border-2 bg-slate-50 flex-col gap-2 p-0 active:bg-emerald-50 transition-colors"
+                  onClick={() => toast.info("Đang mở camera chụp ảnh Hoàn thành...")}
+                >
                    <Camera className="h-6 w-6 text-slate-300" />
                    <span className="text-[9px] font-black text-slate-400 uppercase">Ảnh hoàn thành</span>
                 </Button>
+             </div>
+             
+             {/* Signature Pad Placeholder */}
+             <div className="mt-4">
+                <p className="text-[9px] font-black text-slate-400 uppercase mb-2 px-1">Chữ ký xác nhận của khách hàng</p>
+                <div 
+                  className="h-32 w-full bg-slate-50 rounded-3xl border-2 border-dashed border-slate-200 flex flex-col items-center justify-center gap-2 active:bg-slate-100 transition-colors cursor-pointer"
+                  onClick={() => toast.info("Đang khởi tạo vùng ký tên kỹ thuật số...")}
+                >
+                   <PenTool className="h-6 w-6 text-slate-300" />
+                   <span className="text-[9px] font-black text-slate-400 uppercase">Ký tên tại đây</span>
+                </div>
              </div>
           </section>
 

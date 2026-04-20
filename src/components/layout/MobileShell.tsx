@@ -27,7 +27,7 @@ import {
   HelpCircle,
   LogOut,
 } from "lucide-react";
-import { useAppStore, useCurrentPermissions } from "@/lib/store";
+import { useAppStore, useCurrentPermissions, useMainRole } from "@/lib/store";
 import { mockTenants, mockUsers } from "@/lib/mock-data";
 import { MobilePortalProvider } from "./MobilePortalContext";
 import { cn } from "@/lib/utils";
@@ -45,6 +45,7 @@ export function MobileShell({ children, title, showBackButton, backLink }: Mobil
   const user = useCurrentUser();
   const activeTenantId = useAppStore((s) => s.activeTenantId);
   const setTenantId = useAppStore((s) => s.setTenantId);
+  const userId = useAppStore((s) => s.userId);
   const setUserId = useAppStore((s) => s.setUserId);
   const permissions = useCurrentPermissions();
   const activeTenant = mockTenants.find(t => t.id === activeTenantId);
@@ -68,17 +69,45 @@ export function MobileShell({ children, title, showBackButton, backLink }: Mobil
     .slice(-1)[0][0]
     .toUpperCase();
 
+  const role = useMainRole();
+  const companySize = useAppStore((s) => s.companySize);
+  const setCompanySize = useAppStore((s) => s.setCompanySize);
+
   const menuItems = [
     { to: "/mobile/leads", label: "CRM Leads", icon: Users, color: "bg-indigo-500 shadow-indigo-500/20", permissions: ["director", "sales"] },
     { to: "/mobile/route-plan", label: "Lộ trình", icon: Navigation, color: "bg-blue-600 shadow-blue-600/20", permissions: ["director", "field_tech", "maintenance_mgmt"] },
-    { to: "/mobile/schedule", label: "Lịch bảo trì", icon: Calendar, color: "bg-rose-500 shadow-rose-500/20", permissions: ["director", "maintenance_mgmt", "field_tech"] },
     { to: "/mobile/inventory", label: "Kho vật tư", icon: Package, color: "bg-emerald-500 shadow-emerald-500/20", permissions: ["director", "install_mgmt", "maintenance_mgmt", "field_tech", "accounting"] },
-    { to: "/mobile/approvals", label: "Phê duyệt", icon: ShieldCheck, color: "bg-amber-500 shadow-amber-500/20", permissions: ["director", "install_mgmt", "maintenance_mgmt", "hr_admin", "accounting"] },
     { to: "/mobile/projects", label: "Dự án", icon: Building, color: "bg-slate-700 shadow-slate-700/20", permissions: ["director", "install_mgmt", "sales"] },
     { to: "/mobile/accounting", label: "Tài chính", icon: CreditCard, color: "bg-purple-500 shadow-purple-500/20", permissions: ["director", "accounting"] },
     { to: "/mobile/reports", label: "Báo cáo", icon: BarChart3, color: "bg-primary shadow-primary/20", permissions: ["director", "sales", "accounting", "hr_admin"] },
+    { to: "/mobile/hr", label: "Nhân sự", icon: User, color: "bg-rose-500 shadow-rose-500/20", permissions: ["director", "hr_admin"] },
     { to: "/mobile/settings", label: "Cài đặt", icon: Settings, color: "bg-slate-500 shadow-slate-500/20", permissions: ["director", "sales", "hr_admin", "accounting", "field_tech", "install_mgmt", "maintenance_mgmt"] },
   ].filter(item => item.permissions.some(p => permissions.includes(p as any)));
+
+  const navItems = {
+    director: [
+      { to: "/mobile", label: "DASHBOARD", icon: Home },
+      { to: "/mobile/projects", label: "DỰ ÁN", icon: Building },
+      { to: "/mobile/approvals", label: "PHÊ DUYỆT", icon: ShieldCheck },
+      { to: "/mobile/accounting", label: "KẾ TOÁN", icon: CreditCard },
+    ],
+    sales: [
+      { to: "/mobile", label: "PIPELINE", icon: Home },
+      { to: "/mobile/leads", label: "TIỀM NĂNG", icon: Users },
+      { to: "/mobile/reports", label: "BÁO CÁO", icon: BarChart3 },
+      { to: "/mobile/projects", label: "HỢP ĐỒNG", icon: Briefcase },
+    ],
+    tech: [
+      { to: "/mobile", label: "LÀM VIỆC", icon: Home },
+      { to: "/mobile/route-plan", label: "LỘ TRÌNH", icon: Navigation },
+      { to: "/mobile/jobs", label: "PHIẾU VIỆC", icon: ClipboardCheck },
+      { to: "/mobile/inventory", label: "KHO VẬT TƯ", icon: Package },
+    ],
+    staff: [
+      { to: "/mobile", label: "HOME", icon: Home },
+      { to: "/mobile/hr", label: "ĐỘI NGŨ", icon: User },
+    ]
+  }[role] || [];
 
   const isActive = (to: string) =>
     location.pathname === to || (to !== "/mobile" && location.pathname.startsWith(to));
@@ -102,60 +131,67 @@ export function MobileShell({ children, title, showBackButton, backLink }: Mobil
           </div>
         </div>
 
-        {/* Header - Enhanced Glassmorphism */}
-        <header className="h-20 flex items-center justify-between px-6 sticky top-0 bg-white/70 backdrop-blur-3xl z-[60] border-b border-slate-100/50">
-          <div className="flex items-center gap-3">
+        {/* Header - Unified & Compact */}
+        <header className="h-[72px] flex items-center justify-between px-6 sticky top-0 bg-white/80 backdrop-blur-3xl z-[60] border-b border-slate-100 italic transition-all">
+          <div className="flex items-center gap-4">
             {showBackButton || backLink ? (
               <Button
                 variant="ghost"
                 size="icon"
-                className="-ml-2 h-10 w-10 rounded-2xl bg-slate-50/50 hover:bg-slate-100 active:scale-90 transition-all"
+                className="h-10 w-10 rounded-2xl bg-slate-50/50 hover:bg-slate-100 active:scale-90 transition-all border border-slate-100"
                 onClick={() => {
-                  if (backLink) window.location.href = backLink;
+                  if (backLink) window.location.assign(backLink);
                   else window.history.back();
                 }}
               >
                 <ChevronLeft className="h-5 w-5" />
               </Button>
             ) : (
-              <div className="h-10 w-10 rounded-2xl bg-slate-900 flex items-center justify-center shadow-lg shadow-slate-900/10">
-                <LayoutGrid className="h-5 w-5 text-white" />
-              </div>
+              <button 
+                onClick={() => setIsAccountOpen(true)}
+                className="flex items-center gap-3 active:scale-95 transition-transform"
+              >
+                <div className="h-11 w-11 rounded-2xl bg-slate-900 flex items-center justify-center shadow-lg shadow-slate-900/10">
+                  <Avatar className="h-full w-full rounded-2xl">
+                    <AvatarFallback className="bg-slate-900 text-white text-[10px] font-black italic">
+                      {initials}
+                    </AvatarFallback>
+                  </Avatar>
+                </div>
+                <div className="flex flex-col items-start min-w-0">
+                  <h1 className="font-black text-[14px] text-slate-900 leading-none tracking-tight truncate max-w-[120px]">
+                    {user.name.split(' ')[0]}
+                  </h1>
+                  <span className="text-[8px] font-black text-slate-400 uppercase tracking-widest mt-1 flex items-center gap-1">
+                    <Globe className="h-2.5 w-2.5 text-primary" /> {activeTenant?.name?.split(' ')[0]}
+                  </span>
+                </div>
+              </button>
             )}
-            <div className="flex flex-col min-w-0">
-               <div className="flex items-center gap-2">
-                 <h1 className="font-black text-[15px] text-slate-900 truncate leading-tight tracking-tight">
-                   {title || "ElevatorPro"}
-                 </h1>
-                 {!showBackButton && !backLink && (
-                   <div className="px-2 py-0.5 rounded-full bg-primary/10 border border-primary/20 text-[8px] font-black text-primary uppercase shrink-0">
-                      {currentRoleName}
-                   </div>
-                 )}
-               </div>
-               {!showBackButton && !backLink && (
-                 <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest flex items-center gap-1.5 mt-0.5">
-                   <Globe className="h-3 w-3" /> {activeTenant?.name?.split(' ')[0] || "Hệ thống"}
-                 </span>
-               )}
-            </div>
           </div>
 
+          {!showBackButton && !backLink && (
+            <div className="absolute left-1/2 -translate-x-1/2 flex flex-col items-center pointer-events-none">
+               <span className="text-[10px] font-black text-slate-900 uppercase tracking-[0.2em]">{title || "COMMAND"}</span>
+               <div className="px-2 py-0.5 rounded-full bg-emerald-500/10 text-[7px] font-black text-emerald-600 uppercase tracking-widest mt-1 border border-emerald-500/20">
+                  {role} • {companySize}
+               </div>
+            </div>
+          )}
+
           <div className="flex items-center gap-2">
-            <Button variant="ghost" size="icon" className="h-10 w-10 rounded-2xl relative bg-slate-50/50">
+            <Button variant="ghost" size="icon" className="h-10 w-10 rounded-2xl relative bg-slate-50 border border-slate-100">
               <Bell className="h-5 w-5 text-slate-600" />
-              <span className="absolute top-3 right-3 w-2 h-2 bg-rose-500 rounded-full border-2 border-white" />
+              <span className="absolute top-2.5 right-2.5 w-2 h-2 bg-rose-500 rounded-full border-2 border-white" />
             </Button>
-            <button 
+            <Button 
+              variant="ghost" 
+              size="icon" 
+              className="h-10 w-10 rounded-2xl bg-slate-50 border border-slate-100"
               onClick={() => setIsMenuOpen(true)}
-              className="flex items-center p-1 rounded-2xl hover:bg-slate-50 transition-colors focus:outline-none"
             >
-              <Avatar className="h-8 w-8 border border-white shadow-sm ring-1 ring-slate-100">
-                <AvatarFallback className="bg-indigo-50 text-indigo-600 text-[10px] font-black italic">
-                   {initials}
-                </AvatarFallback>
-              </Avatar>
-            </button>
+              <LayoutGrid className="h-5 w-5 text-slate-600" />
+            </Button>
           </div>
         </header>
 
@@ -168,13 +204,13 @@ export function MobileShell({ children, title, showBackButton, backLink }: Mobil
 
         {/* Global Overlays (Menu / Auth / Switch Role) */}
         {(isMenuOpen || isAccountOpen) && (
-          <div className="absolute inset-0 bg-slate-50/95 backdrop-blur-2xl z-[100] animate-in fade-in slide-in-from-bottom-10 duration-300 flex flex-col p-8 pt-16">
+          <div className="absolute inset-0 bg-white/95 backdrop-blur-3xl z-[100] animate-in fade-in slide-in-from-bottom-20 duration-500 flex flex-col p-8 pt-16">
               <div className="flex items-center justify-between mb-8">
                 <div className="flex flex-col">
-                  <h2 className="text-2xl font-black text-slate-900 tracking-tighter italic uppercase">
-                    {isMenuOpen ? "COMMAND HUB" : "WORKSPACE"}
+                  <h2 className="text-3xl font-black text-slate-900 tracking-tighter italic uppercase leading-none">
+                    {isMenuOpen ? "COMMAND" : "WORKSPACE"}
                   </h2>
-                  <p className="text-[10px] font-black text-slate-400 tracking-widest mt-1">SUPER APP INTEGRATION V2.0</p>
+                  <p className="text-[9px] font-black text-slate-400 tracking-[0.3em] mt-1 uppercase italic opacity-50">Demo Controls & RBAC</p>
                 </div>
                 <Button
                   variant="ghost"
@@ -183,113 +219,109 @@ export function MobileShell({ children, title, showBackButton, backLink }: Mobil
                     setIsMenuOpen(false);
                     setIsAccountOpen(false);
                   }}
-                  className="rounded-2xl h-12 w-12 bg-white shadow-xl border border-slate-100 active:scale-90"
+                  className="rounded-2xl h-12 w-12 bg-slate-50 border border-slate-100 shadow-sm active:scale-90"
                 >
-                  <X className="h-6 w-6" />
+                  <X className="h-6 w-6 text-slate-900" />
                 </Button>
               </div>
 
-              {/* Role Switcher - Always prominent in Command Hub too */}
-              <div className="mb-10 space-y-4">
-                  <h3 className="text-[10px] font-black uppercase text-slate-400 tracking-[0.2em] px-1 italic">
-                    CHUYỂN ĐỔI VAI TRÒ
-                  </h3>
-                  <div className="flex gap-2 overflow-x-auto pb-4 scrollbar-hide">
-                    {mockUsers
-                      .filter((u) => u.memberships.some((m) => m.tenantId === activeTenantId))
-                      .map((u) => {
-                         const roleLabel = u.name.split("(")[1] ? u.name.split("(")[1].replace(")", "") : "User";
-                         const isCurrent = user.id === u.id;
-                         return (
-                           <button
-                             key={u.id}
-                             onClick={() => {
-                               setUserId(u.id);
-                               setIsMenuOpen(false);
-                               setIsAccountOpen(false);
-                             }}
-                             className={cn(
-                               "shrink-0 flex flex-col items-center gap-2 p-3 rounded-[1.5rem] border-2 transition-all w-24",
-                               isCurrent ? "bg-primary border-primary text-white shadow-lg shadow-primary/20" : "bg-white border-slate-100 text-slate-400 hover:border-slate-200"
-                             )}
-                           >
-                             <Avatar className="h-10 w-10 border-2 border-white/20">
-                                <AvatarFallback className={cn("text-[9px] font-black", isCurrent ? "bg-white/20 text-white" : "bg-slate-50 text-slate-400")}>
-                                  {u.name.split(' ').slice(-1)[0][0]}
-                                </AvatarFallback>
-                             </Avatar>
-                             <span className={cn("text-[8px] font-black uppercase tracking-tighter truncate w-full text-center", isCurrent ? "text-white" : "text-slate-900")}>
-                               {roleLabel}
-                             </span>
-                           </button>
-                         );
-                      })}
-                  </div>
-              </div>
-
-              {isAccountOpen ? (
-                <div className="space-y-10">
-                  {/* Tenant Switcher */}
-                  <div className="space-y-4">
-                    <h3 className="text-[10px] font-black uppercase text-slate-400 tracking-[0.2em] px-1">CHỌN TỔ CHỨC</h3>
-                    <div className="space-y-3">
-                      {mockTenants.map((t) => (
+              <div className="flex-1 overflow-y-auto scrollbar-hide space-y-12">
+                {/* 1. COMPANY SIZE SWITCHER */}
+                <section className="space-y-4">
+                   <h3 className="text-[10px] font-black uppercase text-slate-400 tracking-widest px-1 italic">QUY MÔ HỆ THỐNG</h3>
+                   <div className="grid grid-cols-2 gap-3">
+                      {[
+                        { id: "large", label: "Tập Đoàn Lớn", desc: "Quy trình chuyên môn hóa", icon: Globe },
+                        { id: "small", label: "Công Ty SME", desc: "Nhân sự kiêm nhiệm", icon: LayoutGrid }
+                      ].map((type) => (
                         <button
-                          key={t.id}
+                          key={type.id}
                           onClick={() => {
-                            setTenantId(t.id);
-                            const directorId = t.id === "t-1" ? "u-director-1" : "u-director-2";
-                            setUserId(directorId);
+                            setCompanySize(type.id as any);
+                            setIsMenuOpen(false);
                             setIsAccountOpen(false);
                           }}
                           className={cn(
-                            "w-full flex items-center justify-between p-5 rounded-3xl transition-all border-2",
-                            activeTenantId === t.id 
-                            ? "bg-slate-900 border-slate-900 text-white shadow-2xl shadow-slate-900/20" 
-                            : "bg-white border-slate-100 text-slate-600 hover:border-slate-200"
+                            "p-4 rounded-[1.75rem] border-2 transition-all text-left flex flex-col gap-2 relative overflow-hidden group",
+                            companySize === type.id ? "bg-slate-900 border-slate-900 text-white shadow-xl" : "bg-white border-slate-100 text-slate-400 hover:border-slate-200"
                           )}
                         >
-                          <div className="flex items-center gap-4">
-                            <div className={cn("h-10 w-10 rounded-2xl flex items-center justify-center", activeTenantId === t.id ? "bg-white/10" : "bg-slate-50")}>
-                               <Building2 className="h-5 w-5" />
-                            </div>
-                            <span className="font-black text-sm uppercase tracking-tight">{t.name}</span>
-                          </div>
-                          {activeTenantId === t.id && <Check className="h-5 w-5 text-emerald-400" />}
+                          <type.icon className={cn("h-6 w-6 mb-2", companySize === type.id ? "text-white" : "text-slate-300")} />
+                          <span className={cn("text-[11px] font-black uppercase tracking-tight leading-none", companySize === type.id ? "text-white" : "text-slate-900")}>
+                            {type.label}
+                          </span>
+                          <span className="text-[8px] font-bold opacity-60 leading-tight">{type.desc}</span>
+                          {companySize === type.id && <div className="absolute top-2 right-2 h-1.5 w-1.5 rounded-full bg-emerald-500 animate-pulse" />}
                         </button>
                       ))}
+                   </div>
+                </section>
+
+                {/* 2. ROLE SWITCHER (Contextual) */}
+                <section className="space-y-4">
+                   <h3 className="text-[10px] font-black uppercase text-slate-400 tracking-widest px-1 italic">VAI TRÒ TRONG HỆ THỐNG</h3>
+                   <div className="grid grid-cols-1 gap-3">
+                      {mockUsers
+                        .filter((u) => u.memberships.some((m) => m.tenantId === activeTenantId))
+                        .map((u) => {
+                           const roleLabel = u.name.split("(")[1] ? u.name.split("(")[1].replace(")", "") : "Thành viên";
+                           const isCurrent = userId === u.id;
+                           return (
+                             <button
+                               key={u.id}
+                               onClick={() => {
+                                 setUserId(u.id);
+                                 setIsMenuOpen(false);
+                                 setIsAccountOpen(false);
+                               }}
+                               className={cn(
+                                 "flex items-center gap-4 p-4 rounded-3xl border-2 transition-all text-left",
+                                 isCurrent ? "bg-primary/5 border-primary shadow-sm" : "bg-white border-slate-100 hover:border-slate-200"
+                               )}
+                             >
+                               <div className={cn("h-11 w-11 rounded-2xl shrink-0 flex items-center justify-center font-black text-xs border border-white shadow-sm", isCurrent ? "bg-primary text-white" : "bg-slate-50 text-slate-400")}>
+                                 {u.name.split(' ').slice(-1)[0][0]}
+                               </div>
+                               <div className="flex-1 min-w-0">
+                                  <p className={cn("text-[11px] font-black uppercase tracking-tight", isCurrent ? "text-primary" : "text-slate-900")}>{roleLabel}</p>
+                                  <p className="text-[9px] font-bold text-slate-400 truncate">{u.name.split("(")[0].trim()}</p>
+                               </div>
+                               {isCurrent && <Check className="h-5 w-5 text-primary shrink-0" />}
+                             </button>
+                           );
+                        })}
+                   </div>
+                </section>
+
+                {/* 3. QUICK ACTIONS (Strict Filtered) */}
+                {isMenuOpen && (
+                  <section className="space-y-4">
+                    <h3 className="text-[10px] font-black uppercase text-slate-400 tracking-widest px-1 italic">DANH MỤC CHỨC NĂNG</h3>
+                    <div className="grid grid-cols-3 gap-4">
+                      {menuItems.map((item) => {
+                        const Icon = item.icon;
+                        return (
+                          <Link
+                            key={item.to}
+                            to={item.to}
+                            onClick={() => setIsMenuOpen(false)}
+                            className="flex flex-col items-center gap-2 group"
+                          >
+                            <div className={cn("h-14 w-14 rounded-2xl flex items-center justify-center text-white transition-all active:scale-95", item.color)}>
+                              <Icon className="h-6 w-6" />
+                            </div>
+                            <span className="text-[9px] font-black text-slate-500 text-center leading-tight uppercase tracking-widest h-6 flex items-center transition-colors group-hover:text-slate-900">
+                              {item.label.split(' ')[0]}
+                            </span>
+                          </Link>
+                        );
+                      })}
                     </div>
-                  </div>
-                </div>
-              ) : (
-                <div className="grid grid-cols-3 gap-6 scrollbar-hide flex-1 pb-10 overflow-y-auto">
-                  {menuItems.map((item) => {
-                    const Icon = item.icon;
-                    return (
-                      <Link
-                        key={item.to}
-                        to={item.to}
-                        onClick={() => setIsMenuOpen(false)}
-                        className="flex flex-col items-center gap-3 active:scale-90 transition-transform"
-                      >
-                        <div
-                          className={cn(
-                            "h-16 w-16 rounded-[1.75rem] flex items-center justify-center text-white shadow-2xl",
-                            item.color,
-                          )}
-                        >
-                          <Icon className="h-7 w-7" />
-                        </div>
-                        <span className="text-[10px] font-black text-slate-900 text-center leading-tight uppercase tracking-widest h-8 flex items-center">
-                          {item.label}
-                        </span>
-                      </Link>
-                    );
-                  })}
-                </div>
-              )}
+                  </section>
+                )}
+              </div>
               
-              <div className="mt-auto pt-6 flex flex-col gap-3">
+              <div className="mt-8 flex flex-col gap-4">
                  <Link to="/admin" className="w-full">
                     <Button variant="outline" className="w-full rounded-2xl h-14 border-slate-200 text-slate-400 font-black text-[10px] uppercase gap-2">
                       QUAY LẠI TRÌNH QUẢN TRỊ <ChevronRight className="h-3.5 w-3.5" />
@@ -302,53 +334,43 @@ export function MobileShell({ children, title, showBackButton, backLink }: Mobil
           </div>
         )}
 
-        {/* Bottom Tab Bar - Premium Glassmorphism */}
-        <nav className="h-[84px] bg-white/70 backdrop-blur-3xl border-t border-slate-100/50 flex items-center justify-around px-4 absolute bottom-0 w-full z-[110] pb-8 shadow-[0_-10px_40px_-15px_rgba(30,41,59,0.1)]">
-          <Link to="/mobile" className="flex flex-col items-center gap-1.5 active:scale-90 transition-all">
-            <div className={cn(
-              "h-1 w-1 rounded-full mb-1 transition-all",
-              location.pathname === "/mobile" ? "bg-primary w-4" : "bg-transparent"
-            )} />
-            <Home className={cn("h-5 w-5", location.pathname === "/mobile" ? "text-primary" : "text-slate-400")} />
-            <span className={cn("text-[8px] font-black uppercase tracking-tighter font-mono", location.pathname === "/mobile" ? "text-primary" : "text-slate-400")}>HOME</span>
-          </Link>
+        {/* Bottom Tab Bar - Dynamic & Role-Based */}
+        <nav className="h-[80px] bg-white/80 backdrop-blur-3xl border-t border-slate-100 flex items-center justify-around px-4 absolute bottom-0 w-full z-[110] pb-6 shadow-[0_-5px_25px_rgba(0,0,0,0.03)]">
+          {navItems.slice(0, 2).map((item) => {
+            const Icon = item.icon;
+            const active = isActive(item.to);
+            return (
+              <Link key={item.to} to={item.to} className="flex flex-col items-center gap-1.5 active:scale-90 transition-all w-16">
+                <div className={cn("h-1 w-3 rounded-full mb-0.5", active ? "bg-primary" : "bg-transparent")} />
+                <Icon className={cn("h-5 w-5", active ? "text-primary" : "text-slate-400")} />
+                <span className={cn("text-[8px] font-black uppercase tracking-tight", active ? "text-primary" : "text-slate-400")}>
+                  {item.label}
+                </span>
+              </Link>
+            );
+          })}
 
-          <Link to="/mobile/projects" className="flex flex-col items-center gap-1.5 active:scale-90 transition-all">
-            <div className={cn(
-              "h-1 w-1 rounded-full mb-1 transition-all",
-              isActive("/mobile/projects") ? "bg-primary w-4" : "bg-transparent"
-            )} />
-            <Building className={cn("h-5 w-5", isActive("/mobile/projects") ? "text-primary" : "text-slate-400")} />
-            <span className={cn("text-[8px] font-black uppercase tracking-tighter font-mono", isActive("/mobile/projects") ? "text-primary" : "text-slate-400")}>PROJECTS</span>
-          </Link>
-
-          {/* Central Floating Action */}
-          <Link to="/mobile/scanner" className="relative -mt-10 group">
-            <div className="h-16 w-16 rounded-[1.75rem] bg-slate-900 text-white shadow-2xl shadow-slate-900/30 flex items-center justify-center border-[4px] border-white active:scale-90 transition-all group-hover:bg-primary group-hover:shadow-primary/30">
-              <QrCode className="h-7 w-7" />
+          {/* Central QR Feature (Always visible) */}
+          <Link to="/mobile/scanner" className="relative -mt-12 group">
+            <div className="h-[68px] w-[68px] rounded-[2rem] bg-slate-900 text-white shadow-xl flex items-center justify-center border-4 border-white active:scale-90 transition-all group-hover:bg-primary">
+              <QrCode className="h-8 w-8" />
             </div>
+            <span className="absolute -bottom-5 left-1/2 -translate-x-1/2 text-[8px] font-black text-slate-400 uppercase tracking-widest whitespace-nowrap">SCAN QR</span>
           </Link>
 
-          <Link to="/mobile/jobs" className="flex flex-col items-center gap-1.5 active:scale-90 transition-all">
-            <div className={cn(
-              "h-1 w-1 rounded-full mb-1 transition-all",
-              isActive("/mobile/jobs") ? "bg-primary w-4" : "bg-transparent"
-            )} />
-            <Briefcase className={cn("h-5 w-5", isActive("/mobile/jobs") ? "text-primary" : "text-slate-400")} />
-            <span className={cn("text-[8px] font-black uppercase tracking-tighter font-mono", isActive("/mobile/jobs") ? "text-primary" : "text-slate-400")}>SERVICE</span>
-          </Link>
-
-          <button
-            onClick={() => setIsMenuOpen(!isMenuOpen)}
-            className="flex flex-col items-center gap-1.5 active:scale-90 transition-all"
-          >
-            <div className={cn(
-              "h-1 w-1 rounded-full mb-1 transition-all",
-              isMenuOpen ? "bg-primary w-4" : "bg-transparent"
-            )} />
-            <LayoutGrid className={cn("h-5 w-5", isMenuOpen ? "text-primary" : "text-slate-400")} />
-            <span className={cn("text-[8px] font-black uppercase tracking-tighter font-mono", isMenuOpen ? "text-primary" : "text-slate-400")}>COMMAND</span>
-          </button>
+          {navItems.slice(2, 4).map((item) => {
+            const Icon = item.icon;
+            const active = isActive(item.to);
+            return (
+              <Link key={item.to} to={item.to} className="flex flex-col items-center gap-1.5 active:scale-90 transition-all w-16">
+                <div className={cn("h-1 w-3 rounded-full mb-0.5", active ? "bg-primary" : "bg-transparent")} />
+                <Icon className={cn("h-5 w-5", active ? "text-primary" : "text-slate-400")} />
+                <span className={cn("text-[8px] font-black uppercase tracking-tight", active ? "text-primary" : "text-slate-400")}>
+                  {item.label}
+                </span>
+              </Link>
+            );
+          })}
         </nav>
 
         {/* Home Indicator */}

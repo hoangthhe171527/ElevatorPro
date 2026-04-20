@@ -57,31 +57,6 @@ function MobileDashboard() {
   return (
     <MobileShell title={role === "director" ? "Trung tâm điều hành" : role === "sales" ? "Kinh doanh & CRM" : "Điều hành kỹ thuật"}>
       <div className="flex flex-col pb-28">
-        {/* Welcome Header */}
-        <div className="px-6 py-6 bg-white flex items-center justify-between border-b border-slate-50">
-          <div className="flex items-center gap-3">
-             <div className="h-14 w-14 rounded-2xl bg-primary/10 p-0.5 border border-primary/20">
-                <div className="h-full w-full rounded-[0.8rem] bg-primary flex items-center justify-center font-black text-white text-xl shadow-lg shadow-primary/20">
-                  {user?.name[0]}
-                </div>
-             </div>
-             <div>
-                <p className="text-[9px] font-black text-slate-400 uppercase tracking-widest">
-                  {role.toUpperCase()} • ONLINE
-                </p>
-                <h2 className="text-xl font-black text-slate-900 tracking-tighter">{user?.name.split(' ')[0]}</h2>
-             </div>
-          </div>
-          <Link to="/mobile/approvals">
-            <Button variant="ghost" size="icon" className="h-11 w-11 rounded-xl bg-slate-50 text-slate-400 border border-slate-100 relative group">
-                <Bell className="h-5 w-5" />
-                {pendingApprovals.length > 0 && role === "director" && (
-                    <div className="absolute top-3 right-3 h-2.5 w-2.5 bg-rose-500 rounded-full border-2 border-white" />
-                )}
-            </Button>
-          </Link>
-        </div>
-
         <div className="p-5 space-y-6">
           {/* ROLE-SPECIFIC WIDGETS */}
           {role === "director" && (

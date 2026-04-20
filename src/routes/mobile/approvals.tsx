@@ -13,9 +13,11 @@ import {
   User,
   AlertCircle,
   History as HistoryIcon,
-  Filter,
   CheckCircle,
+  TrendingUp,
 } from "lucide-react";
+import { useCurrentPermissions } from "@/lib/store";
+import { Link } from "@tanstack/react-router";
 import { useState } from "react";
 import { cn } from "@/lib/utils";
 import { toast } from "sonner";
@@ -27,8 +29,33 @@ export const Route = createFileRoute("/mobile/approvals")({
 });
 
 function MobileApprovals() {
+  const permissions = useCurrentPermissions();
+  const allowed = ["director", "install_mgmt", "maintenance_mgmt", "accounting", "hr_admin"];
+  const canAccess = permissions.some(p => allowed.includes(p));
+
   const [activeTab, setActiveTab] = useState<"pending" | "history">("pending");
   const [confirmId, setConfirmId] = useState<string | null>(null);
+
+  if (!canAccess) {
+    return (
+      <MobileShell title="Truy cập bị hạn chế">
+        <div className="flex flex-col items-center justify-center p-12 text-center h-[60vh]">
+          <div className="h-20 w-20 rounded-[2rem] bg-rose-50 text-rose-500 flex items-center justify-center mb-6">
+            <XCircle className="h-10 w-10" />
+          </div>
+          <h2 className="text-xl font-black text-slate-900 tracking-tighter mb-2 italic">KHÔNG CÓ QUYỀN TRUY CẬP</h2>
+          <p className="text-xs text-slate-400 font-medium leading-relaxed mb-8">
+            Bạn không có thẩm quyền để duyệt các yêu cầu/chi phí. Vui lòng liên hệ cấp quản lý.
+          </p>
+          <Link to="/mobile" className="w-full">
+            <Button className="w-full h-12 rounded-2xl bg-slate-900 text-white font-black italic uppercase text-[10px] tracking-widest shadow-xl">
+              QUAY LẠI TRANG CHỦ
+            </Button>
+          </Link>
+        </div>
+      </MobileShell>
+    );
+  }
 
   const pending = mockRequests.filter((r) => r.status === "pending");
   const history = mockRequests.filter((r) => r.status !== "pending");
@@ -225,21 +252,3 @@ function MobileApprovals() {
   );
 }
 
-// Helper needed for icons
-const TrendingUp = (props: any) => (
-    <svg 
-        {...props} 
-        xmlns="http://www.w3.org/2000/svg" 
-        width="24" 
-        height="24" 
-        viewBox="0 0 24 24" 
-        fill="none" 
-        stroke="currentColor" 
-        strokeWidth="2" 
-        strokeLinecap="round" 
-        strokeLinejoin="round" 
-    >
-        <polyline points="23 6 13.5 15.5 8.5 10.5 1 18" />
-        <polyline points="17 6 23 6 23 12" />
-    </svg>
-);

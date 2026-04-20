@@ -15,6 +15,7 @@ import {
   Banknote,
   RefreshCw,
   MoreVertical,
+  XCircle,
 } from "lucide-react";
 import { useState } from "react";
 import { Input } from "@/components/ui/input";
@@ -30,12 +31,18 @@ import {
 import { toast } from "sonner";
 import { Progress } from "@/components/ui/progress";
 
+import { useCurrentPermissions } from "@/lib/store";
+import { Link } from "@tanstack/react-router";
+
 export const Route = createFileRoute("/mobile/accounting")({
   head: () => ({ meta: [{ title: "Kế toán & Hợp đồng — Mobile" }] }),
   component: MobileAccounting,
 });
 
 function MobileAccounting() {
+  const permissions = useCurrentPermissions();
+  const canAccess = permissions.includes("director") || permissions.includes("accounting");
+
   const [search, setSearch] = useState("");
   const [activeTab, setActiveTab] = useState<"all" | "active" | "due">("all");
   
@@ -44,6 +51,27 @@ function MobileAccounting() {
   const [renewOpen, setRenewOpen] = useState(false);
   const [createOpen, setCreateOpen] = useState(false);
   const [selectedContract, setSelectedContract] = useState<Contract | null>(null);
+
+  if (!canAccess) {
+    return (
+      <MobileShell title="Truy cập bị hạn chế">
+        <div className="flex flex-col items-center justify-center p-12 text-center h-[60vh]">
+          <div className="h-20 w-20 rounded-[2rem] bg-rose-50 text-rose-500 flex items-center justify-center mb-6">
+            <XCircle className="h-10 w-10" />
+          </div>
+          <h2 className="text-xl font-black text-slate-900 tracking-tighter mb-2 italic">KHÔNG CÓ QUYỀN TRUY CẬP</h2>
+          <p className="text-xs text-slate-400 font-medium leading-relaxed mb-8">
+            Bạn không có thẩm quyền để xem dữ liệu tài chính và hợp đồng. Vui lòng liên hệ quản trị viên.
+          </p>
+          <Link to="/mobile" className="w-full">
+            <Button className="w-full h-12 rounded-2xl bg-slate-900 text-white font-black italic uppercase text-[10px] tracking-widest shadow-xl">
+              QUAY LẠI TRANG CHỦ
+            </Button>
+          </Link>
+        </div>
+      </MobileShell>
+    );
+  }
 
   const filtered = mockContracts.filter((c) => {
     const matchesSearch = c.code.toLowerCase().includes(search.toLowerCase()) || 

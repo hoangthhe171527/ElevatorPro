@@ -44,8 +44,12 @@ function ElevatorDetailMobile() {
       <div className="p-4 space-y-5">
         {/* Basic Info Card */}
         <Card className="p-4 border-none shadow-sm flex gap-4">
-          <div className="h-16 w-16 rounded-2xl bg-blue-50 flex items-center justify-center text-blue-600 border border-blue-100 shrink-0">
-            <Building2 className="h-8 w-8" />
+          <div 
+            className="h-16 w-16 rounded-2xl bg-blue-50 flex flex-col items-center justify-center text-blue-600 border border-blue-100 shrink-0 active:scale-95 transition-transform cursor-pointer"
+            onClick={() => window.location.href = `/mobile/elevators/${elevator.id}/qr`}
+          >
+            <Building2 className="h-6 w-6" />
+            <span className="text-[8px] font-bold mt-1">XEM QR</span>
           </div>
           <div className="flex-1">
             <div className="flex justify-between items-start">

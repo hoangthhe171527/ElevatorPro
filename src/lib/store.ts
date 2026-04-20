@@ -7,11 +7,13 @@ interface AppState {
   userId: string;
   activeTenantId: string;
   activeJobCheckIn: string | null;
-  hasHydrated: boolean; // Tracking hydration for Web UI
+  hasHydrated: boolean;
+  companySize: "large" | "small"; // New: for demo flexibility
   setUserId: (userId: string) => void;
   setTenantId: (tenantId: string) => void;
   setJobCheckIn: (jobId: string | null) => void;
   setHasHydrated: (val: boolean) => void;
+  setCompanySize: (size: "large" | "small") => void;
 }
 
 export const useAppStore = create<AppState>()(
@@ -21,19 +23,27 @@ export const useAppStore = create<AppState>()(
       activeTenantId: "t-1",
       activeJobCheckIn: null,
       hasHydrated: false,
+      companySize: "large",
       setUserId: (userId) => {
         const user = mockUsers.find((u) => u.id === userId);
         const activeTenantId = user?.memberships?.[0]?.tenantId || get().activeTenantId;
-        set({ userId, activeTenantId, activeJobCheckIn: null }); // Reset check-in on user change
+        set({ userId, activeTenantId, activeJobCheckIn: null });
       },
       setTenantId: (tenantId) => {
-        set({ activeTenantId: tenantId });
+        set({ activeTenantId: tenantId, companySize: tenantId === "t-1" ? "large" : "small" });
       },
       setJobCheckIn: (jobId) => set({ activeJobCheckIn: jobId }),
       setHasHydrated: (val) => set({ hasHydrated: val }),
+      setCompanySize: (companySize) => {
+        set({ companySize });
+        // Auto-switch to director of that company type for demo ease
+        const tenantId = companySize === "large" ? "t-1" : "t-2";
+        const directorId = companySize === "large" ? "u-director-1" : "u-director-2";
+        set({ activeTenantId: tenantId, userId: directorId, activeJobCheckIn: null });
+      },
     }),
     {
-      name: "elevator-app-state-v3",
+      name: "elevator-app-state-v4",
       onRehydrateStorage: () => (state) => {
         state?.setHasHydrated(true);
       },
