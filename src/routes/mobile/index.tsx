@@ -45,6 +45,7 @@ function MobileDashboard() {
   const user = useCurrentUser();
   const role = useMainRole();
   const activeJobId = useAppStore((s) => s.activeJobCheckIn);
+  const activeJob = mockJobs.find(j => j.id === activeJobId);
   
   const pendingApprovals = mockRequests.filter((r) => r.status === "pending");
   const totalRevenue = mockContracts.reduce((s, c) => s + c.paid, 0);
@@ -58,6 +59,28 @@ function MobileDashboard() {
     <MobileShell title={role === "director" ? "Trung tâm điều hành" : role === "sales" ? "Kinh doanh & CRM" : "Điều hành kỹ thuật"}>
       <div className="flex flex-col pb-28">
         <div className="p-5 space-y-6">
+          {/* ACTIVE TASK BANNER - Creative Addition */}
+          {activeJob && (
+            <Link to={`/mobile/jobs/${activeJob.id}`}>
+              <div className="bg-primary group relative overflow-hidden rounded-[2rem] p-5 shadow-xl shadow-primary/20 mb-2 active:scale-[0.98] transition-all">
+                <div className="absolute top-0 right-0 p-4 opacity-10 group-hover:scale-125 transition-transform">
+                  <Zap className="h-16 w-16 text-white" />
+                </div>
+                <div className="relative z-10 flex items-center justify-between">
+                  <div className="space-y-1">
+                    <div className="flex items-center gap-2">
+                      <div className="h-2 w-2 rounded-full bg-white animate-pulse" />
+                      <span className="text-[10px] font-black text-white/60 uppercase tracking-widest">Đang thực hiện</span>
+                    </div>
+                    <h4 className="text-white font-black text-[15px] italic tracking-tight">{activeJob.title}</h4>
+                    <p className="text-white/80 text-[10px] font-bold">{activeJob.code} • {getCustomer(activeJob.customerId)?.name}</p>
+                  </div>
+                  <ChevronRight className="h-5 w-5 text-white/50" />
+                </div>
+              </div>
+            </Link>
+          )}
+
           {/* ROLE-SPECIFIC WIDGETS */}
           {role === "director" && (
             <>

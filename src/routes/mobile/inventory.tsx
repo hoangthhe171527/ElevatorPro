@@ -13,6 +13,7 @@ import {
   Navigation,
   Box,
   CheckCircle2,
+  Scan,
 } from "lucide-react";
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
@@ -34,7 +35,16 @@ function MobileInventory() {
   );
 
   return (
-    <MobileShell title="Quản lý kho">
+    <MobileShell 
+      title="Kho hàng & Vật tư"
+      actions={
+        <Link to="/mobile/scanner">
+          <Button variant="ghost" size="icon" className="h-10 w-10 rounded-2xl bg-slate-900 text-white shadow-lg shadow-slate-900/20 active:scale-95 transition-transform">
+            <Scan className="h-5 w-5" />
+          </Button>
+        </Link>
+      }
+    >
       {/* Search & Header Stats */}
       <div className="sticky top-0 bg-white/80 backdrop-blur-md z-20 px-5 py-4 border-b">
          <div className="flex items-center justify-between mb-4">

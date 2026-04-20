@@ -1,4 +1,4 @@
-import { useRef, useEffect, useState } from "react";
+import { useRef, useEffect, useState, useMemo } from "react";
 import { Link, useLocation } from "@tanstack/react-router";
 import { useCurrentUser } from "@/lib/store";
 import {
@@ -26,6 +26,9 @@ import {
   ChevronRight,
   HelpCircle,
   LogOut,
+  Camera,
+  Scan,
+  Plus,
 } from "lucide-react";
 import { useAppStore, useCurrentPermissions, useMainRole } from "@/lib/store";
 import { mockTenants, mockUsers } from "@/lib/mock-data";
@@ -39,9 +42,10 @@ interface MobileShellProps {
   title?: string;
   showBackButton?: boolean;
   backLink?: string;
+  actions?: React.ReactNode;
 }
 
-export function MobileShell({ children, title, showBackButton, backLink }: MobileShellProps) {
+export function MobileShell({ children, title, showBackButton, backLink, actions }: MobileShellProps) {
   const user = useCurrentUser();
   const activeTenantId = useAppStore((s) => s.activeTenantId);
   const setTenantId = useAppStore((s) => s.setTenantId);
@@ -94,20 +98,33 @@ export function MobileShell({ children, title, showBackButton, backLink }: Mobil
     sales: [
       { to: "/mobile", label: "PIPELINE", icon: Home },
       { to: "/mobile/leads", label: "TIỀM NĂNG", icon: Users },
-      { to: "/mobile/reports", label: "BÁO CÁO", icon: BarChart3 },
-      { to: "/mobile/projects", label: "HỢP ĐỒNG", icon: Briefcase },
+      { to: "/mobile/reports", label: "Báo cáo", icon: BarChart3 },
+      { to: "/mobile/projects", label: "Hợp đồng", icon: Briefcase },
     ],
     tech: [
       { to: "/mobile", label: "LÀM VIỆC", icon: Home },
       { to: "/mobile/route-plan", label: "LỘ TRÌNH", icon: Navigation },
       { to: "/mobile/jobs", label: "PHIẾU VIỆC", icon: ClipboardCheck },
-      { to: "/mobile/inventory", label: "KHO VẬT TƯ", icon: Package },
+      { to: "/mobile/inventory", label: "Kho", icon: Package },
     ],
     staff: [
-      { to: "/mobile", label: "HOME", icon: Home },
-      { to: "/mobile/hr", label: "ĐỘI NGŨ", icon: User },
+      { to: "/mobile", label: "Trang chủ", icon: Home },
+      { to: "/mobile/hr", label: "Đội ngũ", icon: User },
     ]
   }[role] || [];
+
+  const isActive = (to: string) =>
+    location.pathname === to || (to !== "/mobile" && location.pathname.startsWith(to));
+
+  const currentRoleName = user.name.split("(")[1] ? user.name.split("(")[1].replace(")", "") : "Thành viên";
+
+  // Context-aware Floating Action Button
+  const fabConfig = useMemo(() => {
+    if (location.pathname.includes('/inventory')) return { icon: Scan, to: '/mobile/scanner', label: 'Quét mã' };
+    if (location.pathname.includes('/leads')) return { icon: Plus, to: '/mobile/leads/new', label: 'Thêm Lead' };
+    if (location.pathname.includes('/jobs')) return { icon: ClipboardCheck, to: '/mobile/jobs', label: 'Việc của tôi' };
+    return null;
+  }, [location.pathname]);
 
   const isActive = (to: string) =>
     location.pathname === to || (to !== "/mobile" && location.pathname.startsWith(to));
@@ -180,10 +197,14 @@ export function MobileShell({ children, title, showBackButton, backLink }: Mobil
           </div>
 
           <div className="flex items-center gap-2 z-10 w-[110px] shrink-0 justify-end">
-            <Button variant="ghost" size="icon" className="h-10 w-10 rounded-2xl relative bg-slate-50 border border-slate-100 shrink-0">
-              <Bell className="h-5 w-5 text-slate-600" />
-              <span className="absolute top-2.5 right-2.5 w-2 h-2 bg-rose-500 rounded-full border-2 border-white" />
-            </Button>
+            {actions ? (
+              actions
+            ) : (
+              <Button variant="ghost" size="icon" className="h-10 w-10 rounded-2xl relative bg-slate-50 border border-slate-100 shrink-0">
+                <Bell className="h-5 w-5 text-slate-600" />
+                <span className="absolute top-2.5 right-2.5 w-2 h-2 bg-rose-500 rounded-full border-2 border-white" />
+              </Button>
+            )}
             <Button 
               variant="ghost" 
               size="icon" 
@@ -196,9 +217,20 @@ export function MobileShell({ children, title, showBackButton, backLink }: Mobil
         </header>
 
         {/* Main Content Area */}
-        <main className="flex-1 overflow-y-auto pb-32 scrollbar-hide bg-slate-50">
+        <main className="flex-1 overflow-y-auto pb-32 scrollbar-hide bg-white relative">
           <MobilePortalProvider container={portalNode}>
             {children}
+            
+            {/* Dynamic FAB */}
+            {fabConfig && (
+              <Link
+                to={fabConfig.to}
+                className="absolute bottom-24 right-6 h-14 w-14 rounded-full bg-slate-900 border-4 border-white text-white flex items-center justify-center shadow-2xl shadow-slate-900/40 z-50 active:scale-90 transition-transform"
+              >
+                <fabConfig.icon className="h-6 w-6" />
+                {/* Tooltip optional for mobile */}
+              </Link>
+            )}
           </MobilePortalProvider>
         </main>
 
