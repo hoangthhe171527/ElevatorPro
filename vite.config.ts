@@ -8,6 +8,7 @@ import tsconfigPaths from "vite-tsconfig-paths";
 export default defineConfig({
   plugins: [tanstackStart(), nitro({ preset: "netlify" }), react(), tailwindcss(), tsconfigPaths()],
   ssr: {
+    external: ["@tanstack/react-router", /^@radix-ui\/react-.*/],
     noExternal: ["tslib", "zustand", "sonner"],
   },
 });
