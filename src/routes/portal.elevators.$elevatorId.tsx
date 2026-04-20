@@ -3,13 +3,13 @@ import { AppShell } from "@/components/layout/AppShell";
 import { PageHeader } from "@/components/common/PageHeader";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
+import { StatusBadge } from "@/components/common/StatusBadge";
 import {
-  StatusBadge,
   elevatorStatusLabel,
   elevatorStatusVariant,
   jobStatusLabel,
   jobStatusVariant,
-} from "@/components/common/StatusBadge";
+} from "@/lib/status-variants";
 import {
   mockElevators,
   mockJobs,
@@ -30,7 +30,7 @@ import {
   CheckCircle2,
 } from "lucide-react";
 
-const CUSTOMER_ID = "c-1"; 
+const CUSTOMER_ID = "c-1";
 
 export const Route = createFileRoute("/portal/elevators/$elevatorId")({
   loader: ({ params }) => {
@@ -44,7 +44,9 @@ export const Route = createFileRoute("/portal/elevators/$elevatorId")({
   notFoundComponent: () => (
     <AppShell>
       <div className="p-12 text-center">
-        <p className="text-muted-foreground">Không tìm thấy thang máy hoặc bạn không có quyền truy cập</p>
+        <p className="text-muted-foreground">
+          Không tìm thấy thang máy hoặc bạn không có quyền truy cập
+        </p>
         <Link to="/portal/elevators">
           <Button className="mt-4">Quay lại</Button>
         </Link>
@@ -95,7 +97,9 @@ function PortalElevatorDetail() {
       {(isDue || isOut) && (
         <div
           className={`flex flex-col sm:flex-row sm:items-center gap-4 p-4 rounded-xl mb-6 border ${
-            isOut ? "bg-destructive/10 text-destructive border-destructive/20" : "bg-warning/10 text-warning-foreground border-warning/20"
+            isOut
+              ? "bg-destructive/10 text-destructive border-destructive/20"
+              : "bg-warning/10 text-warning-foreground border-warning/20"
           }`}
         >
           <div className="flex items-center gap-3 flex-1">
@@ -117,15 +121,18 @@ function PortalElevatorDetail() {
       )}
 
       {elevator.status === "operational" && !isDue && (
-         <div className="flex items-center gap-3 p-4 rounded-xl mb-6 bg-success/10 text-success-foreground border border-success/20">
-             <div className="p-2 rounded-full bg-success/20">
-               <CheckCircle2 className="h-6 w-6 text-success" />
-             </div>
-             <div>
-               <div className="font-semibold text-lg">Hoạt động bình thường</div>
-               <div className="text-sm opacity-90 mt-0.5">Thang máy đang trong trạng thái tốt. Lần bảo trì tiếp theo: {formatDate(elevator.nextMaintenance)}</div>
-             </div>
-         </div>
+        <div className="flex items-center gap-3 p-4 rounded-xl mb-6 bg-success/10 text-success-foreground border border-success/20">
+          <div className="p-2 rounded-full bg-success/20">
+            <CheckCircle2 className="h-6 w-6 text-success" />
+          </div>
+          <div>
+            <div className="font-semibold text-lg">Hoạt động bình thường</div>
+            <div className="text-sm opacity-90 mt-0.5">
+              Thang máy đang trong trạng thái tốt. Lần bảo trì tiếp theo:{" "}
+              {formatDate(elevator.nextMaintenance)}
+            </div>
+          </div>
+        </div>
       )}
 
       <div className="grid gap-6 lg:grid-cols-3">
@@ -167,16 +174,15 @@ function PortalElevatorDetail() {
           </h3>
           <div className="space-y-4 text-sm">
             <Row label="Ngày lắp đặt" value={formatDate(elevator.installedAt)} />
-            <Row
-              label="Hạn bảo hành"
-              value={formatDate(elevator.warrantyUntil)}
-            />
+            <Row label="Hạn bảo hành" value={formatDate(elevator.warrantyUntil)} />
             <Row label="Bảo trì gần nhất" value={formatDate(elevator.lastMaintenance)} />
-            
+
             <div className="pt-4 border-t mt-4">
               <div className="flex items-center justify-between">
                 <span className="text-muted-foreground">Bảo trì tiếp theo</span>
-                <span className={`font-semibold text-base py-1 px-3 rounded-md ${isDue ? "bg-warning/20 text-warning-foreground" : "bg-primary/10 text-primary"}`}>
+                <span
+                  className={`font-semibold text-base py-1 px-3 rounded-md ${isDue ? "bg-warning/20 text-warning-foreground" : "bg-primary/10 text-primary"}`}
+                >
                   {formatDate(elevator.nextMaintenance)}
                 </span>
               </div>
@@ -185,23 +191,27 @@ function PortalElevatorDetail() {
         </Card>
 
         {/* Thông tin chứng nhận */}
-         <Card className="p-6 lg:col-span-1 shadow-sm hover:shadow-md transition-all duration-200">
+        <Card className="p-6 lg:col-span-1 shadow-sm hover:shadow-md transition-all duration-200">
           <div className="h-full flex flex-col">
             <h3 className="font-semibold text-lg mb-5 flex items-center gap-2">
               <ShieldCheck className="h-5 w-5 text-success" /> Tình trạng kiểm định
             </h3>
-            
+
             <div className="space-y-4 text-sm flex-1">
-               <Row label="Trạng thái" value="Đạt tiêu chuẩn an toàn" highlightClassName="text-success font-semibold" />
-               <Row label="Số kiểm định" value="KD-2025-04821" />
-               <Row label="Ngày kiểm định" value="20/04/2025" />
-               <Row label="Hạn kiểm định" value="20/04/2026" />
+              <Row
+                label="Trạng thái"
+                value="Đạt tiêu chuẩn an toàn"
+                highlightClassName="text-success font-semibold"
+              />
+              <Row label="Số kiểm định" value="KD-2025-04821" />
+              <Row label="Ngày kiểm định" value="20/04/2025" />
+              <Row label="Hạn kiểm định" value="20/04/2026" />
             </div>
 
             <div className="pt-4 mt-auto">
-               <Button variant="secondary" className="w-full">
-                  Tải giấy chứng nhận
-               </Button>
+              <Button variant="secondary" className="w-full">
+                Tải giấy chứng nhận
+              </Button>
             </div>
           </div>
         </Card>
@@ -213,7 +223,7 @@ function PortalElevatorDetail() {
               <Briefcase className="h-5 w-5 text-primary" /> Lịch sử bảo trì & sửa chữa
             </h3>
           </div>
-          
+
           {history.length > 0 ? (
             <div className="space-y-3">
               {history.map((j) => (
@@ -226,11 +236,15 @@ function PortalElevatorDetail() {
                       j.status === "completed"
                         ? "bg-success/20 text-success"
                         : j.status === "in_progress"
-                        ? "bg-warning/20 text-warning"
-                        : "bg-primary/20 text-primary"
+                          ? "bg-warning/20 text-warning"
+                          : "bg-primary/20 text-primary"
                     }`}
                   >
-                    {j.status === "completed" ? <CheckCircle2 className="h-5 w-5" /> : <Briefcase className="h-5 w-5" />}
+                    {j.status === "completed" ? (
+                      <CheckCircle2 className="h-5 w-5" />
+                    ) : (
+                      <Briefcase className="h-5 w-5" />
+                    )}
                   </div>
                   <div className="flex-1 min-w-0">
                     <div className="flex items-center gap-2 mb-1 flex-wrap">
@@ -243,8 +257,8 @@ function PortalElevatorDetail() {
                       <span>Lên lịch: {formatDateTime(j.scheduledFor)}</span>
                       {j.completedAt && (
                         <>
-                           <span>•</span>
-                           <span>Hoàn thành: {formatDateTime(j.completedAt)}</span>
+                          <span>•</span>
+                          <span>Hoàn thành: {formatDateTime(j.completedAt)}</span>
                         </>
                       )}
                     </div>
@@ -262,7 +276,8 @@ function PortalElevatorDetail() {
               <Briefcase className="mx-auto h-12 w-12 text-muted-foreground/30 mb-3" />
               <h3 className="text-lg font-medium text-foreground mb-1">Chưa có dữ liệu</h3>
               <p className="text-sm text-muted-foreground max-w-sm mx-auto">
-                Thang máy này hiện chưa có lịch sử bảo trì hoặc sửa chữa nào được ghi nhận trên hệ thống.
+                Thang máy này hiện chưa có lịch sử bảo trì hoặc sửa chữa nào được ghi nhận trên hệ
+                thống.
               </p>
             </div>
           )}

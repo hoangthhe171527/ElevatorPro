@@ -16,22 +16,22 @@ export const useAppStore = create<AppState>()(
       userId: "u-director-1",
       activeTenantId: "t-1",
       setUserId: (userId) => {
-        const user = mockUsers.find(u => u.id === userId);
+        const user = mockUsers.find((u) => u.id === userId);
         const activeTenantId = user?.memberships?.[0]?.tenantId || get().activeTenantId;
         set({ userId, activeTenantId });
       },
       setTenantId: (tenantId) => {
-        const user = mockUsers.find(u => u.id === get().userId);
-        const membership = user?.memberships.find(m => m.tenantId === tenantId);
+        const user = mockUsers.find((u) => u.id === get().userId);
+        const membership = user?.memberships.find((m) => m.tenantId === tenantId);
         if (membership) {
           set({ activeTenantId: tenantId });
         } else {
           set({ activeTenantId: tenantId });
         }
-      }
+      },
     }),
-    { name: "elevator-app-state-v3" }
-  )
+    { name: "elevator-app-state-v3" },
+  ),
 );
 
 export function useCurrentUser() {
@@ -50,7 +50,9 @@ export function useCurrentPermissions(): Permission[] {
  * RBAC Helper: Kiểm tra xem user hiện tại có quyền "ghi" (thao tác) vào module hay không.
  * Nếu là Director thì luôn true. Cấp dưới chỉ được thao tác module chuyên môn.
  */
-export function useCanWrite(module: "projects" | "hr" | "accounting" | "inventory" | "jobs" | "leads" | "contracts") {
+export function useCanWrite(
+  module: "projects" | "hr" | "accounting" | "inventory" | "jobs" | "leads" | "contracts",
+) {
   const permissions = useCurrentPermissions();
   if (permissions.includes("director")) return true;
 
@@ -62,9 +64,17 @@ export function useCanWrite(module: "projects" | "hr" | "accounting" | "inventor
     case "accounting":
       return permissions.includes("accounting");
     case "inventory":
-      return permissions.includes("maintenance_mgmt") || permissions.includes("install_mgmt") || permissions.includes("field_tech");
+      return (
+        permissions.includes("maintenance_mgmt") ||
+        permissions.includes("install_mgmt") ||
+        permissions.includes("field_tech")
+      );
     case "jobs":
-      return permissions.includes("maintenance_mgmt") || permissions.includes("install_mgmt") || permissions.includes("field_tech");
+      return (
+        permissions.includes("maintenance_mgmt") ||
+        permissions.includes("install_mgmt") ||
+        permissions.includes("field_tech")
+      );
     case "leads":
     case "contracts":
       return permissions.includes("sales") || permissions.includes("sales_maintenance");

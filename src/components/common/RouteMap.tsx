@@ -19,13 +19,29 @@ export function RouteMap({ routes, highlightJobId, className, height = 360 }: Ro
       className={cn("relative rounded-xl border overflow-hidden", className)}
       style={{ background: "var(--map-bg)" }}
     >
-      <svg viewBox={`0 0 ${W} ${H}`} className="w-full h-full block" preserveAspectRatio="xMidYMid meet">
+      <svg
+        viewBox={`0 0 ${W} ${H}`}
+        className="w-full h-full block"
+        preserveAspectRatio="xMidYMid meet"
+      >
         <defs>
           <pattern id="grid" width="40" height="40" patternUnits="userSpaceOnUse">
-            <path d="M 40 0 L 0 0 0 40" fill="none" stroke="var(--border)" strokeWidth="0.5" opacity="0.6" />
+            <path
+              d="M 40 0 L 0 0 0 40"
+              fill="none"
+              stroke="var(--border)"
+              strokeWidth="0.5"
+              opacity="0.6"
+            />
           </pattern>
           <pattern id="grid-major" width="160" height="160" patternUnits="userSpaceOnUse">
-            <path d="M 160 0 L 0 0 0 160" fill="none" stroke="var(--border)" strokeWidth="1" opacity="0.8" />
+            <path
+              d="M 160 0 L 0 0 0 160"
+              fill="none"
+              stroke="var(--border)"
+              strokeWidth="1"
+              opacity="0.8"
+            />
           </pattern>
         </defs>
         <rect width={W} height={H} fill="url(#grid)" />
@@ -62,7 +78,9 @@ export function RouteMap({ routes, highlightJobId, className, height = 360 }: Ro
               {/* Base marker */}
               <g transform={`translate(${baseP.x}, ${baseP.y})`}>
                 <rect x={-9} y={-9} width={18} height={18} rx={3} fill={r.color} />
-                <text x={0} y={3} textAnchor="middle" fontSize="10" fontWeight="700" fill="white">B</text>
+                <text x={0} y={3} textAnchor="middle" fontSize="10" fontWeight="700" fill="white">
+                  B
+                </text>
               </g>
               {/* Stop markers */}
               {stopPts.map((p, i) => {
@@ -72,11 +90,23 @@ export function RouteMap({ routes, highlightJobId, className, height = 360 }: Ro
                   <g key={stop.jobId} transform={`translate(${p.x}, ${p.y})`}>
                     {isHi && (
                       <circle r={18} fill={r.color} opacity={0.25}>
-                        <animate attributeName="r" values="14;22;14" dur="1.6s" repeatCount="indefinite" />
+                        <animate
+                          attributeName="r"
+                          values="14;22;14"
+                          dur="1.6s"
+                          repeatCount="indefinite"
+                        />
                       </circle>
                     )}
                     <circle r={isHi ? 13 : 11} fill={r.color} stroke="white" strokeWidth={2} />
-                    <text x={0} y={4} textAnchor="middle" fontSize="11" fontWeight="700" fill="white">
+                    <text
+                      x={0}
+                      y={4}
+                      textAnchor="middle"
+                      fontSize="11"
+                      fontWeight="700"
+                      fill="white"
+                    >
                       {i + 1}
                     </text>
                   </g>
@@ -89,12 +119,13 @@ export function RouteMap({ routes, highlightJobId, className, height = 360 }: Ro
 
       {/* Legend */}
       <div className="absolute bottom-2 left-2 right-2 flex flex-wrap gap-2 rounded-md bg-background/90 backdrop-blur px-2.5 py-1.5 text-[11px] shadow-sm">
-        {routes.map(r => (
+        {routes.map((r) => (
           <div key={r.id} className="flex items-center gap-1.5">
             <span className="inline-block h-2.5 w-2.5 rounded-sm" style={{ background: r.color }} />
             <span className="font-medium">{r.label}</span>
             <span className="text-muted-foreground">
-              {r.route.stops.length} điểm · {r.route.totalKm.toFixed(1)} km · {r.route.totalMinutes} phút
+              {r.route.stops.length} điểm · {r.route.totalKm.toFixed(1)} km · {r.route.totalMinutes}{" "}
+              phút
             </span>
           </div>
         ))}

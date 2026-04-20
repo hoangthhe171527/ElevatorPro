@@ -100,13 +100,10 @@ export function NotificationPanel() {
   const [notifications, setNotifications] = useState(MOCK_NOTIFICATIONS);
   const unreadCount = notifications.filter((n) => !n.read).length;
 
-  const markAllRead = () =>
-    setNotifications((prev) => prev.map((n) => ({ ...n, read: true })));
+  const markAllRead = () => setNotifications((prev) => prev.map((n) => ({ ...n, read: true })));
 
   const markRead = (id: string) =>
-    setNotifications((prev) =>
-      prev.map((n) => (n.id === id ? { ...n, read: true } : n))
-    );
+    setNotifications((prev) => prev.map((n) => (n.id === id ? { ...n, read: true } : n)));
 
   return (
     <DropdownMenu>
@@ -151,13 +148,13 @@ export function NotificationPanel() {
                 onClick={() => markRead(n.id)}
                 className={cn(
                   "w-full text-left flex items-start gap-3 px-4 py-3 hover:bg-muted/50 transition-colors",
-                  !n.read && "bg-primary/3"
+                  !n.read && "bg-primary/3",
                 )}
               >
                 <div
                   className={cn(
                     "flex h-8 w-8 shrink-0 items-center justify-center rounded-full",
-                    typeColor[n.type]
+                    typeColor[n.type],
                   )}
                 >
                   <Icon className="h-3.5 w-3.5" />
@@ -167,7 +164,7 @@ export function NotificationPanel() {
                     <p
                       className={cn(
                         "text-sm leading-snug",
-                        !n.read ? "font-semibold" : "font-medium text-muted-foreground"
+                        !n.read ? "font-semibold" : "font-medium text-muted-foreground",
                       )}
                     >
                       {n.title}
@@ -176,9 +173,7 @@ export function NotificationPanel() {
                       <span className="mt-1.5 h-2 w-2 shrink-0 rounded-full bg-primary" />
                     )}
                   </div>
-                  <p className="text-xs text-muted-foreground mt-0.5 leading-snug">
-                    {n.desc}
-                  </p>
+                  <p className="text-xs text-muted-foreground mt-0.5 leading-snug">{n.desc}</p>
                   <p className="text-[10px] text-muted-foreground mt-1">{n.time}</p>
                 </div>
               </button>

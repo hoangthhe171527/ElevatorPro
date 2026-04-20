@@ -6,9 +6,16 @@ import { PageHeader } from "@/components/common/PageHeader";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { DataPagination } from "@/components/common/DataPagination";
-import { StatusBadge, leadStatusLabel, leadStatusVariant } from "@/components/common/StatusBadge";
+import { StatusBadge } from "@/components/common/StatusBadge";
+import { leadStatusLabel, leadStatusVariant } from "@/lib/status-variants";
 import { mockLeads, formatVND, formatDate, type Lead } from "@/lib/mock-data";
 import { Plus, Phone, Mail, MapPin, Search, UserCog } from "lucide-react";
 import { ConvertLeadModal, CreateLeadModal } from "@/components/common/Modals";
@@ -33,9 +40,7 @@ function LeadsPage() {
 
   const filtered = mockLeads.filter((l) => {
     const matchSearch =
-      !search ||
-      l.name.toLowerCase().includes(search.toLowerCase()) ||
-      l.phone.includes(search);
+      !search || l.name.toLowerCase().includes(search.toLowerCase()) || l.phone.includes(search);
     const matchStatus = statusFilter === "all" || l.status === statusFilter;
     return matchSearch && matchStatus;
   });
@@ -79,15 +84,28 @@ function LeadsPage() {
               placeholder="Tìm theo tên, số điện thoại..."
               className="pl-9"
               value={search}
-              onChange={(e) => { setSearch(e.target.value); setPage(1); }}
+              onChange={(e) => {
+                setSearch(e.target.value);
+                setPage(1);
+              }}
             />
           </div>
-          <Select value={statusFilter} onValueChange={(v) => { setStatusFilter(v); setPage(1); }}>
-            <SelectTrigger className="w-full sm:w-48"><SelectValue /></SelectTrigger>
+          <Select
+            value={statusFilter}
+            onValueChange={(v) => {
+              setStatusFilter(v);
+              setPage(1);
+            }}
+          >
+            <SelectTrigger className="w-full sm:w-48">
+              <SelectValue />
+            </SelectTrigger>
             <SelectContent>
               <SelectItem value="all">Tất cả trạng thái</SelectItem>
               {Object.entries(leadStatusLabel).map(([k, v]) => (
-                <SelectItem key={k} value={k}>{v}</SelectItem>
+                <SelectItem key={k} value={k}>
+                  {v}
+                </SelectItem>
               ))}
             </SelectContent>
           </Select>
@@ -109,9 +127,17 @@ function LeadsPage() {
                       </StatusBadge>
                     </div>
                     <div className="mt-1.5 flex flex-wrap gap-x-4 gap-y-1 text-xs text-muted-foreground">
-                      <span className="flex items-center gap-1"><Phone className="h-3 w-3" /> {l.phone}</span>
-                      {l.email && <span className="flex items-center gap-1"><Mail className="h-3 w-3" /> {l.email}</span>}
-                      <span className="flex items-center gap-1"><MapPin className="h-3 w-3" /> {l.address}</span>
+                      <span className="flex items-center gap-1">
+                        <Phone className="h-3 w-3" /> {l.phone}
+                      </span>
+                      {l.email && (
+                        <span className="flex items-center gap-1">
+                          <Mail className="h-3 w-3" /> {l.email}
+                        </span>
+                      )}
+                      <span className="flex items-center gap-1">
+                        <MapPin className="h-3 w-3" /> {l.address}
+                      </span>
                     </div>
                     {l.note && (
                       <p className="mt-2 text-xs text-muted-foreground italic">"{l.note}"</p>
@@ -119,7 +145,9 @@ function LeadsPage() {
                   </div>
                 </div>
                 <div className="flex flex-row lg:flex-col items-start lg:items-end gap-2 lg:gap-1 lg:min-w-[180px]">
-                  <div className="text-sm font-bold text-primary">{formatVND(l.estimatedValue)}</div>
+                  <div className="text-sm font-bold text-primary">
+                    {formatVND(l.estimatedValue)}
+                  </div>
                   <div className="text-xs text-muted-foreground">Nguồn: {l.source}</div>
                   {l.nextFollowUp && (
                     <div className="text-xs">
@@ -128,11 +156,7 @@ function LeadsPage() {
                   )}
                 </div>
                 <div className="flex gap-2">
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    onClick={() => setConfirmContact(l)}
-                  >
+                  <Button variant="outline" size="sm" onClick={() => setConfirmContact(l)}>
                     Liên hệ
                   </Button>
                   <Button
@@ -153,21 +177,19 @@ function LeadsPage() {
           )}
         </div>
 
-        <DataPagination page={page} pageSize={PAGE_SIZE} total={filtered.length} onPageChange={setPage} />
+        <DataPagination
+          page={page}
+          pageSize={PAGE_SIZE}
+          total={filtered.length}
+          onPageChange={setPage}
+        />
       </Card>
 
       {convertLead && (
-        <ConvertLeadModal
-          open={true}
-          onClose={() => setConvertLead(null)}
-          lead={convertLead}
-        />
+        <ConvertLeadModal open={true} onClose={() => setConvertLead(null)} lead={convertLead} />
       )}
 
-      <CreateLeadModal
-        open={createOpen}
-        onClose={() => setCreateOpen(false)}
-      />
+      <CreateLeadModal open={createOpen} onClose={() => setCreateOpen(false)} />
 
       <ConfirmationDialog
         open={!!confirmContact}

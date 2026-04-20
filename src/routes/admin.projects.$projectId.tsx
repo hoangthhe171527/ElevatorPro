@@ -5,37 +5,37 @@ import { PageHeader } from "@/components/common/PageHeader";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { 
-  Building, 
-  ArrowLeft, 
-  Calendar, 
-  MapPin, 
-  User, 
-  Check, 
-  Briefcase, 
-  Clock, 
+import {
+  Building,
+  ArrowLeft,
+  Calendar,
+  MapPin,
+  User,
+  Check,
+  Briefcase,
+  Clock,
   Plus,
   ChevronRight,
   AlertCircle,
-  HardHat
+  HardHat,
 } from "lucide-react";
-import { 
-  mockProjects, 
-  mockJobs, 
-  getCustomer, 
-  PROJECT_STAGES, 
-  PROJECT_STAGE_LABELS, 
+import {
+  mockProjects,
+  mockJobs,
+  getCustomer,
+  PROJECT_STAGES,
+  PROJECT_STAGE_LABELS,
   advanceProjectStage,
   formatDate,
-  formatDateTime
+  formatDateTime,
 } from "@/lib/mock-data";
-import { 
-  StatusBadge, 
-  jobStatusLabel, 
+import { StatusBadge } from "@/components/common/StatusBadge";
+import {
+  jobStatusLabel,
   jobStatusVariant,
   priorityLabel,
-  priorityVariant
-} from "@/components/common/StatusBadge";
+  priorityVariant,
+} from "@/lib/status-variants";
 import { CreateJobModal } from "@/components/common/Modals";
 import { ConfirmationDialog } from "@/components/common/ConfirmationDialog";
 
@@ -64,7 +64,7 @@ function ProjectDetailPage() {
 
   const handleAdvance = () => {
     advanceProjectStage(project.id);
-    const updated = mockProjects.find(p => p.id === project.id);
+    const updated = mockProjects.find((p) => p.id === project.id);
     if (updated) setProject({ ...updated });
   };
 
@@ -83,7 +83,11 @@ function ProjectDetailPage() {
         actions={
           <div className="flex gap-2">
             {!isCompleted && (
-              <Button onClick={() => setConfirmOpen(true)} variant="outline" className="border-primary text-primary hover:bg-primary/5">
+              <Button
+                onClick={() => setConfirmOpen(true)}
+                variant="outline"
+                className="border-primary text-primary hover:bg-primary/5"
+              >
                 <Check className="h-4 w-4 mr-1.5" /> Hoàn tất: {PROJECT_STAGE_LABELS[project.stage]}
               </Button>
             )}
@@ -105,7 +109,9 @@ function ProjectDetailPage() {
           <CardContent className="grid sm:grid-cols-2 gap-6">
             <div className="space-y-4">
               <div>
-                <label className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">Khách hàng</label>
+                <label className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">
+                  Khách hàng
+                </label>
                 <div className="flex items-center gap-2 mt-1">
                   <div className="h-8 w-8 rounded-full bg-primary/10 flex items-center justify-center text-primary">
                     <User className="h-4 w-4" />
@@ -117,7 +123,9 @@ function ProjectDetailPage() {
                 </div>
               </div>
               <div>
-                <label className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">Địa chỉ thi công</label>
+                <label className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">
+                  Địa chỉ thi công
+                </label>
                 <div className="flex items-start gap-2 mt-1 text-sm text-muted-foreground">
                   <MapPin className="h-4 w-4 mt-0.5 shrink-0 text-primary" />
                   {project.address}
@@ -126,20 +134,34 @@ function ProjectDetailPage() {
             </div>
             <div className="space-y-4">
               <div>
-                <label className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">Ngày bắt đầu</label>
+                <label className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">
+                  Ngày bắt đầu
+                </label>
                 <div className="flex items-center gap-2 mt-1 text-sm">
                   <Calendar className="h-4 w-4 text-primary" />
                   {formatDate(project.startDate)}
                 </div>
               </div>
               <div>
-                <label className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">Trạng thái dự án</label>
+                <label className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">
+                  Trạng thái dự án
+                </label>
                 <div className="mt-1">
-                   {isCompleted ? (
-                     <Badge className="bg-success/10 text-success border-success/20 hover:bg-success/20" variant="outline">Đã bàn giao</Badge>
-                   ) : (
-                     <Badge className="bg-primary/10 text-primary border-primary/20" variant="outline">Đang thi công</Badge>
-                   )}
+                  {isCompleted ? (
+                    <Badge
+                      className="bg-success/10 text-success border-success/20 hover:bg-success/20"
+                      variant="outline"
+                    >
+                      Đã bàn giao
+                    </Badge>
+                  ) : (
+                    <Badge
+                      className="bg-primary/10 text-primary border-primary/20"
+                      variant="outline"
+                    >
+                      Đang thi công
+                    </Badge>
+                  )}
                 </div>
               </div>
             </div>
@@ -160,7 +182,9 @@ function ProjectDetailPage() {
             </div>
             <div className="flex justify-between items-center py-2 border-b border-dashed">
               <span className="text-sm text-muted-foreground">Đã hoàn thành</span>
-              <span className="font-bold text-lg text-success">{jobs.filter(j => j.status === 'completed').length}</span>
+              <span className="font-bold text-lg text-success">
+                {jobs.filter((j) => j.status === "completed").length}
+              </span>
             </div>
             <div className="flex justify-between items-center py-2 border-b border-dashed">
               <span className="text-sm text-muted-foreground">Giai đoạn hiện tại</span>
@@ -177,37 +201,45 @@ function ProjectDetailPage() {
         </CardHeader>
         <CardContent className="pt-10 pb-12">
           <div className="relative max-w-5xl mx-auto px-4">
-             {/* Stepper background line */}
-             <div className="absolute top-1/2 left-0 w-full h-1 bg-muted -translate-y-1/2 rounded" />
-                  
-             {/* Stepper progress line */}
-             <div 
-               className="absolute top-1/2 left-0 h-1 bg-primary -translate-y-1/2 rounded transition-all duration-700" 
-               style={{ width: `${(currentStageIndex / (PROJECT_STAGES.length - 1)) * 100}%` }}
-             />
+            {/* Stepper background line */}
+            <div className="absolute top-1/2 left-0 w-full h-1 bg-muted -translate-y-1/2 rounded" />
 
-             {/* Stepper nodes */}
-             <div className="relative flex justify-between">
-               {PROJECT_STAGES.map((stage, idx) => {
-                 const isPast = idx < currentStageIndex;
-                 const isCurrent = idx === currentStageIndex;
-                 return (
-                   <div key={stage} className="flex flex-col items-center gap-3 w-20">
-                     <div className={`
+            {/* Stepper progress line */}
+            <div
+              className="absolute top-1/2 left-0 h-1 bg-primary -translate-y-1/2 rounded transition-all duration-700"
+              style={{ width: `${(currentStageIndex / (PROJECT_STAGES.length - 1)) * 100}%` }}
+            />
+
+            {/* Stepper nodes */}
+            <div className="relative flex justify-between">
+              {PROJECT_STAGES.map((stage, idx) => {
+                const isPast = idx < currentStageIndex;
+                const isCurrent = idx === currentStageIndex;
+                return (
+                  <div key={stage} className="flex flex-col items-center gap-3 w-20">
+                    <div
+                      className={`
                        z-10 flex h-10 w-10 items-center justify-center rounded-full text-sm font-semibold border-2 shadow-sm transition-all duration-300
-                       ${isPast ? "bg-primary border-primary text-primary-foreground" : 
-                         isCurrent ? "bg-background border-primary text-primary ring-4 ring-primary/10" : 
-                         "bg-background border-muted text-muted-foreground"}
-                     `}>
-                       {isPast ? <Check className="h-5 w-5" /> : idx + 1}
-                     </div>
-                     <div className={`text-[11px] text-center font-bold uppercase tracking-tight leading-tight ${isCurrent ? "text-primary" : "text-muted-foreground"}`}>
-                       {PROJECT_STAGE_LABELS[stage]}
-                     </div>
-                   </div>
-                 );
-               })}
-             </div>
+                       ${
+                         isPast
+                           ? "bg-primary border-primary text-primary-foreground"
+                           : isCurrent
+                             ? "bg-background border-primary text-primary ring-4 ring-primary/10"
+                             : "bg-background border-muted text-muted-foreground"
+                       }
+                     `}
+                    >
+                      {isPast ? <Check className="h-5 w-5" /> : idx + 1}
+                    </div>
+                    <div
+                      className={`text-[11px] text-center font-bold uppercase tracking-tight leading-tight ${isCurrent ? "text-primary" : "text-muted-foreground"}`}
+                    >
+                      {PROJECT_STAGE_LABELS[stage]}
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
           </div>
         </CardContent>
       </Card>
@@ -236,11 +268,16 @@ function ProjectDetailPage() {
                     <span className="text-[10px] font-mono bg-muted px-1.5 py-0.5 rounded text-muted-foreground border">
                       {j.code}
                     </span>
-                    <StatusBadge variant={priorityVariant[j.priority]} className="text-[9px] px-1.5">
+                    <StatusBadge
+                      variant={priorityVariant[j.priority]}
+                      className="text-[9px] px-1.5"
+                    >
                       {priorityLabel[j.priority]}
                     </StatusBadge>
                   </div>
-                  <h4 className="font-semibold group-hover:text-primary transition-colors">{j.title}</h4>
+                  <h4 className="font-semibold group-hover:text-primary transition-colors">
+                    {j.title}
+                  </h4>
                   <div className="mt-1 flex items-center gap-4 text-xs text-muted-foreground">
                     <span className="flex items-center gap-1">
                       <Clock className="h-3 w-3" /> {formatDateTime(j.scheduledFor)}
@@ -253,28 +290,30 @@ function ProjectDetailPage() {
                   </div>
                 </div>
                 <div className="flex items-center gap-4 shrink-0 sm:justify-end">
-                   <StatusBadge variant={jobStatusVariant[j.status]}>
-                     {jobStatusLabel[j.status]}
-                   </StatusBadge>
-                   <ChevronRight className="h-4 w-4 text-muted-foreground group-hover:translate-x-1 transition-transform" />
+                  <StatusBadge variant={jobStatusVariant[j.status]}>
+                    {jobStatusLabel[j.status]}
+                  </StatusBadge>
+                  <ChevronRight className="h-4 w-4 text-muted-foreground group-hover:translate-x-1 transition-transform" />
                 </div>
               </Link>
             ))
           ) : (
             <div className="py-12 text-center">
-               <AlertCircle className="mx-auto h-12 w-12 text-muted-foreground/20 mb-3" />
-               <p className="text-muted-foreground">Chưa có hạng mục công việc nào được liên kết với dự án này.</p>
-               <Button variant="outline" className="mt-4" onClick={() => setCreateJobOpen(true)}>
-                 Khởi tạo hạng mục đầu tiên
-               </Button>
+              <AlertCircle className="mx-auto h-12 w-12 text-muted-foreground/20 mb-3" />
+              <p className="text-muted-foreground">
+                Chưa có hạng mục công việc nào được liên kết với dự án này.
+              </p>
+              <Button variant="outline" className="mt-4" onClick={() => setCreateJobOpen(true)}>
+                Khởi tạo hạng mục đầu tiên
+              </Button>
             </div>
           )}
         </div>
       </Card>
 
-      <CreateJobModal 
-        open={createJobOpen} 
-        onClose={() => setCreateJobOpen(false)} 
+      <CreateJobModal
+        open={createJobOpen}
+        onClose={() => setCreateJobOpen(false)}
         defaultProjectId={project.id}
         defaultCustomerId={project.customerId}
       />

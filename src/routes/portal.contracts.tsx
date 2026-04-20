@@ -6,7 +6,8 @@ import { PageHeader } from "@/components/common/PageHeader";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { DataPagination } from "@/components/common/DataPagination";
-import { StatusBadge, contractStatusLabel, contractStatusVariant } from "@/components/common/StatusBadge";
+import { StatusBadge } from "@/components/common/StatusBadge";
+import { contractStatusLabel, contractStatusVariant } from "@/lib/status-variants";
 import { Progress } from "@/components/ui/progress";
 import { mockContracts, formatVND, formatDate } from "@/lib/mock-data";
 import { FileText, Calendar, Download, Phone, AlertTriangle, CheckCircle2 } from "lucide-react";
@@ -19,7 +20,11 @@ export const Route = createFileRoute("/portal/contracts")({
 
 const CUSTOMER_ID = "c-1";
 const PAGE_SIZE = 5;
-const typeLabel: Record<string, string> = { install: "Lắp đặt", maintenance: "Bảo trì", repair: "Sửa chữa" };
+const typeLabel: Record<string, string> = {
+  install: "Lắp đặt",
+  maintenance: "Bảo trì",
+  repair: "Sửa chữa",
+};
 
 function PortalContracts() {
   const [page, setPage] = useState(1);
@@ -42,7 +47,11 @@ function PortalContracts() {
         </Card>
         <Card className="p-4">
           <div className="text-xs text-muted-foreground">Sắp hết hạn</div>
-          <div className={`mt-1 text-2xl font-bold ${expiringCount > 0 ? "text-warning-foreground" : ""}`}>{expiringCount}</div>
+          <div
+            className={`mt-1 text-2xl font-bold ${expiringCount > 0 ? "text-warning-foreground" : ""}`}
+          >
+            {expiringCount}
+          </div>
         </Card>
         <Card className="p-4">
           <div className="text-xs text-muted-foreground">Đã thanh toán</div>
@@ -78,9 +87,12 @@ function PortalContracts() {
                           </span>
                         </div>
                         <div className="mt-1 text-xs text-muted-foreground flex items-center gap-1">
-                          <Calendar className="h-3 w-3" /> {formatDate(c.startDate)} → {formatDate(c.endDate)}
+                          <Calendar className="h-3 w-3" /> {formatDate(c.startDate)} →{" "}
+                          {formatDate(c.endDate)}
                         </div>
-                        <p className="mt-1.5 text-xs text-muted-foreground">{c.items.join(" · ")}</p>
+                        <p className="mt-1.5 text-xs text-muted-foreground">
+                          {c.items.join(" · ")}
+                        </p>
                       </div>
                     </div>
 
@@ -105,7 +117,8 @@ function PortalContracts() {
                       {c.status === "expiring" && (
                         <div className="sm:col-span-2 flex items-center gap-2 p-3 rounded-lg bg-warning/10 text-warning-foreground text-sm">
                           <AlertTriangle className="h-4 w-4 shrink-0" />
-                          Hợp đồng sắp hết hạn vào <strong>{formatDate(c.endDate)}</strong> — liên hệ để tái ký
+                          Hợp đồng sắp hết hạn vào <strong>{formatDate(c.endDate)}</strong> — liên
+                          hệ để tái ký
                         </div>
                       )}
                       {percent === 100 && (
@@ -126,7 +139,11 @@ function PortalContracts() {
                         variant="outline"
                         size="sm"
                         className="gap-2"
-                        onClick={() => toast.success("Đã gửi yêu cầu liên hệ — nhân viên sẽ gọi lại trong 30 phút")}
+                        onClick={() =>
+                          toast.success(
+                            "Đã gửi yêu cầu liên hệ — nhân viên sẽ gọi lại trong 30 phút",
+                          )
+                        }
                       >
                         <Phone className="h-3.5 w-3.5" /> Liên hệ về hợp đồng này
                       </Button>
@@ -137,7 +154,12 @@ function PortalContracts() {
             );
           })}
         </div>
-        <DataPagination page={page} pageSize={PAGE_SIZE} total={filtered.length} onPageChange={setPage} />
+        <DataPagination
+          page={page}
+          pageSize={PAGE_SIZE}
+          total={filtered.length}
+          onPageChange={setPage}
+        />
       </Card>
     </AppShell>
   );

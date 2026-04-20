@@ -7,7 +7,13 @@ import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { Input } from "@/components/ui/input";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { DataPagination } from "@/components/common/DataPagination";
 import { StatusBadge } from "@/components/common/StatusBadge";
 import { mockIssues, mockElevators, formatDateTime, getElevator } from "@/lib/mock-data";
@@ -21,7 +27,11 @@ export const Route = createFileRoute("/portal/issues")({
 
 const CUSTOMER_ID = "c-1";
 const PAGE_SIZE = 5;
-const statusLabel: Record<string, string> = { open: "Đang mở", scheduled: "Đã tiếp nhận", resolved: "Đã giải quyết" };
+const statusLabel: Record<string, string> = {
+  open: "Đang mở",
+  scheduled: "Đã tiếp nhận",
+  resolved: "Đã giải quyết",
+};
 const statusVariant = { open: "destructive", scheduled: "info", resolved: "success" } as const;
 
 const issueTypes = [
@@ -80,10 +90,7 @@ function PortalIssues() {
 
   return (
     <AppShell>
-      <PageHeader
-        title="Báo lỗi & sự cố"
-        description="Gửi yêu cầu kiểm tra hoặc sửa chữa nhanh"
-      />
+      <PageHeader title="Báo lỗi & sự cố" description="Gửi yêu cầu kiểm tra hoặc sửa chữa nhanh" />
 
       <div className="grid gap-4 lg:grid-cols-3">
         {/* Form / Success */}
@@ -97,24 +104,36 @@ function PortalIssues() {
 
               <div className="space-y-3">
                 <div>
-                  <label className="text-xs font-medium text-muted-foreground">Chọn thang <span className="text-destructive">*</span></label>
+                  <label className="text-xs font-medium text-muted-foreground">
+                    Chọn thang <span className="text-destructive">*</span>
+                  </label>
                   <Select value={elevatorId} onValueChange={setElevatorId}>
-                    <SelectTrigger className="mt-1"><SelectValue placeholder="Chọn thang máy..." /></SelectTrigger>
+                    <SelectTrigger className="mt-1">
+                      <SelectValue placeholder="Chọn thang máy..." />
+                    </SelectTrigger>
                     <SelectContent>
                       {myElevators.map((e) => (
-                        <SelectItem key={e.id} value={e.id}>{e.code} — {e.building}</SelectItem>
+                        <SelectItem key={e.id} value={e.id}>
+                          {e.code} — {e.building}
+                        </SelectItem>
                       ))}
                     </SelectContent>
                   </Select>
                 </div>
 
                 <div>
-                  <label className="text-xs font-medium text-muted-foreground">Loại sự cố <span className="text-destructive">*</span></label>
+                  <label className="text-xs font-medium text-muted-foreground">
+                    Loại sự cố <span className="text-destructive">*</span>
+                  </label>
                   <Select value={issueType} onValueChange={setIssueType}>
-                    <SelectTrigger className="mt-1"><SelectValue placeholder="Chọn loại sự cố..." /></SelectTrigger>
+                    <SelectTrigger className="mt-1">
+                      <SelectValue placeholder="Chọn loại sự cố..." />
+                    </SelectTrigger>
                     <SelectContent>
                       {issueTypes.map((t) => (
-                        <SelectItem key={t} value={t}>{t}</SelectItem>
+                        <SelectItem key={t} value={t}>
+                          {t}
+                        </SelectItem>
                       ))}
                     </SelectContent>
                   </Select>
@@ -125,13 +144,17 @@ function PortalIssues() {
                     <AlertTriangle className="h-4 w-4 shrink-0" />
                     <span className="flex-1 font-medium">Tình huống khẩn cấp!</span>
                     <a href="tel:19001234">
-                      <Button size="sm" variant="secondary">Gọi ngay</Button>
+                      <Button size="sm" variant="secondary">
+                        Gọi ngay
+                      </Button>
                     </a>
                   </div>
                 )}
 
                 <div>
-                  <label className="text-xs font-medium text-muted-foreground">Mô tả chi tiết</label>
+                  <label className="text-xs font-medium text-muted-foreground">
+                    Mô tả chi tiết
+                  </label>
                   <Textarea
                     placeholder="Mô tả hiện tượng bạn gặp..."
                     value={description}
@@ -142,7 +165,9 @@ function PortalIssues() {
                 </div>
 
                 <div>
-                  <label className="text-xs font-medium text-muted-foreground">Số điện thoại liên hệ <span className="text-destructive">*</span></label>
+                  <label className="text-xs font-medium text-muted-foreground">
+                    Số điện thoại liên hệ <span className="text-destructive">*</span>
+                  </label>
                   <Input
                     className="mt-1"
                     placeholder="VD: 0901 234 567"
@@ -157,7 +182,11 @@ function PortalIssues() {
                 </Button>
 
                 <p className="text-center text-xs text-muted-foreground">
-                  Khẩn cấp? Gọi <a href="tel:19001234" className="text-destructive font-semibold">1900 1234</a> (24/7)
+                  Khẩn cấp? Gọi{" "}
+                  <a href="tel:19001234" className="text-destructive font-semibold">
+                    1900 1234
+                  </a>{" "}
+                  (24/7)
                 </p>
               </div>
             </>
@@ -221,10 +250,14 @@ function PortalIssues() {
                     <div className="flex-1 min-w-0">
                       <div className="flex items-center gap-2 flex-wrap">
                         <span className="font-mono text-sm font-medium">{elev?.code}</span>
-                        <StatusBadge variant={statusVariant[i.status]}>{statusLabel[i.status]}</StatusBadge>
+                        <StatusBadge variant={statusVariant[i.status]}>
+                          {statusLabel[i.status]}
+                        </StatusBadge>
                       </div>
                       <p className="mt-1 text-sm">{i.description}</p>
-                      <div className="mt-1 text-xs text-muted-foreground">{formatDateTime(i.reportedAt)}</div>
+                      <div className="mt-1 text-xs text-muted-foreground">
+                        {formatDateTime(i.reportedAt)}
+                      </div>
                       {i.jobId && (
                         <Link
                           to="/portal"
@@ -239,10 +272,17 @@ function PortalIssues() {
               );
             })}
             {paged.length === 0 && (
-              <div className="p-12 text-center text-sm text-muted-foreground">Chưa có báo lỗi nào</div>
+              <div className="p-12 text-center text-sm text-muted-foreground">
+                Chưa có báo lỗi nào
+              </div>
             )}
           </div>
-          <DataPagination page={page} pageSize={PAGE_SIZE} total={myIssues.length} onPageChange={setPage} />
+          <DataPagination
+            page={page}
+            pageSize={PAGE_SIZE}
+            total={myIssues.length}
+            onPageChange={setPage}
+          />
         </Card>
       </div>
     </AppShell>

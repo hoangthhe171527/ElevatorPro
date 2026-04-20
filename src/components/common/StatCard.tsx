@@ -23,16 +23,28 @@ export function StatCard({ label, value, icon: Icon, hint, trend, accent = "prim
     <Card className="p-5">
       <div className="flex items-start justify-between gap-3">
         <div className="min-w-0">
-          <div className="text-xs font-medium text-muted-foreground uppercase tracking-wide">{label}</div>
+          <div className="text-xs font-medium text-muted-foreground uppercase tracking-wide">
+            {label}
+          </div>
           <div className="mt-2 text-2xl font-bold tracking-tight truncate">{value}</div>
           {hint && <div className="mt-1 text-xs text-muted-foreground">{hint}</div>}
           {trend && (
-            <div className={cn("mt-2 text-xs font-medium", trend.positive ? "text-success" : "text-destructive")}>
+            <div
+              className={cn(
+                "mt-2 text-xs font-medium",
+                trend.positive ? "text-success" : "text-destructive",
+              )}
+            >
               {trend.positive ? "▲" : "▼"} {trend.value}
             </div>
           )}
         </div>
-        <div className={cn("flex h-10 w-10 items-center justify-center rounded-lg shrink-0", accentMap[accent])}>
+        <div
+          className={cn(
+            "flex h-10 w-10 items-center justify-center rounded-lg shrink-0",
+            accentMap[accent],
+          )}
+        >
           <Icon className="h-5 w-5" />
         </div>
       </div>

@@ -4,16 +4,16 @@ import { PageHeader } from "@/components/common/PageHeader";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { 
-  CheckCircle2, 
-  XCircle, 
-  Clock, 
-  FileText, 
-  Package, 
-  DollarSign, 
+import {
+  CheckCircle2,
+  XCircle,
+  Clock,
+  FileText,
+  Package,
+  DollarSign,
   AlertTriangle,
   User,
-  ArrowRight
+  ArrowRight,
 } from "lucide-react";
 import { mockRequests, getUser, getProject, formatVND, formatDate } from "@/lib/mock-data";
 import { useAppStore } from "@/lib/store";
@@ -47,29 +47,31 @@ const URGENCY_STYLES = {
 };
 
 function ApprovalsPage() {
-  const activeTenantId = useAppStore(s => s.activeTenantId);
+  const activeTenantId = useAppStore((s) => s.activeTenantId);
   const [page, setPage] = useState(1);
   const [requests, setRequests] = useState(mockRequests);
 
-  const filtered = requests.filter(r => r.tenantId === activeTenantId);
+  const filtered = requests.filter((r) => r.tenantId === activeTenantId);
   const paged = filtered.slice((page - 1) * 5, page * 5);
 
   const handleAction = async (id: string, action: "approved" | "rejected") => {
-    const updated = requests.map(r => r.id === id ? { ...r, status: action } : r);
+    const updated = requests.map((r) => (r.id === id ? { ...r, status: action } : r));
     setRequests(updated);
     toast.success(action === "approved" ? "Đã phê duyệt đơn" : "Đã từ chối đơn");
   };
 
   return (
     <AppShell>
-      <PageHeader 
-        title="Trung tâm Phê duyệt" 
-        description="Quản lý và xét duyệt các yêu cầu, đề xuất từ nhân viên cấp dưới." 
+      <PageHeader
+        title="Trung tâm Phê duyệt"
+        description="Quản lý và xét duyệt các yêu cầu, đề xuất từ nhân viên cấp dưới."
       />
 
       <div className="grid gap-6">
         <div className="flex items-center gap-4 text-sm font-medium border-b pb-2">
-          <div className="text-primary border-b-2 border-primary pb-2 px-1 cursor-pointer">Chờ duyệt ({filtered.filter(r => r.status === "pending").length})</div>
+          <div className="text-primary border-b-2 border-primary pb-2 px-1 cursor-pointer">
+            Chờ duyệt ({filtered.filter((r) => r.status === "pending").length})
+          </div>
           <div className="text-muted-foreground px-1 cursor-pointer">Lịch sử</div>
         </div>
 
@@ -92,8 +94,15 @@ function ApprovalsPage() {
                   <div className="flex flex-col md:flex-row divide-y md:divide-y-0 md:divide-x">
                     <div className="p-4 md:w-64 bg-muted/20 flex flex-col justify-between">
                       <div>
-                        <Badge className={`${URGENCY_STYLES[req.urgency]} border mb-2`} variant="outline">
-                          {req.urgency === "critical" ? "KHẨN CẤP" : req.urgency === "high" ? "Ưu tiên cao" : "Bình thường"}
+                        <Badge
+                          className={`${URGENCY_STYLES[req.urgency]} border mb-2`}
+                          variant="outline"
+                        >
+                          {req.urgency === "critical"
+                            ? "KHẨN CẤP"
+                            : req.urgency === "high"
+                              ? "Ưu tiên cao"
+                              : "Bình thường"}
                         </Badge>
                         <div className="flex items-center gap-2 text-sm font-bold">
                           <Icon className="h-4 w-4 text-primary" />
@@ -110,7 +119,9 @@ function ApprovalsPage() {
                     <div className="flex-1 p-4 flex flex-col justify-between">
                       <div>
                         <h3 className="font-semibold text-base mb-1">{req.title}</h3>
-                        <p className="text-sm text-muted-foreground line-clamp-2">{req.description}</p>
+                        <p className="text-sm text-muted-foreground line-clamp-2">
+                          {req.description}
+                        </p>
                         {req.amount && (
                           <div className="mt-2 text-lg font-bold text-destructive">
                             {formatVND(req.amount)}
@@ -128,11 +139,20 @@ function ApprovalsPage() {
                         </div>
                         {req.status === "pending" ? (
                           <div className="flex gap-2">
-                            <Button size="sm" variant="outline" onClick={() => handleAction(req.id, "rejected")}>
+                            <Button
+                              size="sm"
+                              variant="outline"
+                              onClick={() => handleAction(req.id, "rejected")}
+                            >
                               <XCircle className="h-4 w-4 mr-1 md:hidden lg:inline" /> Từ chối
                             </Button>
-                            <Button size="sm" className="bg-success hover:bg-success/90" onClick={() => handleAction(req.id, "approved")}>
-                              <CheckCircle2 className="h-4 w-4 mr-1 md:hidden lg:inline" /> Phê duyệt
+                            <Button
+                              size="sm"
+                              className="bg-success hover:bg-success/90"
+                              onClick={() => handleAction(req.id, "approved")}
+                            >
+                              <CheckCircle2 className="h-4 w-4 mr-1 md:hidden lg:inline" /> Phê
+                              duyệt
                             </Button>
                           </div>
                         ) : (
@@ -146,12 +166,12 @@ function ApprovalsPage() {
                 </Card>
               );
             })}
-            
-            <DataPagination 
-              page={page} 
-              pageSize={5} 
-              total={filtered.length} 
-              onPageChange={setPage} 
+
+            <DataPagination
+              page={page}
+              pageSize={5}
+              total={filtered.length}
+              onPageChange={setPage}
             />
           </div>
         )}

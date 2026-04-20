@@ -31,17 +31,34 @@ export const Route = createRootRoute({
       { charSet: "utf-8" },
       { name: "viewport", content: "width=device-width, initial-scale=1" },
       { title: "Lovable App" },
-      { name: "description", content: "Lift Service Hub is a modern elevator service management system." },
+      {
+        name: "description",
+        content: "Lift Service Hub is a modern elevator service management system.",
+      },
       { name: "author", content: "Lovable" },
       { property: "og:title", content: "Lovable App" },
-      { property: "og:description", content: "Lift Service Hub is a modern elevator service management system." },
+      {
+        property: "og:description",
+        content: "Lift Service Hub is a modern elevator service management system.",
+      },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary" },
       { name: "twitter:site", content: "@Lovable" },
       { name: "twitter:title", content: "Lovable App" },
-      { name: "twitter:description", content: "Lift Service Hub is a modern elevator service management system." },
-      { property: "og:image", content: "https://pub-bb2e103a32db4e198524a2e9ed8f35b4.r2.dev/7ff846f1-46b4-4037-8e3d-47cd6b577536/id-preview-b8c6b7e4--15be25b7-5615-4f28-8660-d1137b8d33f2.lovable.app-1776504115739.png" },
-      { name: "twitter:image", content: "https://pub-bb2e103a32db4e198524a2e9ed8f35b4.r2.dev/7ff846f1-46b4-4037-8e3d-47cd6b577536/id-preview-b8c6b7e4--15be25b7-5615-4f28-8660-d1137b8d33f2.lovable.app-1776504115739.png" },
+      {
+        name: "twitter:description",
+        content: "Lift Service Hub is a modern elevator service management system.",
+      },
+      {
+        property: "og:image",
+        content:
+          "https://pub-bb2e103a32db4e198524a2e9ed8f35b4.r2.dev/7ff846f1-46b4-4037-8e3d-47cd6b577536/id-preview-b8c6b7e4--15be25b7-5615-4f28-8660-d1137b8d33f2.lovable.app-1776504115739.png",
+      },
+      {
+        name: "twitter:image",
+        content:
+          "https://pub-bb2e103a32db4e198524a2e9ed8f35b4.r2.dev/7ff846f1-46b4-4037-8e3d-47cd6b577536/id-preview-b8c6b7e4--15be25b7-5615-4f28-8660-d1137b8d33f2.lovable.app-1776504115739.png",
+      },
     ],
     links: [
       {

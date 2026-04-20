@@ -6,8 +6,16 @@ import { PageHeader } from "@/components/common/PageHeader";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { StatCard } from "@/components/common/StatCard";
-import { StatusBadge, elevatorStatusLabel, elevatorStatusVariant } from "@/components/common/StatusBadge";
-import { mockElevators, mockContracts, mockJobs, mockProjects, formatDate, formatDateTime } from "@/lib/mock-data";
+import { StatusBadge } from "@/components/common/StatusBadge";
+import { elevatorStatusLabel, elevatorStatusVariant } from "@/lib/status-variants";
+import {
+  mockElevators,
+  mockContracts,
+  mockJobs,
+  mockProjects,
+  formatDate,
+  formatDateTime,
+} from "@/lib/mock-data";
 import { useAppStore } from "@/lib/store";
 import { Building2, FileText, AlertTriangle, QrCode, ArrowRight } from "lucide-react";
 import { ConfirmScheduleModal } from "@/components/common/Modals";
@@ -23,7 +31,9 @@ function PortalIndex() {
   useAppStore();
   const [confirmOpen, setConfirmOpen] = useState(false);
 
-  const customerProjectIds = mockProjects.filter((p) => p.customerId === CUSTOMER_ID).map((p) => p.id);
+  const customerProjectIds = mockProjects
+    .filter((p) => p.customerId === CUSTOMER_ID)
+    .map((p) => p.id);
   const myElevators = mockElevators.filter((e) => customerProjectIds.includes(e.projectId));
   const myContracts = mockContracts.filter((c) => c.customerId === CUSTOMER_ID);
   const myJobs = mockJobs.filter((j) => j.customerId === CUSTOMER_ID);
@@ -130,9 +140,7 @@ function PortalIndex() {
                 <div className="mt-1 h-2 w-2 rounded-full bg-primary shrink-0" />
                 <div className="flex-1 min-w-0">
                   <div className="font-medium truncate">{j.title}</div>
-                  <div className="text-xs text-muted-foreground">
-                    {formatDate(j.scheduledFor)}
-                  </div>
+                  <div className="text-xs text-muted-foreground">{formatDate(j.scheduledFor)}</div>
                 </div>
               </div>
             ))}

@@ -6,9 +6,16 @@ import { PageHeader } from "@/components/common/PageHeader";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { DataPagination } from "@/components/common/DataPagination";
-import { StatusBadge, elevatorStatusLabel, elevatorStatusVariant } from "@/components/common/StatusBadge";
+import { StatusBadge } from "@/components/common/StatusBadge";
+import { elevatorStatusLabel, elevatorStatusVariant } from "@/lib/status-variants";
 import { mockElevators, formatDate, getCustomer, getProject } from "@/lib/mock-data";
 import { Plus, Search, Building2, QrCode, MapPin } from "lucide-react";
 import { CreateElevatorModal } from "@/components/common/Modals";
@@ -58,15 +65,28 @@ function ElevatorsPage() {
               placeholder="Tìm mã thang, khách hàng..."
               className="pl-9"
               value={search}
-              onChange={(e) => { setSearch(e.target.value); setPage(1); }}
+              onChange={(e) => {
+                setSearch(e.target.value);
+                setPage(1);
+              }}
             />
           </div>
-          <Select value={statusFilter} onValueChange={(v) => { setStatusFilter(v); setPage(1); }}>
-            <SelectTrigger className="w-full sm:w-44"><SelectValue /></SelectTrigger>
+          <Select
+            value={statusFilter}
+            onValueChange={(v) => {
+              setStatusFilter(v);
+              setPage(1);
+            }}
+          >
+            <SelectTrigger className="w-full sm:w-44">
+              <SelectValue />
+            </SelectTrigger>
             <SelectContent>
               <SelectItem value="all">Tất cả trạng thái</SelectItem>
               {Object.entries(elevatorStatusLabel).map(([k, v]) => (
-                <SelectItem key={k} value={k}>{v}</SelectItem>
+                <SelectItem key={k} value={k}>
+                  {v}
+                </SelectItem>
               ))}
             </SelectContent>
           </Select>
@@ -96,7 +116,10 @@ function ElevatorsPage() {
                 </div>
                 <div className="space-y-1.5 text-xs">
                   <div className="text-muted-foreground">
-                    Khách: <span className="text-foreground font-medium">{cus?.name ?? project?.name ?? "—"}</span>
+                    Khách:{" "}
+                    <span className="text-foreground font-medium">
+                      {cus?.name ?? project?.name ?? "—"}
+                    </span>
                   </div>
                   <div className="text-muted-foreground flex items-start gap-1">
                     <MapPin className="h-3 w-3 mt-0.5 shrink-0" /> {e.building}, {e.address}
@@ -112,13 +135,23 @@ function ElevatorsPage() {
                   </div>
                 </div>
                 <div className="mt-3 pt-3 border-t flex gap-2">
-                  <Link to="/admin/elevators/$elevatorId/qr" params={{ elevatorId: e.id }} className="flex-1">
+                  <Link
+                    to="/admin/elevators/$elevatorId/qr"
+                    params={{ elevatorId: e.id }}
+                    className="flex-1"
+                  >
                     <Button variant="outline" size="sm" className="w-full">
                       <QrCode className="h-3.5 w-3.5 mr-1" /> Xem QR
                     </Button>
                   </Link>
-                  <Link to="/admin/elevators/$elevatorId" params={{ elevatorId: e.id }} className="flex-1">
-                    <Button size="sm" className="w-full">Chi tiết</Button>
+                  <Link
+                    to="/admin/elevators/$elevatorId"
+                    params={{ elevatorId: e.id }}
+                    className="flex-1"
+                  >
+                    <Button size="sm" className="w-full">
+                      Chi tiết
+                    </Button>
                   </Link>
                 </div>
               </Card>
@@ -126,7 +159,12 @@ function ElevatorsPage() {
           })}
         </div>
 
-        <DataPagination page={page} pageSize={PAGE_SIZE} total={filtered.length} onPageChange={setPage} />
+        <DataPagination
+          page={page}
+          pageSize={PAGE_SIZE}
+          total={filtered.length}
+          onPageChange={setPage}
+        />
       </Card>
 
       <CreateElevatorModal open={createOpen} onClose={() => setCreateOpen(false)} />

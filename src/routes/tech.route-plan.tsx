@@ -5,13 +5,29 @@ import { AppShell } from "@/components/layout/AppShell";
 import { PageHeader } from "@/components/common/PageHeader";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { StatCard } from "@/components/common/StatCard";
-import { StatusBadge, priorityLabel, priorityVariant } from "@/components/common/StatusBadge";
+import { StatusBadge } from "@/components/common/StatusBadge";
+import { priorityLabel, priorityVariant } from "@/lib/status-variants";
 import { RouteMap } from "@/components/common/RouteMap";
 import { mockJobs, optimizeRoute, formatDateTime, getCustomer } from "@/lib/mock-data";
 import { useAppStore } from "@/lib/store";
-import { Route as RouteIcon, Clock, MapPin, Navigation, Sparkles, Zap, Phone, CheckCircle2 } from "lucide-react";
+import {
+  Route as RouteIcon,
+  Clock,
+  MapPin,
+  Navigation,
+  Sparkles,
+  Zap,
+  Phone,
+  CheckCircle2,
+} from "lucide-react";
 import { toast } from "sonner";
 
 export const Route = createFileRoute("/tech/route-plan")({
@@ -25,7 +41,10 @@ function TechRoute() {
   const [completedStops, setCompletedStops] = useState<string[]>([]);
 
   const myActive = useMemo(
-    () => mockJobs.filter((j) => j.assignedTo === userId && (j.status === "scheduled" || j.status === "in_progress")),
+    () =>
+      mockJobs.filter(
+        (j) => j.assignedTo === userId && (j.status === "scheduled" || j.status === "in_progress"),
+      ),
     [userId],
   );
 
@@ -47,16 +66,28 @@ function TechRoute() {
         : `https://www.google.com/maps/dir/?api=1&destination=${encodeURIComponent(destination)}&travelmode=driving`;
       window.open(url, "_blank", "noopener,noreferrer");
     };
-    if (!navigator.geolocation) { launch(); return; }
+    if (!navigator.geolocation) {
+      launch();
+      return;
+    }
     navigator.geolocation.getCurrentPosition(
-      (pos) => { launch(`${pos.coords.latitude},${pos.coords.longitude}`); toast.success(`Đang chỉ đường tới ${label}`); },
-      () => { launch(); toast.warning("Không lấy được vị trí hiện tại"); },
+      (pos) => {
+        launch(`${pos.coords.latitude},${pos.coords.longitude}`);
+        toast.success(`Đang chỉ đường tới ${label}`);
+      },
+      () => {
+        launch();
+        toast.warning("Không lấy được vị trí hiện tại");
+      },
       { enableHighAccuracy: true, timeout: 8000 },
     );
   };
 
   const openFullRoute = () => {
-    if (route.stops.length === 0) { toast.info("Không có điểm đến nào"); return; }
+    if (route.stops.length === 0) {
+      toast.info("Không có điểm đến nào");
+      return;
+    }
     if (nextStop) {
       openMapToStop(nextStop.lat, nextStop.lng, nextStop.label);
     } else {
@@ -80,11 +111,15 @@ function TechRoute() {
         description="Hệ thống tự sắp xếp thứ tự điểm đến giúp di chuyển ngắn nhất"
         actions={
           <Select value={day} onValueChange={setDay}>
-            <SelectTrigger className="w-44"><SelectValue /></SelectTrigger>
+            <SelectTrigger className="w-44">
+              <SelectValue />
+            </SelectTrigger>
             <SelectContent>
               <SelectItem value="all">Tất cả công việc</SelectItem>
               {days.map((d) => (
-                <SelectItem key={d} value={d}>{new Date(d).toLocaleDateString("vi-VN")}</SelectItem>
+                <SelectItem key={d} value={d}>
+                  {new Date(d).toLocaleDateString("vi-VN")}
+                </SelectItem>
               ))}
             </SelectContent>
           </Select>
@@ -93,9 +128,24 @@ function TechRoute() {
 
       <div className="grid gap-3 sm:grid-cols-4 mb-4">
         <StatCard label="Số điểm đến" value={route.stops.length} icon={MapPin} accent="info" />
-        <StatCard label="Tổng quãng đường" value={`${route.totalKm.toFixed(1)} km`} icon={RouteIcon} accent="primary" />
-        <StatCard label="Thời gian di chuyển" value={`${route.totalMinutes} phút`} icon={Clock} accent="warning" />
-        <StatCard label="Tiết kiệm so với gốc" value={`${route.savedKm.toFixed(1)} km`} icon={Sparkles} accent="success" />
+        <StatCard
+          label="Tổng quãng đường"
+          value={`${route.totalKm.toFixed(1)} km`}
+          icon={RouteIcon}
+          accent="primary"
+        />
+        <StatCard
+          label="Thời gian di chuyển"
+          value={`${route.totalMinutes} phút`}
+          icon={Clock}
+          accent="warning"
+        />
+        <StatCard
+          label="Tiết kiệm so với gốc"
+          value={`${route.savedKm.toFixed(1)} km`}
+          icon={Sparkles}
+          accent="success"
+        />
       </div>
 
       <Card className="overflow-hidden mb-4">
@@ -133,13 +183,21 @@ function TechRoute() {
                 <div className="flex items-start gap-3 p-4">
                   <div
                     className={`flex h-9 w-9 shrink-0 items-center justify-center rounded-full text-sm font-bold ${
-                      isDone ? "bg-success text-white" : isNext ? "bg-primary text-primary-foreground" : "bg-muted text-muted-foreground"
+                      isDone
+                        ? "bg-success text-white"
+                        : isNext
+                          ? "bg-primary text-primary-foreground"
+                          : "bg-muted text-muted-foreground"
                     }`}
                   >
                     {isDone ? <CheckCircle2 className="h-4 w-4" /> : idx + 1}
                   </div>
                   <div className="flex-1 min-w-0">
-                    <Link to="/tech/jobs/$jobId" params={{ jobId: s.jobId }} className="hover:underline">
+                    <Link
+                      to="/tech/jobs/$jobId"
+                      params={{ jobId: s.jobId }}
+                      className="hover:underline"
+                    >
                       <div className="flex items-center gap-2 flex-wrap">
                         <span className="font-semibold truncate">{job.title}</span>
                         <StatusBadge variant={priorityVariant[job.priority]}>
@@ -160,7 +218,11 @@ function TechRoute() {
                       <div className="flex items-center gap-3 flex-wrap">
                         <span>{formatDateTime(job.scheduledFor)}</span>
                         {cus?.phone && (
-                          <a href={`tel:${cus.phone}`} className="flex items-center gap-1 text-primary" onClick={(e) => e.stopPropagation()}>
+                          <a
+                            href={`tel:${cus.phone}`}
+                            className="flex items-center gap-1 text-primary"
+                            onClick={(e) => e.stopPropagation()}
+                          >
                             <Phone className="h-3 w-3" /> {cus.phone}
                           </a>
                         )}

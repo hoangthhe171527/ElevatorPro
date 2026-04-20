@@ -5,9 +5,37 @@ import { PageHeader } from "@/components/common/PageHeader";
 import { StatCard } from "@/components/common/StatCard";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { StatusBadge, jobStatusLabel, jobStatusVariant, contractStatusLabel, contractStatusVariant, priorityLabel, priorityVariant } from "@/components/common/StatusBadge";
-import { mockJobs, mockContracts, mockCustomers, mockElevators, mockLeads, formatVND, formatDate, formatDateTime, getCustomer } from "@/lib/mock-data";
-import { Briefcase, Users, FileText, AlertTriangle, Building2, TrendingUp, Calendar, ArrowUpRight, Plus } from "lucide-react";
+import { StatusBadge } from "@/components/common/StatusBadge";
+import {
+  jobStatusLabel,
+  jobStatusVariant,
+  contractStatusLabel,
+  contractStatusVariant,
+  priorityLabel,
+  priorityVariant,
+} from "@/lib/status-variants";
+import {
+  mockJobs,
+  mockContracts,
+  mockCustomers,
+  mockElevators,
+  mockLeads,
+  formatVND,
+  formatDate,
+  formatDateTime,
+  getCustomer,
+} from "@/lib/mock-data";
+import {
+  Briefcase,
+  Users,
+  FileText,
+  AlertTriangle,
+  Building2,
+  TrendingUp,
+  Calendar,
+  ArrowUpRight,
+  Plus,
+} from "lucide-react";
 import { CreateJobModal } from "@/components/common/Modals";
 import { useState } from "react";
 import { useAppStore } from "@/lib/store";
@@ -19,20 +47,24 @@ export const Route = createFileRoute("/admin/")({
 
 function AdminDashboard() {
   const navigate = useNavigate();
-  const activeTenantId = useAppStore(s => s.activeTenantId);
+  const activeTenantId = useAppStore((s) => s.activeTenantId);
   const [createJobOpen, setCreateJobOpen] = useState(false);
 
   // Filter all data by activeTenantId
-  const tenantContracts = mockContracts.filter(c => c.tenantId === activeTenantId);
-  const tenantElevators = mockElevators.filter(e => e.tenantId === activeTenantId);
-  const tenantJobs = mockJobs.filter(j => j.tenantId === activeTenantId);
-  const tenantCustomers = mockCustomers.filter(c => c.tenantId === activeTenantId);
-  const tenantLeads = mockLeads.filter(l => l.tenantId === activeTenantId);
+  const tenantContracts = mockContracts.filter((c) => c.tenantId === activeTenantId);
+  const tenantElevators = mockElevators.filter((e) => e.tenantId === activeTenantId);
+  const tenantJobs = mockJobs.filter((j) => j.tenantId === activeTenantId);
+  const tenantCustomers = mockCustomers.filter((c) => c.tenantId === activeTenantId);
+  const tenantLeads = mockLeads.filter((l) => l.tenantId === activeTenantId);
 
   const totalRevenue = tenantContracts.reduce((s, c) => s + c.paid, 0);
   const expiringContracts = tenantContracts.filter((c) => c.status === "expiring").length;
-  const overdueElevators = tenantElevators.filter((e) => e.status === "maintenance_due" || e.status === "out_of_order").length;
-  const activeJobs = tenantJobs.filter((j) => j.status === "in_progress" || j.status === "scheduled").length;
+  const overdueElevators = tenantElevators.filter(
+    (e) => e.status === "maintenance_due" || e.status === "out_of_order",
+  ).length;
+  const activeJobs = tenantJobs.filter(
+    (j) => j.status === "in_progress" || j.status === "scheduled",
+  ).length;
   const newLeads = tenantLeads.filter((l) => l.status === "new" || l.status === "contacted").length;
 
   const upcomingJobs = [...tenantJobs]
@@ -59,25 +91,59 @@ function AdminDashboard() {
       {/* Primary stats — all clickable */}
       <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4 mb-6">
         <div className="cursor-pointer" onClick={() => navigate({ to: "/admin/reports" })}>
-          <StatCard label="Doanh thu đã thu" value={formatVND(totalRevenue)} icon={TrendingUp} accent="success" trend={{ value: "12% so tháng trước", positive: true }} />
+          <StatCard
+            label="Doanh thu đã thu"
+            value={formatVND(totalRevenue)}
+            icon={TrendingUp}
+            accent="success"
+            trend={{ value: "12% so tháng trước", positive: true }}
+          />
         </div>
         <div className="cursor-pointer" onClick={() => navigate({ to: "/admin/jobs" })}>
-          <StatCard label="Công việc đang chạy" value={activeJobs} icon={Briefcase} accent="info" hint={`${mockJobs.length} công việc tổng`} />
+          <StatCard
+            label="Công việc đang chạy"
+            value={activeJobs}
+            icon={Briefcase}
+            accent="info"
+            hint={`${mockJobs.length} công việc tổng`}
+          />
         </div>
         <div className="cursor-pointer" onClick={() => navigate({ to: "/admin/contracts" })}>
-          <StatCard label="HĐ sắp hết hạn" value={expiringContracts} icon={FileText} accent="warning" hint="Cần liên hệ tái ký" />
+          <StatCard
+            label="HĐ sắp hết hạn"
+            value={expiringContracts}
+            icon={FileText}
+            accent="warning"
+            hint="Cần liên hệ tái ký"
+          />
         </div>
         <div className="cursor-pointer" onClick={() => navigate({ to: "/admin/elevators" })}>
-          <StatCard label="Thang cần chú ý" value={overdueElevators} icon={AlertTriangle} accent="destructive" hint="Đến hạn BT hoặc hỏng" />
+          <StatCard
+            label="Thang cần chú ý"
+            value={overdueElevators}
+            icon={AlertTriangle}
+            accent="destructive"
+            hint="Đến hạn BT hoặc hỏng"
+          />
         </div>
       </div>
 
       <div className="grid gap-4 lg:grid-cols-3 mb-6">
         <div className="cursor-pointer" onClick={() => navigate({ to: "/admin/customers" })}>
-          <StatCard label="Tổng khách hàng" value={tenantCustomers.length} icon={Users} accent="primary" />
+          <StatCard
+            label="Tổng khách hàng"
+            value={tenantCustomers.length}
+            icon={Users}
+            accent="primary"
+          />
         </div>
         <div className="cursor-pointer" onClick={() => navigate({ to: "/admin/elevators" })}>
-          <StatCard label="Tổng thang máy" value={tenantElevators.length} icon={Building2} accent="primary" />
+          <StatCard
+            label="Tổng thang máy"
+            value={tenantElevators.length}
+            icon={Building2}
+            accent="primary"
+          />
         </div>
         <div className="cursor-pointer" onClick={() => navigate({ to: "/admin/leads" })}>
           <StatCard label="Lead đang theo dõi" value={newLeads} icon={ArrowUpRight} accent="info" />
@@ -93,7 +159,9 @@ function AdminDashboard() {
               <p className="text-xs text-muted-foreground">Đã lên lịch hoặc đang thực hiện</p>
             </div>
             <Link to="/admin/jobs">
-              <Button variant="ghost" size="sm">Tất cả</Button>
+              <Button variant="ghost" size="sm">
+                Tất cả
+              </Button>
             </Link>
           </div>
           <div className="divide-y">
@@ -112,13 +180,17 @@ function AdminDashboard() {
                   <div className="flex-1 min-w-0">
                     <div className="flex items-center gap-2">
                       <span className="font-medium text-sm truncate">{j.title}</span>
-                      <StatusBadge variant={priorityVariant[j.priority]}>{priorityLabel[j.priority]}</StatusBadge>
+                      <StatusBadge variant={priorityVariant[j.priority]}>
+                        {priorityLabel[j.priority]}
+                      </StatusBadge>
                     </div>
                     <div className="text-xs text-muted-foreground truncate">
                       {cus?.name} · {formatDateTime(j.scheduledFor)}
                     </div>
                   </div>
-                  <StatusBadge variant={jobStatusVariant[j.status]}>{jobStatusLabel[j.status]}</StatusBadge>
+                  <StatusBadge variant={jobStatusVariant[j.status]}>
+                    {jobStatusLabel[j.status]}
+                  </StatusBadge>
                 </Link>
               );
             })}
@@ -130,7 +202,9 @@ function AdminDashboard() {
           <div className="flex items-center justify-between mb-4">
             <h3 className="font-semibold">Hợp đồng gần đây</h3>
             <Link to="/admin/contracts">
-              <Button variant="ghost" size="sm">Tất cả</Button>
+              <Button variant="ghost" size="sm">
+                Tất cả
+              </Button>
             </Link>
           </div>
           <div className="space-y-3">
@@ -144,7 +218,9 @@ function AdminDashboard() {
                 >
                   <div className="flex items-center justify-between gap-2">
                     <span className="font-medium text-sm">{c.code}</span>
-                    <StatusBadge variant={contractStatusVariant[c.status]}>{contractStatusLabel[c.status]}</StatusBadge>
+                    <StatusBadge variant={contractStatusVariant[c.status]}>
+                      {contractStatusLabel[c.status]}
+                    </StatusBadge>
                   </div>
                   <div className="mt-1 text-xs text-muted-foreground truncate">{cus?.name}</div>
                   <div className="mt-2 flex items-center justify-between text-xs">
@@ -166,13 +242,35 @@ function AdminDashboard() {
         </div>
         <div className="grid gap-3 md:grid-cols-3">
           {[
-            { icon: Calendar, label: "Thang đến hạn bảo trì", count: overdueElevators, href: "/admin/elevators", color: "text-warning-foreground bg-warning/15" },
-            { icon: FileText, label: "Hợp đồng sắp hết hạn", count: expiringContracts, href: "/admin/contracts", color: "text-destructive bg-destructive/10" },
-            { icon: AlertTriangle, label: "Sự cố đang mở", count: 1, href: "/admin/jobs", color: "text-info bg-info/10" },
+            {
+              icon: Calendar,
+              label: "Thang đến hạn bảo trì",
+              count: overdueElevators,
+              href: "/admin/elevators",
+              color: "text-warning-foreground bg-warning/15",
+            },
+            {
+              icon: FileText,
+              label: "Hợp đồng sắp hết hạn",
+              count: expiringContracts,
+              href: "/admin/contracts",
+              color: "text-destructive bg-destructive/10",
+            },
+            {
+              icon: AlertTriangle,
+              label: "Sự cố đang mở",
+              count: 1,
+              href: "/admin/jobs",
+              color: "text-info bg-info/10",
+            },
           ].map((a) => {
             const Icon = a.icon;
             return (
-              <Link key={a.label} to={a.href} className="flex items-center gap-3 p-3 rounded-lg border hover:bg-muted/50 transition-colors">
+              <Link
+                key={a.label}
+                to={a.href}
+                className="flex items-center gap-3 p-3 rounded-lg border hover:bg-muted/50 transition-colors"
+              >
                 <div className={`flex h-10 w-10 items-center justify-center rounded-lg ${a.color}`}>
                   <Icon className="h-4 w-4" />
                 </div>

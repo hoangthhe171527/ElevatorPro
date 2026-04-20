@@ -7,7 +7,8 @@ import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { DataPagination } from "@/components/common/DataPagination";
-import { StatusBadge, elevatorStatusLabel, elevatorStatusVariant } from "@/components/common/StatusBadge";
+import { StatusBadge } from "@/components/common/StatusBadge";
+import { elevatorStatusLabel, elevatorStatusVariant } from "@/lib/status-variants";
 import { mockElevators, mockProjects, getProject, formatDate } from "@/lib/mock-data";
 import { Building2, QrCode, MapPin, Search, AlertTriangle } from "lucide-react";
 
@@ -25,7 +26,9 @@ function PortalElevators() {
 
   // In a real app, get CUSTOMER_ID from auth context
   const CUSTOMER_ID = "c-1";
-  const customerProjectIds = mockProjects.filter((p) => p.customerId === CUSTOMER_ID).map((p) => p.id);
+  const customerProjectIds = mockProjects
+    .filter((p) => p.customerId === CUSTOMER_ID)
+    .map((p) => p.id);
 
   const filtered = mockElevators
     .filter((e) => customerProjectIds.includes(e.projectId))
@@ -36,7 +39,9 @@ function PortalElevators() {
         e.building.toLowerCase().includes(search.toLowerCase()),
     );
   const paged = filtered.slice((page - 1) * PAGE_SIZE, page * PAGE_SIZE);
-  const dueCount = filtered.filter((e) => e.status === "maintenance_due" || e.status === "out_of_order").length;
+  const dueCount = filtered.filter(
+    (e) => e.status === "maintenance_due" || e.status === "out_of_order",
+  ).length;
 
   return (
     <AppShell>
@@ -62,7 +67,10 @@ function PortalElevators() {
               placeholder="Tìm thang máy..."
               className="pl-9"
               value={search}
-              onChange={(e) => { setSearch(e.target.value); setPage(1); }}
+              onChange={(e) => {
+                setSearch(e.target.value);
+                setPage(1);
+              }}
             />
           </div>
         </div>
@@ -77,9 +85,13 @@ function PortalElevators() {
                   </div>
                   <div>
                     <Link to="/portal/elevators/$elevatorId" params={{ elevatorId: e.id }}>
-                      <div className="font-mono text-sm font-semibold text-primary hover:underline underline-offset-4">{e.code}</div>
+                      <div className="font-mono text-sm font-semibold text-primary hover:underline underline-offset-4">
+                        {e.code}
+                      </div>
                     </Link>
-                    <div className="text-xs text-muted-foreground">{e.brand} {e.model}</div>
+                    <div className="text-xs text-muted-foreground">
+                      {e.brand} {e.model}
+                    </div>
                   </div>
                 </div>
                 <StatusBadge variant={elevatorStatusVariant[e.status]}>
@@ -91,22 +103,35 @@ function PortalElevators() {
                 <div className="flex items-start gap-1">
                   <MapPin className="h-3 w-3 mt-0.5 shrink-0" /> {e.building}
                 </div>
-                <div>{e.floors} tầng · BT gần nhất {formatDate(e.lastMaintenance)}</div>
+                <div>
+                  {e.floors} tầng · BT gần nhất {formatDate(e.lastMaintenance)}
+                </div>
                 <div>
                   BT tiếp:{" "}
-                  <span className={`font-medium ${e.status === "maintenance_due" ? "text-warning-foreground" : "text-foreground"}`}>
+                  <span
+                    className={`font-medium ${e.status === "maintenance_due" ? "text-warning-foreground" : "text-foreground"}`}
+                  >
                     {formatDate(e.nextMaintenance)}
                   </span>
                 </div>
               </div>
 
               <div className="mt-4 pt-4 border-t flex gap-2">
-                <Link to="/portal/elevators/$elevatorId" params={{ elevatorId: e.id }} className="flex-1">
+                <Link
+                  to="/portal/elevators/$elevatorId"
+                  params={{ elevatorId: e.id }}
+                  className="flex-1"
+                >
                   <Button variant="default" size="sm" className="w-full gap-1.5">
                     Chi tiết
                   </Button>
                 </Link>
-                <Link to="/qr/$elevatorId" params={{ elevatorId: e.id }} title="Xem QR" className="flex-none">
+                <Link
+                  to="/qr/$elevatorId"
+                  params={{ elevatorId: e.id }}
+                  title="Xem QR"
+                  className="flex-none"
+                >
                   <Button variant="outline" size="sm" className="w-9 px-0">
                     <QrCode className="h-4 w-4 text-muted-foreground" />
                   </Button>

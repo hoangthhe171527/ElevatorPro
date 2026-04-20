@@ -35,8 +35,23 @@ import {
   type JobPriority,
   type ContractType,
   type LeadStatus,
+  type Job,
+  type User,
 } from "@/lib/mock-data";
-import { CheckCircle2, AlertTriangle, User, Building2, FileText, Banknote, Briefcase, UserCog, X, Wallet, RefreshCw, ArrowRightLeft } from "lucide-react";
+import {
+  CheckCircle2,
+  AlertTriangle,
+  User,
+  Building2,
+  FileText,
+  Banknote,
+  Briefcase,
+  UserCog,
+  X,
+  Wallet,
+  RefreshCw,
+  ArrowRightLeft,
+} from "lucide-react";
 
 // ─────────────────────────────────────────────
 // 1. MODAL TẠO CÔNG VIỆC MỚI
@@ -89,7 +104,9 @@ export function CreateJobModal({
   const [description, setDescription] = useState("");
   const [loading, setLoading] = useState(false);
 
-  const technicians = mockUsers.filter((u) => u.memberships?.some(m => m.permissions.includes("field_tech")));
+  const technicians = mockUsers.filter((u) =>
+    u.memberships?.some((m) => m.permissions.includes("field_tech")),
+  );
   // Filter elevators belonging to customer's projects
   const customerProjects = mockProjects.filter((p) => p.customerId === customerId);
   const customerProjectIds = customerProjects.map((p) => p.id);
@@ -106,10 +123,20 @@ export function CreateJobModal({
     setLoading(true);
     await new Promise((r) => setTimeout(r, 600));
     setLoading(false);
-    toast.success(`Đã tạo công việc "${title}" — giao cho ${mockUsers.find(u => u.id === techId)?.name}`);
+    toast.success(
+      `Đã tạo công việc "${title}" — giao cho ${mockUsers.find((u) => u.id === techId)?.name}`,
+    );
     onClose();
     // Reset
-    setTitle(""); setType("maintenance"); setCustomerId(""); setProjectId(""); setElevatorId(""); setContractId(""); setTechId(""); setPriority("normal"); setDescription("");
+    setTitle("");
+    setType("maintenance");
+    setCustomerId("");
+    setProjectId("");
+    setElevatorId("");
+    setContractId("");
+    setTechId("");
+    setPriority("normal");
+    setDescription("");
   };
 
   return (
@@ -124,34 +151,75 @@ export function CreateJobModal({
         <div className="space-y-4 py-2">
           {/* Tiêu đề */}
           <div>
-            <label className="text-sm font-medium">Tiêu đề công việc <span className="text-destructive">*</span></label>
-            <Input className="mt-1" placeholder="VD: Bảo trì định kỳ tháng 5 — Vinhomes A1" value={title} onChange={(e) => setTitle(e.target.value)} />
+            <label className="text-sm font-medium">
+              Tiêu đề công việc <span className="text-destructive">*</span>
+            </label>
+            <Input
+              className="mt-1"
+              placeholder="VD: Bảo trì định kỳ tháng 5 — Vinhomes A1"
+              value={title}
+              onChange={(e) => setTitle(e.target.value)}
+            />
           </div>
 
           <div className="grid grid-cols-2 gap-3">
             <div>
-              <label className="text-sm font-medium">Loại công việc <span className="text-destructive">*</span></label>
+              <label className="text-sm font-medium">
+                Loại công việc <span className="text-destructive">*</span>
+              </label>
               <Select value={type} onValueChange={(v) => setType(v as JobType)}>
-                <SelectTrigger className="mt-1"><SelectValue /></SelectTrigger>
-                <SelectContent>{typeOptions.map(o => <SelectItem key={o.value} value={o.value}>{o.label}</SelectItem>)}</SelectContent>
+                <SelectTrigger className="mt-1">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  {typeOptions.map((o) => (
+                    <SelectItem key={o.value} value={o.value}>
+                      {o.label}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
               </Select>
             </div>
             <div>
               <label className="text-sm font-medium">Mức ưu tiên</label>
               <Select value={priority} onValueChange={(v) => setPriority(v as JobPriority)}>
-                <SelectTrigger className="mt-1"><SelectValue /></SelectTrigger>
-                <SelectContent>{priorityOptions.map(o => <SelectItem key={o.value} value={o.value}>{o.label}</SelectItem>)}</SelectContent>
+                <SelectTrigger className="mt-1">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  {priorityOptions.map((o) => (
+                    <SelectItem key={o.value} value={o.value}>
+                      {o.label}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
               </Select>
             </div>
           </div>
 
           {/* Khách hàng */}
           <div>
-            <label className="text-sm font-medium">Khách hàng <span className="text-destructive">*</span></label>
-            <Select value={customerId} onValueChange={(v) => { setCustomerId(v); setProjectId(""); setElevatorId(""); setContractId(""); }}>
-              <SelectTrigger className="mt-1"><SelectValue placeholder="Chọn khách hàng..." /></SelectTrigger>
+            <label className="text-sm font-medium">
+              Khách hàng <span className="text-destructive">*</span>
+            </label>
+            <Select
+              value={customerId}
+              onValueChange={(v) => {
+                setCustomerId(v);
+                setProjectId("");
+                setElevatorId("");
+                setContractId("");
+              }}
+            >
+              <SelectTrigger className="mt-1">
+                <SelectValue placeholder="Chọn khách hàng..." />
+              </SelectTrigger>
               <SelectContent>
-                {mockCustomers.map(c => <SelectItem key={c.id} value={c.id}>{c.name}</SelectItem>)}
+                {mockCustomers.map((c) => (
+                  <SelectItem key={c.id} value={c.id}>
+                    {c.name}
+                  </SelectItem>
+                ))}
               </SelectContent>
             </Select>
           </div>
@@ -159,11 +227,23 @@ export function CreateJobModal({
           {customerId && (
             <div>
               <label className="text-sm font-medium">Dự án liên quan</label>
-              <Select value={projectId || "none"} onValueChange={(v) => { setProjectId(v === "none" ? "" : v); setElevatorId(""); }}>
-                <SelectTrigger className="mt-1"><SelectValue placeholder="Chọn dự án..." /></SelectTrigger>
+              <Select
+                value={projectId || "none"}
+                onValueChange={(v) => {
+                  setProjectId(v === "none" ? "" : v);
+                  setElevatorId("");
+                }}
+              >
+                <SelectTrigger className="mt-1">
+                  <SelectValue placeholder="Chọn dự án..." />
+                </SelectTrigger>
                 <SelectContent>
                   <SelectItem value="none">— Không chọn —</SelectItem>
-                  {customerProjects.map(p => <SelectItem key={p.id} value={p.id}>{p.name}</SelectItem>)}
+                  {customerProjects.map((p) => (
+                    <SelectItem key={p.id} value={p.id}>
+                      {p.name}
+                    </SelectItem>
+                  ))}
                 </SelectContent>
               </Select>
             </div>
@@ -177,10 +257,16 @@ export function CreateJobModal({
                   value={elevatorId || "none"}
                   onValueChange={(v) => setElevatorId(v === "none" ? "" : v)}
                 >
-                  <SelectTrigger className="mt-1"><SelectValue placeholder="Chọn thang..." /></SelectTrigger>
+                  <SelectTrigger className="mt-1">
+                    <SelectValue placeholder="Chọn thang..." />
+                  </SelectTrigger>
                   <SelectContent>
                     <SelectItem value="none">— Không chọn —</SelectItem>
-                    {customerElevators.map(e => <SelectItem key={e.id} value={e.id}>{e.code} — {e.building}</SelectItem>)}
+                    {customerElevators.map((e) => (
+                      <SelectItem key={e.id} value={e.id}>
+                        {e.code} — {e.building}
+                      </SelectItem>
+                    ))}
                   </SelectContent>
                 </Select>
               </div>
@@ -190,10 +276,16 @@ export function CreateJobModal({
                   value={contractId || "none"}
                   onValueChange={(v) => setContractId(v === "none" ? "" : v)}
                 >
-                  <SelectTrigger className="mt-1"><SelectValue placeholder="Chọn HĐ..." /></SelectTrigger>
+                  <SelectTrigger className="mt-1">
+                    <SelectValue placeholder="Chọn HĐ..." />
+                  </SelectTrigger>
                   <SelectContent>
                     <SelectItem value="none">— Không chọn —</SelectItem>
-                    {customerContracts.map(c => <SelectItem key={c.id} value={c.id}>{c.code}</SelectItem>)}
+                    {customerContracts.map((c) => (
+                      <SelectItem key={c.id} value={c.id}>
+                        {c.code}
+                      </SelectItem>
+                    ))}
                   </SelectContent>
                 </Select>
               </div>
@@ -202,26 +294,51 @@ export function CreateJobModal({
 
           <div className="grid grid-cols-2 gap-3">
             <div>
-              <label className="text-sm font-medium">Kỹ thuật viên phụ trách <span className="text-destructive">*</span></label>
+              <label className="text-sm font-medium">
+                Kỹ thuật viên phụ trách <span className="text-destructive">*</span>
+              </label>
               <Select value={techId} onValueChange={setTechId}>
-                <SelectTrigger className="mt-1"><SelectValue placeholder="Chọn kỹ thuật..." /></SelectTrigger>
-                <SelectContent>{technicians.map(u => <SelectItem key={u.id} value={u.id}>{u.name}</SelectItem>)}</SelectContent>
+                <SelectTrigger className="mt-1">
+                  <SelectValue placeholder="Chọn kỹ thuật..." />
+                </SelectTrigger>
+                <SelectContent>
+                  {technicians.map((u) => (
+                    <SelectItem key={u.id} value={u.id}>
+                      {u.name}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
               </Select>
             </div>
             <div>
-              <label className="text-sm font-medium">Ngày giờ thực hiện <span className="text-destructive">*</span></label>
-              <Input type="datetime-local" className="mt-1" value={scheduledFor} onChange={(e) => setScheduledFor(e.target.value)} />
+              <label className="text-sm font-medium">
+                Ngày giờ thực hiện <span className="text-destructive">*</span>
+              </label>
+              <Input
+                type="datetime-local"
+                className="mt-1"
+                value={scheduledFor}
+                onChange={(e) => setScheduledFor(e.target.value)}
+              />
             </div>
           </div>
 
           <div>
             <label className="text-sm font-medium">Mô tả / Ghi chú</label>
-            <Textarea className="mt-1" placeholder="Mô tả chi tiết công việc cần thực hiện..." rows={3} value={description} onChange={(e) => setDescription(e.target.value)} />
+            <Textarea
+              className="mt-1"
+              placeholder="Mô tả chi tiết công việc cần thực hiện..."
+              rows={3}
+              value={description}
+              onChange={(e) => setDescription(e.target.value)}
+            />
           </div>
         </div>
 
         <DialogFooter>
-          <Button variant="outline" onClick={onClose} disabled={loading}>Hủy</Button>
+          <Button variant="outline" onClick={onClose} disabled={loading}>
+            Hủy
+          </Button>
           <Button onClick={handleSubmit} disabled={loading}>
             {loading ? "Đang tạo..." : "Tạo công việc"}
           </Button>
@@ -250,12 +367,21 @@ const jobStatusOptions = [
   { value: "cancelled", label: "❌ Hủy" },
 ];
 
-export function UpdateJobStatusModal({ open, onClose, jobTitle, currentStatus, onConfirm }: UpdateJobStatusModalProps) {
+export function UpdateJobStatusModal({
+  open,
+  onClose,
+  jobTitle,
+  currentStatus,
+  onConfirm,
+}: UpdateJobStatusModalProps) {
   const [newStatus, setNewStatus] = useState(currentStatus);
   const [note, setNote] = useState("");
 
   const handle = () => {
-    if (newStatus === currentStatus) { toast.info("Trạng thái không thay đổi"); return; }
+    if (newStatus === currentStatus) {
+      toast.info("Trạng thái không thay đổi");
+      return;
+    }
     onConfirm(newStatus, note);
     setNote("");
     onClose();
@@ -268,19 +394,33 @@ export function UpdateJobStatusModal({ open, onClose, jobTitle, currentStatus, o
           <DialogTitle>Cập nhật trạng thái công việc</DialogTitle>
         </DialogHeader>
         <div className="space-y-4 py-2">
-          <p className="text-sm text-muted-foreground">Công việc: <span className="font-medium text-foreground">{jobTitle}</span></p>
+          <p className="text-sm text-muted-foreground">
+            Công việc: <span className="font-medium text-foreground">{jobTitle}</span>
+          </p>
           <div>
             <label className="text-sm font-medium">Trạng thái mới</label>
             <Select value={newStatus} onValueChange={setNewStatus}>
-              <SelectTrigger className="mt-1"><SelectValue /></SelectTrigger>
+              <SelectTrigger className="mt-1">
+                <SelectValue />
+              </SelectTrigger>
               <SelectContent>
-                {jobStatusOptions.map(o => <SelectItem key={o.value} value={o.value}>{o.label}</SelectItem>)}
+                {jobStatusOptions.map((o) => (
+                  <SelectItem key={o.value} value={o.value}>
+                    {o.label}
+                  </SelectItem>
+                ))}
               </SelectContent>
             </Select>
           </div>
           <div>
             <label className="text-sm font-medium">Ghi chú (không bắt buộc)</label>
-            <Textarea className="mt-1" placeholder="VD: Đã hoàn tất thay thế biến tần..." rows={3} value={note} onChange={(e) => setNote(e.target.value)} />
+            <Textarea
+              className="mt-1"
+              placeholder="VD: Đã hoàn tất thay thế biến tần..."
+              rows={3}
+              value={note}
+              onChange={(e) => setNote(e.target.value)}
+            />
           </div>
           {newStatus === "completed" && (
             <div className="flex items-start gap-2 p-3 rounded-lg bg-success/10 text-success text-sm">
@@ -290,7 +430,9 @@ export function UpdateJobStatusModal({ open, onClose, jobTitle, currentStatus, o
           )}
         </div>
         <DialogFooter>
-          <Button variant="outline" onClick={onClose}>Hủy</Button>
+          <Button variant="outline" onClick={onClose}>
+            Hủy
+          </Button>
           <Button onClick={handle}>Xác nhận cập nhật</Button>
         </DialogFooter>
       </DialogContent>
@@ -309,7 +451,13 @@ interface RecordPaymentModalProps {
   alreadyPaid: number;
 }
 
-export function RecordPaymentModal({ open, onClose, contractCode, totalValue, alreadyPaid }: RecordPaymentModalProps) {
+export function RecordPaymentModal({
+  open,
+  onClose,
+  contractCode,
+  totalValue,
+  alreadyPaid,
+}: RecordPaymentModalProps) {
   const remaining = totalValue - alreadyPaid;
   const [amount, setAmount] = useState("");
   const [method, setMethod] = useState("transfer");
@@ -322,13 +470,20 @@ export function RecordPaymentModal({ open, onClose, contractCode, totalValue, al
   const newPercent = totalValue > 0 ? Math.min(100, Math.round((newTotal / totalValue) * 100)) : 0;
 
   const handle = async () => {
-    if (!amount || numAmount <= 0) { toast.error("Vui lòng nhập số tiền"); return; }
-    if (numAmount > remaining) { toast.error("Số tiền vượt quá số còn nợ"); return; }
+    if (!amount || numAmount <= 0) {
+      toast.error("Vui lòng nhập số tiền");
+      return;
+    }
+    if (numAmount > remaining) {
+      toast.error("Số tiền vượt quá số còn nợ");
+      return;
+    }
     setLoading(true);
-    await new Promise(r => setTimeout(r, 500));
+    await new Promise((r) => setTimeout(r, 500));
     setLoading(false);
     toast.success(`Đã ghi nhận thu ${formatVND(numAmount)} — hợp đồng ${contractCode}`);
-    setAmount(""); setNote("");
+    setAmount("");
+    setNote("");
     onClose();
   };
 
@@ -342,28 +497,46 @@ export function RecordPaymentModal({ open, onClose, contractCode, totalValue, al
         </DialogHeader>
         <div className="space-y-4 py-2">
           <div className="p-3 rounded-lg bg-muted/50 space-y-2 text-sm">
-            <div className="flex justify-between"><span className="text-muted-foreground">Hợp đồng</span><span className="font-medium">{contractCode}</span></div>
-            <div className="flex justify-between"><span className="text-muted-foreground">Tổng giá trị</span><span className="font-medium">{formatVND(totalValue)}</span></div>
-            <div className="flex justify-between"><span className="text-muted-foreground">Đã thu</span><span className="text-success font-medium">{formatVND(alreadyPaid)}</span></div>
-            <div className="flex justify-between"><span className="text-muted-foreground">Còn nợ</span><span className="text-warning-foreground font-semibold">{formatVND(remaining)}</span></div>
+            <div className="flex justify-between">
+              <span className="text-muted-foreground">Hợp đồng</span>
+              <span className="font-medium">{contractCode}</span>
+            </div>
+            <div className="flex justify-between">
+              <span className="text-muted-foreground">Tổng giá trị</span>
+              <span className="font-medium">{formatVND(totalValue)}</span>
+            </div>
+            <div className="flex justify-between">
+              <span className="text-muted-foreground">Đã thu</span>
+              <span className="text-success font-medium">{formatVND(alreadyPaid)}</span>
+            </div>
+            <div className="flex justify-between">
+              <span className="text-muted-foreground">Còn nợ</span>
+              <span className="text-warning-foreground font-semibold">{formatVND(remaining)}</span>
+            </div>
           </div>
 
           <div>
-            <label className="text-sm font-medium">Số tiền thu (VNĐ) <span className="text-destructive">*</span></label>
+            <label className="text-sm font-medium">
+              Số tiền thu (VNĐ) <span className="text-destructive">*</span>
+            </label>
             <Input
               className="mt-1"
               placeholder="VD: 50000000"
               value={amount}
               onChange={(e) => setAmount(e.target.value.replace(/\D/g, ""))}
             />
-            {numAmount > 0 && <p className="text-xs text-muted-foreground mt-1">{formatVND(numAmount)}</p>}
+            {numAmount > 0 && (
+              <p className="text-xs text-muted-foreground mt-1">{formatVND(numAmount)}</p>
+            )}
           </div>
 
           <div className="grid grid-cols-2 gap-3">
             <div>
               <label className="text-sm font-medium">Hình thức</label>
               <Select value={method} onValueChange={setMethod}>
-                <SelectTrigger className="mt-1"><SelectValue /></SelectTrigger>
+                <SelectTrigger className="mt-1">
+                  <SelectValue />
+                </SelectTrigger>
                 <SelectContent>
                   <SelectItem value="transfer">Chuyển khoản</SelectItem>
                   <SelectItem value="cash">Tiền mặt</SelectItem>
@@ -373,7 +546,12 @@ export function RecordPaymentModal({ open, onClose, contractCode, totalValue, al
             </div>
             <div>
               <label className="text-sm font-medium">Ngày thu</label>
-              <Input type="date" className="mt-1" value={date} onChange={(e) => setDate(e.target.value)} />
+              <Input
+                type="date"
+                className="mt-1"
+                value={date}
+                onChange={(e) => setDate(e.target.value)}
+              />
             </div>
           </div>
 
@@ -389,11 +567,18 @@ export function RecordPaymentModal({ open, onClose, contractCode, totalValue, al
 
           <div>
             <label className="text-sm font-medium">Ghi chú</label>
-            <Input className="mt-1" placeholder="VD: Đợt 2 theo tiến độ" value={note} onChange={(e) => setNote(e.target.value)} />
+            <Input
+              className="mt-1"
+              placeholder="VD: Đợt 2 theo tiến độ"
+              value={note}
+              onChange={(e) => setNote(e.target.value)}
+            />
           </div>
         </div>
         <DialogFooter>
-          <Button variant="outline" onClick={onClose} disabled={loading}>Hủy</Button>
+          <Button variant="outline" onClick={onClose} disabled={loading}>
+            Hủy
+          </Button>
           <Button onClick={handle} disabled={loading} className="bg-success hover:bg-success/90">
             {loading ? "Đang lưu..." : "Ghi nhận thu tiền"}
           </Button>
@@ -428,9 +613,12 @@ export function ConvertLeadModal({ open, onClose, lead }: ConvertLeadModalProps)
   const [loading, setLoading] = useState(false);
 
   const handle = async () => {
-    if (!name.trim() || !phone.trim()) { toast.error("Vui lòng nhập tên và số điện thoại"); return; }
+    if (!name.trim() || !phone.trim()) {
+      toast.error("Vui lòng nhập tên và số điện thoại");
+      return;
+    }
     setLoading(true);
-    await new Promise(r => setTimeout(r, 700));
+    await new Promise((r) => setTimeout(r, 700));
     setLoading(false);
     toast.success(`Đã chuyển lead thành khách hàng: "${name}" — có thể tạo hợp đồng ngay`);
     onClose();
@@ -446,12 +634,15 @@ export function ConvertLeadModal({ open, onClose, lead }: ConvertLeadModalProps)
         </DialogHeader>
         <div className="space-y-3 py-2">
           <div className="p-3 rounded-lg bg-primary/5 text-sm text-primary">
-            Lead "<span className="font-medium">{lead.name}</span>" sẽ được chuyển sang danh sách Khách hàng. Kiểm tra và bổ sung thông tin bên dưới.
+            Lead "<span className="font-medium">{lead.name}</span>" sẽ được chuyển sang danh sách
+            Khách hàng. Kiểm tra và bổ sung thông tin bên dưới.
           </div>
           <div>
             <label className="text-sm font-medium">Loại khách hàng</label>
             <Select value={type} onValueChange={(v) => setType(v as "business" | "individual")}>
-              <SelectTrigger className="mt-1"><SelectValue /></SelectTrigger>
+              <SelectTrigger className="mt-1">
+                <SelectValue />
+              </SelectTrigger>
               <SelectContent>
                 <SelectItem value="business">Doanh nghiệp / Tòa nhà</SelectItem>
                 <SelectItem value="individual">Cá nhân / Hộ gia đình</SelectItem>
@@ -459,22 +650,36 @@ export function ConvertLeadModal({ open, onClose, lead }: ConvertLeadModalProps)
             </Select>
           </div>
           <div>
-            <label className="text-sm font-medium">Tên {type === "business" ? "công ty / tòa nhà" : "khách hàng"} <span className="text-destructive">*</span></label>
+            <label className="text-sm font-medium">
+              Tên {type === "business" ? "công ty / tòa nhà" : "khách hàng"}{" "}
+              <span className="text-destructive">*</span>
+            </label>
             <Input className="mt-1" value={name} onChange={(e) => setName(e.target.value)} />
           </div>
           <div className="grid grid-cols-2 gap-3">
             <div>
               <label className="text-sm font-medium">Người liên hệ</label>
-              <Input className="mt-1" value={contactPerson} onChange={(e) => setContactPerson(e.target.value)} />
+              <Input
+                className="mt-1"
+                value={contactPerson}
+                onChange={(e) => setContactPerson(e.target.value)}
+              />
             </div>
             <div>
-              <label className="text-sm font-medium">Số điện thoại <span className="text-destructive">*</span></label>
+              <label className="text-sm font-medium">
+                Số điện thoại <span className="text-destructive">*</span>
+              </label>
               <Input className="mt-1" value={phone} onChange={(e) => setPhone(e.target.value)} />
             </div>
           </div>
           <div>
             <label className="text-sm font-medium">Email</label>
-            <Input className="mt-1" type="email" value={email} onChange={(e) => setEmail(e.target.value)} />
+            <Input
+              className="mt-1"
+              type="email"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+            />
           </div>
           <div>
             <label className="text-sm font-medium">Địa chỉ</label>
@@ -482,7 +687,9 @@ export function ConvertLeadModal({ open, onClose, lead }: ConvertLeadModalProps)
           </div>
         </div>
         <DialogFooter>
-          <Button variant="outline" onClick={onClose} disabled={loading}>Hủy</Button>
+          <Button variant="outline" onClick={onClose} disabled={loading}>
+            Hủy
+          </Button>
           <Button onClick={handle} disabled={loading}>
             {loading ? "Đang chuyển..." : "Xác nhận chuyển KH"}
           </Button>
@@ -501,13 +708,18 @@ interface CreateContractModalProps {
   defaultCustomerId?: string;
 }
 
-export function CreateContractModal({ open, onClose, defaultCustomerId = "" }: CreateContractModalProps) {
+export function CreateContractModal({
+  open,
+  onClose,
+  defaultCustomerId = "",
+}: CreateContractModalProps) {
   const [customerId, setCustomerId] = useState(defaultCustomerId);
   const [type, setType] = useState<ContractType>("maintenance");
   const [value, setValue] = useState("");
   const [startDate, setStartDate] = useState(new Date().toISOString().split("T")[0]);
   const [endDate, setEndDate] = useState(() => {
-    const d = new Date(); d.setFullYear(d.getFullYear() + 1);
+    const d = new Date();
+    d.setFullYear(d.getFullYear() + 1);
     return d.toISOString().split("T")[0];
   });
   const [items, setItems] = useState("");
@@ -516,9 +728,12 @@ export function CreateContractModal({ open, onClose, defaultCustomerId = "" }: C
   const autoCode = `HD-${new Date().getFullYear()}-${String(mockContracts.length + 1).padStart(4, "0")}`;
 
   const handle = async () => {
-    if (!customerId || !value || !items.trim()) { toast.error("Vui lòng điền đầy đủ các trường bắt buộc"); return; }
+    if (!customerId || !value || !items.trim()) {
+      toast.error("Vui lòng điền đầy đủ các trường bắt buộc");
+      return;
+    }
     setLoading(true);
-    await new Promise(r => setTimeout(r, 600));
+    await new Promise((r) => setTimeout(r, 600));
     setLoading(false);
     toast.success(`Đã tạo hợp đồng ${autoCode} — Hệ thống sẽ tự sinh công việc theo lịch hợp đồng`);
     onClose();
@@ -540,40 +755,86 @@ export function CreateContractModal({ open, onClose, defaultCustomerId = "" }: C
         </DialogHeader>
         <div className="space-y-4 py-2">
           <div className="flex items-center gap-2 p-2 rounded bg-muted/50 text-xs text-muted-foreground">
-            Mã hợp đồng (tự động): <span className="font-mono font-semibold text-foreground ml-1">{autoCode}</span>
+            Mã hợp đồng (tự động):{" "}
+            <span className="font-mono font-semibold text-foreground ml-1">{autoCode}</span>
           </div>
           <div>
-            <label className="text-sm font-medium">Khách hàng <span className="text-destructive">*</span></label>
+            <label className="text-sm font-medium">
+              Khách hàng <span className="text-destructive">*</span>
+            </label>
             <Select value={customerId} onValueChange={setCustomerId}>
-              <SelectTrigger className="mt-1"><SelectValue placeholder="Chọn khách hàng..." /></SelectTrigger>
-              <SelectContent>{mockCustomers.map(c => <SelectItem key={c.id} value={c.id}>{c.name}</SelectItem>)}</SelectContent>
+              <SelectTrigger className="mt-1">
+                <SelectValue placeholder="Chọn khách hàng..." />
+              </SelectTrigger>
+              <SelectContent>
+                {mockCustomers.map((c) => (
+                  <SelectItem key={c.id} value={c.id}>
+                    {c.name}
+                  </SelectItem>
+                ))}
+              </SelectContent>
             </Select>
           </div>
           <div>
             <label className="text-sm font-medium">Loại hợp đồng</label>
             <Select value={type} onValueChange={(v) => setType(v as ContractType)}>
-              <SelectTrigger className="mt-1"><SelectValue /></SelectTrigger>
-              <SelectContent>{contractTypeOptions.map(o => <SelectItem key={o.value} value={o.value}>{o.label}</SelectItem>)}</SelectContent>
+              <SelectTrigger className="mt-1">
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                {contractTypeOptions.map((o) => (
+                  <SelectItem key={o.value} value={o.value}>
+                    {o.label}
+                  </SelectItem>
+                ))}
+              </SelectContent>
             </Select>
           </div>
           <div>
-            <label className="text-sm font-medium">Giá trị hợp đồng (VNĐ) <span className="text-destructive">*</span></label>
-            <Input className="mt-1" placeholder="VD: 240000000" value={value} onChange={(e) => setValue(e.target.value.replace(/\D/g, ""))} />
-            {value && <p className="text-xs text-muted-foreground mt-1">{formatVND(parseInt(value))}</p>}
+            <label className="text-sm font-medium">
+              Giá trị hợp đồng (VNĐ) <span className="text-destructive">*</span>
+            </label>
+            <Input
+              className="mt-1"
+              placeholder="VD: 240000000"
+              value={value}
+              onChange={(e) => setValue(e.target.value.replace(/\D/g, ""))}
+            />
+            {value && (
+              <p className="text-xs text-muted-foreground mt-1">{formatVND(parseInt(value))}</p>
+            )}
           </div>
           <div className="grid grid-cols-2 gap-3">
             <div>
               <label className="text-sm font-medium">Ngày bắt đầu</label>
-              <Input type="date" className="mt-1" value={startDate} onChange={(e) => setStartDate(e.target.value)} />
+              <Input
+                type="date"
+                className="mt-1"
+                value={startDate}
+                onChange={(e) => setStartDate(e.target.value)}
+              />
             </div>
             <div>
               <label className="text-sm font-medium">Ngày kết thúc</label>
-              <Input type="date" className="mt-1" value={endDate} onChange={(e) => setEndDate(e.target.value)} />
+              <Input
+                type="date"
+                className="mt-1"
+                value={endDate}
+                onChange={(e) => setEndDate(e.target.value)}
+              />
             </div>
           </div>
           <div>
-            <label className="text-sm font-medium">Hạng mục dịch vụ <span className="text-destructive">*</span></label>
-            <Textarea className="mt-1" placeholder="VD: Bảo trì 4 thang Mitsubishi định kỳ 1 tháng/lần" rows={2} value={items} onChange={(e) => setItems(e.target.value)} />
+            <label className="text-sm font-medium">
+              Hạng mục dịch vụ <span className="text-destructive">*</span>
+            </label>
+            <Textarea
+              className="mt-1"
+              placeholder="VD: Bảo trì 4 thang Mitsubishi định kỳ 1 tháng/lần"
+              rows={2}
+              value={items}
+              onChange={(e) => setItems(e.target.value)}
+            />
           </div>
           {type === "maintenance" && (
             <div className="flex items-start gap-2 p-3 rounded-lg bg-info/10 text-info text-sm">
@@ -583,8 +844,12 @@ export function CreateContractModal({ open, onClose, defaultCustomerId = "" }: C
           )}
         </div>
         <DialogFooter>
-          <Button variant="outline" onClick={onClose} disabled={loading}>Hủy</Button>
-          <Button onClick={handle} disabled={loading}>{loading ? "Đang tạo..." : "Tạo hợp đồng"}</Button>
+          <Button variant="outline" onClick={onClose} disabled={loading}>
+            Hủy
+          </Button>
+          <Button onClick={handle} disabled={loading}>
+            {loading ? "Đang tạo..." : "Tạo hợp đồng"}
+          </Button>
         </DialogFooter>
       </DialogContent>
     </Dialog>
@@ -600,9 +865,22 @@ interface CreateElevatorModalProps {
   defaultCustomerId?: string;
 }
 
-const brands = ["Mitsubishi", "Otis", "Kone", "Schindler", "Hyundai", "ThyssenKrupp", "Fuji", "Toshiba"];
+const brands = [
+  "Mitsubishi",
+  "Otis",
+  "Kone",
+  "Schindler",
+  "Hyundai",
+  "ThyssenKrupp",
+  "Fuji",
+  "Toshiba",
+];
 
-export function CreateElevatorModal({ open, onClose, defaultCustomerId = "" }: CreateElevatorModalProps) {
+export function CreateElevatorModal({
+  open,
+  onClose,
+  defaultCustomerId = "",
+}: CreateElevatorModalProps) {
   const [customerId, setCustomerId] = useState(defaultCustomerId);
   const [building, setBuilding] = useState("");
   const [brand, setBrand] = useState("Mitsubishi");
@@ -613,15 +891,23 @@ export function CreateElevatorModal({ open, onClose, defaultCustomerId = "" }: C
   const [maintenanceCycle, setMaintenanceCycle] = useState("1");
   const [loading, setLoading] = useState(false);
 
-  const customer = mockCustomers.find(c => c.id === customerId);
+  const customer = mockCustomers.find((c) => c.id === customerId);
   const autoCode = customer
-    ? `${customer.name.split(" ").slice(-2).map(w => w[0]).join("").toUpperCase()}-${String(mockElevators.length + 1).padStart(2, "0")}`
+    ? `${customer.name
+        .split(" ")
+        .slice(-2)
+        .map((w) => w[0])
+        .join("")
+        .toUpperCase()}-${String(mockElevators.length + 1).padStart(2, "0")}`
     : "—";
 
   const handle = async () => {
-    if (!customerId || !building || !model) { toast.error("Vui lòng điền đầy đủ thông tin"); return; }
+    if (!customerId || !building || !model) {
+      toast.error("Vui lòng điền đầy đủ thông tin");
+      return;
+    }
     setLoading(true);
-    await new Promise(r => setTimeout(r, 500));
+    await new Promise((r) => setTimeout(r, 500));
     setLoading(false);
     toast.success(`Đã thêm thang máy ${autoCode} — ${brand} ${model} tại ${building}`);
     onClose();
@@ -637,56 +923,116 @@ export function CreateElevatorModal({ open, onClose, defaultCustomerId = "" }: C
         </DialogHeader>
         <div className="space-y-3 py-2">
           <div>
-            <label className="text-sm font-medium">Khách hàng <span className="text-destructive">*</span></label>
+            <label className="text-sm font-medium">
+              Khách hàng <span className="text-destructive">*</span>
+            </label>
             <Select value={customerId} onValueChange={setCustomerId}>
-              <SelectTrigger className="mt-1"><SelectValue placeholder="Chọn khách hàng..." /></SelectTrigger>
-              <SelectContent>{mockCustomers.map(c => <SelectItem key={c.id} value={c.id}>{c.name}</SelectItem>)}</SelectContent>
+              <SelectTrigger className="mt-1">
+                <SelectValue placeholder="Chọn khách hàng..." />
+              </SelectTrigger>
+              <SelectContent>
+                {mockCustomers.map((c) => (
+                  <SelectItem key={c.id} value={c.id}>
+                    {c.name}
+                  </SelectItem>
+                ))}
+              </SelectContent>
             </Select>
           </div>
           {customerId && (
             <div className="text-xs text-muted-foreground p-2 bg-muted/50 rounded">
-              Mã thang tự động: <span className="font-mono font-semibold text-foreground">{autoCode}</span>
+              Mã thang tự động:{" "}
+              <span className="font-mono font-semibold text-foreground">{autoCode}</span>
             </div>
           )}
           <div>
-            <label className="text-sm font-medium">Tên tòa nhà / vị trí <span className="text-destructive">*</span></label>
-            <Input className="mt-1" placeholder="VD: Tòa A1, Mường Thanh Hà Đông..." value={building} onChange={(e) => setBuilding(e.target.value)} />
+            <label className="text-sm font-medium">
+              Tên tòa nhà / vị trí <span className="text-destructive">*</span>
+            </label>
+            <Input
+              className="mt-1"
+              placeholder="VD: Tòa A1, Mường Thanh Hà Đông..."
+              value={building}
+              onChange={(e) => setBuilding(e.target.value)}
+            />
           </div>
           <div className="grid grid-cols-2 gap-3">
             <div>
               <label className="text-sm font-medium">Hãng sản xuất</label>
               <Select value={brand} onValueChange={setBrand}>
-                <SelectTrigger className="mt-1"><SelectValue /></SelectTrigger>
-                <SelectContent>{brands.map(b => <SelectItem key={b} value={b}>{b}</SelectItem>)}</SelectContent>
+                <SelectTrigger className="mt-1">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  {brands.map((b) => (
+                    <SelectItem key={b} value={b}>
+                      {b}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
               </Select>
             </div>
             <div>
-              <label className="text-sm font-medium">Model <span className="text-destructive">*</span></label>
-              <Input className="mt-1" placeholder="VD: NEXIEZ-MR" value={model} onChange={(e) => setModel(e.target.value)} />
+              <label className="text-sm font-medium">
+                Model <span className="text-destructive">*</span>
+              </label>
+              <Input
+                className="mt-1"
+                placeholder="VD: NEXIEZ-MR"
+                value={model}
+                onChange={(e) => setModel(e.target.value)}
+              />
             </div>
           </div>
           <div className="grid grid-cols-3 gap-3">
             <div>
               <label className="text-sm font-medium">Số tầng</label>
-              <Input type="number" className="mt-1" min={1} value={floors} onChange={(e) => setFloors(e.target.value)} />
+              <Input
+                type="number"
+                className="mt-1"
+                min={1}
+                value={floors}
+                onChange={(e) => setFloors(e.target.value)}
+              />
             </div>
             <div>
               <label className="text-sm font-medium">Bảo hành (năm)</label>
-              <Input type="number" className="mt-1" min={1} value={warrantyYears} onChange={(e) => setWarrantyYears(e.target.value)} />
+              <Input
+                type="number"
+                className="mt-1"
+                min={1}
+                value={warrantyYears}
+                onChange={(e) => setWarrantyYears(e.target.value)}
+              />
             </div>
             <div>
               <label className="text-sm font-medium">Chu kỳ BT (tháng)</label>
-              <Input type="number" className="mt-1" min={1} value={maintenanceCycle} onChange={(e) => setMaintenanceCycle(e.target.value)} />
+              <Input
+                type="number"
+                className="mt-1"
+                min={1}
+                value={maintenanceCycle}
+                onChange={(e) => setMaintenanceCycle(e.target.value)}
+              />
             </div>
           </div>
           <div>
             <label className="text-sm font-medium">Ngày lắp đặt</label>
-            <Input type="date" className="mt-1" value={installedAt} onChange={(e) => setInstalledAt(e.target.value)} />
+            <Input
+              type="date"
+              className="mt-1"
+              value={installedAt}
+              onChange={(e) => setInstalledAt(e.target.value)}
+            />
           </div>
         </div>
         <DialogFooter>
-          <Button variant="outline" onClick={onClose} disabled={loading}>Hủy</Button>
-          <Button onClick={handle} disabled={loading}>{loading ? "Đang thêm..." : "Thêm thang máy"}</Button>
+          <Button variant="outline" onClick={onClose} disabled={loading}>
+            Hủy
+          </Button>
+          <Button onClick={handle} disabled={loading}>
+            {loading ? "Đang thêm..." : "Thêm thang máy"}
+          </Button>
         </DialogFooter>
       </DialogContent>
     </Dialog>
@@ -711,12 +1057,20 @@ export function CreateCustomerModal({ open, onClose }: CreateCustomerModalProps)
   const [loading, setLoading] = useState(false);
 
   const handle = async () => {
-    if (!name.trim() || !phone.trim()) { toast.error("Vui lòng nhập tên và số điện thoại"); return; }
+    if (!name.trim() || !phone.trim()) {
+      toast.error("Vui lòng nhập tên và số điện thoại");
+      return;
+    }
     setLoading(true);
-    await new Promise(r => setTimeout(r, 500));
+    await new Promise((r) => setTimeout(r, 500));
     setLoading(false);
     toast.success(`Đã thêm khách hàng "${name}"`);
-    setName(""); setContactPerson(""); setPhone(""); setEmail(""); setAddress(""); setType("business");
+    setName("");
+    setContactPerson("");
+    setPhone("");
+    setEmail("");
+    setAddress("");
+    setType("business");
     onClose();
   };
 
@@ -732,7 +1086,9 @@ export function CreateCustomerModal({ open, onClose }: CreateCustomerModalProps)
           <div>
             <label className="text-sm font-medium">Loại khách hàng</label>
             <Select value={type} onValueChange={(v) => setType(v as "business" | "individual")}>
-              <SelectTrigger className="mt-1"><SelectValue /></SelectTrigger>
+              <SelectTrigger className="mt-1">
+                <SelectValue />
+              </SelectTrigger>
               <SelectContent>
                 <SelectItem value="business">Doanh nghiệp / Tòa nhà</SelectItem>
                 <SelectItem value="individual">Cá nhân / Hộ gia đình</SelectItem>
@@ -740,31 +1096,68 @@ export function CreateCustomerModal({ open, onClose }: CreateCustomerModalProps)
             </Select>
           </div>
           <div>
-            <label className="text-sm font-medium">Tên {type === "business" ? "công ty / tòa nhà" : "khách hàng"} <span className="text-destructive">*</span></label>
-            <Input className="mt-1" placeholder={type === "business" ? "VD: Vinhomes Ocean Park" : "VD: Anh Nguyễn Văn An"} value={name} onChange={(e) => setName(e.target.value)} />
+            <label className="text-sm font-medium">
+              Tên {type === "business" ? "công ty / tòa nhà" : "khách hàng"}{" "}
+              <span className="text-destructive">*</span>
+            </label>
+            <Input
+              className="mt-1"
+              placeholder={
+                type === "business" ? "VD: Vinhomes Ocean Park" : "VD: Anh Nguyễn Văn An"
+              }
+              value={name}
+              onChange={(e) => setName(e.target.value)}
+            />
           </div>
           <div className="grid grid-cols-2 gap-3">
             <div>
               <label className="text-sm font-medium">Người liên hệ</label>
-              <Input className="mt-1" placeholder="Tên người liên hệ" value={contactPerson} onChange={(e) => setContactPerson(e.target.value)} />
+              <Input
+                className="mt-1"
+                placeholder="Tên người liên hệ"
+                value={contactPerson}
+                onChange={(e) => setContactPerson(e.target.value)}
+              />
             </div>
             <div>
-              <label className="text-sm font-medium">Số điện thoại <span className="text-destructive">*</span></label>
-              <Input className="mt-1" placeholder="0901 234 567" value={phone} onChange={(e) => setPhone(e.target.value)} />
+              <label className="text-sm font-medium">
+                Số điện thoại <span className="text-destructive">*</span>
+              </label>
+              <Input
+                className="mt-1"
+                placeholder="0901 234 567"
+                value={phone}
+                onChange={(e) => setPhone(e.target.value)}
+              />
             </div>
           </div>
           <div>
             <label className="text-sm font-medium">Email</label>
-            <Input className="mt-1" type="email" placeholder="email@example.com" value={email} onChange={(e) => setEmail(e.target.value)} />
+            <Input
+              className="mt-1"
+              type="email"
+              placeholder="email@example.com"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+            />
           </div>
           <div>
             <label className="text-sm font-medium">Địa chỉ</label>
-            <Input className="mt-1" placeholder="Địa chỉ đầy đủ" value={address} onChange={(e) => setAddress(e.target.value)} />
+            <Input
+              className="mt-1"
+              placeholder="Địa chỉ đầy đủ"
+              value={address}
+              onChange={(e) => setAddress(e.target.value)}
+            />
           </div>
         </div>
         <DialogFooter>
-          <Button variant="outline" onClick={onClose} disabled={loading}>Hủy</Button>
-          <Button onClick={handle} disabled={loading}>{loading ? "Đang thêm..." : "Thêm khách hàng"}</Button>
+          <Button variant="outline" onClick={onClose} disabled={loading}>
+            Hủy
+          </Button>
+          <Button onClick={handle} disabled={loading}>
+            {loading ? "Đang thêm..." : "Thêm khách hàng"}
+          </Button>
         </DialogFooter>
       </DialogContent>
     </Dialog>
@@ -781,7 +1174,12 @@ interface ReceiveInventoryModalProps {
   itemCode?: string;
 }
 
-export function ReceiveInventoryModal({ open, onClose, itemName = "", itemCode = "" }: ReceiveInventoryModalProps) {
+export function ReceiveInventoryModal({
+  open,
+  onClose,
+  itemName = "",
+  itemCode = "",
+}: ReceiveInventoryModalProps) {
   const [qty, setQty] = useState("1");
   const [supplier, setSupplier] = useState("");
   const [invoiceNo, setInvoiceNo] = useState("");
@@ -789,12 +1187,18 @@ export function ReceiveInventoryModal({ open, onClose, itemName = "", itemCode =
   const [loading, setLoading] = useState(false);
 
   const handle = async () => {
-    if (!qty || parseInt(qty) <= 0) { toast.error("Số lượng phải lớn hơn 0"); return; }
+    if (!qty || parseInt(qty) <= 0) {
+      toast.error("Số lượng phải lớn hơn 0");
+      return;
+    }
     setLoading(true);
-    await new Promise(r => setTimeout(r, 400));
+    await new Promise((r) => setTimeout(r, 400));
     setLoading(false);
     toast.success(`Đã nhập ${qty} ${itemName} vào kho`);
-    setQty("1"); setSupplier(""); setInvoiceNo(""); setNote("");
+    setQty("1");
+    setSupplier("");
+    setInvoiceNo("");
+    setNote("");
     onClose();
   };
 
@@ -808,29 +1212,58 @@ export function ReceiveInventoryModal({ open, onClose, itemName = "", itemCode =
           {itemName && (
             <div className="p-2 rounded bg-muted/50 text-sm">
               Vật tư: <span className="font-medium">{itemName}</span>
-              {itemCode && <span className="text-muted-foreground ml-2 font-mono text-xs">{itemCode}</span>}
+              {itemCode && (
+                <span className="text-muted-foreground ml-2 font-mono text-xs">{itemCode}</span>
+              )}
             </div>
           )}
           <div>
-            <label className="text-sm font-medium">Số lượng nhập <span className="text-destructive">*</span></label>
-            <Input type="number" className="mt-1" min={1} value={qty} onChange={(e) => setQty(e.target.value)} />
+            <label className="text-sm font-medium">
+              Số lượng nhập <span className="text-destructive">*</span>
+            </label>
+            <Input
+              type="number"
+              className="mt-1"
+              min={1}
+              value={qty}
+              onChange={(e) => setQty(e.target.value)}
+            />
           </div>
           <div>
             <label className="text-sm font-medium">Nhà cung cấp</label>
-            <Input className="mt-1" placeholder="Tên nhà cung cấp" value={supplier} onChange={(e) => setSupplier(e.target.value)} />
+            <Input
+              className="mt-1"
+              placeholder="Tên nhà cung cấp"
+              value={supplier}
+              onChange={(e) => setSupplier(e.target.value)}
+            />
           </div>
           <div>
             <label className="text-sm font-medium">Số hóa đơn</label>
-            <Input className="mt-1" placeholder="VD: INV-2026-001" value={invoiceNo} onChange={(e) => setInvoiceNo(e.target.value)} />
+            <Input
+              className="mt-1"
+              placeholder="VD: INV-2026-001"
+              value={invoiceNo}
+              onChange={(e) => setInvoiceNo(e.target.value)}
+            />
           </div>
           <div>
             <label className="text-sm font-medium">Ghi chú</label>
-            <Input className="mt-1" placeholder="Ghi chú nếu có" value={note} onChange={(e) => setNote(e.target.value)} />
+            <Input
+              className="mt-1"
+              placeholder="Ghi chú nếu có"
+              value={note}
+              onChange={(e) => setNote(e.target.value)}
+            />
           </div>
         </div>
         <DialogFooter>
-          <Button variant="outline" onClick={onClose} disabled={loading}>Hủy</Button>
-          <Button onClick={handle} disabled={loading}>{loading ? "Đang lưu..." : "Xác nhận nhập kho"}</Button>
+          <Button variant="outline" onClick={onClose} disabled={loading}>
+            Hủy
+          </Button>
+          <Button onClick={handle} disabled={loading}>
+            {loading ? "Đang lưu..." : "Xác nhận nhập kho"}
+          </Button>
         </DialogFooter>
       </DialogContent>
     </Dialog>
@@ -847,13 +1280,18 @@ interface ConfirmScheduleModalProps {
   scheduledFor: string;
 }
 
-export function ConfirmScheduleModal({ open, onClose, jobTitle, scheduledFor }: ConfirmScheduleModalProps) {
+export function ConfirmScheduleModal({
+  open,
+  onClose,
+  jobTitle,
+  scheduledFor,
+}: ConfirmScheduleModalProps) {
   const [note, setNote] = useState("");
   const [loading, setLoading] = useState(false);
 
   const handle = async () => {
     setLoading(true);
-    await new Promise(r => setTimeout(r, 400));
+    await new Promise((r) => setTimeout(r, 400));
     setLoading(false);
     toast.success("Đã xác nhận lịch — Kỹ thuật viên sẽ đến đúng giờ");
     onClose();
@@ -875,16 +1313,31 @@ export function ConfirmScheduleModal({ open, onClose, jobTitle, scheduledFor }: 
             <div className="font-medium">{jobTitle}</div>
             <div className="text-sm text-muted-foreground mt-1">{scheduledFor}</div>
           </div>
-          <p className="text-sm text-muted-foreground">Vui lòng xác nhận bạn có thể tiếp đón kỹ thuật viên vào thời điểm trên. Nếu cần thay đổi, nhấn "Đổi lịch".</p>
+          <p className="text-sm text-muted-foreground">
+            Vui lòng xác nhận bạn có thể tiếp đón kỹ thuật viên vào thời điểm trên. Nếu cần thay
+            đổi, nhấn "Đổi lịch".
+          </p>
           <div>
             <label className="text-sm font-medium">Ghi chú cho kỹ thuật viên (nếu có)</label>
-            <Textarea className="mt-1" placeholder="VD: Gọi trước 30 phút, vào cổng B..." rows={2} value={note} onChange={(e) => setNote(e.target.value)} />
+            <Textarea
+              className="mt-1"
+              placeholder="VD: Gọi trước 30 phút, vào cổng B..."
+              rows={2}
+              value={note}
+              onChange={(e) => setNote(e.target.value)}
+            />
           </div>
         </div>
         <DialogFooter className="flex-col sm:flex-row gap-2">
-          <Button variant="outline" onClick={handleReschedule} className="sm:mr-auto">Đề xuất đổi ngày</Button>
-          <Button variant="outline" onClick={onClose} disabled={loading}>Hủy</Button>
-          <Button onClick={handle} disabled={loading}>{loading ? "Đang xác nhận..." : "✓ Đồng ý lịch"}</Button>
+          <Button variant="outline" onClick={handleReschedule} className="sm:mr-auto">
+            Đề xuất đổi ngày
+          </Button>
+          <Button variant="outline" onClick={onClose} disabled={loading}>
+            Hủy
+          </Button>
+          <Button onClick={handle} disabled={loading}>
+            {loading ? "Đang xác nhận..." : "✓ Đồng ý lịch"}
+          </Button>
         </DialogFooter>
       </DialogContent>
     </Dialog>
@@ -909,12 +1362,20 @@ export function CreateLeadModal({ open, onClose }: CreateLeadModalProps) {
   const [loading, setLoading] = useState(false);
 
   const handle = async () => {
-    if (!name.trim() || !phone.trim()) { toast.error("Vui lòng nhập tên và số điện thoại lead"); return; }
+    if (!name.trim() || !phone.trim()) {
+      toast.error("Vui lòng nhập tên và số điện thoại lead");
+      return;
+    }
     setLoading(true);
-    await new Promise(r => setTimeout(r, 500));
+    await new Promise((r) => setTimeout(r, 500));
     setLoading(false);
     toast.success(`Đã thêm lead mới: "${name}"`);
-    setName(""); setPhone(""); setEmail(""); setAddress(""); setSource("Website"); setNote("");
+    setName("");
+    setPhone("");
+    setEmail("");
+    setAddress("");
+    setSource("Website");
+    setNote("");
     onClose();
   };
 
@@ -928,18 +1389,34 @@ export function CreateLeadModal({ open, onClose }: CreateLeadModalProps) {
         </DialogHeader>
         <div className="space-y-3 py-2">
           <div>
-            <label className="text-sm font-medium">Tên khách hàng / Tổ chức <span className="text-destructive">*</span></label>
-            <Input className="mt-1" placeholder="VD: Tòa nhà Sunshine" value={name} onChange={(e) => setName(e.target.value)} />
+            <label className="text-sm font-medium">
+              Tên khách hàng / Tổ chức <span className="text-destructive">*</span>
+            </label>
+            <Input
+              className="mt-1"
+              placeholder="VD: Tòa nhà Sunshine"
+              value={name}
+              onChange={(e) => setName(e.target.value)}
+            />
           </div>
           <div className="grid grid-cols-2 gap-3">
             <div>
-              <label className="text-sm font-medium">Số điện thoại <span className="text-destructive">*</span></label>
-              <Input className="mt-1" placeholder="0901 234 567" value={phone} onChange={(e) => setPhone(e.target.value)} />
+              <label className="text-sm font-medium">
+                Số điện thoại <span className="text-destructive">*</span>
+              </label>
+              <Input
+                className="mt-1"
+                placeholder="0901 234 567"
+                value={phone}
+                onChange={(e) => setPhone(e.target.value)}
+              />
             </div>
             <div>
               <label className="text-sm font-medium">Nguồn liên hệ</label>
               <Select value={source} onValueChange={setSource}>
-                <SelectTrigger className="mt-1"><SelectValue /></SelectTrigger>
+                <SelectTrigger className="mt-1">
+                  <SelectValue />
+                </SelectTrigger>
                 <SelectContent>
                   <SelectItem value="Website">Website</SelectItem>
                   <SelectItem value="Facebook Ads">Facebook Ads</SelectItem>
@@ -951,20 +1428,41 @@ export function CreateLeadModal({ open, onClose }: CreateLeadModalProps) {
           </div>
           <div>
             <label className="text-sm font-medium">Email</label>
-            <Input className="mt-1" type="email" placeholder="email@example.com" value={email} onChange={(e) => setEmail(e.target.value)} />
+            <Input
+              className="mt-1"
+              type="email"
+              placeholder="email@example.com"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+            />
           </div>
           <div>
             <label className="text-sm font-medium">Địa chỉ</label>
-            <Input className="mt-1" placeholder="Địa chỉ dự kiến lắp đặt/bảo trì" value={address} onChange={(e) => setAddress(e.target.value)} />
+            <Input
+              className="mt-1"
+              placeholder="Địa chỉ dự kiến lắp đặt/bảo trì"
+              value={address}
+              onChange={(e) => setAddress(e.target.value)}
+            />
           </div>
           <div>
             <label className="text-sm font-medium">Ghi chú nhu cầu</label>
-            <Textarea className="mt-1" placeholder="VD: Khách cần lắp 2 thang máy gia đình 5 tầng" value={note} onChange={(e) => setNote(e.target.value)} rows={3} />
+            <Textarea
+              className="mt-1"
+              placeholder="VD: Khách cần lắp 2 thang máy gia đình 5 tầng"
+              value={note}
+              onChange={(e) => setNote(e.target.value)}
+              rows={3}
+            />
           </div>
         </div>
         <DialogFooter>
-          <Button variant="outline" onClick={onClose} disabled={loading}>Hủy</Button>
-          <Button onClick={handle} disabled={loading}>{loading ? "Đang thêm..." : "Thêm Lead"}</Button>
+          <Button variant="outline" onClick={onClose} disabled={loading}>
+            Hủy
+          </Button>
+          <Button onClick={handle} disabled={loading}>
+            {loading ? "Đang thêm..." : "Thêm Lead"}
+          </Button>
         </DialogFooter>
       </DialogContent>
     </Dialog>
@@ -977,7 +1475,7 @@ export function CreateLeadModal({ open, onClose }: CreateLeadModalProps) {
 interface DispatchJobModalProps {
   open: boolean;
   onClose: () => void;
-  job: any; // Using any for simplicity in this demo component
+  job: Job;
   onDispatch: (jobId: string, techId: string) => void;
 }
 
@@ -985,7 +1483,9 @@ export function DispatchJobModal({ open, onClose, job, onDispatch }: DispatchJob
   const [techId, setTechId] = useState("");
   const [loading, setLoading] = useState(false);
 
-  const technicians = mockUsers.filter((u) => u.memberships?.some(m => m.permissions.includes("field_tech")));
+  const technicians = mockUsers.filter((u) =>
+    u.memberships?.some((m) => m.permissions.includes("field_tech")),
+  );
 
   const handle = async () => {
     if (!techId) {
@@ -993,16 +1493,16 @@ export function DispatchJobModal({ open, onClose, job, onDispatch }: DispatchJob
       return;
     }
     setLoading(true);
-    await new Promise(r => setTimeout(r, 600));
+    await new Promise((r) => setTimeout(r, 600));
     setLoading(false);
     onDispatch(job.id, techId);
-    toast.success(`Đã giao việc cho ${mockUsers.find(u => u.id === techId)?.name}`);
+    toast.success(`Đã giao việc cho ${mockUsers.find((u) => u.id === techId)?.name}`);
     setTechId("");
     onClose();
   };
 
   if (!job) return null;
-  const cus = mockCustomers.find(c => c.id === job.customerId);
+  const cus = mockCustomers.find((c) => c.id === job.customerId);
 
   return (
     <Dialog open={open} onOpenChange={onClose}>
@@ -1021,13 +1521,15 @@ export function DispatchJobModal({ open, onClose, job, onDispatch }: DispatchJob
             </div>
           </div>
           <div>
-            <label className="text-sm font-medium">Kỹ thuật viên phụ trách <span className="text-destructive">*</span></label>
+            <label className="text-sm font-medium">
+              Kỹ thuật viên phụ trách <span className="text-destructive">*</span>
+            </label>
             <Select value={techId} onValueChange={setTechId}>
               <SelectTrigger className="mt-1">
                 <SelectValue placeholder="Chọn thợ đang rảnh..." />
               </SelectTrigger>
               <SelectContent>
-                {technicians.map(u => (
+                {technicians.map((u) => (
                   <SelectItem key={u.id} value={u.id}>
                     {u.name}
                   </SelectItem>
@@ -1041,7 +1543,9 @@ export function DispatchJobModal({ open, onClose, job, onDispatch }: DispatchJob
           </div>
         </div>
         <DialogFooter>
-          <Button variant="outline" onClick={onClose} disabled={loading}>Hủy</Button>
+          <Button variant="outline" onClick={onClose} disabled={loading}>
+            Hủy
+          </Button>
           <Button onClick={handle} disabled={loading}>
             {loading ? "Đang phân công..." : "Xác nhận Dispatch"}
           </Button>
@@ -1057,7 +1561,7 @@ export function DispatchJobModal({ open, onClose, job, onDispatch }: DispatchJob
 interface PaySalaryModalProps {
   open: boolean;
   onClose: () => void;
-  users: any[];
+  users: (User & { salary?: number })[];
 }
 
 export function PaySalaryModal({ open, onClose, users }: PaySalaryModalProps) {
@@ -1066,9 +1570,11 @@ export function PaySalaryModal({ open, onClose, users }: PaySalaryModalProps) {
 
   const handle = async () => {
     setLoading(true);
-    await new Promise(r => setTimeout(r, 1000));
+    await new Promise((r) => setTimeout(r, 1000));
     setLoading(false);
-    toast.success(`Đã thanh toán tổng cộng ${new Intl.NumberFormat("vi-VN", { style: "currency", currency: "VND" }).format(total)} cho ${users.length} nhân viên`);
+    toast.success(
+      `Đã thanh toán tổng cộng ${new Intl.NumberFormat("vi-VN", { style: "currency", currency: "VND" }).format(total)} cho ${users.length} nhân viên`,
+    );
     onClose();
   };
 
@@ -1082,19 +1588,30 @@ export function PaySalaryModal({ open, onClose, users }: PaySalaryModalProps) {
         </DialogHeader>
         <div className="space-y-4 py-2">
           <div className="p-4 rounded-xl bg-success/5 border border-success/20 text-center">
-            <div className="text-sm text-muted-foreground uppercase tracking-wider">Tổng quỹ lương trả đợt này</div>
+            <div className="text-sm text-muted-foreground uppercase tracking-wider">
+              Tổng quỹ lương trả đợt này
+            </div>
             <div className="text-3xl font-bold text-success mt-1">
               {new Intl.NumberFormat("vi-VN", { style: "currency", currency: "VND" }).format(total)}
             </div>
-            <div className="text-xs text-muted-foreground mt-2">Dự kiến chi trả cho {users.length} nhân sự</div>
+            <div className="text-xs text-muted-foreground mt-2">
+              Dự kiến chi trả cho {users.length} nhân sự
+            </div>
           </div>
           <p className="text-sm text-balance text-center text-muted-foreground">
-            Hệ thống sẽ thực hiện lệnh chuyển khoản hàng loạt đến tài khoản ngân hàng của từng nhân sự. Hành động này không thể hoàn tác.
+            Hệ thống sẽ thực hiện lệnh chuyển khoản hàng loạt đến tài khoản ngân hàng của từng nhân
+            sự. Hành động này không thể hoàn tác.
           </p>
         </div>
         <DialogFooter className="gap-2 sm:gap-0">
-          <Button variant="outline" onClick={onClose} disabled={loading} className="flex-1">Hủy</Button>
-          <Button onClick={handle} disabled={loading} className="flex-1 bg-success hover:bg-success/90">
+          <Button variant="outline" onClick={onClose} disabled={loading} className="flex-1">
+            Hủy
+          </Button>
+          <Button
+            onClick={handle}
+            disabled={loading}
+            className="flex-1 bg-success hover:bg-success/90"
+          >
             {loading ? "Đang xử lý..." : "Xác nhận Chi trả"}
           </Button>
         </DialogFooter>
@@ -1118,7 +1635,7 @@ export function RenewContractModal({ open, onClose, contractCode }: RenewContrac
 
   const handle = async () => {
     setLoading(true);
-    await new Promise(r => setTimeout(r, 600));
+    await new Promise((r) => setTimeout(r, 600));
     setLoading(false);
     toast.success(`Đã tạo bản nháp tái ký cho HĐ ${contractCode}`);
     onClose();
@@ -1134,24 +1651,28 @@ export function RenewContractModal({ open, onClose, contractCode }: RenewContrac
         </DialogHeader>
         <div className="space-y-4 py-4">
           <div className="text-sm">
-            Bạn đang yêu cầu tạo bản nháp tái ký cho hợp đồng <span className="font-bold underline">{contractCode}</span>.
+            Bạn đang yêu cầu tạo bản nháp tái ký cho hợp đồng{" "}
+            <span className="font-bold underline">{contractCode}</span>.
           </div>
           <div>
             <label className="text-sm font-medium">Giá trị hợp đồng mới dự kiến (VND)</label>
-            <Input 
-              type="number" 
-              className="mt-1" 
-              placeholder="VD: 50000000" 
-              value={newTotal} 
+            <Input
+              type="number"
+              className="mt-1"
+              placeholder="VD: 50000000"
+              value={newTotal}
               onChange={(e) => setNewTotal(e.target.value)}
             />
           </div>
           <p className="text-xs text-muted-foreground italic">
-            * Sau khi xác nhận, hệ thống sẽ sinh 1 hợp đồng nháp mới với các thông tin kế thừa và chuyển sang trạng thái "Thương thảo".
+            * Sau khi xác nhận, hệ thống sẽ sinh 1 hợp đồng nháp mới với các thông tin kế thừa và
+            chuyển sang trạng thái "Thương thảo".
           </p>
         </div>
         <DialogFooter>
-          <Button variant="outline" onClick={onClose} disabled={loading}>Hủy</Button>
+          <Button variant="outline" onClick={onClose} disabled={loading}>
+            Hủy
+          </Button>
           <Button onClick={handle} disabled={loading}>
             {loading ? "Đang tạo..." : "Xác nhận tạo nháp"}
           </Button>
@@ -1164,14 +1685,17 @@ export function RenewContractModal({ open, onClose, contractCode }: RenewContrac
 // ─────────────────────────────────────────────
 // 14. MODAL CHUYỂN KHO
 // ─────────────────────────────────────────────
-export function TransferInventoryModal({ open, onClose }: { open: boolean, onClose: () => void }) {
+export function TransferInventoryModal({ open, onClose }: { open: boolean; onClose: () => void }) {
   const [loading, setLoading] = useState(false);
   const [target, setTarget] = useState("");
 
   const handle = async () => {
-    if (!target) { toast.error("Vui lòng nhập kho đích"); return; }
+    if (!target) {
+      toast.error("Vui lòng nhập kho đích");
+      return;
+    }
     setLoading(true);
-    await new Promise(r => setTimeout(r, 800));
+    await new Promise((r) => setTimeout(r, 800));
     setLoading(false);
     toast.success(`Lệnh chuyển kho đã được tạo — Đang chờ kho đích xác nhận`);
     onClose();
@@ -1204,11 +1728,14 @@ export function TransferInventoryModal({ open, onClose }: { open: boolean, onClo
             <Input className="mt-1" placeholder="Lý do chuyển..." />
           </div>
           <p className="text-xs text-muted-foreground">
-            * Sau khi xác nhận, số lượng vật tư sẽ được đưa vào trạng thái "Đang trung chuyển" và trừ khỏi kho hiện tại.
+            * Sau khi xác nhận, số lượng vật tư sẽ được đưa vào trạng thái "Đang trung chuyển" và
+            trừ khỏi kho hiện tại.
           </p>
         </div>
         <DialogFooter>
-          <Button variant="outline" onClick={onClose} disabled={loading}>Hủy</Button>
+          <Button variant="outline" onClick={onClose} disabled={loading}>
+            Hủy
+          </Button>
           <Button onClick={handle} disabled={loading}>
             {loading ? "Đang xử lý..." : "Xác nhận chuyển"}
           </Button>

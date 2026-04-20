@@ -15,13 +15,13 @@ import {
 import { DataPagination } from "@/components/common/DataPagination";
 import { RouteMap } from "@/components/common/RouteMap";
 import { StatCard } from "@/components/common/StatCard";
+import { StatusBadge } from "@/components/common/StatusBadge";
 import {
-  StatusBadge,
   jobStatusLabel,
   jobStatusVariant,
   priorityLabel,
   priorityVariant,
-} from "@/components/common/StatusBadge";
+} from "@/lib/status-variants";
 import { mockJobs, formatDateTime, getCustomer, optimizeRoute } from "@/lib/mock-data";
 import { useAppStore } from "@/lib/store";
 import {

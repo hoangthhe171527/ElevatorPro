@@ -2,7 +2,14 @@ import { createFileRoute } from "@tanstack/react-router";
 import { useState } from "react";
 import { AppShell } from "@/components/layout/AppShell";
 import { PageHeader } from "@/components/common/PageHeader";
-import { Card, CardContent, CardHeader, CardTitle, CardDescription, CardFooter } from "@/components/ui/card";
+import {
+  Card,
+  CardContent,
+  CardHeader,
+  CardTitle,
+  CardDescription,
+  CardFooter,
+} from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -22,16 +29,20 @@ function ProfilePage() {
   const [name, setName] = useState(user.name.split(" (")[0]);
   const [email, setEmail] = useState(user.email);
   const [phone, setPhone] = useState(user.phone);
-  
+
   const [confirmSave, setConfirmSave] = useState(false);
   const [confirmPassword, setConfirmPassword] = useState(false);
 
-  const initials = name.split(" ").slice(-2).map(n => n[0]).join("");
+  const initials = name
+    .split(" ")
+    .slice(-2)
+    .map((n) => n[0])
+    .join("");
 
   return (
     <AppShell>
-      <PageHeader 
-        title="Hồ sơ cá nhân" 
+      <PageHeader
+        title="Hồ sơ cá nhân"
         description="Quản lý thông tin tài khoản và bảo mật của bạn."
       />
 
@@ -46,12 +57,13 @@ function ProfilePage() {
                 </AvatarFallback>
               </Avatar>
               <h2 className="text-xl font-bold">{user.name}</h2>
-              <p className="text-sm text-muted-foreground mt-1 capitalize">
-                ID: {user.id}
-              </p>
+              <p className="text-sm text-muted-foreground mt-1 capitalize">ID: {user.id}</p>
               <div className="flex flex-wrap justify-center gap-2 mt-4">
-                {user.memberships[0]?.permissions.map(p => (
-                  <span key={p} className="text-[10px] bg-muted px-2 py-0.5 rounded-full border font-mono">
+                {user.memberships[0]?.permissions.map((p) => (
+                  <span
+                    key={p}
+                    className="text-[10px] bg-muted px-2 py-0.5 rounded-full border font-mono"
+                  >
                     {p}
                   </span>
                 ))}
@@ -98,7 +110,12 @@ function ProfilePage() {
                   <Label htmlFor="phone">Số điện thoại</Label>
                   <div className="relative">
                     <Phone className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                    <Input id="phone" className="pl-9" value={phone} onChange={(e) => setPhone(e.target.value)} />
+                    <Input
+                      id="phone"
+                      className="pl-9"
+                      value={phone}
+                      onChange={(e) => setPhone(e.target.value)}
+                    />
                   </div>
                 </div>
               </div>
@@ -106,7 +123,12 @@ function ProfilePage() {
                 <Label htmlFor="email">Địa chỉ Email</Label>
                 <div className="relative">
                   <Mail className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                  <Input id="email" className="pl-9" value={email} onChange={(e) => setEmail(e.target.value)} />
+                  <Input
+                    id="email"
+                    className="pl-9"
+                    value={email}
+                    onChange={(e) => setEmail(e.target.value)}
+                  />
                 </div>
               </div>
             </CardContent>
@@ -142,7 +164,11 @@ function ProfilePage() {
               </div>
             </CardContent>
             <CardFooter className="bg-muted/30 border-t py-3 flex justify-end">
-              <Button variant="outline" onClick={() => setConfirmPassword(true)} className="border-primary text-primary hover:bg-primary/5">
+              <Button
+                variant="outline"
+                onClick={() => setConfirmPassword(true)}
+                className="border-primary text-primary hover:bg-primary/5"
+              >
                 Cập nhật mật khẩu
               </Button>
             </CardFooter>

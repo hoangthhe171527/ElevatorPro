@@ -32,7 +32,6 @@ export function ConfirmationDialog({
   cancelText = "Hủy",
   variant = "default",
 }: ConfirmationDialogProps) {
-  
   const getActionClass = () => {
     switch (variant) {
       case "destructive":
@@ -49,15 +48,11 @@ export function ConfirmationDialog({
       <AlertDialogContent className="max-w-[400px]">
         <AlertDialogHeader>
           <AlertDialogTitle>{title}</AlertDialogTitle>
-          <AlertDialogDescription className="text-sm">
-            {description}
-          </AlertDialogDescription>
+          <AlertDialogDescription className="text-sm">{description}</AlertDialogDescription>
         </AlertDialogHeader>
         <AlertDialogFooter className="mt-4">
-          <AlertDialogCancel onClick={() => onOpenChange(false)}>
-            {cancelText}
-          </AlertDialogCancel>
-          <AlertDialogAction 
+          <AlertDialogCancel onClick={() => onOpenChange(false)}>{cancelText}</AlertDialogCancel>
+          <AlertDialogAction
             onClick={(e) => {
               e.preventDefault();
               onConfirm();

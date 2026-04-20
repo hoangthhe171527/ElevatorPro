@@ -6,16 +6,22 @@ import { PageHeader } from "@/components/common/PageHeader";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { DataPagination } from "@/components/common/DataPagination";
 import {
-  StatusBadge,
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { DataPagination } from "@/components/common/DataPagination";
+import { StatusBadge } from "@/components/common/StatusBadge";
+import {
   jobStatusLabel,
   jobStatusVariant,
   priorityLabel,
   priorityVariant,
-} from "@/components/common/StatusBadge";
-import { mockJobs, formatDateTime, getCustomer, getUser } from "@/lib/mock-data";
+} from "@/lib/status-variants";
+import { mockJobs, formatDateTime, getCustomer, getUser, type Job } from "@/lib/mock-data";
 import { Plus, Search, Briefcase, Calendar, User, ArrowRight } from "lucide-react";
 import { CreateJobModal, DispatchJobModal } from "@/components/common/Modals";
 
@@ -38,17 +44,17 @@ function JobsPage() {
   const [statusFilter, setStatusFilter] = useState("all");
   const [typeFilter, setTypeFilter] = useState("all");
   const [createOpen, setCreateOpen] = useState(false);
-  const [dispatchJob, setDispatchJob] = useState<any>(null);
+  const [dispatchJob, setDispatchJob] = useState<Job | null>(null);
 
   // Mở modal
-  const openDispatch = (job: any, e: React.MouseEvent) => {
+  const openDispatch = (job: Job, e: React.MouseEvent<HTMLButtonElement>) => {
     e.preventDefault();
     setDispatchJob(job);
   };
 
   // Xử lý logic dispatch (mô phỏng)
   const handleDispatch = (jobId: string, techId: string) => {
-    const job = mockJobs.find(j => j.id === jobId);
+    const job = mockJobs.find((j) => j.id === jobId);
     if (job) {
       job.assignedTo = techId;
       job.status = "scheduled";
@@ -91,7 +97,10 @@ function JobsPage() {
             <Card
               key={k}
               className="p-4 cursor-pointer hover:border-primary/50 transition-colors"
-              onClick={() => { setStatusFilter(k); setPage(1); }}
+              onClick={() => {
+                setStatusFilter(k);
+                setPage(1);
+              }}
             >
               <div className="text-xs text-muted-foreground">{v}</div>
               <div className="mt-1 text-2xl font-bold">
@@ -109,24 +118,47 @@ function JobsPage() {
               placeholder="Tìm công việc..."
               className="pl-9"
               value={search}
-              onChange={(e) => { setSearch(e.target.value); setPage(1); }}
+              onChange={(e) => {
+                setSearch(e.target.value);
+                setPage(1);
+              }}
             />
           </div>
-          <Select value={typeFilter} onValueChange={(v) => { setTypeFilter(v); setPage(1); }}>
-            <SelectTrigger className="w-full sm:w-40"><SelectValue placeholder="Loại" /></SelectTrigger>
+          <Select
+            value={typeFilter}
+            onValueChange={(v) => {
+              setTypeFilter(v);
+              setPage(1);
+            }}
+          >
+            <SelectTrigger className="w-full sm:w-40">
+              <SelectValue placeholder="Loại" />
+            </SelectTrigger>
             <SelectContent>
               <SelectItem value="all">Tất cả loại</SelectItem>
               {Object.entries(typeLabel).map(([k, v]) => (
-                <SelectItem key={k} value={k}>{v}</SelectItem>
+                <SelectItem key={k} value={k}>
+                  {v}
+                </SelectItem>
               ))}
             </SelectContent>
           </Select>
-          <Select value={statusFilter} onValueChange={(v) => { setStatusFilter(v); setPage(1); }}>
-            <SelectTrigger className="w-full sm:w-44"><SelectValue /></SelectTrigger>
+          <Select
+            value={statusFilter}
+            onValueChange={(v) => {
+              setStatusFilter(v);
+              setPage(1);
+            }}
+          >
+            <SelectTrigger className="w-full sm:w-44">
+              <SelectValue />
+            </SelectTrigger>
             <SelectContent>
               <SelectItem value="all">Tất cả trạng thái</SelectItem>
               {Object.entries(jobStatusLabel).map(([k, v]) => (
-                <SelectItem key={k} value={k}>{v}</SelectItem>
+                <SelectItem key={k} value={k}>
+                  {v}
+                </SelectItem>
               ))}
             </SelectContent>
           </Select>
@@ -160,19 +192,30 @@ function JobsPage() {
                       </div>
                       <h3 className="mt-1 font-semibold truncate">{j.title}</h3>
                       <div className="mt-1 text-xs text-muted-foreground flex flex-wrap gap-x-4 gap-y-1 items-center">
-                        <span className="flex items-center gap-1"><User className="h-3 w-3" /> {cus?.name}</span>
-                        <span className="flex items-center gap-1"><Calendar className="h-3 w-3" /> {formatDateTime(j.scheduledFor)}</span>
+                        <span className="flex items-center gap-1">
+                          <User className="h-3 w-3" /> {cus?.name}
+                        </span>
+                        <span className="flex items-center gap-1">
+                          <Calendar className="h-3 w-3" /> {formatDateTime(j.scheduledFor)}
+                        </span>
                         {tech ? (
                           <span>KT: {tech.name}</span>
                         ) : (
-                          <span className="text-warning-foreground font-semibold flex items-center gap-1">Chưa phân công</span>
+                          <span className="text-warning-foreground font-semibold flex items-center gap-1">
+                            Chưa phân công
+                          </span>
                         )}
                       </div>
                     </div>
                   </div>
                   <div className="flex items-center gap-3">
                     {!j.assignedTo && j.status === "pending" && (
-                      <Button size="sm" variant="outline" className="h-7 text-xs border-primary text-primary hover:bg-primary/10 gap-1" onClick={(e) => openDispatch(j, e)}>
+                      <Button
+                        size="sm"
+                        variant="outline"
+                        className="h-7 text-xs border-primary text-primary hover:bg-primary/10 gap-1"
+                        onClick={(e) => openDispatch(j, e)}
+                      >
                         Điều phối <ArrowRight className="h-3 w-3" />
                       </Button>
                     )}
@@ -186,15 +229,20 @@ function JobsPage() {
           })}
         </div>
 
-        <DataPagination page={page} pageSize={PAGE_SIZE} total={filtered.length} onPageChange={setPage} />
+        <DataPagination
+          page={page}
+          pageSize={PAGE_SIZE}
+          total={filtered.length}
+          onPageChange={setPage}
+        />
       </Card>
 
       <CreateJobModal open={createOpen} onClose={() => setCreateOpen(false)} />
-      <DispatchJobModal 
-        open={!!dispatchJob} 
-        onClose={() => setDispatchJob(null)} 
-        job={dispatchJob} 
-        onDispatch={handleDispatch} 
+      <DispatchJobModal
+        open={!!dispatchJob}
+        onClose={() => setDispatchJob(null)}
+        job={dispatchJob}
+        onDispatch={handleDispatch}
       />
     </AppShell>
   );

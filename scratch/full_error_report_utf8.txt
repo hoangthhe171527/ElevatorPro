@@ -1,0 +1,46 @@
+﻿Running lint and capturing output...
+Total non-prettier issues: 39
+
+Rule: @typescript-eslint/no-explicit-any (21 occurrences)
+  - D:\T├ái liß╗çu kh├ích h├áng\Thang m├íy\demo\lift-service-hub\src\components\common\GlobalSearch.tsx:91 - Unexpected any. Specify a different type.
+  - D:\T├ái liß╗çu kh├ích h├áng\Thang m├íy\demo\lift-service-hub\src\components\common\GlobalSearch.tsx:99 - Unexpected any. Specify a different type.
+  - D:\T├ái liß╗çu kh├ích h├áng\Thang m├íy\demo\lift-service-hub\src\components\common\Modals.tsx:980 - Unexpected any. Specify a different type.
+  - D:\T├ái liß╗çu kh├ích h├áng\Thang m├íy\demo\lift-service-hub\src\components\common\Modals.tsx:1060 - Unexpected any. Specify a different type.
+  - D:\T├ái liß╗çu kh├ích h├áng\Thang m├íy\demo\lift-service-hub\src\components\layout\AppShell.tsx:343 - Unexpected any. Specify a different type.
+  - D:\T├ái liß╗çu kh├ích h├áng\Thang m├íy\demo\lift-service-hub\src\components\layout\AppShell.tsx:346 - Unexpected any. Specify a different type.
+  - D:\T├ái liß╗çu kh├ích h├áng\Thang m├íy\demo\lift-service-hub\src\components\layout\MobileShell.tsx:107 - Unexpected any. Specify a different type.
+  - D:\T├ái liß╗çu kh├ích h├áng\Thang m├íy\demo\lift-service-hub\src\components\layout\MobileShell.tsx:137 - Unexpected any. Specify a different type.
+  - D:\T├ái liß╗çu kh├ích h├áng\Thang m├íy\demo\lift-service-hub\src\routes\admin.inventory.index.tsx:181 - Unexpected any. Specify a different type.
+  - D:\T├ái liß╗çu kh├ích h├áng\Thang m├íy\demo\lift-service-hub\src\routes\admin.jobs.index.tsx:41 - Unexpected any. Specify a different type.
+  - D:\T├ái liß╗çu kh├ích h├áng\Thang m├íy\demo\lift-service-hub\src\routes\admin.jobs.index.tsx:44 - Unexpected any. Specify a different type.
+  - D:\T├ái liß╗çu kh├ích h├áng\Thang m├íy\demo\lift-service-hub\src\routes\admin.projects.index.tsx:59 - Unexpected any. Specify a different type.
+  - D:\T├ái liß╗çu kh├ích h├áng\Thang m├íy\demo\lift-service-hub\src\routes\admin.projects.index.tsx:60 - Unexpected any. Specify a different type.
+  - D:\T├ái liß╗çu kh├ích h├áng\Thang m├íy\demo\lift-service-hub\src\routes\admin.projects.index.tsx:71 - Unexpected any. Specify a different type.
+  - D:\T├ái liß╗çu kh├ích h├áng\Thang m├íy\demo\lift-service-hub\src\routes\admin.projects.index.tsx:71 - Unexpected any. Specify a different type.
+  - D:\T├ái liß╗çu kh├ích h├áng\Thang m├íy\demo\lift-service-hub\src\routes\index.tsx:63 - Unexpected any. Specify a different type.
+  - D:\T├ái liß╗çu kh├ích h├áng\Thang m├íy\demo\lift-service-hub\src\routes\index.tsx:89 - Unexpected any. Specify a different type.
+  - D:\T├ái liß╗çu kh├ích h├áng\Thang m├íy\demo\lift-service-hub\src\routes\mobile\index.tsx:68 - Unexpected any. Specify a different type.
+  - D:\T├ái liß╗çu kh├ích h├áng\Thang m├íy\demo\lift-service-hub\src\routes\mobile\index.tsx:91 - Unexpected any. Specify a different type.
+  - D:\T├ái liß╗çu kh├ích h├áng\Thang m├íy\demo\lift-service-hub\src\routes\mobile\index.tsx:98 - Unexpected any. Specify a different type.
+  - D:\T├ái liß╗çu kh├ích h├áng\Thang m├íy\demo\lift-service-hub\src\routes\mobile\index.tsx:154 - Unexpected any. Specify a different type.
+
+Rule: react-refresh/only-export-components (18 occurrences)
+  - D:\T├ái liß╗çu kh├ích h├áng\Thang m├íy\demo\lift-service-hub\src\components\common\DataPagination.tsx:57 - Fast refresh only works when a file only exports components. Use a new file to share constants or functions between components.
+  - D:\T├ái liß╗çu kh├ích h├áng\Thang m├íy\demo\lift-service-hub\src\components\common\StatusBadge.tsx:23 - Fast refresh only works when a file only exports components. Use a new file to share constants or functions between components.
+  - D:\T├ái liß╗çu kh├ích h├áng\Thang m├íy\demo\lift-service-hub\src\components\common\StatusBadge.tsx:26 - Fast refresh only works when a file only exports components. Use a new file to share constants or functions between components.
+  - D:\T├ái liß╗çu kh├ích h├áng\Thang m├íy\demo\lift-service-hub\src\components\common\StatusBadge.tsx:29 - Fast refresh only works when a file only exports components. Use a new file to share constants or functions between components.
+  - D:\T├ái liß╗çu kh├ích h├áng\Thang m├íy\demo\lift-service-hub\src\components\common\StatusBadge.tsx:32 - Fast refresh only works when a file only exports components. Use a new file to share constants or functions between components.
+  - D:\T├ái liß╗çu kh├ích h├áng\Thang m├íy\demo\lift-service-hub\src\components\common\StatusBadge.tsx:35 - Fast refresh only works when a file only exports components. Use a new file to share constants or functions between components.
+  - D:\T├ái liß╗çu kh├ích h├áng\Thang m├íy\demo\lift-service-hub\src\components\common\StatusBadge.tsx:38 - Fast refresh only works when a file only exports components. Use a new file to share constants or functions between components.
+  - D:\T├ái liß╗çu kh├ích h├áng\Thang m├íy\demo\lift-service-hub\src\components\common\StatusBadge.tsx:41 - Fast refresh only works when a file only exports components. Use a new file to share constants or functions between components.
+  - D:\T├ái liß╗çu kh├ích h├áng\Thang m├íy\demo\lift-service-hub\src\components\common\StatusBadge.tsx:44 - Fast refresh only works when a file only exports components. Use a new file to share constants or functions between components.
+  - D:\T├ái liß╗çu kh├ích h├áng\Thang m├íy\demo\lift-service-hub\src\components\common\StatusBadge.tsx:47 - Fast refresh only works when a file only exports components. Use a new file to share constants or functions between components.
+  - D:\T├ái liß╗çu kh├ích h├áng\Thang m├íy\demo\lift-service-hub\src\components\common\StatusBadge.tsx:50 - Fast refresh only works when a file only exports components. Use a new file to share constants or functions between components.
+  - D:\T├ái liß╗çu kh├ích h├áng\Thang m├íy\demo\lift-service-hub\src\components\ui\badge.tsx:32 - Fast refresh only works when a file only exports components. Use a new file to share constants or functions between components.
+  - D:\T├ái liß╗çu kh├ích h├áng\Thang m├íy\demo\lift-service-hub\src\components\ui\button.tsx:49 - Fast refresh only works when a file only exports components. Use a new file to share constants or functions between components.
+  - D:\T├ái liß╗çu kh├ích h├áng\Thang m├íy\demo\lift-service-hub\src\components\ui\form.tsx:163 - Fast refresh only works when a file only exports components. Use a new file to share constants or functions between components.
+  - D:\T├ái liß╗çu kh├ích h├áng\Thang m├íy\demo\lift-service-hub\src\components\ui\navigation-menu.tsx:111 - Fast refresh only works when a file only exports components. Use a new file to share constants or functions between components.
+  - D:\T├ái liß╗çu kh├ích h├áng\Thang m├íy\demo\lift-service-hub\src\components\ui\sidebar.tsx:743 - Fast refresh only works when a file only exports components. Use a new file to share constants or functions between components.
+  - D:\T├ái liß╗çu kh├ích h├áng\Thang m├íy\demo\lift-service-hub\src\components\ui\toggle.tsx:42 - Fast refresh only works when a file only exports components. Use a new file to share constants or functions between components.
+  - D:\T├ái liß╗çu kh├ích h├áng\Thang m├íy\demo\lift-service-hub\src\router.tsx:4 - Fast refresh only works when a file only exports components. Move your component(s) to a separate file.
+

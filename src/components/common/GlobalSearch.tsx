@@ -5,13 +5,7 @@
 import { useState, useRef, useEffect } from "react";
 import { useNavigate } from "@tanstack/react-router";
 import { Input } from "@/components/ui/input";
-import {
-  mockCustomers,
-  mockContracts,
-  mockJobs,
-  mockElevators,
-  mockLeads,
-} from "@/lib/mock-data";
+import { mockCustomers, mockContracts, mockJobs, mockElevators, mockLeads } from "@/lib/mock-data";
 import { Search, Users, FileText, Briefcase, Building2, UserCog, X } from "lucide-react";
 import { cn } from "@/lib/utils";
 
@@ -29,35 +23,75 @@ function buildResults(q: string): SearchResult[] {
   const lq = q.toLowerCase();
   const results: SearchResult[] = [];
 
-  mockCustomers.filter(c =>
-    c.name.toLowerCase().includes(lq) || c.phone.includes(lq)
-  ).slice(0, 3).forEach(c =>
-    results.push({ id: c.id, label: c.name, sublabel: c.phone, href: `/admin/customers/${c.id}`, category: "Khách hàng", icon: Users })
-  );
+  mockCustomers
+    .filter((c) => c.name.toLowerCase().includes(lq) || c.phone.includes(lq))
+    .slice(0, 3)
+    .forEach((c) =>
+      results.push({
+        id: c.id,
+        label: c.name,
+        sublabel: c.phone,
+        href: `/admin/customers/${c.id}`,
+        category: "Khách hàng",
+        icon: Users,
+      }),
+    );
 
-  mockLeads.filter(l =>
-    l.name.toLowerCase().includes(lq) || l.phone.includes(lq)
-  ).slice(0, 2).forEach(l =>
-    results.push({ id: l.id, label: l.name, sublabel: l.phone, href: "/admin/leads", category: "Lead", icon: UserCog })
-  );
+  mockLeads
+    .filter((l) => l.name.toLowerCase().includes(lq) || l.phone.includes(lq))
+    .slice(0, 2)
+    .forEach((l) =>
+      results.push({
+        id: l.id,
+        label: l.name,
+        sublabel: l.phone,
+        href: "/admin/leads",
+        category: "Lead",
+        icon: UserCog,
+      }),
+    );
 
-  mockContracts.filter(c =>
-    c.code.toLowerCase().includes(lq)
-  ).slice(0, 3).forEach(c =>
-    results.push({ id: c.id, label: c.code, sublabel: `Hợp đồng · ${c.type}`, href: `/admin/contracts/${c.id}`, category: "Hợp đồng", icon: FileText })
-  );
+  mockContracts
+    .filter((c) => c.code.toLowerCase().includes(lq))
+    .slice(0, 3)
+    .forEach((c) =>
+      results.push({
+        id: c.id,
+        label: c.code,
+        sublabel: `Hợp đồng · ${c.type}`,
+        href: `/admin/contracts/${c.id}`,
+        category: "Hợp đồng",
+        icon: FileText,
+      }),
+    );
 
-  mockJobs.filter(j =>
-    j.title.toLowerCase().includes(lq) || j.code.toLowerCase().includes(lq)
-  ).slice(0, 3).forEach(j =>
-    results.push({ id: j.id, label: j.title, sublabel: j.code, href: `/admin/jobs/${j.id}`, category: "Công việc", icon: Briefcase })
-  );
+  mockJobs
+    .filter((j) => j.title.toLowerCase().includes(lq) || j.code.toLowerCase().includes(lq))
+    .slice(0, 3)
+    .forEach((j) =>
+      results.push({
+        id: j.id,
+        label: j.title,
+        sublabel: j.code,
+        href: `/admin/jobs/${j.id}`,
+        category: "Công việc",
+        icon: Briefcase,
+      }),
+    );
 
-  mockElevators.filter(e =>
-    e.code.toLowerCase().includes(lq) || e.building.toLowerCase().includes(lq)
-  ).slice(0, 2).forEach(e =>
-    results.push({ id: e.id, label: e.code, sublabel: e.building, href: `/admin/elevators/${e.id}`, category: "Thang máy", icon: Building2 })
-  );
+  mockElevators
+    .filter((e) => e.code.toLowerCase().includes(lq) || e.building.toLowerCase().includes(lq))
+    .slice(0, 2)
+    .forEach((e) =>
+      results.push({
+        id: e.id,
+        label: e.code,
+        sublabel: e.building,
+        href: `/admin/elevators/${e.id}`,
+        category: "Thang máy",
+        icon: Building2,
+      }),
+    );
 
   return results.slice(0, 8);
 }
@@ -84,19 +118,20 @@ export function GlobalSearch() {
 
   const handleKeyDown = (e: React.KeyboardEvent) => {
     if (e.key === "ArrowDown") {
-      setActiveIdx(i => Math.min(i + 1, results.length - 1));
+      setActiveIdx((i) => Math.min(i + 1, results.length - 1));
     } else if (e.key === "ArrowUp") {
-      setActiveIdx(i => Math.max(i - 1, 0));
+      setActiveIdx((i) => Math.max(i - 1, 0));
     } else if (e.key === "Enter" && activeIdx >= 0) {
-      navigate({ to: results[activeIdx].href as any });
-      setOpen(false); setQ("");
+      navigate({ to: results[activeIdx].href });
+      setOpen(false);
+      setQ("");
     } else if (e.key === "Escape") {
       setOpen(false);
     }
   };
 
   const handleSelect = (href: string) => {
-    navigate({ to: href as any });
+    navigate({ to: href });
     setOpen(false);
     setQ("");
   };
@@ -109,14 +144,21 @@ export function GlobalSearch() {
         placeholder="Tìm khách hàng, hợp đồng, công việc... (Ctrl+K)"
         className="pl-9 pr-8 bg-muted/50 border-0"
         value={q}
-        onChange={(e) => { setQ(e.target.value); setOpen(true); setActiveIdx(-1); }}
+        onChange={(e) => {
+          setQ(e.target.value);
+          setOpen(true);
+          setActiveIdx(-1);
+        }}
         onFocus={() => setOpen(true)}
         onKeyDown={handleKeyDown}
       />
       {q && (
         <button
           className="absolute right-2.5 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
-          onClick={() => { setQ(""); inputRef.current?.focus(); }}
+          onClick={() => {
+            setQ("");
+            inputRef.current?.focus();
+          }}
         >
           <X className="h-3.5 w-3.5" />
         </button>
@@ -132,7 +174,7 @@ export function GlobalSearch() {
                 onMouseDown={() => handleSelect(r.href)}
                 className={cn(
                   "w-full flex items-center gap-3 px-3 py-2.5 text-left hover:bg-muted/60 transition-colors",
-                  i === activeIdx && "bg-muted/60"
+                  i === activeIdx && "bg-muted/60",
                 )}
               >
                 <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-primary/10 text-primary">
@@ -153,7 +195,9 @@ export function GlobalSearch() {
 
       {open && q.length >= 2 && results.length === 0 && (
         <div className="absolute top-full mt-1 left-0 right-0 z-50 bg-background border rounded-lg shadow-lg p-6 text-center">
-          <p className="text-sm text-muted-foreground">Không tìm thấy kết quả cho "<span className="font-medium">{q}</span>"</p>
+          <p className="text-sm text-muted-foreground">
+            Không tìm thấy kết quả cho "<span className="font-medium">{q}</span>"
+          </p>
         </div>
       )}
     </div>

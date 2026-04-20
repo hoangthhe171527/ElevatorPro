@@ -6,15 +6,15 @@ import { PageHeader } from "@/components/common/PageHeader";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
+import { StatusBadge } from "@/components/common/StatusBadge";
 import {
-  StatusBadge,
   contractStatusLabel,
   contractStatusVariant,
   elevatorStatusLabel,
   elevatorStatusVariant,
   jobStatusLabel,
   jobStatusVariant,
-} from "@/components/common/StatusBadge";
+} from "@/lib/status-variants";
 import { Progress } from "@/components/ui/progress";
 import {
   mockCustomers,
@@ -150,10 +150,16 @@ function CustomerDetail() {
             <div className="space-y-2 text-sm">
               <div className="text-muted-foreground text-xs">Người liên hệ</div>
               <div className="font-medium">{customer.contactPerson}</div>
-              <a href={`tel:${customer.phone}`} className="flex items-center gap-1.5 text-primary text-sm">
+              <a
+                href={`tel:${customer.phone}`}
+                className="flex items-center gap-1.5 text-primary text-sm"
+              >
                 <Phone className="h-3.5 w-3.5" /> {customer.phone}
               </a>
-              <a href={`mailto:${customer.email}`} className="flex items-center gap-1.5 text-primary text-sm">
+              <a
+                href={`mailto:${customer.email}`}
+                className="flex items-center gap-1.5 text-primary text-sm"
+              >
                 <Mail className="h-3.5 w-3.5" /> {customer.email}
               </a>
               <div className="flex items-start gap-1.5 text-xs text-muted-foreground">
@@ -227,7 +233,9 @@ function CustomerDetail() {
                       {formatDate(c.startDate)} → {formatDate(c.endDate)}
                     </div>
                     <div className="flex items-center justify-between text-xs mb-1">
-                      <span className="text-muted-foreground">{formatVND(c.paid)} / {formatVND(c.value)}</span>
+                      <span className="text-muted-foreground">
+                        {formatVND(c.paid)} / {formatVND(c.value)}
+                      </span>
                       <span className="font-medium">{percent}%</span>
                     </div>
                     <Progress value={percent} className="h-1" />
@@ -255,7 +263,9 @@ function CustomerDetail() {
                 >
                   <div className="min-w-0">
                     <div className="font-medium truncate">{j.title}</div>
-                    <div className="text-xs text-muted-foreground">{formatDateTime(j.scheduledFor)}</div>
+                    <div className="text-xs text-muted-foreground">
+                      {formatDateTime(j.scheduledFor)}
+                    </div>
                   </div>
                   <StatusBadge variant={jobStatusVariant[j.status]}>
                     {jobStatusLabel[j.status]}

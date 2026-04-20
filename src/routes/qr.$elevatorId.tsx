@@ -12,8 +12,19 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { StatusBadge, elevatorStatusLabel, elevatorStatusVariant } from "@/components/common/StatusBadge";
-import { mockElevators, mockJobs, mockIssues, getCustomer, getProject, getUser, formatDate, formatDateTime, type IssueReport } from "@/lib/mock-data";
+import { StatusBadge } from "@/components/common/StatusBadge";
+import { elevatorStatusLabel, elevatorStatusVariant } from "@/lib/status-variants";
+import {
+  mockElevators,
+  mockJobs,
+  mockIssues,
+  getCustomer,
+  getProject,
+  getUser,
+  formatDate,
+  formatDateTime,
+  type IssueReport,
+} from "@/lib/mock-data";
 import { useAppStore, useCurrentPermissions } from "@/lib/store";
 import {
   Building2,
@@ -47,7 +58,9 @@ export const Route = createFileRoute("/qr/$elevatorId")({
       <Card className="p-8 text-center max-w-sm w-full">
         <Building2 className="mx-auto h-12 w-12 text-muted-foreground/30 mb-3" />
         <p className="font-semibold">Không tìm thấy thang máy</p>
-        <p className="text-sm text-muted-foreground mt-1">Mã QR không hợp lệ hoặc đã hết hiệu lực</p>
+        <p className="text-sm text-muted-foreground mt-1">
+          Mã QR không hợp lệ hoặc đã hết hiệu lực
+        </p>
         <a href="tel:19001234">
           <Button className="mt-4 w-full gap-2">
             <Phone className="h-4 w-4" /> Gọi 1900 1234
@@ -84,17 +97,24 @@ function QRPage() {
     .slice(0, 5);
 
   const activeJob = mockJobs
-    .filter((j) => j.elevatorId === elevator.id && (j.status === "pending" || j.status === "scheduled" || j.status === "in_progress") && (j.type === "repair" || j.type === "maintenance"))
+    .filter(
+      (j) =>
+        j.elevatorId === elevator.id &&
+        (j.status === "pending" || j.status === "scheduled" || j.status === "in_progress") &&
+        (j.type === "repair" || j.type === "maintenance"),
+    )
     .sort((a, b) => b.scheduledFor.localeCompare(a.scheduledFor))[0];
 
   const assignedTech = activeJob && activeJob.assignedTo ? getUser(activeJob.assignedTo) : null;
 
   const [step, setStep] = useState<Step>("home");
   const [historyOpen, setHistoryOpen] = useState(false);
-  
+
   const permissions = useCurrentPermissions();
   const isStaff = !permissions.includes("customer");
-  const isAdmin = permissions.some(p => ["director", "maintenance_mgmt", "install_mgmt", "accounting", "hr_admin", "sales"].includes(p));
+  const isAdmin = permissions.some((p) =>
+    ["director", "maintenance_mgmt", "install_mgmt", "accounting", "hr_admin", "sales"].includes(p),
+  );
 
   // Report form state
   const [issueType, setIssueType] = useState("");
@@ -107,8 +127,14 @@ function QRPage() {
   const isUrgent = issueType === "Kẹt người trong thang";
 
   const handleSubmit = async () => {
-    if (!issueType) { toast.error("Vui lòng chọn loại sự cố"); return; }
-    if (!phone.trim()) { toast.error("Vui lòng nhập số điện thoại liên hệ"); return; }
+    if (!issueType) {
+      toast.error("Vui lòng chọn loại sự cố");
+      return;
+    }
+    if (!phone.trim()) {
+      toast.error("Vui lòng nhập số điện thoại liên hệ");
+      return;
+    }
     setSubmitting(true);
     await new Promise((r) => setTimeout(r, 700));
     setSubmitting(false);
@@ -131,7 +157,10 @@ function QRPage() {
       <header className="bg-sidebar text-sidebar-foreground sticky top-0 z-10">
         <div className="container max-w-lg mx-auto px-4 py-3 flex items-center gap-3">
           {step !== "home" && (
-            <button onClick={() => setStep("home")} className="text-sidebar-foreground/70 hover:text-sidebar-foreground">
+            <button
+              onClick={() => setStep("home")}
+              className="text-sidebar-foreground/70 hover:text-sidebar-foreground"
+            >
               <ArrowLeft className="h-5 w-5" />
             </button>
           )}
@@ -152,7 +181,6 @@ function QRPage() {
       </header>
 
       <div className="container max-w-lg mx-auto px-4 py-5">
-
         {/* ── STEP: HOME ── */}
         {step === "home" && (
           <div className="space-y-4">
@@ -166,26 +194,26 @@ function QRPage() {
                   <Building2 className="h-7 w-7" />
                 </div>
                 <h1 className="text-2xl font-bold font-mono">{elevator.code}</h1>
-              <p className="text-sm opacity-90 mt-0.5">
-                {elevator.brand} {elevator.model} · {elevator.floors} tầng
-              </p>
-              <p className="text-xs opacity-70 mt-0.5">{elevator.building}</p>
-              <div className="mt-3 flex justify-center">
-                <StatusBadge
-                  variant={elevatorStatusVariant[elevator.status]}
-                  className="bg-white/20 border-white/30 text-white"
-                >
-                  {elevatorStatusLabel[elevator.status]}
-                </StatusBadge>
-              </div>
+                <p className="text-sm opacity-90 mt-0.5">
+                  {elevator.brand} {elevator.model} · {elevator.floors} tầng
+                </p>
+                <p className="text-xs opacity-70 mt-0.5">{elevator.building}</p>
+                <div className="mt-3 flex justify-center">
+                  <StatusBadge
+                    variant={elevatorStatusVariant[elevator.status]}
+                    className="bg-white/20 border-white/30 text-white"
+                  >
+                    {elevatorStatusLabel[elevator.status]}
+                  </StatusBadge>
+                </div>
               </div>
             </Card>
 
             {/* Staff shortcut */}
             {isStaff && (
               <div className="mt-4">
-                <Link 
-                  to={isAdmin ? "/admin/elevators/$elevatorId" : "/tech"} 
+                <Link
+                  to={isAdmin ? "/admin/elevators/$elevatorId" : "/tech"}
                   params={isAdmin ? { elevatorId: elevator.id } : {}}
                 >
                   <div className="flex items-center gap-3 p-4 rounded-xl bg-orange-500 text-white shadow-md hover:opacity-90 transition-opacity">
@@ -257,22 +285,36 @@ function QRPage() {
                   <Wrench className="h-4 w-4 text-muted-foreground" />
                   Lịch sử bảo trì ({history.length})
                 </span>
-                {historyOpen ? <ChevronUp className="h-4 w-4 text-muted-foreground" /> : <ChevronDown className="h-4 w-4 text-muted-foreground" />}
+                {historyOpen ? (
+                  <ChevronUp className="h-4 w-4 text-muted-foreground" />
+                ) : (
+                  <ChevronDown className="h-4 w-4 text-muted-foreground" />
+                )}
               </button>
               {historyOpen && (
                 <div className="border-t divide-y">
                   {history.map((j) => (
                     <div key={j.id} className="flex items-start gap-3 px-4 py-3">
-                      <div className={`mt-1.5 h-2 w-2 rounded-full shrink-0 ${j.status === "completed" ? "bg-success" : "bg-primary"}`} />
+                      <div
+                        className={`mt-1.5 h-2 w-2 rounded-full shrink-0 ${j.status === "completed" ? "bg-success" : "bg-primary"}`}
+                      />
                       <div className="flex-1 min-w-0">
                         <div className="text-sm font-medium truncate">{j.title}</div>
-                        <div className="text-xs text-muted-foreground">{formatDateTime(j.scheduledFor)}</div>
-                        {j.report && <p className="text-xs text-muted-foreground mt-0.5 italic">"{j.report}"</p>}
+                        <div className="text-xs text-muted-foreground">
+                          {formatDateTime(j.scheduledFor)}
+                        </div>
+                        {j.report && (
+                          <p className="text-xs text-muted-foreground mt-0.5 italic">
+                            "{j.report}"
+                          </p>
+                        )}
                       </div>
                     </div>
                   ))}
                   {history.length === 0 && (
-                    <div className="px-4 py-6 text-center text-sm text-muted-foreground">Chưa có lịch sử</div>
+                    <div className="px-4 py-6 text-center text-sm text-muted-foreground">
+                      Chưa có lịch sử
+                    </div>
                   )}
                 </div>
               )}
@@ -285,7 +327,9 @@ function QRPage() {
           <div className="space-y-4">
             <div>
               <h2 className="text-lg font-bold">Báo sự cố</h2>
-              <p className="text-sm text-muted-foreground">Thang {elevator.code} · {elevator.building}</p>
+              <p className="text-sm text-muted-foreground">
+                Thang {elevator.code} · {elevator.building}
+              </p>
             </div>
 
             {activeJob && (
@@ -296,10 +340,12 @@ function QRPage() {
                   </div>
                   <div>
                     <h3 className="font-bold text-primary">Đã ghi nhận sự cố!</h3>
-                    <p className="text-sm text-muted-foreground leading-tight mt-0.5">Thang máy này đang trong quá trình được xử lý.</p>
+                    <p className="text-sm text-muted-foreground leading-tight mt-0.5">
+                      Thang máy này đang trong quá trình được xử lý.
+                    </p>
                   </div>
                 </div>
-                
+
                 <div className="space-y-3 relative before:absolute before:inset-0 before:ml-[1.125rem] before:-translate-x-px md:before:mx-auto md:before:translate-x-0 before:h-full before:w-0.5 before:bg-gradient-to-b before:from-transparent before:via-primary/20 before:to-transparent">
                   <div className="relative flex items-center justify-between md:justify-normal md:odd:flex-row-reverse group is-active">
                     <div className="flex items-center justify-center w-6 h-6 rounded-full border-2 border-white bg-success text-white shadow shrink-0 md:order-1 md:group-odd:-translate-x-1/2 md:group-even:translate-x-1/2 z-10">
@@ -310,27 +356,51 @@ function QRPage() {
                       <div className="text-xs text-muted-foreground">Hệ thống đã nhận tin báo.</div>
                     </div>
                   </div>
-                  
+
                   <div className="relative flex items-center justify-between md:justify-normal md:odd:flex-row-reverse group is-active">
-                    <div className={`flex items-center justify-center w-6 h-6 rounded-full border-2 border-white ${activeJob.status === "scheduled" || activeJob.status === "in_progress" ? "bg-success text-white" : "bg-muted text-muted-foreground"} shadow shrink-0 md:order-1 md:group-odd:-translate-x-1/2 md:group-even:translate-x-1/2 z-10`}>
-                      {(activeJob.status === "scheduled" || activeJob.status === "in_progress") ? <CheckCircle2 className="h-3 w-3" /> : <div className="h-2 w-2 rounded-full bg-current" />}
+                    <div
+                      className={`flex items-center justify-center w-6 h-6 rounded-full border-2 border-white ${activeJob.status === "scheduled" || activeJob.status === "in_progress" ? "bg-success text-white" : "bg-muted text-muted-foreground"} shadow shrink-0 md:order-1 md:group-odd:-translate-x-1/2 md:group-even:translate-x-1/2 z-10`}
+                    >
+                      {activeJob.status === "scheduled" || activeJob.status === "in_progress" ? (
+                        <CheckCircle2 className="h-3 w-3" />
+                      ) : (
+                        <div className="h-2 w-2 rounded-full bg-current" />
+                      )}
                     </div>
                     <div className="w-[calc(100%-2.5rem)] md:w-[calc(50%-1.5rem)] ml-3 md:ml-0 p-3 rounded bg-white shadow-sm border text-sm">
-                      <div className={`font-semibold ${activeJob.assignedTo ? "text-primary" : "text-muted-foreground"}`}>Bố trí nhân sự</div>
+                      <div
+                        className={`font-semibold ${activeJob.assignedTo ? "text-primary" : "text-muted-foreground"}`}
+                      >
+                        Bố trí nhân sự
+                      </div>
                       <div className="text-xs text-muted-foreground">
-                        {activeJob.assignedTo ? `Đã phân công: ${assignedTech?.name || 'Kỹ thuật viên'}` : 'Đang chờ Admin phân công thợ.'}
+                        {activeJob.assignedTo
+                          ? `Đã phân công: ${assignedTech?.name || "Kỹ thuật viên"}`
+                          : "Đang chờ Admin phân công thợ."}
                       </div>
                     </div>
                   </div>
 
                   <div className="relative flex items-center justify-between md:justify-normal md:odd:flex-row-reverse group is-active">
-                     <div className={`flex items-center justify-center w-6 h-6 rounded-full border-2 border-white ${activeJob.status === "in_progress" ? "bg-primary text-white" : "bg-muted text-muted-foreground"} shadow shrink-0 md:order-1 md:group-odd:-translate-x-1/2 md:group-even:translate-x-1/2 z-10`}>
-                      {activeJob.status === "in_progress" ? <Cog className="h-3 w-3 animate-spin duration-3000" /> : <div className="h-2 w-2 rounded-full bg-current" />}
+                    <div
+                      className={`flex items-center justify-center w-6 h-6 rounded-full border-2 border-white ${activeJob.status === "in_progress" ? "bg-primary text-white" : "bg-muted text-muted-foreground"} shadow shrink-0 md:order-1 md:group-odd:-translate-x-1/2 md:group-even:translate-x-1/2 z-10`}
+                    >
+                      {activeJob.status === "in_progress" ? (
+                        <Cog className="h-3 w-3 animate-spin duration-3000" />
+                      ) : (
+                        <div className="h-2 w-2 rounded-full bg-current" />
+                      )}
                     </div>
                     <div className="w-[calc(100%-2.5rem)] md:w-[calc(50%-1.5rem)] ml-3 md:ml-0 p-3 rounded bg-white shadow-sm border text-sm">
-                      <div className={`font-semibold ${activeJob.status === "in_progress" ? "text-primary" : "text-muted-foreground"}`}>Đang xử lý</div>
+                      <div
+                        className={`font-semibold ${activeJob.status === "in_progress" ? "text-primary" : "text-muted-foreground"}`}
+                      >
+                        Đang xử lý
+                      </div>
                       <div className="text-xs text-muted-foreground">
-                        {activeJob.status === "in_progress" ? "Thợ đang làm việc tại hiện trường." : 'Chờ thợ di chuyển tới nơi.'}
+                        {activeJob.status === "in_progress"
+                          ? "Thợ đang làm việc tại hiện trường."
+                          : "Chờ thợ di chuyển tới nơi."}
                       </div>
                     </div>
                   </div>
@@ -344,89 +414,120 @@ function QRPage() {
 
             {!activeJob && (
               <>
-
-            {/* Urgent banner */}
-            {isUrgent && (
-              <div className="flex items-center gap-3 p-4 rounded-xl bg-destructive text-white">
-                <AlertTriangle className="h-5 w-5 shrink-0" />
-                <div className="flex-1 text-sm font-medium">Tình huống khẩn cấp — Gọi ngay 1900 1234</div>
-                <a href="tel:19001234">
-                  <Button size="sm" variant="secondary" className="shrink-0">Gọi ngay</Button>
-                </a>
-              </div>
-            )}
-
-            <Card className="p-4 space-y-4">
-              {/* Issue type */}
-              <div>
-                <label className="text-sm font-medium">Loại sự cố <span className="text-destructive">*</span></label>
-                <Select value={issueType} onValueChange={setIssueType}>
-                  <SelectTrigger className="mt-1.5">
-                    <SelectValue placeholder="Chọn loại sự cố..." />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {issueTypes.map((t) => (
-                      <SelectItem key={t} value={t}>{t}</SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
-
-              {/* Description */}
-              <div>
-                <label className="text-sm font-medium">Mô tả thêm</label>
-                <Textarea
-                  className="mt-1.5"
-                  placeholder="Mô tả chi tiết hiện tượng bạn gặp..."
-                  rows={3}
-                  value={description}
-                  onChange={(e) => setDescription(e.target.value)}
-                />
-              </div>
-
-              {/* Phone */}
-              <div>
-                <label className="text-sm font-medium">Số điện thoại liên hệ <span className="text-destructive">*</span></label>
-                <Input
-                  className="mt-1.5"
-                  placeholder="VD: 0901 234 567"
-                  type="tel"
-                  value={phone}
-                  onChange={(e) => setPhone(e.target.value)}
-                />
-                <p className="text-xs text-muted-foreground mt-1">Để kỹ thuật viên gọi xác nhận</p>
-              </div>
-
-              {/* Photos */}
-              <div>
-                <label className="text-sm font-medium">Đính kèm ảnh <span className="text-muted-foreground font-normal">(không bắt buộc, tối đa 3)</span></label>
-                <div className="mt-1.5 flex gap-2 flex-wrap">
-                  {Array.from({ length: photoCount }).map((_, i) => (
-                    <div key={i} className="h-16 w-16 rounded-lg bg-muted flex items-center justify-center">
-                      <Camera className="h-5 w-5 text-muted-foreground" />
+                {/* Urgent banner */}
+                {isUrgent && (
+                  <div className="flex items-center gap-3 p-4 rounded-xl bg-destructive text-white">
+                    <AlertTriangle className="h-5 w-5 shrink-0" />
+                    <div className="flex-1 text-sm font-medium">
+                      Tình huống khẩn cấp — Gọi ngay 1900 1234
                     </div>
-                  ))}
-                  {photoCount < 3 && (
-                    <button
-                      onClick={() => { setPhotoCount((c) => c + 1); toast.success("Đã thêm ảnh"); }}
-                      className="h-16 w-16 rounded-lg border-2 border-dashed flex items-center justify-center hover:bg-muted transition-colors"
-                    >
-                      <Camera className="h-5 w-5 text-muted-foreground" />
-                    </button>
-                  )}
-                </div>
-              </div>
-            </Card>
+                    <a href="tel:19001234">
+                      <Button size="sm" variant="secondary" className="shrink-0">
+                        Gọi ngay
+                      </Button>
+                    </a>
+                  </div>
+                )}
 
-            <Button onClick={handleSubmit} disabled={submitting} className="w-full gap-2" size="lg">
-              <Send className="h-4 w-4" />
-              {submitting ? "Đang gửi..." : "Gửi báo lỗi"}
-            </Button>
+                <Card className="p-4 space-y-4">
+                  {/* Issue type */}
+                  <div>
+                    <label className="text-sm font-medium">
+                      Loại sự cố <span className="text-destructive">*</span>
+                    </label>
+                    <Select value={issueType} onValueChange={setIssueType}>
+                      <SelectTrigger className="mt-1.5">
+                        <SelectValue placeholder="Chọn loại sự cố..." />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {issueTypes.map((t) => (
+                          <SelectItem key={t} value={t}>
+                            {t}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
 
-            <p className="text-center text-xs text-muted-foreground">
-              Hoặc gọi thẳng <a href="tel:19001234" className="text-destructive font-semibold">1900 1234</a> nếu khẩn cấp
-            </p>
-            </>
+                  {/* Description */}
+                  <div>
+                    <label className="text-sm font-medium">Mô tả thêm</label>
+                    <Textarea
+                      className="mt-1.5"
+                      placeholder="Mô tả chi tiết hiện tượng bạn gặp..."
+                      rows={3}
+                      value={description}
+                      onChange={(e) => setDescription(e.target.value)}
+                    />
+                  </div>
+
+                  {/* Phone */}
+                  <div>
+                    <label className="text-sm font-medium">
+                      Số điện thoại liên hệ <span className="text-destructive">*</span>
+                    </label>
+                    <Input
+                      className="mt-1.5"
+                      placeholder="VD: 0901 234 567"
+                      type="tel"
+                      value={phone}
+                      onChange={(e) => setPhone(e.target.value)}
+                    />
+                    <p className="text-xs text-muted-foreground mt-1">
+                      Để kỹ thuật viên gọi xác nhận
+                    </p>
+                  </div>
+
+                  {/* Photos */}
+                  <div>
+                    <label className="text-sm font-medium">
+                      Đính kèm ảnh{" "}
+                      <span className="text-muted-foreground font-normal">
+                        (không bắt buộc, tối đa 3)
+                      </span>
+                    </label>
+                    <div className="mt-1.5 flex gap-2 flex-wrap">
+                      {Array.from({ length: photoCount }).map((_, i) => (
+                        <div
+                          key={i}
+                          className="h-16 w-16 rounded-lg bg-muted flex items-center justify-center"
+                        >
+                          <Camera className="h-5 w-5 text-muted-foreground" />
+                        </div>
+                      ))}
+                      {photoCount < 3 && (
+                        <button
+                          onClick={() => {
+                            setPhotoCount((c) => c + 1);
+                            toast.success("Đã thêm ảnh");
+                          }}
+                          className="h-16 w-16 rounded-lg border-2 border-dashed flex items-center justify-center hover:bg-muted transition-colors"
+                        >
+                          <Camera className="h-5 w-5 text-muted-foreground" />
+                        </button>
+                      )}
+                    </div>
+                  </div>
+                </Card>
+
+                <Button
+                  onClick={handleSubmit}
+                  disabled={submitting}
+                  className="w-full gap-2"
+                  size="lg"
+                >
+                  <Send className="h-4 w-4" />
+                  {submitting ? "Đang gửi..." : "Gửi báo lỗi"}
+                </Button>
+
+                <p className="text-center text-xs text-muted-foreground">
+                  Hoặc gọi thẳng{" "}
+                  <a href="tel:19001234" className="text-destructive font-semibold">
+                    1900 1234
+                  </a>{" "}
+                  nếu khẩn cấp
+                </p>
+              </>
             )}
           </div>
         )}
@@ -436,7 +537,9 @@ function QRPage() {
           <div className="space-y-4">
             <div>
               <h2 className="text-lg font-bold">Thông tin thang máy</h2>
-              <p className="text-sm text-muted-foreground">{elevator.code} · {elevator.building}</p>
+              <p className="text-sm text-muted-foreground">
+                {elevator.code} · {elevator.building}
+              </p>
             </div>
 
             {/* Technical info */}
@@ -461,7 +564,11 @@ function QRPage() {
               </h3>
               <div className="space-y-2 text-sm">
                 <Row label="Bảo trì gần nhất" value={formatDate(elevator.lastMaintenance)} />
-                <Row label="Bảo trì tiếp theo" value={formatDate(elevator.nextMaintenance)} highlight />
+                <Row
+                  label="Bảo trì tiếp theo"
+                  value={formatDate(elevator.nextMaintenance)}
+                  highlight
+                />
               </div>
               {elevator.status === "maintenance_due" && (
                 <div className="mt-3 flex items-center gap-2 p-2.5 rounded-lg bg-warning/10 text-warning-foreground text-xs">
@@ -484,11 +591,7 @@ function QRPage() {
               </div>
             </Card>
 
-            <Button
-              onClick={() => setStep("report")}
-              variant="outline"
-              className="w-full gap-2"
-            >
+            <Button onClick={() => setStep("report")} variant="outline" className="w-full gap-2">
               <AlertTriangle className="h-4 w-4" /> Phát hiện sự cố? Báo ngay
             </Button>
           </div>
@@ -528,8 +631,9 @@ function QRPage() {
             </Card>
 
             <div className="p-4 rounded-xl bg-primary/5 border border-primary/20 text-sm w-full">
-              Kỹ thuật viên sẽ gọi xác nhận trong vòng <strong>15 phút</strong> và có mặt trong <strong>2 giờ</strong>.
-              Lưu mã <span className="font-mono font-bold text-primary">{ticketNo}</span> để tra cứu.
+              Kỹ thuật viên sẽ gọi xác nhận trong vòng <strong>15 phút</strong> và có mặt trong{" "}
+              <strong>2 giờ</strong>. Lưu mã{" "}
+              <span className="font-mono font-bold text-primary">{ticketNo}</span> để tra cứu.
             </div>
 
             <div className="flex flex-col gap-2 w-full">
@@ -547,7 +651,9 @@ function QRPage() {
 
         <div className="text-center text-xs text-muted-foreground py-6">
           Powered by <span className="font-semibold">ElevatorPro</span> ·{" "}
-          <a href="tel:19001234" className="text-primary">1900 1234</a>
+          <a href="tel:19001234" className="text-primary">
+            1900 1234
+          </a>
         </div>
       </div>
     </div>

@@ -6,13 +6,24 @@ import { PageHeader } from "@/components/common/PageHeader";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { DataPagination } from "@/components/common/DataPagination";
-import { StatusBadge, contractStatusLabel, contractStatusVariant } from "@/components/common/StatusBadge";
+import { StatusBadge } from "@/components/common/StatusBadge";
+import { contractStatusLabel, contractStatusVariant } from "@/lib/status-variants";
 import { Progress } from "@/components/ui/progress";
 import { mockContracts, formatVND, formatDate, getCustomer, type Contract } from "@/lib/mock-data";
 import { Plus, Search, FileText, Calendar, User, Banknote, RefreshCw } from "lucide-react";
-import { RecordPaymentModal, CreateContractModal, RenewContractModal } from "@/components/common/Modals";
+import {
+  RecordPaymentModal,
+  CreateContractModal,
+  RenewContractModal,
+} from "@/components/common/Modals";
 import { toast } from "sonner";
 import { ConfirmationDialog } from "@/components/common/ConfirmationDialog";
 
@@ -90,24 +101,47 @@ function ContractsPage() {
               placeholder="Tìm mã HĐ hoặc khách hàng..."
               className="pl-9"
               value={search}
-              onChange={(e) => { setSearch(e.target.value); setPage(1); }}
+              onChange={(e) => {
+                setSearch(e.target.value);
+                setPage(1);
+              }}
             />
           </div>
-          <Select value={typeFilter} onValueChange={(v) => { setTypeFilter(v); setPage(1); }}>
-            <SelectTrigger className="w-full sm:w-40"><SelectValue placeholder="Loại" /></SelectTrigger>
+          <Select
+            value={typeFilter}
+            onValueChange={(v) => {
+              setTypeFilter(v);
+              setPage(1);
+            }}
+          >
+            <SelectTrigger className="w-full sm:w-40">
+              <SelectValue placeholder="Loại" />
+            </SelectTrigger>
             <SelectContent>
               <SelectItem value="all">Tất cả loại</SelectItem>
               {Object.entries(typeLabel).map(([k, v]) => (
-                <SelectItem key={k} value={k}>{v}</SelectItem>
+                <SelectItem key={k} value={k}>
+                  {v}
+                </SelectItem>
               ))}
             </SelectContent>
           </Select>
-          <Select value={statusFilter} onValueChange={(v) => { setStatusFilter(v); setPage(1); }}>
-            <SelectTrigger className="w-full sm:w-44"><SelectValue /></SelectTrigger>
+          <Select
+            value={statusFilter}
+            onValueChange={(v) => {
+              setStatusFilter(v);
+              setPage(1);
+            }}
+          >
+            <SelectTrigger className="w-full sm:w-44">
+              <SelectValue />
+            </SelectTrigger>
             <SelectContent>
               <SelectItem value="all">Tất cả trạng thái</SelectItem>
               {Object.entries(contractStatusLabel).map(([k, v]) => (
-                <SelectItem key={k} value={k}>{v}</SelectItem>
+                <SelectItem key={k} value={k}>
+                  {v}
+                </SelectItem>
               ))}
             </SelectContent>
           </Select>
@@ -139,7 +173,8 @@ function ContractsPage() {
                         <User className="h-3 w-3" /> {cus?.name}
                       </div>
                       <div className="mt-1 text-xs text-muted-foreground flex items-center gap-1">
-                        <Calendar className="h-3 w-3" /> {formatDate(c.startDate)} → {formatDate(c.endDate)}
+                        <Calendar className="h-3 w-3" /> {formatDate(c.startDate)} →{" "}
+                        {formatDate(c.endDate)}
                       </div>
                       <div className="mt-2 text-xs text-muted-foreground italic">
                         {c.items.join(" · ")}
@@ -155,7 +190,9 @@ function ContractsPage() {
                       </div>
                       <div className="flex items-baseline justify-between gap-2">
                         <span className="text-xs text-muted-foreground">Đã thu ({percent}%)</span>
-                        <span className="text-sm font-medium text-success">{formatVND(c.paid)}</span>
+                        <span className="text-sm font-medium text-success">
+                          {formatVND(c.paid)}
+                        </span>
                       </div>
                       <Progress value={percent} className="h-1.5" />
                       {remaining > 0 && (
@@ -196,7 +233,12 @@ function ContractsPage() {
           })}
         </div>
 
-        <DataPagination page={page} pageSize={PAGE_SIZE} total={filtered.length} onPageChange={setPage} />
+        <DataPagination
+          page={page}
+          pageSize={PAGE_SIZE}
+          total={filtered.length}
+          onPageChange={setPage}
+        />
       </Card>
 
       {paymentContract && (
@@ -212,7 +254,7 @@ function ContractsPage() {
       <CreateContractModal open={createOpen} onClose={() => setCreateOpen(false)} />
 
       {renewContract && (
-        <RenewContractModal 
+        <RenewContractModal
           open={true}
           onClose={() => setRenewContract(null)}
           contractCode={renewContract.code}
@@ -225,7 +267,7 @@ function ContractsPage() {
         title="Xác nhận ghi nhận thanh toán"
         description="Bạn có chắc chắn muốn mở biểu mẫu ghi nhận dòng tiền cho hợp đồng này không? Hãy đảm bảo bạn đã nhận được vận đơn hoặc tiền mặt."
         onConfirm={() => {
-          const c = mockContracts.find(contract => contract.id === confirmPaymentId);
+          const c = mockContracts.find((contract) => contract.id === confirmPaymentId);
           if (c) setPaymentContract(c);
           setConfirmPaymentId(null);
         }}
@@ -238,7 +280,7 @@ function ContractsPage() {
         title="Xác nhận tái ký hợp đồng"
         description="Bắt đầu quy trình soạn thảo phụ lục tái ký cho hợp đồng sắp hết hạn này?"
         onConfirm={() => {
-          const c = mockContracts.find(contract => contract.id === confirmRenewId);
+          const c = mockContracts.find((contract) => contract.id === confirmRenewId);
           if (c) setRenewContract(c);
           setConfirmRenewId(null);
         }}

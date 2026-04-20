@@ -2,14 +2,30 @@ import { createFileRoute } from "@tanstack/react-router";
 import { AppShell } from "@/components/layout/AppShell";
 import { PageHeader } from "@/components/common/PageHeader";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Wallet, Receipt, FileText, TrendingUp, Download, Plus, CheckCircle2, AlertTriangle, ChevronRight } from "lucide-react";
+import {
+  Wallet,
+  Receipt,
+  FileText,
+  TrendingUp,
+  Download,
+  Plus,
+  CheckCircle2,
+  AlertTriangle,
+  ChevronRight,
+} from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { mockContracts, markMilestonePaid, formatVND, formatDate } from "@/lib/mock-data";
 import { useState } from "react";
 import { useAppStore, useCanWrite } from "@/lib/store";
 import { DataPagination } from "@/components/common/DataPagination";
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogFooter,
+} from "@/components/ui/dialog";
 
 export const Route = createFileRoute("/admin/accounting")({
   head: () => ({ meta: [{ title: "Kế toán — ElevatorPro" }] }),
@@ -21,23 +37,39 @@ function AccountingPage() {
 
   // Thống kê nhanh
   const totalRevenueThisMonth = contracts.reduce((acc, c) => acc + c.paid, 0); // Mẫu: c.paid hiện tại
-  
+
   // Tổng hợp tất cả các milestone chưa thanh toán
-  const pendingMilestones = contracts.flatMap(c => 
-    c.milestones.map(m => ({ ...m, contractCode: c.code, customerId: c.customerId, contractId: c.id }))
-  ).filter(m => m.status !== "paid");
+  const pendingMilestones = contracts
+    .flatMap((c) =>
+      c.milestones.map((m) => ({
+        ...m,
+        contractCode: c.code,
+        customerId: c.customerId,
+        contractId: c.id,
+      })),
+    )
+    .filter((m) => m.status !== "paid");
 
   // Những cái overdue hoặc gần đến hạn
-  const sortedMilestones = pendingMilestones.sort((a, b) => new Date(a.dueDate).getTime() - new Date(b.dueDate).getTime());
+  const sortedMilestones = pendingMilestones.sort(
+    (a, b) => new Date(a.dueDate).getTime() - new Date(b.dueDate).getTime(),
+  );
 
   // Pagination & Modal State
-  const activeTenantId = useAppStore(s => s.activeTenantId);
+  const activeTenantId = useAppStore((s) => s.activeTenantId);
   const canAcc = useCanWrite("accounting");
   const [currentPage, setCurrentPage] = useState(1);
   const pageSize = 5;
-  const paginatedMilestones = sortedMilestones.slice((currentPage - 1) * pageSize, currentPage * pageSize);
-  
-  const [confirmMilestone, setConfirmMilestone] = useState<{contractId: string, id: string, amount: number} | null>(null);
+  const paginatedMilestones = sortedMilestones.slice(
+    (currentPage - 1) * pageSize,
+    currentPage * pageSize,
+  );
+
+  const [confirmMilestone, setConfirmMilestone] = useState<{
+    contractId: string;
+    id: string;
+    amount: number;
+  } | null>(null);
 
   const confirmMarkPaid = (contractId: string, id: string, amount: number) => {
     setConfirmMilestone({ contractId, id, amount });
@@ -53,10 +85,17 @@ function AccountingPage() {
   return (
     <AppShell>
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-6">
-        <PageHeader title="Kế toán & Công nợ" description="Quản lý hóa đơn, thu chi và thanh toán hợp đồng" />
+        <PageHeader
+          title="Kế toán & Công nợ"
+          description="Quản lý hóa đơn, thu chi và thanh toán hợp đồng"
+        />
         <div className="flex gap-2">
-          <Button variant="outline" className="gap-2"><Download className="h-4 w-4" /> Xuất Excel</Button>
-          <Button className="gap-2"><Plus className="h-4 w-4" /> Tạo Hóa Đơn</Button>
+          <Button variant="outline" className="gap-2">
+            <Download className="h-4 w-4" /> Xuất Excel
+          </Button>
+          <Button className="gap-2">
+            <Plus className="h-4 w-4" /> Tạo Hóa Đơn
+          </Button>
         </div>
       </div>
 
@@ -68,7 +107,9 @@ function AccountingPage() {
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">{formatVND(totalRevenueThisMonth)}</div>
-            <p className="text-xs text-muted-foreground mt-1 flex items-center text-success"><TrendingUp className="h-3 w-3 mr-1" /> Toàn thời gian</p>
+            <p className="text-xs text-muted-foreground mt-1 flex items-center text-success">
+              <TrendingUp className="h-3 w-3 mr-1" /> Toàn thời gian
+            </p>
           </CardContent>
         </Card>
         <Card>
@@ -80,7 +121,9 @@ function AccountingPage() {
             <div className="text-2xl font-bold text-warning-foreground">
               {formatVND(pendingMilestones.reduce((acc, m) => acc + m.amount, 0))}
             </div>
-            <p className="text-xs text-muted-foreground mt-1">Từ {pendingMilestones.length} đợt thanh toán</p>
+            <p className="text-xs text-muted-foreground mt-1">
+              Từ {pendingMilestones.length} đợt thanh toán
+            </p>
           </CardContent>
         </Card>
         <Card>
@@ -111,23 +154,44 @@ function AccountingPage() {
         </CardHeader>
         <CardContent className="p-0">
           <div className="divide-y">
-            {paginatedMilestones.map(ms => {
+            {paginatedMilestones.map((ms) => {
               const isOverdue = new Date(ms.dueDate) < new Date("2026-04-19"); // Mock current date logic
               return (
-                <div key={ms.id} className="p-4 flex items-center justify-between hover:bg-muted/50 transition-colors">
+                <div
+                  key={ms.id}
+                  className="p-4 flex items-center justify-between hover:bg-muted/50 transition-colors"
+                >
                   <div className="flex gap-4">
-                    <div className={`mt-1 flex h-10 w-10 shrink-0 items-center justify-center rounded-full ${isOverdue ? 'bg-destructive/10 text-destructive' : 'bg-primary/10 text-primary'}`}>
-                      {isOverdue ? <AlertTriangle className="h-5 w-5" /> : <Receipt className="h-5 w-5" />}
+                    <div
+                      className={`mt-1 flex h-10 w-10 shrink-0 items-center justify-center rounded-full ${isOverdue ? "bg-destructive/10 text-destructive" : "bg-primary/10 text-primary"}`}
+                    >
+                      {isOverdue ? (
+                        <AlertTriangle className="h-5 w-5" />
+                      ) : (
+                        <Receipt className="h-5 w-5" />
+                      )}
                     </div>
                     <div>
                       <div className="flex items-center gap-2">
                         <div className="font-semibold">{ms.name}</div>
-                        {isOverdue && <Badge variant="destructive" className="h-5 text-[10px]">Quá hạn</Badge>}
-                        {ms.status === "pending" && !isOverdue && <Badge variant="outline" className="h-5 text-[10px] text-warning-foreground border-warning-foreground bg-warning-foreground/10">Sắp đến</Badge>}
+                        {isOverdue && (
+                          <Badge variant="destructive" className="h-5 text-[10px]">
+                            Quá hạn
+                          </Badge>
+                        )}
+                        {ms.status === "pending" && !isOverdue && (
+                          <Badge
+                            variant="outline"
+                            className="h-5 text-[10px] text-warning-foreground border-warning-foreground bg-warning-foreground/10"
+                          >
+                            Sắp đến
+                          </Badge>
+                        )}
                       </div>
                       <div className="text-sm text-muted-foreground flex items-center mt-1">
-                        Hợp đồng: <span className="font-medium text-foreground mx-1">{ms.contractCode}</span>
-                        • Hạn chót: {formatDate(ms.dueDate)}
+                        Hợp đồng:{" "}
+                        <span className="font-medium text-foreground mx-1">{ms.contractCode}</span>•
+                        Hạn chót: {formatDate(ms.dueDate)}
                       </div>
                     </div>
                   </div>
@@ -136,7 +200,7 @@ function AccountingPage() {
                       <div className="font-bold text-lg">{formatVND(ms.amount)}</div>
                     </div>
                     {canAcc ? (
-                      <Button 
+                      <Button
                         onClick={() => confirmMarkPaid(ms.contractId, ms.id, ms.amount)}
                         className="gap-2"
                         variant={isOverdue ? "default" : "secondary"}
@@ -144,7 +208,9 @@ function AccountingPage() {
                         <CheckCircle2 className="h-4 w-4" /> Đã Thu
                       </Button>
                     ) : (
-                      <Badge variant="outline" className="opacity-50 border-dashed">Chờ đối soát</Badge>
+                      <Badge variant="outline" className="opacity-50 border-dashed">
+                        Chờ đối soát
+                      </Badge>
                     )}
                   </div>
                 </div>
@@ -157,7 +223,7 @@ function AccountingPage() {
               </div>
             )}
           </div>
-          <DataPagination 
+          <DataPagination
             page={currentPage}
             total={sortedMilestones.length}
             pageSize={pageSize}
@@ -172,11 +238,22 @@ function AccountingPage() {
             <DialogTitle>Xác nhận đã thu tiền</DialogTitle>
           </DialogHeader>
           <div className="py-4">
-            Bạn xác nhận đã nhận đủ số tiền <span className="font-bold text-success">{confirmMilestone ? formatVND(confirmMilestone.amount) : 0}</span> chứ? (Hành động này sẽ cập nhật công nợ hợp đồng và không thể hoàn tác).
+            Bạn xác nhận đã nhận đủ số tiền{" "}
+            <span className="font-bold text-success">
+              {confirmMilestone ? formatVND(confirmMilestone.amount) : 0}
+            </span>{" "}
+            chứ? (Hành động này sẽ cập nhật công nợ hợp đồng và không thể hoàn tác).
           </div>
           <DialogFooter>
-            <Button variant="outline" onClick={() => setConfirmMilestone(null)}>Hủy</Button>
-            <Button className="bg-success text-success-foreground hover:bg-success/90" onClick={handleMarkPaid}>Xác nhận Đã Thu</Button>
+            <Button variant="outline" onClick={() => setConfirmMilestone(null)}>
+              Hủy
+            </Button>
+            <Button
+              className="bg-success text-success-foreground hover:bg-success/90"
+              onClick={handleMarkPaid}
+            >
+              Xác nhận Đã Thu
+            </Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>

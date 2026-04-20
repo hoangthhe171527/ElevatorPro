@@ -5,7 +5,16 @@ import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import QRCode from "react-qr-code";
 import { mockElevators, getCustomer, getProject } from "@/lib/mock-data";
-import { ArrowLeft, Download, Printer, Copy, ExternalLink, Building2, Shield, ScanLine } from "lucide-react";
+import {
+  ArrowLeft,
+  Download,
+  Printer,
+  Copy,
+  ExternalLink,
+  Building2,
+  Shield,
+  ScanLine,
+} from "lucide-react";
 import { toast } from "sonner";
 import { useRef } from "react";
 
@@ -22,7 +31,9 @@ export const Route = createFileRoute("/admin/elevators/$elevatorId/qr")({
     <AppShell>
       <div className="p-12 text-center">
         <p className="text-muted-foreground">Không tìm thấy thang máy</p>
-        <Link to="/admin/elevators"><Button className="mt-4">Quay lại</Button></Link>
+        <Link to="/admin/elevators">
+          <Button className="mt-4">Quay lại</Button>
+        </Link>
       </div>
     </AppShell>
   ),
@@ -36,9 +47,10 @@ function ElevatorQRAdmin() {
   const qrRef = useRef<HTMLDivElement>(null);
 
   // MOCK: Generate the real URL that passengers will scan
-  const publicUrl = typeof window !== 'undefined' 
-    ? `${window.location.origin}/qr/${elevator.id}`
-    : `https://elevatorpro.vn/qr/${elevator.id}`;
+  const publicUrl =
+    typeof window !== "undefined"
+      ? `${window.location.origin}/qr/${elevator.id}`
+      : `https://elevatorpro.vn/qr/${elevator.id}`;
 
   const handlePrint = () => {
     toast.success("Đang chuẩn bị trang in...");
@@ -50,7 +62,7 @@ function ElevatorQRAdmin() {
   const handleCopy = () => {
     navigator.clipboard.writeText(publicUrl);
     toast.success("Đã sao chép liên kết vào clipboard", {
-      description: publicUrl
+      description: publicUrl,
     });
   };
 
@@ -78,7 +90,6 @@ function ElevatorQRAdmin() {
       />
 
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 my-6">
-        
         {/* LEFT BAR - TOOLBAR & INFO */}
         <div className="lg:col-span-5 space-y-6">
           <Card className="p-5 shadow-sm border-muted/60 bg-card/50 backdrop-blur-sm">
@@ -86,9 +97,10 @@ function ElevatorQRAdmin() {
               <ScanLine className="h-5 w-5 text-primary" /> Mẫu in nhãn dán
             </h3>
             <p className="text-sm text-muted-foreground mb-6">
-              Mã QR này được thiết kế để in dán trong cabin thang máy hoặc sảnh chờ. Hành khách có thể quét để gọi cứu hộ trực tiếp hoặc xem lịch sử bảo trì (tùy cài đặt).
+              Mã QR này được thiết kế để in dán trong cabin thang máy hoặc sảnh chờ. Hành khách có
+              thể quét để gọi cứu hộ trực tiếp hoặc xem lịch sử bảo trì (tùy cài đặt).
             </p>
-            
+
             <div className="space-y-4">
               <div>
                 <label className="text-xs font-semibold text-muted-foreground mb-1 block uppercase tracking-wide">
@@ -98,7 +110,12 @@ function ElevatorQRAdmin() {
                   <div className="flex-1 bg-muted/50 rounded-md border px-3 py-2 text-xs font-mono truncate text-muted-foreground select-all">
                     {publicUrl}
                   </div>
-                  <Button variant="outline" size="icon" className="shrink-0 h-[34px] w-[34px]" onClick={handleCopy}>
+                  <Button
+                    variant="outline"
+                    size="icon"
+                    className="shrink-0 h-[34px] w-[34px]"
+                    onClick={handleCopy}
+                  >
                     <Copy className="h-3.5 w-3.5" />
                   </Button>
                 </div>
@@ -108,13 +125,20 @@ function ElevatorQRAdmin() {
                 <Button className="w-full gap-2 shadow-sm" onClick={handlePrint}>
                   <Printer className="h-4 w-4" /> In nhãn dán
                 </Button>
-                <Button variant="secondary" className="w-full gap-2 shadow-sm" onClick={handleDownload}>
+                <Button
+                  variant="secondary"
+                  className="w-full gap-2 shadow-sm"
+                  onClick={handleDownload}
+                >
                   <Download className="h-4 w-4" /> Tải dạng ảnh
                 </Button>
               </div>
 
               <a href={publicUrl} target="_blank" rel="noreferrer" className="block mt-2">
-                <Button variant="ghost" className="w-full gap-2 text-muted-foreground hover:text-foreground">
+                <Button
+                  variant="ghost"
+                  className="w-full gap-2 text-muted-foreground hover:text-foreground"
+                >
                   <ExternalLink className="h-4 w-4" /> Xem thử giao diện hành khách
                 </Button>
               </a>
@@ -147,8 +171,9 @@ function ElevatorQRAdmin() {
 
         {/* RIGHT BAR - ACTUAL PREVIEW (PRINT TARGET) */}
         <div className="lg:col-span-7 flex items-center justify-center bg-muted/30 p-8 rounded-2xl border border-dashed border-muted-foreground/20">
-          
-          <style dangerouslySetInnerHTML={{__html: `
+          <style
+            dangerouslySetInnerHTML={{
+              __html: `
             @media print {
               body * { visibility: hidden; }
               #printable-qr-wrapper, #printable-qr-wrapper * { visibility: visible; }
@@ -165,10 +190,12 @@ function ElevatorQRAdmin() {
               }
               .print-hide { display: none !important; }
             }
-          `}} />
+          `,
+            }}
+          />
 
           {/* THE STICKER */}
-          <div 
+          <div
             id="printable-qr-wrapper"
             ref={qrRef}
             className="w-[340px] bg-white rounded-3xl shadow-xl overflow-hidden border-2 border-primary/10 transition-transform hover:scale-105 duration-500 ease-out"
@@ -179,20 +206,22 @@ function ElevatorQRAdmin() {
                 <Shield className="w-24 h-24" />
               </div>
               <h2 className="font-bold text-xl tracking-tight relative z-10 flex flex-col items-center gap-1">
-                <span className="text-xs uppercase tracking-widest font-medium opacity-80 mb-0.5">Mã ID Thang Máy</span>
+                <span className="text-xs uppercase tracking-widest font-medium opacity-80 mb-0.5">
+                  Mã ID Thang Máy
+                </span>
                 {elevator.code}
               </h2>
             </div>
-            
+
             {/* Body */}
             <div className="p-8 flex flex-col items-center text-center">
               <p className="text-[13px] text-zinc-500 font-medium mb-6 uppercase tracking-wider">
                 Quét để yêu cầu hỗ trợ
               </p>
-              
+
               <div className="bg-white p-3 rounded-2xl border-2 border-zinc-100 shadow-sm relative">
                 <div className="absolute inset-0 flex items-center justify-center opacity-[0.03] pointer-events-none">
-                   <Building2 className="w-20 h-20" />
+                  <Building2 className="w-20 h-20" />
                 </div>
                 {/* REACT QR CODE MODULE */}
                 <QRCode
@@ -208,9 +237,7 @@ function ElevatorQRAdmin() {
                 <div className="text-zinc-400 text-xs font-semibold uppercase tracking-widest mb-1.5">
                   Hotline Hỗ Trợ 24/7
                 </div>
-                <div className="text-2xl font-black text-rose-600 tracking-tight">
-                  1900 1234
-                </div>
+                <div className="text-2xl font-black text-rose-600 tracking-tight">1900 1234</div>
                 {customer?.name && (
                   <div className="mt-2 text-xs font-medium text-zinc-500 max-w-[200px] truncate">
                     {customer.name}
@@ -218,7 +245,7 @@ function ElevatorQRAdmin() {
                 )}
               </div>
             </div>
-            
+
             {/* Footer */}
             <div className="bg-zinc-50 py-3 text-center border-t border-zinc-100">
               <span className="text-[10px] font-semibold tracking-widest text-zinc-400 uppercase">
@@ -227,7 +254,6 @@ function ElevatorQRAdmin() {
             </div>
           </div>
         </div>
-
       </div>
     </AppShell>
   );

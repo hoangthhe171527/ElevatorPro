@@ -14,14 +14,21 @@ import {
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { RouteMap } from "@/components/common/RouteMap";
+import { StatusBadge } from "@/components/common/StatusBadge";
 import {
-  StatusBadge,
   jobStatusLabel,
   jobStatusVariant,
   priorityLabel,
   priorityVariant,
-} from "@/components/common/StatusBadge";
-import { mockJobs, getCustomer, getElevator, formatDateTime, optimizeRoute, mockInventory } from "@/lib/mock-data";
+} from "@/lib/status-variants";
+import {
+  mockJobs,
+  getCustomer,
+  getElevator,
+  formatDateTime,
+  optimizeRoute,
+  mockInventory,
+} from "@/lib/mock-data";
 import { useAppStore } from "@/lib/store";
 import {
   ArrowLeft,
@@ -52,7 +59,9 @@ export const Route = createFileRoute("/tech/jobs/$jobId")({
     <AppShell>
       <div className="p-12 text-center">
         <p>Không tìm thấy</p>
-        <Link to="/tech/jobs"><Button className="mt-4">Quay lại</Button></Link>
+        <Link to="/tech/jobs">
+          <Button className="mt-4">Quay lại</Button>
+        </Link>
       </div>
     </AppShell>
   ),
@@ -71,10 +80,10 @@ function TechJobDetail() {
   const [status, setStatus] = useState<typeof job.status>(job.status);
   const [usedParts, setUsedParts] = useState<{ id: string; qty: number }[]>([]);
   const [selectedPartId, setSelectedPartId] = useState("");
-  
+
   const addPart = () => {
     if (!selectedPartId) return;
-    if (usedParts.find(p => p.id === selectedPartId)) {
+    if (usedParts.find((p) => p.id === selectedPartId)) {
       toast.error("Vật tư này đã có trong danh sách");
       return;
     }
@@ -84,11 +93,11 @@ function TechJobDetail() {
 
   const updatePartQty = (id: string, qty: number) => {
     if (qty < 1) return;
-    setUsedParts(usedParts.map(p => p.id === id ? { ...p, qty } : p));
+    setUsedParts(usedParts.map((p) => (p.id === id ? { ...p, qty } : p)));
   };
 
   const removePart = (id: string) => {
-    setUsedParts(usedParts.filter(p => p.id !== id));
+    setUsedParts(usedParts.filter((p) => p.id !== id));
   };
 
   const route = useMemo(() => {
@@ -203,12 +212,18 @@ function TechJobDetail() {
                 <div className="text-xs font-medium mb-2">Trước ({beforeCount})</div>
                 <div className="grid grid-cols-2 gap-2">
                   {Array.from({ length: beforeCount }).map((_, i) => (
-                    <div key={i} className="aspect-square rounded-lg bg-muted flex items-center justify-center">
+                    <div
+                      key={i}
+                      className="aspect-square rounded-lg bg-muted flex items-center justify-center"
+                    >
                       <Camera className="h-5 w-5 text-muted-foreground" />
                     </div>
                   ))}
                   <button
-                    onClick={() => { setBeforeCount((c) => c + 1); toast.success("Đã thêm ảnh trước"); }}
+                    onClick={() => {
+                      setBeforeCount((c) => c + 1);
+                      toast.success("Đã thêm ảnh trước");
+                    }}
                     className="aspect-square rounded-lg border-2 border-dashed flex items-center justify-center hover:bg-muted transition-colors"
                   >
                     <Plus className="h-5 w-5 text-muted-foreground" />
@@ -219,12 +234,18 @@ function TechJobDetail() {
                 <div className="text-xs font-medium mb-2">Sau ({afterCount})</div>
                 <div className="grid grid-cols-2 gap-2">
                   {Array.from({ length: afterCount }).map((_, i) => (
-                    <div key={i} className="aspect-square rounded-lg bg-muted flex items-center justify-center">
+                    <div
+                      key={i}
+                      className="aspect-square rounded-lg bg-muted flex items-center justify-center"
+                    >
                       <Camera className="h-5 w-5 text-muted-foreground" />
                     </div>
                   ))}
                   <button
-                    onClick={() => { setAfterCount((c) => c + 1); toast.success("Đã thêm ảnh sau"); }}
+                    onClick={() => {
+                      setAfterCount((c) => c + 1);
+                      toast.success("Đã thêm ảnh sau");
+                    }}
                     className="aspect-square rounded-lg border-2 border-dashed flex items-center justify-center hover:bg-muted transition-colors"
                   >
                     <Plus className="h-5 w-5 text-muted-foreground" />
@@ -248,34 +269,58 @@ function TechJobDetail() {
                   <SelectValue placeholder="Chọn vật tư từ kho..." />
                 </SelectTrigger>
                 <SelectContent>
-                  {mockInventory.map(item => (
+                  {mockInventory.map((item) => (
                     <SelectItem key={item.id} value={item.id}>
                       {item.name} ({item.stock} {item.unit} sẵn có)
                     </SelectItem>
                   ))}
                 </SelectContent>
               </Select>
-              <Button onClick={addPart} variant="secondary">Thêm</Button>
+              <Button onClick={addPart} variant="secondary">
+                Thêm
+              </Button>
             </div>
-            
+
             {usedParts.length > 0 ? (
               <div className="border rounded-lg overflow-hidden">
                 {usedParts.map((p, idx) => {
-                  const part = mockInventory.find(i => i.id === p.id);
+                  const part = mockInventory.find((i) => i.id === p.id);
                   if (!part) return null;
                   return (
-                    <div key={p.id} className={`flex items-center justify-between p-3 ${idx < usedParts.length - 1 ? 'border-b' : ''}`}>
+                    <div
+                      key={p.id}
+                      className={`flex items-center justify-between p-3 ${idx < usedParts.length - 1 ? "border-b" : ""}`}
+                    >
                       <div className="min-w-0 flex-1">
                         <div className="font-medium text-sm truncate">{part.name}</div>
                         <div className="text-xs text-muted-foreground">{part.code}</div>
                       </div>
                       <div className="flex items-center gap-3">
                         <div className="flex items-center gap-2">
-                          <Button size="icon" variant="outline" className="h-7 w-7" onClick={() => updatePartQty(p.id, p.qty - 1)}>-</Button>
+                          <Button
+                            size="icon"
+                            variant="outline"
+                            className="h-7 w-7"
+                            onClick={() => updatePartQty(p.id, p.qty - 1)}
+                          >
+                            -
+                          </Button>
                           <span className="w-6 text-center text-sm font-medium">{p.qty}</span>
-                          <Button size="icon" variant="outline" className="h-7 w-7" onClick={() => updatePartQty(p.id, p.qty + 1)}>+</Button>
+                          <Button
+                            size="icon"
+                            variant="outline"
+                            className="h-7 w-7"
+                            onClick={() => updatePartQty(p.id, p.qty + 1)}
+                          >
+                            +
+                          </Button>
                         </div>
-                        <Button size="icon" variant="ghost" className="h-7 w-7 text-destructive hover:text-destructive hover:bg-destructive/10" onClick={() => removePart(p.id)}>
+                        <Button
+                          size="icon"
+                          variant="ghost"
+                          className="h-7 w-7 text-destructive hover:text-destructive hover:bg-destructive/10"
+                          onClick={() => removePart(p.id)}
+                        >
                           <Trash2 className="h-4 w-4" />
                         </Button>
                       </div>
@@ -345,7 +390,10 @@ function TechJobDetail() {
               <div className="space-y-2 text-sm">
                 <div className="font-medium">{cus.name}</div>
                 <div className="text-xs text-muted-foreground">{cus.contactPerson}</div>
-                <a href={`tel:${cus.phone}`} className="flex items-center gap-1.5 text-xs text-primary">
+                <a
+                  href={`tel:${cus.phone}`}
+                  className="flex items-center gap-1.5 text-xs text-primary"
+                >
                   <Phone className="h-3 w-3" /> {cus.phone}
                 </a>
                 <div className="flex items-start gap-1.5 text-xs">

@@ -6,20 +6,23 @@ import { PageHeader } from "@/components/common/PageHeader";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { DataPagination } from "@/components/common/DataPagination";
 import { Badge } from "@/components/ui/badge";
-import { mockCustomers, mockContracts, mockElevators, mockProjects, formatDate } from "@/lib/mock-data";
 import {
-  Plus,
-  Search,
-  Building2,
-  User,
-  Phone,
-  Mail,
-  MapPin,
-  ChevronRight,
-} from "lucide-react";
+  mockCustomers,
+  mockContracts,
+  mockElevators,
+  mockProjects,
+  formatDate,
+} from "@/lib/mock-data";
+import { Plus, Search, Building2, User, Phone, Mail, MapPin, ChevronRight } from "lucide-react";
 import { CreateCustomerModal } from "@/components/common/Modals";
 
 export const Route = createFileRoute("/admin/customers/")({
@@ -37,9 +40,7 @@ function CustomersPage() {
 
   const filtered = mockCustomers.filter((c) => {
     const m1 =
-      !search ||
-      c.name.toLowerCase().includes(search.toLowerCase()) ||
-      c.phone.includes(search);
+      !search || c.name.toLowerCase().includes(search.toLowerCase()) || c.phone.includes(search);
     const m2 = typeFilter === "all" || c.type === typeFilter;
     return m1 && m2;
   });
@@ -65,11 +66,22 @@ function CustomersPage() {
               placeholder="Tìm khách hàng..."
               className="pl-9"
               value={search}
-              onChange={(e) => { setSearch(e.target.value); setPage(1); }}
+              onChange={(e) => {
+                setSearch(e.target.value);
+                setPage(1);
+              }}
             />
           </div>
-          <Select value={typeFilter} onValueChange={(v) => { setTypeFilter(v); setPage(1); }}>
-            <SelectTrigger className="w-full sm:w-44"><SelectValue /></SelectTrigger>
+          <Select
+            value={typeFilter}
+            onValueChange={(v) => {
+              setTypeFilter(v);
+              setPage(1);
+            }}
+          >
+            <SelectTrigger className="w-full sm:w-44">
+              <SelectValue />
+            </SelectTrigger>
             <SelectContent>
               <SelectItem value="all">Tất cả loại</SelectItem>
               <SelectItem value="business">Doanh nghiệp</SelectItem>
