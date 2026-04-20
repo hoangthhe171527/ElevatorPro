@@ -6,7 +6,7 @@ import tailwindcss from "@tailwindcss/vite";
 import tsconfigPaths from "vite-tsconfig-paths";
 
 export default defineConfig({
-  plugins: [tanstackStart(), nitro({ preset: "vercel" }), react(), tailwindcss(), tsconfigPaths()],
+  plugins: [tanstackStart(), nitro({ preset: "netlify" }), react(), tailwindcss(), tsconfigPaths()],
   ssr: {
     noExternal: ["tslib", "zustand", "sonner"],
   },
