@@ -29,6 +29,8 @@ import {
   Camera,
   Scan,
   Plus,
+  Wifi,
+  WifiOff,
 } from "lucide-react";
 import { useAppStore, useCurrentPermissions, useMainRole } from "@/lib/store";
 import { mockTenants, mockUsers } from "@/lib/mock-data";
@@ -57,6 +59,7 @@ export function MobileShell({ children, title, showBackButton, backLink, actions
   const location = useLocation();
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isAccountOpen, setIsAccountOpen] = useState(false);
+  const [isOnline, setIsOnline] = useState(true);
 
   // Portal container for modals
   const shellRef = useRef<HTMLDivElement>(null);
@@ -66,6 +69,16 @@ export function MobileShell({ children, title, showBackButton, backLink, actions
     if (shellRef.current) {
       setPortalNode(shellRef.current);
     }
+
+    // Network status listeners
+    const handleOnline = () => setIsOnline(true);
+    const handleOffline = () => setIsOnline(false);
+    window.addEventListener('online', handleOnline);
+    window.addEventListener('offline', handleOffline);
+    return () => {
+        window.removeEventListener('online', handleOnline);
+        window.removeEventListener('offline', handleOffline);
+    };
   }, []);
 
   const initials = user.name
@@ -190,8 +203,15 @@ export function MobileShell({ children, title, showBackButton, backLink, actions
           <div className="flex-1 flex flex-col items-center justify-center min-w-0 px-1 overflow-hidden">
                <span className="text-[11px] font-black text-slate-900 uppercase tracking-[0.15em] line-clamp-2 text-center w-full leading-tight">{title || "COMMAND"}</span>
                {!showBackButton && !backLink && (
-                 <div className="px-2 py-0.5 rounded-full bg-emerald-500/10 text-[7px] font-black text-emerald-600 uppercase tracking-widest mt-1 border border-emerald-500/20 whitespace-nowrap">
-                    {role} • {companySize}
+                 <div className="flex items-center gap-2 mt-1">
+                   <div className="px-2 py-0.5 rounded-full bg-emerald-500/10 text-[7px] font-black text-emerald-600 uppercase tracking-widest border border-emerald-500/20 whitespace-nowrap">
+                      {role}
+                   </div>
+                   {!isOnline && (
+                     <div className="px-2 py-0.5 rounded-full bg-rose-500 text-[7px] font-black text-white uppercase tracking-widest flex items-center gap-1 border border-rose-600 shadow-sm animate-pulse">
+                        <WifiOff className="h-2 w-2" /> Offline
+                     </div>
+                   )}
                  </div>
                )}
           </div>

@@ -5,9 +5,10 @@ import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { StatusBadge } from "@/components/common/StatusBadge";
 import { jobStatusLabel, jobStatusVariant } from "@/lib/status-variants";
-import { CheckCircle2, MapPin, Clock, ChevronRight, Filter, Phone, Play } from "lucide-react";
+import { CheckCircle2, MapPin, Clock, ChevronRight, Filter, Phone, Play, Search, X } from "lucide-react";
 import { useState } from "react";
 import { ConfirmationDialog } from "@/components/common/ConfirmationDialog";
+import { Input } from "@/components/ui/input";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
 
@@ -18,10 +19,19 @@ export const Route = createFileRoute("/mobile/jobs")({
 
 function MobileJobs() {
   const [filter, setFilter] = useState<string>("all");
+  const [search, setSearch] = useState("");
   const [confirmOpen, setConfirmOpen] = useState(false);
   const [selectedJobId, setSelectedJobId] = useState<string | null>(null);
 
   const filteredJobs = mockJobs.filter((job) => {
+    const cus = getCustomer(job.customerId);
+    const searchMatch = 
+      job.title.toLowerCase().includes(search.toLowerCase()) ||
+      job.code.toLowerCase().includes(search.toLowerCase()) ||
+      cus?.name.toLowerCase().includes(search.toLowerCase());
+
+    if (!searchMatch) return false;
+
     if (filter === "all") return true;
     if (filter === "pending") return job.status === "scheduled";
     if (filter === "doing") return job.status === "in_progress";
@@ -36,8 +46,27 @@ function MobileJobs() {
 
   return (
     <MobileShell title="Lộ trình công việc">
-      <div className="bg-white sticky top-0 z-20 pb-2">
-        <div className="px-4 py-3 flex gap-2 overflow-x-auto scrollbar-hide">
+      <div className="bg-white sticky top-0 z-20 pb-3 border-b shadow-sm">
+        <div className="px-5 pt-4 pb-2">
+          <div className="relative group">
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400 group-focus-within:text-primary transition-colors" />
+            <Input
+              placeholder="Mã số, tên khách hàng..."
+              className="pl-10 pr-10 h-11 bg-slate-50 border-none shadow-inner rounded-xl text-xs font-bold"
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
+            />
+            {search && (
+              <button 
+                onClick={() => setSearch("")}
+                className="absolute right-3 top-1/2 -translate-y-1/2 h-6 w-6 rounded-full bg-slate-200 flex items-center justify-center"
+              >
+                <X className="h-3 w-3 text-slate-500" />
+              </button>
+            )}
+          </div>
+        </div>
+        <div className="px-4 py-1 flex gap-2 overflow-x-auto scrollbar-hide">
           <button
             onClick={() => setFilter("all")}
             className={cn(

@@ -35,6 +35,8 @@ import {
   Calendar,
   ArrowUpRight,
   Plus,
+  Navigation,
+  UserCheck,
 } from "lucide-react";
 import { CreateJobModal } from "@/components/common/Modals";
 import { useState } from "react";
@@ -75,6 +77,13 @@ function AdminDashboard() {
   const recentContracts = [...tenantContracts]
     .sort((a, b) => b.signedAt.localeCompare(a.signedAt))
     .slice(0, 5);
+
+  // Simulated technician locations
+  const techLocations = [
+    { id: 1, name: "Nguyễn Văn A", status: "online", x: 45, y: 30, job: "Bảo trì định kỳ #JOB-102" },
+    { id: 2, name: "Trần Thị B", status: "online", x: 65, y: 55, job: "Sửa chữa khẩn cấp #JOB-105" },
+    { id: 3, name: "Lê Văn C", status: "away", x: 25, y: 70, job: "Nghỉ trưa" },
+  ];
 
   return (
     <AppShell>
@@ -127,6 +136,90 @@ function AdminDashboard() {
           />
         </div>
       </div>
+
+      {/* TECH TRACKING MAP - Creative Feature */}
+      <Card className="p-6 mb-6 overflow-hidden border-none shadow-xl shadow-slate-200/50 bg-white group">
+        <div className="flex items-center justify-between mb-6">
+            <div className="flex items-center gap-3">
+                <div className="h-10 w-10 rounded-2xl bg-primary/10 flex items-center justify-center text-primary group-hover:scale-110 transition-transform">
+                    <Navigation className="h-5 w-5" />
+                </div>
+                <div>
+                    <h3 className="text-sm font-black text-slate-800 tracking-tight uppercase">Theo dõi kỹ thuật viên thời gian thực</h3>
+                    <p className="text-[10px] text-slate-400 font-bold uppercase tracking-widest mt-0.5">Vị trí hiện tại trên bản đồ điều phối</p>
+                </div>
+            </div>
+            <div className="flex items-center gap-4">
+                <div className="flex items-center gap-2">
+                    <div className="h-2 w-2 rounded-full bg-emerald-500 animate-pulse" />
+                    <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest">3 Đang trực tuyến</span>
+                </div>
+                <Button variant="outline" size="sm" className="h-9 px-4 rounded-xl text-[10px] font-black uppercase">Mở bản đồ lớn</Button>
+            </div>
+        </div>
+
+        <div className="grid lg:grid-cols-4 gap-6">
+            <div className="lg:col-span-3 h-[400px] bg-slate-50 rounded-[2.5rem] border border-slate-100 relative group overflow-hidden shadow-inner">
+                {/* Simulated Map Texture */}
+                <div className="absolute inset-0 opacity-40 select-none pointer-events-none bg-[radial-gradient(#e2e8f0_1.5px,transparent_1.5px)] [background-size:24px_24px]" />
+                
+                {techLocations.map((tech) => (
+                    <div 
+                        key={tech.id} 
+                        className="absolute cursor-pointer group/pin hover:z-50 transition-all duration-500"
+                        style={{ left: `${tech.x}%`, top: `${tech.y}%` }}
+                    >
+                        <div className="relative flex flex-col items-center">
+                            {/* Hover Info */}
+                            <div className="absolute bottom-full mb-3 hidden group-hover/pin:block bg-slate-900 text-white p-3 rounded-2xl text-[10px] w-48 shadow-2xl animate-in fade-in slide-in-from-bottom-2 duration-300">
+                                <p className="font-black border-b border-white/10 pb-1.5 mb-1.5">{tech.name}</p>
+                                <p className="text-white/70 italic mb-1">{tech.job}</p>
+                                <div className="flex items-center gap-2 text-[8px] font-black text-primary uppercase">
+                                    <Clock className="h-3 w-3" /> Cập nhật 2 phút trước
+                                </div>
+                            </div>
+                            {/* Pin */}
+                            <div className={cn(
+                                "h-12 w-12 rounded-full border-4 border-white flex items-center justify-center shadow-xl transition-all group-hover/pin:scale-125",
+                                tech.status === "online" ? "bg-primary text-white" : "bg-slate-400 text-white"
+                            )}>
+                                <UserCheck className="h-5 w-5" />
+                                {tech.status === "online" && (
+                                    <span className="absolute -top-1 -right-1 h-4 w-4 rounded-full bg-emerald-500 border-2 border-white animate-pulse" />
+                                )}
+                            </div>
+                            <span className="mt-2 text-[10px] font-black text-slate-700 bg-white/90 px-3 py-1 rounded-full shadow-sm">
+                                {tech.name.split(' ').pop()}
+                            </span>
+                        </div>
+                    </div>
+                ))}
+            </div>
+
+            <div className="space-y-4">
+                <h4 className="text-[10px] font-black text-slate-400 uppercase tracking-widest px-1">Danh sách đội ngũ</h4>
+                {techLocations.map((tech) => (
+                    <div key={tech.id} className="p-4 rounded-2xl bg-white border border-slate-50 shadow-sm hover:border-primary/20 transition-colors group/item">
+                        <div className="flex items-center gap-3">
+                            <div className={cn(
+                                "h-8 w-8 rounded-xl flex items-center justify-center text-white",
+                                tech.status === "online" ? "bg-emerald-500" : "bg-slate-300"
+                            )}>
+                                <Briefcase className="h-4 w-4" />
+                            </div>
+                            <div className="flex-1 min-w-0">
+                                <p className="text-[11px] font-black text-slate-800 truncate uppercase">{tech.name}</p>
+                                <p className="text-[9px] text-slate-400 font-bold truncate group-hover/item:text-primary transition-colors">{tech.job}</p>
+                            </div>
+                            <Button variant="ghost" size="icon" className="h-8 w-8 rounded-lg opacity-0 group-hover/item:opacity-100 transition-opacity">
+                                <Navigation className="h-4 w-4 text-slate-400" />
+                            </Button>
+                        </div>
+                    </div>
+                ))}
+            </div>
+        </div>
+      </Card>
 
       <div className="grid gap-4 lg:grid-cols-3 mb-6">
         <div className="cursor-pointer" onClick={() => navigate({ to: "/admin/customers" })}>

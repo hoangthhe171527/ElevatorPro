@@ -186,32 +186,85 @@ function JobDetailMobile() {
                 <Camera className="h-4 w-4" /> Hình ảnh & Nghiệm thu
              </h3>
              <div className="grid grid-cols-2 gap-3">
-                <Button 
-                  variant="outline" 
-                  className="h-28 rounded-3xl border-dashed border-2 bg-slate-50 flex-col gap-2 p-0 active:bg-blue-50 transition-colors"
-                  onClick={() => toast.info("Đang mở camera chụp ảnh Hiện trường...")}
-                >
-                   <Camera className="h-6 w-6 text-slate-300" />
-                   <span className="text-[9px] font-black text-slate-400 uppercase">Ảnh trước việc</span>
-                </Button>
-                <Button 
-                  variant="outline" 
-                  className="h-28 rounded-3xl border-dashed border-2 bg-slate-50 flex-col gap-2 p-0 active:bg-emerald-50 transition-colors"
-                  onClick={() => toast.info("Đang mở camera chụp ảnh Kết quả...")}
-                >
-                   <Camera className="h-6 w-6 text-slate-300" />
-                   <span className="text-[9px] font-black text-slate-400 uppercase">Ảnh sau việc</span>
-                </Button>
+                <div className="relative group">
+                  <Button 
+                    variant="outline" 
+                    className="h-28 w-full rounded-3xl border-dashed border-2 bg-slate-50 flex-col gap-2 p-0 active:bg-blue-50 transition-colors overflow-hidden"
+                    onClick={() => {
+                        const input = document.createElement('input');
+                        input.type = 'file';
+                        input.accept = 'image/*';
+                        input.capture = 'environment';
+                        input.onchange = (e: any) => {
+                            if (e.target.files?.[0]) {
+                                toast.success("ĐÃ TẢI ẢNH HIỆN TRƯỜNG!", {
+                                    description: "Ảnh đã được đính kèm vào báo cáo kỹ thuật."
+                                });
+                            }
+                        };
+                        input.click();
+                    }}
+                  >
+                    <Camera className="h-6 w-6 text-slate-300" />
+                    <span className="text-[9px] font-black text-slate-400 uppercase">Ảnh trước việc</span>
+                  </Button>
+                </div>
+                <div className="relative group">
+                  <Button 
+                    variant="outline" 
+                    className="h-28 w-full rounded-3xl border-dashed border-2 bg-slate-50 flex-col gap-2 p-0 active:bg-emerald-50 transition-colors overflow-hidden"
+                    onClick={() => {
+                        const input = document.createElement('input');
+                        input.type = 'file';
+                        input.accept = 'image/*';
+                        input.capture = 'environment';
+                        input.onchange = (e: any) => {
+                            if (e.target.files?.[0]) {
+                                toast.success("ĐÃ TẢI ẢNH KẾT QUẢ!", {
+                                    description: "Ảnh nghiệm thu đã được lưu trữ."
+                                });
+                            }
+                        };
+                        input.click();
+                    }}
+                  >
+                    <Camera className="h-6 w-6 text-slate-300" />
+                    <span className="text-[9px] font-black text-slate-400 uppercase">Ảnh sau việc</span>
+                  </Button>
+                </div>
              </div>
              
              <div className="mt-4">
                 <p className="text-[9px] font-black text-slate-400 uppercase mb-2 px-1">Chữ ký xác nhận của khách hàng</p>
                 <div 
-                  className="h-32 w-full bg-slate-50 rounded-3xl border-2 border-dashed border-slate-200 flex flex-col items-center justify-center gap-2 active:bg-slate-100 transition-colors cursor-pointer"
-                  onClick={() => toast.info("Đang khởi tạo vùng ký tên kỹ thuật số...")}
+                  className="h-40 w-full bg-slate-50 rounded-3xl border-2 border-dashed border-slate-200 flex flex-col items-center justify-center gap-2 active:bg-white active:border-primary transition-all cursor-crosshair relative group overflow-hidden"
+                  onClick={() => {
+                      // Simulate signature drawing start
+                      toast.info("ĐANG KHỞI TẠO CHỮ KÝ...", {
+                          description: "Vui lòng ký vào vùng bảng vẽ số."
+                      });
+                      setTimeout(() => {
+                          const canvasCover = document.createElement('div');
+                          canvasCover.className = "absolute inset-0 bg-white/90 flex flex-col items-center justify-center animate-in fade-in zoom-in duration-300 z-30";
+                          canvasCover.id = "signature-success";
+                          canvasCover.innerHTML = `
+                            <div class="h-10 w-10 rounded-full bg-emerald-500 flex items-center justify-center mb-2">
+                                <svg class="h-6 w-6 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7" />
+                                </svg>
+                            </div>
+                            <span class="text-[10px] font-black text-emerald-600 uppercase">ĐÃ KÝ XÁC NHẬN</span>
+                          `;
+                          document.querySelector('.cursor-crosshair')?.appendChild(canvasCover);
+                          toast.success("ĐÃ LƯU CHỮ KÝ!");
+                      }, 1500);
+                  }}
                 >
-                   <PenTool className="h-6 w-6 text-slate-300" />
-                   <span className="text-[9px] font-black text-slate-400 uppercase">Ký tên tại đây</span>
+                   <div className="group-active:hidden flex flex-col items-center">
+                    <PenTool className="h-6 w-6 text-slate-300 mb-1" />
+                    <span className="text-[9px] font-black text-slate-400 uppercase tracking-widest">Ký tên tại đây</span>
+                    <span className="text-[7px] text-slate-300 font-bold uppercase mt-1 italic">Dùng ngón tay hoặc bút cảm ứng</span>
+                   </div>
                 </div>
              </div>
           </section>
