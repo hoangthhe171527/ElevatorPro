@@ -53,25 +53,35 @@ function ProjectsPage() {
               <CardHeader className="bg-muted/30 pb-4">
                 <div className="flex justify-between items-start">
                   <div>
-                    <CardTitle className="text-lg flex items-center gap-2">
-                      <Building className="h-5 w-5 text-primary" />
-                      {proj.name}
-                      {isCompleted && <Badge variant="outline" className="ml-2 bg-success/10 text-success border-success/20">Hoàn thành</Badge>}
+                    <CardTitle className="text-lg">
+                      <Link 
+                        to="/admin/projects/$projectId" 
+                        params={{ projectId: proj.id }}
+                        className="flex items-center gap-2 hover:text-primary transition-colors"
+                      >
+                        <Building className="h-5 w-5 text-primary" />
+                        {proj.name}
+                        {isCompleted && <Badge variant="outline" className="ml-2 bg-success/10 text-success border-success/20">Hoàn thành</Badge>}
+                      </Link>
                     </CardTitle>
                     <p className="text-sm text-muted-foreground mt-1">{proj.address}</p>
                   </div>
-                  {(!isCompleted && canModify) && (
-                    <Button 
-                      onClick={() => confirmAdvance(proj.id)}
-                      className="gap-2"
-                    >
-                      <Check className="h-4 w-4" /> 
-                      Hoàn tất: {PROJECT_STAGE_LABELS[proj.stage]}
-                    </Button>
-                  )}
-                  {(!isCompleted && !canModify) && (
-                    <Badge variant="outline" className="opacity-50">Đang thi công</Badge>
-                  )}
+                  <div className="flex gap-2">
+                    <Link to="/admin/projects/$projectId" params={{ projectId: proj.id }}>
+                      <Button variant="outline" size="sm" className="h-9 px-3 gap-1.5">
+                        <ChevronRight className="h-4 w-4" /> Chi tiết
+                      </Button>
+                    </Link>
+                    {(!isCompleted && canModify) && (
+                      <Button 
+                        onClick={() => confirmAdvance(proj.id)}
+                        className="h-9 gap-2"
+                      >
+                        <Check className="h-4 w-4" /> 
+                        Hoàn tất: {PROJECT_STAGE_LABELS[proj.stage]}
+                      </Button>
+                    )}
+                  </div>
                 </div>
               </CardHeader>
 

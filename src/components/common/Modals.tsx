@@ -47,6 +47,7 @@ interface CreateJobModalProps {
   defaultCustomerId?: string;
   defaultElevatorId?: string;
   defaultContractId?: string;
+  defaultProjectId?: string;
 }
 
 const typeOptions: { value: JobType; label: string }[] = [
@@ -69,10 +70,12 @@ export function CreateJobModal({
   defaultCustomerId = "",
   defaultElevatorId = "",
   defaultContractId = "",
+  defaultProjectId = "",
 }: CreateJobModalProps) {
   const [title, setTitle] = useState("");
   const [type, setType] = useState<JobType>("maintenance");
   const [customerId, setCustomerId] = useState(defaultCustomerId || "");
+  const [projectId, setProjectId] = useState(defaultProjectId || "");
   const [elevatorId, setElevatorId] = useState(defaultElevatorId || "");
   const [contractId, setContractId] = useState(defaultContractId || "");
   const [techId, setTechId] = useState("");
@@ -106,7 +109,7 @@ export function CreateJobModal({
     toast.success(`Đã tạo công việc "${title}" — giao cho ${mockUsers.find(u => u.id === techId)?.name}`);
     onClose();
     // Reset
-    setTitle(""); setType("maintenance"); setCustomerId(""); setElevatorId(""); setContractId(""); setTechId(""); setPriority("normal"); setDescription("");
+    setTitle(""); setType("maintenance"); setCustomerId(""); setProjectId(""); setElevatorId(""); setContractId(""); setTechId(""); setPriority("normal"); setDescription("");
   };
 
   return (
@@ -145,13 +148,26 @@ export function CreateJobModal({
           {/* Khách hàng */}
           <div>
             <label className="text-sm font-medium">Khách hàng <span className="text-destructive">*</span></label>
-            <Select value={customerId} onValueChange={(v) => { setCustomerId(v); setElevatorId(""); setContractId(""); }}>
+            <Select value={customerId} onValueChange={(v) => { setCustomerId(v); setProjectId(""); setElevatorId(""); setContractId(""); }}>
               <SelectTrigger className="mt-1"><SelectValue placeholder="Chọn khách hàng..." /></SelectTrigger>
               <SelectContent>
                 {mockCustomers.map(c => <SelectItem key={c.id} value={c.id}>{c.name}</SelectItem>)}
               </SelectContent>
             </Select>
           </div>
+
+          {customerId && (
+            <div>
+              <label className="text-sm font-medium">Dự án liên quan</label>
+              <Select value={projectId || "none"} onValueChange={(v) => { setProjectId(v === "none" ? "" : v); setElevatorId(""); }}>
+                <SelectTrigger className="mt-1"><SelectValue placeholder="Chọn dự án..." /></SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="none">— Không chọn —</SelectItem>
+                  {customerProjects.map(p => <SelectItem key={p.id} value={p.id}>{p.name}</SelectItem>)}
+                </SelectContent>
+              </Select>
+            </div>
+          )}
 
           {customerId && (
             <div className="grid grid-cols-2 gap-3">
