@@ -1,6 +1,7 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { MobileShell } from "@/components/layout/MobileShell";
 import { mockLeads, formatVND, type Lead } from "@/lib/mock-data";
+import { useAppStore } from "@/lib/store";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { StatusBadge } from "@/components/common/StatusBadge";
@@ -38,6 +39,7 @@ const STATUS_TABS = [
 ] as const;
 
 function MobileLeads() {
+  const activeTenantId = useAppStore((s) => s.activeTenantId);
   const [search, setSearch] = useState("");
   const [activeStatus, setActiveStatus] = useState<string>("all");
   const [createOpen, setCreateOpen] = useState(false);
@@ -61,7 +63,9 @@ function MobileLeads() {
     setNewPhone("");
   };
 
-  const filtered = mockLeads.filter((l) => {
+  const tenantLeads = mockLeads.filter((l) => l.tenantId === activeTenantId);
+
+  const filtered = tenantLeads.filter((l) => {
     const matchSearch =
       l.name.toLowerCase().includes(search.toLowerCase()) ||
       l.phone.includes(search);
@@ -70,14 +74,14 @@ function MobileLeads() {
   });
 
   const totalValue = filtered.reduce((s, l) => s + l.estimatedValue, 0);
-  const activeLeads = mockLeads.filter((l) => !["won", "lost"].includes(l.status)).length;
+  const activeLeads = tenantLeads.filter((l) => !["won", "lost"].includes(l.status)).length;
 
   return (
     <MobileShell title="Phễu bán hàng">
       {/* Stats Header */}
       <div className="px-5 pt-5 pb-4 grid grid-cols-3 gap-3">
         <div className="bg-white rounded-2xl p-3 border border-slate-50 shadow-sm text-center">
-          <p className="text-xl font-black text-slate-900">{mockLeads.length}</p>
+          <p className="text-xl font-black text-slate-900">{tenantLeads.length}</p>
           <p className="text-[8px] font-black text-slate-400 uppercase tracking-widest mt-0.5">Tổng Lead</p>
         </div>
         <div className="bg-white rounded-2xl p-3 border border-slate-50 shadow-sm text-center">

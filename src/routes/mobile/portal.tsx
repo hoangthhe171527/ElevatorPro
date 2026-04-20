@@ -7,16 +7,11 @@ import { StatusBadge } from "@/components/common/StatusBadge";
 import { elevatorStatusVariant, elevatorStatusLabel } from "@/lib/status-variants";
 import {
   PhoneCall,
-  History,
-  ShieldCheck,
   AlertCircle,
   Building2,
   ChevronRight,
-  BellRing,
-  FileText,
-  Zap,
   ArrowRight,
-  CreditCard
+  FileText
 } from "lucide-react";
 import { toast } from "sonner";
 
@@ -120,10 +115,10 @@ function MobileCustomerPortal() {
 
             {/* Quick Actions */}
             <div className="grid grid-cols-2 gap-4">
-                <Link to="/mobile/portal/billing">
+                <Link to="/mobile/portal/contracts">
                   <Button variant="outline" className="w-full h-20 rounded-[1.8rem] bg-white border-slate-100 flex-col gap-1.5 shadow-sm active:scale-95 transition-all text-indigo-600 hover:bg-white/80">
-                      <CreditCard className="h-6 w-6" />
-                      <span className="text-[9px] font-black uppercase tracking-widest">Tài chính</span>
+                      <FileText className="h-6 w-6" />
+                      <span className="text-[9px] font-black uppercase tracking-widest">Hợp đồng</span>
                   </Button>
                 </Link>
                 <Link to="/mobile/portal/issues">
@@ -138,13 +133,13 @@ function MobileCustomerPortal() {
             <section>
                 <div className="flex items-center justify-between mb-4 px-1">
                     <h3 className="text-[10px] font-black uppercase text-slate-400 tracking-[0.2em]">Thang máy của bạn</h3>
-                    <Link to="/mobile/elevators">
+                  <Link to="/mobile/portal/elevators">
                         <span className="text-[10px] font-black text-indigo-600 uppercase">Tất cả</span>
                     </Link>
                 </div>
                 <div className="space-y-3">
                     {myElevators.slice(0, 3).map((e) => (
-                        <Link key={e.id} to="/mobile/elevators/$elevatorId" params={{ elevatorId: e.id }}>
+                    <Link key={e.id} to="/mobile/portal/elevators/$elevatorId" params={{ elevatorId: e.id }}>
                           <Card
                               className="p-4 border-none shadow-sm flex items-center gap-4 bg-white rounded-[1.8rem] active:bg-slate-50 transition-colors"
                           >

@@ -2,6 +2,7 @@
 import { MobileShell } from "@/components/layout/MobileShell";
 import { Card } from "@/components/ui/card";
 import { mockJobs } from "@/lib/mock-data";
+import { useAppStore, useMainRole } from "@/lib/store";
 import { StatusBadge } from "@/components/common/StatusBadge";
 import { jobStatusLabel, jobStatusVariant } from "@/lib/status-variants";
 import { 
@@ -21,6 +22,13 @@ export const Route = createFileRoute("/mobile/jobs/")({
 });
 
 function MobileJobsList() {
+   const role = useMainRole();
+   const activeTenantId = useAppStore((s) => s.activeTenantId);
+   const userId = useAppStore((s) => s.userId);
+
+   const scopedJobs = mockJobs.filter((job) => job.tenantId === activeTenantId);
+   const jobs = role === "tech" ? scopedJobs.filter((job) => job.assignedTo === userId) : scopedJobs;
+
   return (
     <MobileShell title="Danh sách tác vụ">
       <div className="flex flex-col pb-32 bg-slate-50 min-h-screen">
@@ -51,9 +59,9 @@ function MobileJobsList() {
 
         {/* Dynamic List with Better Spacing */}
         <div className="px-5 py-6 space-y-4">
-          <p className="text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] mb-2 px-1">Lịch trình hiển thị ({mockJobs.length})</p>
+               <p className="text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] mb-2 px-1">Lịch trình hiển thị ({jobs.length})</p>
           
-          {mockJobs.map((job) => (
+               {jobs.map((job) => (
             <Link key={job.id} to={`/mobile/jobs/${job.id}`}>
               <Card className="p-5 border border-slate-100 shadow-sm rounded-[1.8rem] bg-white active:scale-[0.98] transition-all flex flex-col gap-4 relative overflow-hidden group">
                  {/* Left accent bar */}
@@ -105,7 +113,7 @@ function MobileJobsList() {
               </div>
               <button className="h-9 w-9 rounded-xl bg-white border border-slate-100 flex items-center justify-center shadow-sm"><ChevronRight className="h-4 w-4" /></button>
            </div>
-           <p className="text-[9px] font-bold text-slate-400 uppercase tracking-widest">Đang hiển thị 10 trên 45 kết quả</p>
+                <p className="text-[9px] font-bold text-slate-400 uppercase tracking-widest">Đang hiển thị {Math.min(jobs.length, 10)} trên {jobs.length} kết quả</p>
         </div>
       </div>
     </MobileShell>

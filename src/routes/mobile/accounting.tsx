@@ -1,15 +1,15 @@
 ﻿import { createFileRoute } from "@tanstack/react-router";
 import { MobileShell } from "@/components/layout/MobileShell";
 import { Card } from "@/components/ui/card";
+import { useAppStore } from "@/lib/store";
+import { formatDate, formatVND, mockContracts, mockInventory } from "@/lib/mock-data";
 import { 
-  CreditCard, 
   ArrowUpRight, 
   ArrowDownLeft, 
   Receipt, 
   Wallet,
   Calendar,
   Filter,
-  Search,
   ChevronRight,
   TrendingUp,
   LayoutDashboard
@@ -21,12 +21,39 @@ export const Route = createFileRoute("/mobile/accounting")({
 });
 
 function MobileAccounting() {
-  const transactions = [
-    { id: 1, title: "Hợp đồng Vincom", amount: "+45.000.000", type: "income", date: "Hôm nay", category: "Dịch vụ" },
-    { id: 2, title: "Linh kiện thang máy", amount: "-12.500.000", type: "expense", date: "Hôm qua", category: "Vật tư" },
-    { id: 3, title: "Lương kỹ thuật (T3)", amount: "-150.000.000", type: "expense", date: "15 Th04", category: "Nhân sự" },
-    { id: 4, title: "Bitexco Maintenance", amount: "+8.200.000", type: "income", date: "12 Th04", category: "Bảo trì" },
-  ];
+   const activeTenantId = useAppStore((s) => s.activeTenantId);
+   const tenantContracts = mockContracts.filter((c) => c.tenantId === activeTenantId);
+   const tenantInventory = mockInventory.filter((i) => i.tenantId === activeTenantId);
+
+   const totalPaid = tenantContracts.reduce((sum, c) => sum + c.paid, 0);
+   const totalValue = tenantContracts.reduce((sum, c) => sum + c.value, 0);
+   const estimatedOpsCost = Math.round(
+      tenantInventory.reduce((sum, i) => sum + i.stock * i.unitPrice, 0) * 0.03,
+   );
+
+   const transactions = tenantContracts
+      .slice()
+      .sort((a, b) => b.signedAt.localeCompare(a.signedAt))
+      .slice(0, 4)
+      .map((contract) => ({
+         id: contract.id,
+         title: contract.code,
+         amount: formatVND(contract.paid),
+         type: "income" as const,
+         date: formatDate(contract.signedAt),
+         category: contract.type === "maintenance" ? "Bảo trì" : contract.type === "repair" ? "Sửa chữa" : "Lắp đặt",
+      }));
+
+   if (estimatedOpsCost > 0) {
+      transactions.push({
+         id: "ops-cost",
+         title: "Chi phí vận hành ước tính",
+         amount: formatVND(estimatedOpsCost),
+         type: "expense" as const,
+         date: "Tháng này",
+         category: "Vận hành",
+      });
+   }
 
   return (
     <MobileShell title="Quản lý Tài chính" hideHeader={true}>
@@ -37,7 +64,7 @@ function MobileAccounting() {
            
            <div className="relative z-10 flex flex-col items-center">
               <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2">Tổng số dư khả dụng</p>
-              <h2 className="text-3xl font-black text-white italic tracking-tighter mb-8">1.240.500.000<span className="text-sm font-bold text-emerald-400 ml-1">₫</span></h2>
+              <h2 className="text-3xl font-bold text-white tracking-tight mb-8">{formatVND(Math.max(totalPaid - estimatedOpsCost, 0))}</h2>
               
               <div className="grid grid-cols-2 gap-4 w-full">
                  <div className="p-4 rounded-2xl bg-white/5 backdrop-blur-md border border-white/10">
@@ -45,14 +72,14 @@ function MobileAccounting() {
                        <ArrowUpRight className="h-4 w-4 text-emerald-400" />
                        <span className="text-[9px] font-black text-slate-400 uppercase">Thu nhập</span>
                     </div>
-                    <p className="text-sm font-black text-white tracking-tight">+540M <span className="text-[10px] text-emerald-400/60">↑</span></p>
+                    <p className="text-sm font-bold text-white tracking-tight">{formatVND(totalPaid)} <span className="text-[10px] text-emerald-400/60">↑</span></p>
                  </div>
                  <div className="p-4 rounded-2xl bg-white/5 backdrop-blur-md border border-white/10">
                     <div className="flex items-center gap-2 mb-1">
                        <ArrowDownLeft className="h-4 w-4 text-rose-400" />
                        <span className="text-[9px] font-black text-slate-400 uppercase">Chi phí</span>
                     </div>
-                    <p className="text-sm font-black text-white tracking-tight">-162M <span className="text-[10px] text-rose-400/60">↓</span></p>
+                    <p className="text-sm font-bold text-white tracking-tight">{formatVND(estimatedOpsCost)} <span className="text-[10px] text-rose-400/60">↓</span></p>
                  </div>
               </div>
            </div>
@@ -89,7 +116,7 @@ function MobileAccounting() {
            </div>
 
            <div className="space-y-3">
-              {transactions.map((tx) => (
+              {transactions.slice(0, 5).map((tx) => (
                  <Card key={tx.id} className="p-4 border border-slate-100 shadow-sm rounded-2xl bg-white active:scale-[0.98] transition-all flex items-center gap-4">
                     <div className={cn(
                        "h-10 w-10 rounded-xl flex items-center justify-center shrink-0 shadow-sm",
@@ -98,7 +125,7 @@ function MobileAccounting() {
                        {tx.type === "income" ? <ArrowUpRight className="h-5 w-5" /> : <ArrowDownLeft className="h-5 w-5" />}
                     </div>
                     <div className="flex-1 min-w-0">
-                       <h4 className="text-[13px] font-black text-slate-900 leading-tight italic truncate mb-0.5">{tx.title}</h4>
+                       <h4 className="text-[13px] font-bold text-slate-900 leading-tight truncate mb-0.5">{tx.title}</h4>
                        <div className="flex items-center gap-2">
                           <span className="text-[10px] font-bold text-slate-400 uppercase tracking-tighter">{tx.date}</span>
                           <span className="text-[8px] font-black text-indigo-400 uppercase px-1.5 py-0.5 bg-indigo-50 rounded italic">{tx.category}</span>
@@ -106,9 +133,9 @@ function MobileAccounting() {
                     </div>
                     <div className="text-right">
                        <p className={cn(
-                          "text-sm font-black italic",
+                          "text-sm font-bold",
                           tx.type === "income" ? "text-emerald-600" : "text-rose-600"
-                       )}>{tx.amount}₫</p>
+                       )}>{tx.amount}</p>
                        <ChevronRight className="h-3 w-3 text-slate-300 ml-auto mt-1" />
                     </div>
                  </Card>

@@ -3,6 +3,60 @@ import { persist } from "zustand/middleware";
 import type { Permission } from "./mock-data";
 import { mockUsers } from "./mock-data";
 
+type MobileRole = "admin" | "tech";
+
+const ADMIN_PERMISSIONS: Permission[] = [
+  "director",
+  "sales",
+  "sales_maintenance",
+  "accounting",
+  "hr_admin",
+  "install_mgmt",
+  "maintenance_mgmt",
+];
+
+const TECH_PERMISSIONS: Permission[] = ["field_tech", "tech_survey", "maintenance_mgmt", "install_mgmt"];
+
+function getPermissionsForTenant(userId: string, tenantId: string): Permission[] {
+  const user = mockUsers.find((u) => u.id === userId);
+  const membership = user?.memberships.find((m) => m.tenantId === tenantId);
+  return membership?.permissions || [];
+}
+
+function hasRoleInTenant(userId: string, tenantId: string, role: MobileRole): boolean {
+  const permissions = getPermissionsForTenant(userId, tenantId);
+  if (!permissions.length) return false;
+
+  const rolePermissions = role === "admin" ? ADMIN_PERMISSIONS : TECH_PERMISSIONS;
+  return permissions.some((p) => rolePermissions.includes(p));
+}
+
+function findUserIdForRole(tenantId: string, role: MobileRole): string | null {
+  const candidate = mockUsers.find((u) => {
+    const hasTenant = u.memberships.some((m) => m.tenantId === tenantId);
+    if (!hasTenant) return false;
+    return hasRoleInTenant(u.id, tenantId, role);
+  });
+
+  return candidate?.id || null;
+}
+
+function resolveRoleForUser(userId: string, tenantId: string, preferredRole?: MobileRole): MobileRole {
+  if (preferredRole && hasRoleInTenant(userId, tenantId, preferredRole)) {
+    return preferredRole;
+  }
+
+  if (hasRoleInTenant(userId, tenantId, "admin")) {
+    return "admin";
+  }
+
+  if (hasRoleInTenant(userId, tenantId, "tech")) {
+    return "tech";
+  }
+
+  return "admin";
+}
+
 interface AppState {
   userId: string;
   activeTenantId: string;
@@ -30,20 +84,40 @@ export const useAppStore = create<AppState>()(
       setUserId: (userId) => {
         const user = mockUsers.find((u) => u.id === userId);
         const activeTenantId = user?.memberships?.[0]?.tenantId || get().activeTenantId;
-        set({ userId, activeTenantId, activeJobCheckIn: null });
+        const mainRole = resolveRoleForUser(userId, activeTenantId, get().mainRole);
+        set({ userId, activeTenantId, mainRole, activeJobCheckIn: null });
       },
       setTenantId: (tenantId) => {
-        set({ activeTenantId: tenantId, companySize: tenantId === "t-1" ? "large" : "small" });
+        const preferredRole = get().mainRole;
+        const preferredUserId = hasRoleInTenant(get().userId, tenantId, preferredRole)
+          ? get().userId
+          : findUserIdForRole(tenantId, preferredRole);
+
+        const fallbackRole: MobileRole = preferredRole === "admin" ? "tech" : "admin";
+        const fallbackUserId = preferredUserId || findUserIdForRole(tenantId, fallbackRole);
+        const finalUserId = fallbackUserId || get().userId;
+        const finalRole = resolveRoleForUser(finalUserId, tenantId, preferredRole);
+
+        set({
+          activeTenantId: tenantId,
+          companySize: tenantId === "t-1" ? "large" : "small",
+          userId: finalUserId,
+          mainRole: finalRole,
+          activeJobCheckIn: null,
+        });
       },
       setJobCheckIn: (jobId) => set({ activeJobCheckIn: jobId }),
       setHasHydrated: (val) => set({ hasHydrated: val }),
       setCompanySize: (size) => {
-        set({ companySize: size });
         const tenantId = size === "large" ? "t-1" : "t-2";
-        const directorId = size === "large" ? "u-director-1" : "u-director-2";
-        set({ activeTenantId: tenantId, userId: directorId, activeJobCheckIn: null });
+        get().setTenantId(tenantId);
       },
-      setMainRole: (role) => set({ mainRole: role }),
+      setMainRole: (role) => {
+        const tenantId = get().activeTenantId;
+        const nextUserId = findUserIdForRole(tenantId, role) || get().userId;
+        const nextRole = resolveRoleForUser(nextUserId, tenantId, role);
+        set({ userId: nextUserId, mainRole: nextRole, activeJobCheckIn: null });
+      },
     }),
     {
       name: "elevator-app-state-v5",

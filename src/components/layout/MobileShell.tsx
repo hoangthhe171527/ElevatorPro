@@ -1,10 +1,9 @@
 ﻿import React, { useState } from "react";
-import { Link, useRouter } from "@tanstack/react-router";
+import { Link, useNavigate } from "@tanstack/react-router";
 import { useMainRole, useCurrentUser, setMainRole, useAppStore } from "@/lib/store";
 import { 
   Home, 
   Briefcase, 
-  Navigation, 
   Settings, 
   Bell,
   Menu,
@@ -16,40 +15,63 @@ import {
   ArrowRightLeft,
   X,
   PlusSquare,
-  Search
+  ShieldCheck
 } from "lucide-react";
-import { cn } from "@/lib/utils";
 
 interface MobileShellProps {
   children: React.ReactNode;
   title?: string;
   hideHeader?: boolean;
+   showBackButton?: boolean;
+   backLink?: string;
 }
 
-export function MobileShell({ children, title, hideHeader = false }: MobileShellProps) {
+export function MobileShell({
+   children,
+   title,
+   hideHeader = false,
+   showBackButton = false,
+   backLink,
+}: MobileShellProps) {
+   const navigate = useNavigate();
   const role = useMainRole();
   const user = useCurrentUser();
   const companySize = useAppStore((s) => s.companySize);
+   const setCompanySize = useAppStore((s) => s.setCompanySize);
   const [isMenuOpen, setIsMenuOpen] = useState(false);
 
   const switchRole = () => {
     const nextRole = role === "admin" ? "tech" : "admin";
     setMainRole(nextRole);
     setIsMenuOpen(false);
-    window.location.reload(); 
   };
 
+   const switchCompanyScale = () => {
+      setCompanySize(companySize === "large" ? "small" : "large");
+      setIsMenuOpen(false);
+   };
+
+   const handleBack = () => {
+      if (backLink) {
+         navigate({ to: backLink });
+         return;
+      }
+      window.history.back();
+   };
+
   return (
-    <div className="flex flex-col min-h-screen bg-slate-50 text-slate-900 font-sans relative overflow-hidden">
-      {/* Phone Frame Desktop Simulation in __root.tsx already handles the outer frame */}
-      
+    <div className="flex flex-col h-full bg-slate-50 text-slate-900 font-sans relative overflow-hidden">
       {/* Header with Role Branding */}
       {!hideHeader && (
-        <header className="sticky top-0 z-[60] bg-white/70 backdrop-blur-xl border-b border-slate-100 px-5 py-4 flex items-center justify-between shadow-sm">
+        <header className="shrink-0 bg-white/70 backdrop-blur-xl border-b border-slate-100 px-5 py-4 flex items-center justify-between shadow-sm z-[60]">
           <div className="flex items-center gap-3">
-             <button onClick={() => window.history.back()} className="h-9 w-9 rounded-xl bg-slate-100 flex items-center justify-center border border-slate-200 active:scale-95 transition-all">
-                <ChevronLeft className="h-5 w-5 text-slate-600" />
-             </button>
+                  {showBackButton ? (
+                     <button onClick={handleBack} className="h-9 w-9 rounded-xl bg-slate-100 flex items-center justify-center border border-slate-200 active:scale-95 transition-all">
+                        <ChevronLeft className="h-5 w-5 text-slate-600" />
+                     </button>
+                  ) : (
+                     <div className="h-9 w-9" />
+                  )}
              <div>
                 <h2 className="text-[13px] font-black italic text-slate-900 leading-none uppercase tracking-tight">{title || "Cloud_Stack"}</h2>
                 <div className="flex items-center gap-1.5 mt-1">
@@ -74,9 +96,9 @@ export function MobileShell({ children, title, hideHeader = false }: MobileShell
       {isMenuOpen && (
         <>
           <div className="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-[100] animate-in fade-in duration-300" onClick={() => setIsMenuOpen(false)} />
-          <div className="fixed inset-y-0 right-0 w-[300px] bg-white z-[101] shadow-2xl flex flex-col p-0 overflow-hidden animate-in slide-in-from-right duration-500 ease-out">
+          <div className="fixed inset-y-0 right-0 w-[85%] max-w-[300px] bg-white z-[101] shadow-2xl flex flex-col p-0 overflow-hidden animate-in slide-in-from-right duration-500 ease-out">
              {/* Profile Header */}
-             <div className="p-8 pb-10 bg-indigo-950 text-white relative overflow-hidden">
+             <div className="p-8 pb-10 bg-indigo-950 text-white relative overflow-hidden shrink-0">
                 <div className="absolute top-0 right-0 w-48 h-48 bg-white/5 rounded-full -mr-24 -mt-24 blur-3xl" />
                 <div className="relative z-10 flex justify-between items-start mb-8">
                    <div className="h-16 w-16 rounded-[1.5rem] bg-white/10 backdrop-blur-md border border-white/20 flex items-center justify-center shadow-xl">
@@ -87,7 +109,7 @@ export function MobileShell({ children, title, hideHeader = false }: MobileShell
                    </button>
                 </div>
                 <div className="relative z-10">
-                   <h3 className="text-xl font-black italic tracking-tighter leading-none mb-2">{user?.name || "Nguyễn Văn Director"}</h3>
+                   <h3 className="text-xl font-bold tracking-tight leading-none mb-2">{user?.name || "Nguyễn Văn Director"}</h3>
                    <div className="flex items-center gap-2 px-3 py-1 bg-white/10 rounded-full border border-white/10 w-fit">
                       <Shield className="h-3.5 w-3.5 text-indigo-400" />
                       <span className="text-[10px] font-black uppercase tracking-widest text-indigo-100">{role === "admin" ? "Executive Admin" : "Field Engineer"}</span>
@@ -95,40 +117,40 @@ export function MobileShell({ children, title, hideHeader = false }: MobileShell
                 </div>
              </div>
 
-             <div className="flex-1 overflow-y-auto p-6 space-y-2">
+             <div className="flex-1 overflow-y-auto p-6 space-y-2 no-scrollbar">
                 <p className="text-[10px] font-black text-slate-400 uppercase tracking-[0.3em] mb-4 pl-2">System Controls_</p>
                 
-                <button onClick={switchRole} className="w-full h-14 flex items-center gap-4 px-4 rounded-2xl hover:bg-slate-50 active:bg-slate-100 text-slate-700 transition-all border border-transparent active:border-slate-100 group">
+                <button onClick={switchRole} className="w-full h-14 flex items-center gap-4 px-4 rounded-2xl hover:bg-slate-50 active:bg-slate-100 text-slate-700 transition-all border border-transparent active:border-slate-100 group shrink-0">
                    <div className="h-10 w-10 rounded-xl bg-indigo-50 flex items-center justify-center group-hover:scale-110 transition-transform">
                       <ArrowRightLeft className="h-5 w-5 text-indigo-600" />
                    </div>
                    <div className="text-left">
-                      <span className="block text-[12px] font-black uppercase tracking-tighter">Switch Workspace</span>
-                      <span className="block text-[9px] font-bold text-slate-400">Sang chế độ {role === "admin" ? "Kỹ thuật" : "Quản trị"}</span>
+                      <span className="block text-[12px] font-bold uppercase tracking-tight">Switch Role</span>
+                      <span className="block text-[9px] font-semibold text-slate-400">Chuyển sang {role === "admin" ? "Kỹ thuật" : "Quản trị"}</span>
                    </div>
                 </button>
 
-                <button className="w-full h-14 flex items-center gap-4 px-4 rounded-2xl hover:bg-slate-50 text-slate-700 transition-all group">
+                <button onClick={switchCompanyScale} className="w-full h-14 flex items-center gap-4 px-4 rounded-2xl hover:bg-slate-50 text-slate-700 transition-all group shrink-0">
                    <div className="h-10 w-10 rounded-xl bg-emerald-50 flex items-center justify-center group-hover:scale-110 transition-transform">
                       <Building2 className="h-5 w-5 text-emerald-600" />
                    </div>
                    <div className="text-left">
-                      <span className="block text-[12px] font-black uppercase tracking-tighter">Company Level</span>
-                      <span className="block text-[9px] font-bold text-slate-400 capitalize">{companySize} Scale Active</span>
+                      <span className="block text-[12px] font-bold uppercase tracking-tight">Company Scale</span>
+                      <span className="block text-[9px] font-semibold text-slate-400 capitalize">{companySize} mode (tap to switch)</span>
                    </div>
                 </button>
 
                 <div className="h-6" />
                 <p className="text-[10px] font-black text-slate-400 uppercase tracking-[0.3em] mb-4 pl-2">Personal_</p>
                 
-                <Link to="/mobile/profile" onClick={() => setIsMenuOpen(false)} className="w-full h-14 flex items-center gap-4 px-4 rounded-2xl hover:bg-slate-50 text-slate-700 transition-all group">
+                <Link to="/mobile/profile" onClick={() => setIsMenuOpen(false)} className="w-full h-14 flex items-center gap-4 px-4 rounded-2xl hover:bg-slate-50 text-slate-700 transition-all group shrink-0">
                    <div className="h-10 w-10 rounded-xl bg-slate-100 flex items-center justify-center group-hover:scale-110 transition-transform">
                       <Settings className="h-5 w-5 text-slate-500" />
                    </div>
                    <span className="text-[12px] font-black uppercase tracking-tighter">My Account</span>
                 </Link>
 
-                <button className="w-full h-14 flex items-center gap-4 px-4 rounded-2xl hover:bg-rose-50 text-rose-600 transition-all group mt-10">
+                <button className="w-full h-14 flex items-center gap-4 px-4 rounded-2xl hover:bg-rose-50 text-rose-600 transition-all group mt-10 shrink-0">
                    <div className="h-10 w-10 rounded-xl bg-rose-100 flex items-center justify-center group-hover:scale-110 transition-transform">
                       <LogOut className="h-5 w-5" />
                    </div>
@@ -136,7 +158,7 @@ export function MobileShell({ children, title, hideHeader = false }: MobileShell
                 </button>
              </div>
 
-             <div className="p-8 border-t border-slate-100 flex justify-center">
+             <div className="p-8 border-t border-slate-100 flex justify-center shrink-0">
                 <div className="flex flex-col items-center opacity-20">
                    <ShieldCheck className="h-8 w-8 text-slate-900 mb-2" />
                    <p className="text-[10px] font-black text-slate-900 uppercase tracking-[0.4em] italic">Encrypted Cloud_</p>
@@ -147,35 +169,36 @@ export function MobileShell({ children, title, hideHeader = false }: MobileShell
       )}
 
       {/* Main Content Area */}
-      <main className="flex-1 overflow-y-auto overflow-x-hidden">
+      <main className="flex-1 overflow-y-auto no-scrollbar pb-32">
         {children}
       </main>
 
-      {/* Fixed Navigation Bar - Professional Rounded Design */}
-      <nav className="fixed bottom-6 left-6 right-6 h-20 bg-slate-900/90 backdrop-blur-2xl rounded-[1.8rem] px-5 flex items-center justify-between z-50 shadow-[0_20px_40px_rgba(0,0,0,0.3)] border border-white/10 border-t-white/20">
-        <Link to="/mobile/" className="flex flex-col items-center transition-all active:scale-75 group select-none">
-          <Home className="h-6 w-6 text-white/50 group-data-[status=active]:text-white" />
-          <span className="text-[8px] font-black text-white/30 uppercase tracking-widest mt-1.5 group-data-[status=active]:text-indigo-400">Home</span>
-        </Link>
-        <Link to="/mobile/jobs" className="flex flex-col items-center transition-all active:scale-75 group select-none">
-          <Briefcase className="h-6 w-6 text-white/50 group-data-[status=active]:text-white" />
-          <span className="text-[8px] font-black text-white/30 uppercase tracking-widest mt-1.5 group-data-[status=active]:text-indigo-400">Tasks</span>
-        </Link>
-        
-        {/* Floating Scanner / Action Button */}
-        <Link to="/mobile/scanner" className="h-16 w-16 -mt-16 bg-gradient-to-br from-indigo-500 to-indigo-700 text-white rounded-[1.5rem] flex items-center justify-center shadow-[0_8px_25px_rgba(79,70,229,0.5)] border-4 border-slate-50 active:scale-90 transition-all active:shadow-indigo-500/20">
-          <PlusSquare className="h-8 w-8" />
-        </Link>
+      {/* Fixed Navigation Bar - Professional Rounded Design with container constraints */}
+      <div className="fixed bottom-0 left-0 right-0 p-5 pointer-events-none z-50">
+        <nav className="max-w-md mx-auto h-20 bg-slate-900/90 backdrop-blur-2xl rounded-[1.8rem] px-5 flex items-center justify-between pointer-events-auto shadow-[0_20px_40px_rgba(0,0,0,0.3)] border border-white/10 border-t-white/20">
+               <Link to={role === "tech" ? "/mobile/tech/" : "/mobile/"} className="flex flex-col items-center transition-all active:scale-75 group select-none">
+            <Home className="h-6 w-6 text-white/50 group-data-[status=active]:text-white" />
+            <span className="text-[8px] font-black text-white/30 uppercase tracking-widest mt-1.5 group-data-[status=active]:text-indigo-400">Home</span>
+          </Link>
+               <Link to={role === "tech" ? "/mobile/tech/jobs/" : "/mobile/jobs"} className="flex flex-col items-center transition-all active:scale-75 group select-none">
+            <Briefcase className="h-6 w-6 text-white/50 group-data-[status=active]:text-white" />
+            <span className="text-[8px] font-black text-white/30 uppercase tracking-widest mt-1.5 group-data-[status=active]:text-indigo-400">Tasks</span>
+          </Link>
+          
+          <Link to="/mobile/scanner" className="h-16 w-16 -mt-16 bg-gradient-to-br from-indigo-500 to-indigo-700 text-white rounded-[1.5rem] flex items-center justify-center shadow-[0_8px_25px_rgba(79,70,229,0.5)] border-4 border-slate-50 active:scale-90 transition-all active:shadow-indigo-500/20">
+            <PlusSquare className="h-8 w-8" />
+          </Link>
 
-        <Link to="/mobile/elevators" className="flex flex-col items-center transition-all active:scale-75 group select-none">
-          <Settings className="h-6 w-6 text-white/50 group-data-[status=active]:text-white" />
-          <span className="text-[8px] font-black text-white/30 uppercase tracking-widest mt-1.5 group-data-[status=active]:text-indigo-400">Asset</span>
-        </Link>
-        <button onClick={() => setIsMenuOpen(true)} className="flex flex-col items-center transition-all active:scale-75 group select-none outline-none">
-           <Menu className="h-6 w-6 text-white/50 group-active:text-white" />
-           <span className="text-[8px] font-black text-white/30 uppercase tracking-widest mt-1.5 group-active:text-indigo-400">More</span>
-        </button>
-      </nav>
+          <Link to="/mobile/elevators" className="flex flex-col items-center transition-all active:scale-75 group select-none">
+            <Settings className="h-6 w-6 text-white/50 group-data-[status=active]:text-white" />
+            <span className="text-[8px] font-black text-white/30 uppercase tracking-widest mt-1.5 group-data-[status=active]:text-indigo-400">Asset</span>
+          </Link>
+          <button onClick={() => setIsMenuOpen(true)} className="flex flex-col items-center transition-all active:scale-75 group select-none outline-none">
+             <Menu className="h-6 w-6 text-white/50 group-active:text-white" />
+             <span className="text-[8px] font-black text-white/30 uppercase tracking-widest mt-1.5 group-active:text-indigo-400">More</span>
+          </button>
+        </nav>
+      </div>
     </div>
   );
 }

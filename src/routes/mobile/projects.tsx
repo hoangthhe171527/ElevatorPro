@@ -2,6 +2,7 @@
 import { MobileShell } from "@/components/layout/MobileShell";
 import { Card } from "@/components/ui/card";
 import { mockProjects } from "@/lib/mock-data";
+import { useAppStore } from "@/lib/store";
 import { StatusBadge } from "@/components/common/StatusBadge";
 import { 
   Target, 
@@ -17,6 +18,9 @@ export const Route = createFileRoute("/mobile/projects/")({
 });
 
 function MobileProjectsList() {
+   const activeTenantId = useAppStore((s) => s.activeTenantId);
+   const tenantProjects = mockProjects.filter((p) => p.tenantId === activeTenantId);
+
   return (
     <MobileShell title="Dự án">
       <div className="flex flex-col pb-24 bg-slate-50 min-h-screen">
@@ -24,7 +28,7 @@ function MobileProjectsList() {
            <div className="flex justify-between items-center">
               <div>
                 <p className="text-[9px] font-bold uppercase text-indigo-400 tracking-widest mb-0.5">Tiến độ thi công</p>
-                <h1 className="text-xl font-bold text-white leading-none">{mockProjects.length} Dự án</h1>
+                        <h1 className="text-xl font-bold text-white leading-none">{tenantProjects.length} Dự án</h1>
               </div>
               <Button className="h-9 w-9 rounded-xl bg-indigo-600 shadow-lg shadow-indigo-500/20 p-0 border border-indigo-400">
                  <Plus className="h-5 w-5 text-white" />
@@ -32,7 +36,7 @@ function MobileProjectsList() {
            </div>
         </div>
         <div className="px-4 space-y-3">
-          {mockProjects.map((p) => (
+               {tenantProjects.map((p) => (
             <Link key={p.id} to={`/mobile/projects/${p.id}`}>
               <Card className="p-4 border border-slate-100 shadow-sm rounded-xl bg-white active:bg-slate-50 transition-colors">
                 <div className="flex justify-between items-start mb-3">

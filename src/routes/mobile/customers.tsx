@@ -1,6 +1,7 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { MobileShell } from "@/components/layout/MobileShell";
 import { mockCustomers, mockElevators } from "@/lib/mock-data";
+import { useAppStore } from "@/lib/store";
 import { Card } from "@/components/ui/card";
 import { 
   Search, 
@@ -25,8 +26,11 @@ export const Route = createFileRoute("/mobile/customers")({
 
 function MobileCustomers() {
   const [search, setSearch] = useState("");
+  const activeTenantId = useAppStore((s) => s.activeTenantId);
 
-  const filtered = mockCustomers.filter(
+  const tenantCustomers = mockCustomers.filter((c) => c.tenantId === activeTenantId);
+
+  const filtered = tenantCustomers.filter(
     (c) =>
       c.name.toLowerCase().includes(search.toLowerCase()) ||
       c.phone.includes(search)

@@ -46,7 +46,7 @@ function MobileDashboard() {
 
   const techModules = [
     { label: "Scanner", icon: QrCode, color: "bg-indigo-600 text-white shadow-indigo-200", path: "/mobile/scanner", desc: "Check-in thiết bị" },
-    { label: "My Tasks", icon: Briefcase, color: "bg-amber-50 text-amber-600", path: "/mobile/jobs", desc: "Công việc hằng ngày" },
+      { label: "My Tasks", icon: Briefcase, color: "bg-amber-50 text-amber-600", path: "/mobile/tech/jobs/", desc: "Công việc hằng ngày" },
     { label: "Inventory", icon: Warehouse, color: "bg-slate-50 text-slate-600", path: "/mobile/inventory", desc: "Yêu cầu vật tư" },
     { label: "Smart Route", icon: RouteIcon, color: "bg-emerald-50 text-emerald-600", path: "/mobile/tech/route-plan", desc: "Lộ trình tối ưu" },
     { label: "Emergency", icon: Zap, color: "bg-rose-50 text-rose-600", path: "/mobile/support", desc: "Cứu hộ khẩn cấp" },
@@ -133,14 +133,14 @@ function MobileDashboard() {
               <h3 className="text-[10px] font-black text-slate-400 uppercase tracking-[0.25em] flex items-center gap-2">
                  <div className="w-2 h-2 rounded-full bg-indigo-500 animate-pulse" /> Live Activity_
               </h3>
-              <Link to="/mobile/jobs" className="text-[10px] font-black text-indigo-600 uppercase flex items-center gap-1 group">
+              <Link to={role === "tech" ? "/mobile/tech/jobs/" : "/mobile/jobs"} className="text-[10px] font-black text-indigo-600 uppercase flex items-center gap-1 group">
                  Tất cả <ArrowUpRight className="h-3 w-3 group-hover:translate-x-0.5 group-hover:-translate-y-0.5 transition-transform" />
               </Link>
            </div>
            
            <div className="space-y-4">
               {[1, 2].map((i) => (
-                 <Link key={i} to="/mobile/jobs/1">
+                 <Link key={i} to={role === "tech" ? "/mobile/tech/jobs/1" : "/mobile/jobs/1"}>
                     <Card className="p-5 border-slate-100 shadow-[0_4px_20px_rgba(0,0,0,0.02)] rounded-[1.8rem] bg-white active:scale-[0.98] transition-all flex items-center gap-4 group">
                        <div className="h-12 w-12 bg-slate-900 rounded-2xl flex flex-col items-center justify-center shadow-lg group-hover:rotate-3 transition-transform">
                           <span className="text-[8px] font-bold text-white/40 uppercase">JOB</span>
