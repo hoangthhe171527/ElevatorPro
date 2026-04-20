@@ -12,7 +12,7 @@ import {
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
-export const Route = createFileRoute("/mobile/projects")({
+export const Route = createFileRoute("/mobile/projects/")({
   component: MobileProjectsList,
 });
 
@@ -20,7 +20,6 @@ function MobileProjectsList() {
   return (
     <MobileShell title="Dự án">
       <div className="flex flex-col pb-24 bg-slate-50 min-h-screen">
-        {/* Compact Header */}
         <div className="px-5 py-6 bg-slate-900 border-b border-indigo-500/10 mb-4 rounded-b-2xl shadow-lg">
            <div className="flex justify-between items-center">
               <div>
@@ -32,7 +31,6 @@ function MobileProjectsList() {
               </Button>
            </div>
         </div>
-
         <div className="px-4 space-y-3">
           {mockProjects.map((p) => (
             <Link key={p.id} to={`/mobile/projects/${p.id}`}>
@@ -45,11 +43,7 @@ function MobileProjectsList() {
                       {p.status}
                    </StatusBadge>
                 </div>
-
-                <h3 className="text-[13px] font-bold text-slate-900 mb-3 truncate leading-snug">
-                  {p.name}
-                </h3>
-
+                <h3 className="text-[13px] font-bold text-slate-900 mb-3 truncate leading-snug">{p.name}</h3>
                 <div className="space-y-3">
                    <div className="space-y-1.5">
                       <div className="flex justify-between text-[8px] font-bold uppercase text-slate-400">
@@ -60,7 +54,6 @@ function MobileProjectsList() {
                          <div className="h-full bg-indigo-500 w-[75%] rounded-full shadow-[0_0_8px_rgba(99,102,241,0.3)]" />
                       </div>
                    </div>
-
                    <div className="flex items-center justify-between pt-1">
                       <div className="flex items-center gap-3">
                         <div className="flex items-center gap-1 text-slate-400">

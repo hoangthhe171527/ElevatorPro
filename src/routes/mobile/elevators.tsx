@@ -1,139 +1,77 @@
-import { createFileRoute } from "@tanstack/react-router";
+﻿import { createFileRoute, Link } from "@tanstack/react-router";
 import { MobileShell } from "@/components/layout/MobileShell";
-import { mockElevators, mockJobs, getProject } from "@/lib/mock-data";
 import { Card } from "@/components/ui/card";
-import { Input } from "@/components/ui/input";
-import { Search, Building2, QrCode, ChevronRight, MapPin, AlertCircle, Calendar } from "lucide-react";
-import { useState } from "react";
+import { mockElevators } from "@/lib/mock-data";
 import { StatusBadge } from "@/components/common/StatusBadge";
-import { elevatorStatusLabel, elevatorStatusVariant } from "@/lib/status-variants";
-import { Button } from "@/components/ui/button";
+import { 
+  Search, 
+  Settings, 
+  MapPin, 
+  Zap, 
+  ChevronRight,
+  Info
+} from "lucide-react";
 
-export const Route = createFileRoute("/mobile/elevators")({
-  head: () => ({ meta: [{ title: "Thang máy — Mobile" }] }),
-  component: MobileElevators,
+export const Route = createFileRoute("/mobile/elevators/")({
+  component: MobileElevatorsList,
 });
 
-function MobileElevators() {
-  const [search, setSearch] = useState("");
-
-  const filtered = mockElevators.filter(
-    (e) =>
-      e.building.toLowerCase().includes(search.toLowerCase()) ||
-      e.code.toLowerCase().includes(search.toLowerCase()),
-  );
-
+function MobileElevatorsList() {
   return (
-    <MobileShell title="Thiết bị & Phụ tùng">
-      <div className="sticky top-0 bg-white/90 backdrop-blur-md z-20 px-6 py-4 border-b border-slate-100">
-        <div className="flex gap-3">
-          <div className="relative flex-1 group">
-            <Search className="absolute left-4 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400 group-focus-within:text-primary transition-colors" />
-            <Input
-              placeholder="Mã ID hoặc Tòa nhà..."
-              className="pl-11 h-12 bg-slate-50 border-none rounded-2xl shadow-inner focus-visible:ring-2 focus-visible:ring-primary/20 transition-all text-sm"
-              value={search}
-              onChange={(e) => setSearch(e.target.value)}
-            />
-          </div>
-          <Button
-            size="icon"
-            className="h-12 w-12 rounded-2xl bg-primary text-white shadow-lg shadow-primary/20 shrink-0 active:scale-95 transition-all"
-          >
-            <QrCode className="h-5 w-5" />
-          </Button>
+    <MobileShell title="Thiết bị">
+      <div className="flex flex-col pb-24 bg-slate-50 min-h-screen">
+        <div className="px-5 py-6 bg-white border-b border-slate-100 rounded-b-2xl shadow-sm mb-4">
+           <div className="flex items-center gap-2 px-3 py-2 bg-slate-50 border border-slate-100 rounded-xl">
+             <Search className="h-4 w-4 text-slate-400" />
+             <input placeholder="Số Serial, Tòa nhà..." className="bg-transparent border-none text-[13px] w-full focus:ring-0" />
+           </div>
         </div>
-      </div>
-
-      <div className="p-6 space-y-6">
-        {filtered.length > 0 ? (
-          filtered.map((elevator) => {
-            const project = getProject(elevator.projectId);
-            const activeJob = mockJobs.find((j) => j.elevatorId === elevator.id && j.status !== "completed");
-            
-            return (
-              <Card
-                key={elevator.id}
-                className="group border-none shadow-xl shadow-slate-200/40 bg-white rounded-[2rem] overflow-hidden active:scale-[0.98] transition-all"
-              >
-                <div className="p-5">
-                  <div className="flex gap-4">
-                    <div className="h-14 w-14 rounded-2xl bg-slate-50 flex items-center justify-center shrink-0 border border-slate-100 relative">
-                      <Building2 className="h-7 w-7 text-primary/40" />
-                      {activeJob && (
-                         <div className="absolute -top-1 -right-1 h-4 w-4 bg-orange-500 rounded-full border-2 border-white animate-pulse" />
-                      )}
-                    </div>
-                    
-                    <div className="flex-1 min-w-0">
-                      <div className="flex justify-between items-start mb-1">
-                        <h3 className="font-black text-slate-900 text-sm leading-tight truncate">
-                          {elevator.building}
-                        </h3>
-                        <StatusBadge variant={elevatorStatusVariant[elevator.status]} className="h-5 text-[9px] px-2">
-                          {elevatorStatusLabel[elevator.status]}
-                        </StatusBadge>
+        <div className="px-4 space-y-3">
+          {mockElevators.map((e) => (
+            <Link key={e.id} to={`/mobile/elevators/${e.id}`}>
+              <Card className="p-4 border border-slate-100 shadow-sm rounded-xl bg-white active:bg-slate-50 transition-colors">
+                <div className="flex justify-between items-start mb-3">
+                   <div className="flex items-center gap-2.5">
+                      <div className="h-9 w-9 bg-slate-100 rounded-lg flex items-center justify-center border border-slate-200">
+                         <Settings className="h-4 w-4 text-slate-600" />
                       </div>
-                      
-                      <div className="flex items-center gap-1.5 text-xs font-bold text-primary mb-2">
-                         <span className="bg-primary/5 px-1.5 py-0.5 rounded text-[10px] tracking-wider uppercase">{elevator.code}</span>
-                         <span className="text-slate-300 font-normal">/</span>
-                         <span className="text-slate-500 font-medium truncate">{project?.name}</span>
+                      <div>
+                         <h3 className="text-[13px] font-bold text-slate-900 leading-none mb-1">{e.serialNumber}</h3>
+                         <div className="flex items-center gap-1 text-[10px] text-slate-400 font-medium tracking-tight">
+                            <MapPin className="h-2.5 w-2.5" />
+                            <span>VINCOM CENTER</span>
+                         </div>
                       </div>
-
-                      <div className="flex items-start gap-1.5 text-[10px] text-muted-foreground bg-slate-50 p-2 rounded-xl border border-white">
-                        <MapPin className="h-3 w-3 mt-0.5 shrink-0 text-slate-400" />
-                        <span className="line-clamp-1">{project?.address}</span>
-                      </div>
-                    </div>
-                  </div>
-
-                  <div className="mt-5 grid grid-cols-2 gap-4 pt-4 border-t border-slate-100/50">
-                    <div className="flex flex-col">
-                      <span className="text-[9px] uppercase text-slate-400 font-black tracking-widest leading-none">
-                        Bảo trì định kỳ
-                      </span>
-                      <div className="flex items-center gap-1.5 mt-2">
-                        <Calendar className="h-3.5 w-3.5 text-slate-400" />
-                        <span className="text-xs font-bold text-slate-700">
-                          {elevator.lastMaintenance.split("-").slice(1).reverse().join("/")}
-                        </span>
-                      </div>
-                    </div>
-                    <div className="flex flex-col pl-4 border-l border-slate-100">
-                      <span className="text-[9px] uppercase text-slate-400 font-black tracking-widest leading-none">
-                        Trạng thái kỹ thuật
-                      </span>
-                      <div className="flex items-center gap-1.5 mt-2">
-                        <Search className="h-3.5 w-3.5 text-slate-400" />
-                        <span className="text-xs font-bold text-slate-700 truncate">
-                          {activeJob ? activeJob.title : "Hoạt động tốt"}
-                        </span>
-                      </div>
-                    </div>
-                  </div>
+                   </div>
+                   <StatusBadge variant={e.status === "operational" ? "success" : "warning"} className="h-4 px-1.5 text-[7px] font-bold uppercase">
+                      {e.status}
+                   </StatusBadge>
                 </div>
-                
-                <Button 
-                  variant="ghost" 
-                  className="w-full h-10 bg-slate-50/50 text-[10px] font-black text-slate-400 uppercase tracking-widest hover:bg-primary/5 hover:text-primary transition-colors rounded-none border-t border-slate-50"
-                >
-                  XEM HỒ SƠ THIẾT BỊ <ChevronRight className="h-3 w-3 ml-1" />
-                </Button>
+                <div className="grid grid-cols-2 gap-2 pt-3 border-t border-slate-50">
+                   <div className="bg-slate-50 px-2.5 py-1.5 rounded-lg flex items-center justify-between border border-slate-100">
+                      <div className="flex items-center gap-1.5">
+                         <Zap className="h-3 w-3 text-amber-500" />
+                         <span className="text-[9px] font-bold text-slate-500 uppercase">CS</span>
+                      </div>
+                      <span className="text-[10px] font-bold text-slate-900">1200KVA</span>
+                   </div>
+                   <div className="bg-slate-50 px-2.5 py-1.5 rounded-lg flex items-center justify-between border border-slate-100">
+                      <div className="flex items-center gap-1.5">
+                         <Info className="h-3 w-3 text-indigo-500" />
+                         <span className="text-[9px] font-bold text-slate-500 uppercase">Tầng</span>
+                      </div>
+                      <span className="text-[10px] font-bold text-slate-900">{e.specifications?.floors || 12}</span>
+                   </div>
+                </div>
+                <div className="flex justify-end mt-3">
+                   <div className="flex items-center gap-1 text-[9px] font-bold text-indigo-600 uppercase tracking-wider">
+                      Chi tiết <ChevronRight className="h-3 w-3 text-indigo-300" />
+                   </div>
+                </div>
               </Card>
-            );
-          })
-        ) : (
-          <div className="py-24 text-center bg-slate-50/50 rounded-[3rem] border border-dashed border-slate-200 mx-2">
-            <div className="h-20 w-20 bg-slate-100 rounded-full flex items-center justify-center mx-auto mb-6">
-              <AlertCircle className="h-10 w-10 text-slate-300" />
-            </div>
-            <h3 className="text-lg font-bold text-slate-900 mb-2">Không tìm thấy thiết bị</h3>
-            <p className="text-xs text-slate-400 max-w-[200px] mx-auto leading-relaxed">
-              Hãy thử lại với mã định danh hoặc tên tòa nhà khác.
-            </p>
-          </div>
-        )}
+            </Link>
+          ))}
+        </div>
       </div>
     </MobileShell>
   );
