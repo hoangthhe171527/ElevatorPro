@@ -1,267 +1,135 @@
-import { createFileRoute } from "@tanstack/react-router";
+﻿import { createFileRoute, Link } from "@tanstack/react-router";
 import { MobileShell } from "@/components/layout/MobileShell";
-import { mockRequests, getUser, getProject, formatVND, type ApprovalRequest } from "@/lib/mock-data";
 import { Card } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import {
-  CheckCircle2,
-  XCircle,
-  Clock,
-  Package,
-  CreditCard,
-  FileCheck,
-  User,
-  AlertCircle,
-  History as HistoryIcon,
-  CheckCircle,
-  TrendingUp,
+import { 
+  CheckCircle2, 
+  XCircle, 
+  Clock, 
+  Package, 
+  CreditCard, 
+  Zap,
+  ChevronRight,
+  Filter,
+  ArrowUpRight
 } from "lucide-react";
-import { useCurrentPermissions } from "@/lib/store";
-import { Link } from "@tanstack/react-router";
-import { useState } from "react";
 import { cn } from "@/lib/utils";
-import { toast } from "sonner";
-import { ConfirmationDialog } from "@/components/common/ConfirmationDialog";
 
 export const Route = createFileRoute("/mobile/approvals")({
-  head: () => ({ meta: [{ title: "Phê duyệt — Mobile" }] }),
   component: MobileApprovals,
 });
 
 function MobileApprovals() {
-  const permissions = useCurrentPermissions();
-  const allowed = ["director", "install_mgmt", "maintenance_mgmt", "accounting", "hr_admin"];
-  const canAccess = permissions.some(p => allowed.includes(p));
+  const requests = [
+    { id: "REQ-901", title: "Thay cáp tải - Toyota Showroom", type: "material", value: "45.000.000đ", requester: "Kỹ thuật An", time: "10 phút trước", priority: "high" },
+    { id: "REQ-902", title: "Nghiệm thu định kỳ - VinHome G1", type: "service", value: "1.200.000đ", requester: "Kỹ thuật Bình", time: "1 giờ trước", priority: "normal" },
+    { id: "REQ-903", title: "Tạm ứng vật tư sửa chữa máy kéo", type: "budget", value: "5.500.000đ", requester: "Kỹ thuật Cường", time: "3 giờ trước", priority: "high" },
+  ];
 
-  const [activeTab, setActiveTab] = useState<"pending" | "history">("pending");
-  const [confirmId, setConfirmId] = useState<string | null>(null);
-  const [rejectId, setRejectId] = useState<string | null>(null);
-
-  if (!canAccess) {
-    return (
-      <MobileShell title="Truy cập bị hạn chế">
-        <div className="flex flex-col items-center justify-center p-12 text-center h-[60vh]">
-          <div className="h-20 w-20 rounded-[2rem] bg-rose-50 text-rose-500 flex items-center justify-center mb-6">
-            <XCircle className="h-10 w-10" />
-          </div>
-          <h2 className="text-xl font-black text-slate-900 tracking-tighter mb-2 italic">KHÔNG CÓ QUYỀN TRUY CẬP</h2>
-          <p className="text-xs text-slate-400 font-medium leading-relaxed mb-8">
-            Bạn không có thẩm quyền để duyệt các yêu cầu/chi phí. Vui lòng liên hệ cấp quản lý.
-          </p>
-          <Link to="/mobile" className="w-full">
-            <Button className="w-full h-12 rounded-2xl bg-slate-900 text-white font-black italic uppercase text-[10px] tracking-widest shadow-xl">
-              QUAY LẠI TRANG CHỦ
-            </Button>
-          </Link>
-        </div>
-      </MobileShell>
-    );
-  }
-
-  const pending = mockRequests.filter((r) => r.status === "pending");
-  const history = mockRequests.filter((r) => r.status !== "pending");
-
-  const displayList = activeTab === "pending" ? pending : history;
-
-  const getTypeIcon = (type: string) => {
-    switch (type) {
-      case "material":
-        return Package;
-      case "budget":
-        return CreditCard;
-      case "project_advance":
-        return TrendingUp;
-      case "completion":
-        return FileCheck;
-      default:
-        return AlertCircle;
-    }
-  };
-
-  const getTypeColor = (type: string) => {
-    switch (type) {
-      case "material":
-        return "bg-blue-500/10 text-blue-600";
-      case "budget":
-        return "bg-purple-500/10 text-purple-600";
-      case "project_advance":
-        return "bg-amber-500/10 text-amber-600";
-      case "completion":
-        return "bg-emerald-500/10 text-emerald-600";
-      default:
-        return "bg-slate-500/10 text-slate-600";
+  const getIcon = (type: string) => {
+    switch(type) {
+      case "material": return Package;
+      case "budget": return CreditCard;
+      default: return Zap;
     }
   };
 
   return (
-    <MobileShell title="Phê duyệt">
-      <div className="flex flex-col pb-20">
-        {/* Tab Header */}
-        <div className="bg-white border-b sticky top-0 z-20 px-6 py-4 flex gap-2">
-            <button
-                onClick={() => setActiveTab("pending")}
-                className={cn(
-                    "flex-1 h-11 rounded-2xl text-[10px] font-black uppercase tracking-widest transition-all flex items-center justify-center gap-2 border",
-                    activeTab === "pending" 
-                        ? "bg-primary text-white border-primary shadow-lg shadow-primary/20" 
-                        : "bg-white text-slate-400 border-slate-100"
-                )}
-            >
-                <Clock className="h-3.5 w-3.5" />
-                Đang chờ ({pending.length})
-            </button>
-            <button
-                onClick={() => setActiveTab("history")}
-                className={cn(
-                    "flex-1 h-11 rounded-2xl text-[10px] font-black uppercase tracking-widest transition-all flex items-center justify-center gap-2 border",
-                    activeTab === "history" 
-                        ? "bg-slate-900 text-white border-slate-900 shadow-lg shadow-slate-900/20" 
-                        : "bg-white text-slate-400 border-slate-100"
-                )}
-            >
-                <HistoryIcon className="h-3.5 w-3.5" />
-                Lịch sử
-            </button>
+    <MobileShell title="Trung tâm Phê duyệt">
+      <div className="flex flex-col min-h-screen bg-slate-50 font-sans pb-32">
+        {/* Quick Filter Tabs */}
+        <div className="px-6 pt-6 pb-2 bg-white border-b border-slate-100 flex items-center gap-6 overflow-x-auto no-scrollbar sticky top-0 z-30">
+           {["Tất cả", "Vật tư", "Tài chính", "Dịch vụ"].map((tab, i) => (
+              <button key={tab} className={cn(
+                 "text-[11px] font-black uppercase tracking-widest whitespace-nowrap pb-3 border-b-2 transition-all",
+                 i === 0 ? "border-indigo-600 text-slate-900" : "border-transparent text-slate-400"
+              )}>{tab}</button>
+           ))}
         </div>
 
-        <div className="p-6 space-y-4">
-          {displayList.length === 0 && (
-            <div className="py-24 text-center">
-              <div className={cn(
-                  "h-20 w-20 rounded-full flex items-center justify-center mx-auto mb-4 bg-slate-50",
-                  activeTab === "pending" ? "text-emerald-100" : "text-slate-100"
-              )}>
-                {activeTab === "pending" ? <CheckCircle className="h-10 w-10" /> : <HistoryIcon className="h-10 w-10" />}
-              </div>
-              <h3 className="font-black text-slate-900">
-                {activeTab === "pending" ? "Đã sạch yêu cầu" : "Chưa có quyết định nào"}
+        {/* Dynamic List */}
+        <section className="px-6 mt-6">
+           <div className="flex items-center justify-between mb-5">
+              <h3 className="text-[10px] font-black text-slate-400 uppercase tracking-[0.25em] flex items-center gap-2">
+                 Chờ phê duyệt ({requests.length})_
               </h3>
-              <p className="text-xs text-slate-400 mt-2 font-medium">
-                {activeTab === "pending" ? "Không có yêu cầu nào đang chờ xử lý." : "Các yêu cầu đã xử lý sẽ hiện ở đây."}
-              </p>
-            </div>
-          )}
+              <Filter className="h-4 w-4 text-slate-300" />
+           </div>
 
-          {displayList.map((req) => {
-            const Icon = getTypeIcon(req.type);
-            const user = getUser(req.requestedBy);
-            const project = req.targetId ? getProject(req.targetId) : null;
-            const isApproved = req.status === "approved";
-            const isRejected = req.status === "rejected";
+           <div className="space-y-4">
+              {requests.map((req) => {
+                 const Icon = getIcon(req.type);
+                 return (
+                    <Card key={req.id} className="p-0 border-none shadow-[0_8px_30px_rgba(0,0,0,0.04)] rounded-[1.8rem] bg-white overflow-hidden group">
+                       <div className="p-5 flex items-start gap-4">
+                          <div className={cn(
+                             "h-12 w-12 rounded-2xl flex flex-col items-center justify-center shrink-0 shadow-lg",
+                             req.priority === "high" ? "bg-rose-500 shadow-rose-200" : "bg-slate-900"
+                          )}>
+                             <Icon className={cn("h-6 w-6 text-white", req.priority === "high" && "animate-pulse")} />
+                          </div>
+                          <div className="flex-1 min-w-0">
+                             <div className="flex items-center justify-between mb-1">
+                                <span className="text-[8px] font-black text-indigo-500 uppercase tracking-widest">{req.id}</span>
+                                <span className="text-[9px] font-bold text-slate-400 uppercase">{req.time}</span>
+                             </div>
+                             <h4 className="text-[14px] font-black text-slate-900 leading-tight italic truncate mb-2 uppercase tracking-tight">{req.title}</h4>
+                             <div className="flex items-center justify-between">
+                                <div className="flex items-center gap-2">
+                                   <div className="h-5 w-5 rounded-full bg-slate-100 flex items-center justify-center">
+                                      <span className="text-[8px] font-black">{req.requester.charAt(8)}</span>
+                                   </div>
+                                   <span className="text-[10px] font-bold text-slate-500 uppercase">{req.requester}</span>
+                                </div>
+                                <div className="text-right">
+                                   <p className="text-[12px] font-black text-rose-600 italic leading-none mb-0.5">{req.value}</p>
+                                   <p className="text-[7px] font-bold text-slate-400 uppercase leading-none">Ước tính</p>
+                                </div>
+                             </div>
+                          </div>
+                       </div>
+                       
+                       {/* Action Bar - Fast Approve/Reject */}
+                       <div className="flex border-t border-slate-50 bg-slate-50/50 p-3 gap-3">
+                          <button className="flex-1 h-12 bg-white rounded-xl border border-slate-200 text-[10px] font-black uppercase text-rose-500 flex items-center justify-center gap-2 active:bg-rose-50 transition-all shadow-sm">
+                             <XCircle className="h-4 w-4" /> Từ chối
+                          </button>
+                          <button className="flex-2 h-12 bg-indigo-600 rounded-xl text-[10px] font-black uppercase text-white flex items-center justify-center gap-2 active:scale-[0.98] transition-all shadow-lg shadow-indigo-200">
+                             <CheckCircle2 className="h-4 w-4" /> Phê duyệt ngay
+                          </button>
+                       </div>
+                    </Card>
+                 );
+              })}
+           </div>
+        </section>
 
-            return (
-              <Card
-                key={req.id}
-                className="p-5 border-none shadow-sm shadow-slate-200/50 bg-white rounded-[2rem] active:scale-[0.98] transition-all relative overflow-hidden group"
-              >
-                <div className="flex items-center gap-4 mb-5">
-                  <div className={cn(
-                    "h-12 w-12 rounded-2xl flex items-center justify-center shrink-0 shadow-lg shadow-current/5",
-                    getTypeColor(req.type)
-                  )}>
-                    <Icon className="h-6 w-6" />
-                  </div>
-                  <div className="flex-1 min-w-0">
-                    <h3 className="font-black text-sm text-slate-900 leading-tight line-clamp-1">{req.title}</h3>
-                    <div className="flex items-center gap-2 mt-1.5 font-medium">
-                      <div className="h-5 w-5 rounded-full bg-slate-100 flex items-center justify-center overflow-hidden">
-                        <User className="h-3 w-3 text-slate-400" />
-                      </div>
-                      <span className="text-[10px] text-slate-500">
-                        {user?.name}
-                      </span>
-                      <div className="h-1 w-1 rounded-full bg-slate-200" />
-                      <span className="text-[10px] text-slate-400">1h trước</span>
+        {/* BI Widget Recommendation */}
+        <div className="px-6 mt-10">
+           <Card className="p-5 bg-gradient-to-br from-slate-900 to-indigo-950 rounded-[2rem] border-none shadow-2xl relative overflow-hidden">
+              <div className="absolute top-0 right-0 w-32 h-32 bg-white/5 rounded-full -mr-16 -mt-16 blur-2xl" />
+              <div className="relative z-10">
+                 <div className="flex justify-between items-start mb-4">
+                    <p className="text-[9px] font-black text-indigo-300 uppercase tracking-[0.3em]">Insights_</p>
+                    <ArrowUpRight className="h-4 w-4 text-white/50" />
+                 </div>
+                 <h3 className="text-lg font-black text-white italic leading-tight mb-1 uppercase tracking-tighter">Budget Utilization</h3>
+                 <div className="flex items-end gap-3 mb-4">
+                    <p className="text-2xl font-black text-white italic">72<span className="text-sm opacity-50 ml-0.5">%</span></p>
+                    <div className="h-10 flex-1 flex items-end gap-1 pb-1">
+                       {[0.4, 0.7, 0.5, 0.9, 0.6, 0.8, 0.72].map((v, i) => (
+                          <div key={i} className="flex-1 bg-white/10 rounded-t-sm relative" style={{ height: `${v * 100}%` }}>
+                             {i === 6 && <div className="absolute inset-0 bg-indigo-400 shadow-[0_0_10px_rgba(129,140,248,0.5)]" />}
+                          </div>
+                       ))}
                     </div>
-                  </div>
-                  {req.urgency === "critical" && (
-                    <div className="absolute top-4 right-4 h-2 w-2 rounded-full bg-red-500 animate-pulse shadow-[0_0_10px_rgba(239,68,68,0.5)]" />
-                  )}
-                </div>
-
-                <div className="text-xs text-slate-600 bg-slate-50/50 p-4 rounded-2xl mb-5 italic border border-slate-100/50 relative">
-                  <span className="absolute -top-2 left-4 px-2 bg-white text-[8px] font-black uppercase text-slate-300">Nội dung yêu cầu</span>
-                  "{req.description}"
-                  {(req.amount || project) && (
-                    <div className="mt-4 pt-4 border-t border-slate-100 flex justify-between items-end not-italic">
-                      {req.amount && (
-                        <div>
-                          <p className="text-[9px] font-black text-slate-400 uppercase">Dự chi</p>
-                          <p className="text-sm font-black text-slate-900 mt-0.5">{formatVND(req.amount)}</p>
-                        </div>
-                      )}
-                      {project && (
-                        <div className="text-right">
-                          <p className="text-[9px] font-black text-slate-400 uppercase">Dự án</p>
-                          <p className="text-[10px] font-bold text-primary mt-0.5 uppercase tracking-tight">{project.name}</p>
-                        </div>
-                      )}
-                    </div>
-                  )}
-                </div>
-
-                {activeTab === "pending" ? (
-                  <div className="flex gap-3">
-                    <Button
-                      variant="outline"
-                      className="flex-1 h-11 rounded-2xl border-slate-100 text-slate-400 hover:text-red-500 hover:bg-red-50 hover:border-red-100 font-black text-[10px] tracking-widest transition-all"
-                      onClick={() => setRejectId(req.id)}
-                    >
-                      <XCircle className="h-4 w-4 mr-2" /> TỪ CHỐI
-                    </Button>
-                    <Button
-                      className="flex-1 h-11 rounded-2xl bg-primary hover:bg-primary/90 text-white font-black text-[10px] tracking-widest shadow-lg shadow-primary/20"
-                      onClick={() => setConfirmId(req.id)}
-                    >
-                      <CheckCircle2 className="h-4 w-4 mr-2" /> PHÊ DUYỆT
-                    </Button>
-                  </div>
-                ) : (
-                  <div className={cn(
-                    "flex items-center justify-center gap-2 py-3 rounded-2xl font-black text-[10px] tracking-widest uppercase",
-                    isApproved ? "bg-emerald-50 text-emerald-600" : "bg-red-50 text-red-600"
-                  )}>
-                    {isApproved ? (
-                        <>
-                            <CheckCircle2 className="h-4 w-4" /> ĐÃ PHÊ DUYỆT
-                        </>
-                    ) : (
-                        <>
-                            <XCircle className="h-4 w-4" /> ĐÃ TỪ CHỐI
-                        </>
-                    )}
-                  </div>
-                )}
-              </Card>
-            );
-          })}
+                 </div>
+                 <p className="text-[9px] font-bold text-white/40 uppercase tracking-widest leading-relaxed">
+                    Ngân sách vật tư tháng 4 đang ở mức kiểm soát. <br/>Dự kiến tăng +12% vào tuần sau.
+                 </p>
+              </div>
+           </Card>
         </div>
       </div>
-
-      <ConfirmationDialog
-        open={!!confirmId}
-        onOpenChange={(o) => !o && setConfirmId(null)}
-        title="Xác nhận phê duyệt"
-        description="Bạn có chắc chắn muốn phê duyệt yêu cầu này? Hệ thống sẽ tự động cập nhật tiến độ dự án và thông báo cho các bên liên quan."
-        onConfirm={() => {
-          toast.success("Đã phê duyệt yêu cầu thành công!");
-          setConfirmId(null);
-        }}
-        variant="success"
-      />
-
-      <ConfirmationDialog
-        open={!!rejectId}
-        onOpenChange={(o) => !o && setRejectId(null)}
-        title="Xác nhận từ chối"
-        description="Bạn có chắc chắn muốn từ chối yêu cầu này? Hành động này sẽ thông báo cho người yêu cầu biết yêu cầu không được chấp nhận."
-        onConfirm={() => {
-          toast.error("Đã từ chối yêu cầu thành công!");
-          setRejectId(null);
-        }}
-        variant="destructive"
-      />
     </MobileShell>
   );
 }
-
