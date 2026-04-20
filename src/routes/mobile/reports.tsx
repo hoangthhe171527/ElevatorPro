@@ -47,6 +47,20 @@ function MobileReports() {
   ];
 
   return (
+    <MobileShell title="Báo cáo Chỉ số">
+      {/* Date Filter Bar */}
+      <div className="sticky top-0 bg-white/80 backdrop-blur-3xl z-20 px-6 py-4 border-b border-slate-100 flex items-center justify-between">
+        <div className="flex items-center gap-2">
+          <div className="h-8 w-8 rounded-xl bg-primary/10 flex items-center justify-center">
+             <Calendar className="h-4 w-4 text-primary" />
+          </div>
+          <span className="text-[10px] font-black uppercase tracking-[0.1em] text-slate-600">Tháng 4, 2026</span>
+        </div>
+        <Button
+          variant="outline"
+          size="sm"
+          className="h-8 text-[9px] font-black text-slate-500 gap-1.5 rounded-xl border-slate-200 uppercase"
+        >
           <Filter className="h-3 w-3" /> Lọc kỳ
         </Button>
       </div>
