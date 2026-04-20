@@ -358,6 +358,10 @@ function ElevatorDetail() {
         </TabsContent>
       </Tabs>
 
+      <CreateJobModal
+        open={jobOpen}
+        onClose={() => setJobOpen(false)}
+        defaultCustomerId={project?.customerId}
         defaultElevatorId={elevator.id}
         defaultContractId={elevator.contractId}
       />
