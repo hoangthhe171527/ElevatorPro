@@ -1,6 +1,6 @@
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute, Link } from "@tanstack/react-router";
 import { MobileShell } from "@/components/layout/MobileShell";
-import { mockInventory, formatVND } from "@/lib/mock-data";
+import { mockInventory } from "@/lib/mock-data";
 import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import {
@@ -8,9 +8,10 @@ import {
   Search,
   AlertTriangle,
   ChevronRight,
-  Layers,
+  Filter,
   ArrowDownToLine,
   Navigation,
+  Box,
 } from "lucide-react";
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
@@ -32,105 +33,104 @@ function MobileInventory() {
 
   return (
     <MobileShell title="Quản lý kho">
-      <div className="sticky top-0 bg-slate-50/80 backdrop-blur-sm z-20 px-4 py-3 border-b flex gap-2">
-        <div className="relative flex-1">
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+      {/* Search & Header Stats */}
+      <div className="sticky top-0 bg-white/80 backdrop-blur-md z-20 px-5 py-4 border-b">
+         <div className="flex items-center justify-between mb-4">
+            <div className="flex items-center gap-2">
+               <Box className="h-4 w-4 text-primary" />
+               <h3 className="text-sm font-black tracking-tight">{mockInventory.length} Mã vật tư</h3>
+            </div>
+            <div className="flex gap-2">
+               <Button variant="ghost" size="icon" className="h-9 w-9 rounded-xl bg-slate-50 border">
+                  <Filter className="h-4 w-4 text-slate-500" />
+               </Button>
+               <Button className="h-9 rounded-xl bg-slate-900 text-white font-black text-[10px] gap-2 px-4 shadow-lg shadow-slate-900/20">
+                  NHẬP KHO
+               </Button>
+            </div>
+         </div>
+        <div className="relative">
+          <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground opacity-50" />
           <Input
             placeholder="Mã hoặc tên vật tư..."
-            className="pl-9 bg-background border-none shadow-sm"
+            className="pl-9 h-11 bg-slate-50 border-none shadow-inner rounded-xl text-xs font-bold"
             value={search}
             onChange={(e) => setSearch(e.target.value)}
           />
         </div>
-        <Button
-          size="icon"
-          variant="outline"
-          className="h-[42px] w-[42px] rounded-xl bg-background border-slate-200 shrink-0"
-        >
-          <Layers className="h-5 w-5" />
-        </Button>
       </div>
 
-      <div className="p-4 space-y-4">
+      <div className="p-5 space-y-4">
         {filtered.map((item) => {
           const isLow = item.stock <= item.reorderLevel;
           return (
-            <Card
-              key={item.id}
-              className="p-4 shadow-sm border-none bg-background active:scale-[0.98] transition-all"
-            >
-              <div className="flex gap-4">
-                <div
-                  className={cn(
-                    "h-14 w-14 rounded-2xl flex items-center justify-center shrink-0 border",
-                    isLow
-                      ? "bg-amber-50 border-amber-200 text-amber-600"
-                      : "bg-blue-50 border-blue-200 text-blue-600",
-                  )}
-                >
-                  <Package className="h-7 w-7" />
-                </div>
-                <div className="flex-1 min-w-0">
-                  <div className="flex justify-between items-start gap-2">
-                    <div className="flex-1 min-w-0">
-                      <h3 className="font-bold text-sm leading-tight line-clamp-1">{item.name}</h3>
-                      <span className="text-[10px] font-mono text-muted-foreground mt-1 block tracking-wider uppercase">
-                        {item.code}
-                      </span>
-                    </div>
-                    {isLow && <AlertTriangle className="h-4 w-4 text-amber-500 shrink-0" />}
+            <Link key={item.id} to="/mobile/inventory/$itemId" params={{ itemId: item.id }}>
+              <Card
+                className="p-4 shadow-sm border-none bg-white rounded-[1.5rem] active:scale-[0.97] transition-all mb-4"
+              >
+                <div className="flex gap-4">
+                  <div
+                    className={cn(
+                      "h-12 w-12 rounded-2xl flex items-center justify-center shrink-0 border shadow-inner",
+                      isLow
+                        ? "bg-amber-50 border-amber-100 text-amber-500"
+                        : "bg-blue-50 border-blue-100 text-blue-500",
+                    )}
+                  >
+                    <Package className="h-6 w-6" />
                   </div>
+                  <div className="flex-1 min-w-0">
+                    <div className="flex justify-between items-start gap-2">
+                      <div className="flex-1 min-w-0">
+                        <h3 className="font-black text-slate-900 text-[13px] leading-tight truncate uppercase">{item.name}</h3>
+                        <div className="flex items-center gap-2 mt-1.5 opacity-50">
+                           <span className="text-[10px] font-mono font-bold tracking-tight">{item.code}</span>
+                        </div>
+                      </div>
+                      {isLow && <AlertTriangle className="h-4 w-4 text-amber-500 shrink-0" />}
+                    </div>
 
-                  <div className="grid grid-cols-2 gap-4 mt-4">
-                    <div className="flex flex-col">
-                      <span className="text-[9px] text-muted-foreground font-bold uppercase">
-                        Tồn kho
-                      </span>
-                      <div className="flex items-end gap-1">
-                        <span
-                          className={cn(
-                            "text-lg font-bold leading-none",
-                            isLow ? "text-amber-600" : "text-foreground",
-                          )}
-                        >
-                          {item.stock}
+                    <div className="grid grid-cols-2 gap-4 mt-4 py-3 border-y border-slate-50">
+                      <div className="flex flex-col">
+                        <span className="text-[8px] text-slate-400 font-black uppercase tracking-widest">
+                          Tồn kho
                         </span>
-                        <span className="text-[10px] text-muted-foreground mb-0.5">
-                          {item.unit}
+                        <div className="flex items-baseline gap-1 mt-0.5">
+                          <span
+                            className={cn(
+                              "text-sm font-black",
+                              isLow ? "text-amber-600" : "text-slate-900",
+                            )}
+                          >
+                            {item.stock}
+                          </span>
+                          <span className="text-[9px] text-slate-400 font-bold uppercase">
+                            {item.unit}
+                          </span>
+                        </div>
+                      </div>
+                      <div className="flex flex-col items-end">
+                        <span className="text-[8px] text-slate-400 font-black uppercase tracking-widest">
+                          Vị trí
                         </span>
+                        <div className="flex items-center gap-1.5 mt-0.5">
+                           <Navigation className="h-2.5 w-2.5 text-slate-300" />
+                           <span className="text-[10px] font-black text-slate-500 uppercase tracking-tight">
+                              {item.location}
+                           </span>
+                        </div>
                       </div>
                     </div>
-                    <div className="flex flex-col">
-                      <span className="text-[9px] text-muted-foreground font-bold uppercase">
-                        Đã đặt chỗ
-                      </span>
-                      <div className="flex items-end gap-1">
-                        <span className="text-lg font-bold leading-none text-slate-500">
-                          {item.reserved}
-                        </span>
-                        <span className="text-[10px] text-muted-foreground mb-0.5">
-                          {item.unit}
-                        </span>
+
+                    <div className="mt-3 flex items-center justify-end">
+                      <div className="text-primary font-black text-[10px] flex items-center gap-1 uppercase tracking-tighter">
+                         QUẢN LÝ <ChevronRight className="h-3 w-3" />
                       </div>
                     </div>
                   </div>
-
-                  <div className="mt-4 flex items-center justify-between pt-3 border-t border-slate-50">
-                    <div className="flex items-center gap-1.5 text-[9px] text-muted-foreground font-semibold">
-                      <Navigation className="h-3 w-3" />
-                      {item.location}
-                    </div>
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      className="h-7 text-[10px] font-bold text-primary gap-1 px-2"
-                    >
-                      XUẤT KHO <ArrowDownToLine className="h-3 w-3" />
-                    </Button>
-                  </div>
                 </div>
-              </div>
-            </Card>
+              </Card>
+            </Link>
           );
         })}
       </div>

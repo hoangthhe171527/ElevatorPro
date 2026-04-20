@@ -6,8 +6,10 @@ import { mockUsers } from "./mock-data";
 interface AppState {
   userId: string;
   activeTenantId: string;
+  activeJobCheckIn: string | null;
   setUserId: (userId: string) => void;
   setTenantId: (tenantId: string) => void;
+  setJobCheckIn: (jobId: string | null) => void;
 }
 
 export const useAppStore = create<AppState>()(
@@ -15,20 +17,16 @@ export const useAppStore = create<AppState>()(
     (set, get) => ({
       userId: "u-director-1",
       activeTenantId: "t-1",
+      activeJobCheckIn: null,
       setUserId: (userId) => {
         const user = mockUsers.find((u) => u.id === userId);
         const activeTenantId = user?.memberships?.[0]?.tenantId || get().activeTenantId;
-        set({ userId, activeTenantId });
+        set({ userId, activeTenantId, activeJobCheckIn: null }); // Reset check-in on user change
       },
       setTenantId: (tenantId) => {
-        const user = mockUsers.find((u) => u.id === get().userId);
-        const membership = user?.memberships.find((m) => m.tenantId === tenantId);
-        if (membership) {
-          set({ activeTenantId: tenantId });
-        } else {
-          set({ activeTenantId: tenantId });
-        }
+        set({ activeTenantId: tenantId });
       },
+      setJobCheckIn: (jobId) => set({ activeJobCheckIn: jobId }),
     }),
     { name: "elevator-app-state-v3" },
   ),
@@ -37,6 +35,14 @@ export const useAppStore = create<AppState>()(
 export function useCurrentUser() {
   const userId = useAppStore((s) => s.userId);
   return mockUsers.find((u) => u.id === userId) || mockUsers[0];
+}
+
+export function useMainRole(): "director" | "sales" | "tech" | "staff" {
+  const permissions = useCurrentPermissions();
+  if (permissions.includes("director")) return "director";
+  if (permissions.includes("sales") || permissions.includes("sales_maintenance")) return "sales";
+  if (permissions.includes("field_tech")) return "tech";
+  return "staff";
 }
 
 export function useCurrentPermissions(): Permission[] {

@@ -20,11 +20,12 @@ import {
   QrCode,
   Navigation,
   Calendar,
-  ChevronDown,
-  Wrench,
   Globe,
   X,
   Check,
+  ChevronRight,
+  HelpCircle,
+  LogOut,
 } from "lucide-react";
 import { useAppStore, useCurrentPermissions } from "@/lib/store";
 import { mockTenants, mockUsers } from "@/lib/mock-data";
@@ -32,7 +33,6 @@ import { MobilePortalProvider } from "./MobilePortalContext";
 import { cn } from "@/lib/utils";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
-import { Card } from "../ui/card";
 
 interface MobileShellProps {
   children: React.ReactNode;
@@ -47,6 +47,7 @@ export function MobileShell({ children, title, showBackButton, backLink }: Mobil
   const setTenantId = useAppStore((s) => s.setTenantId);
   const setUserId = useAppStore((s) => s.setUserId);
   const permissions = useCurrentPermissions();
+  const activeTenant = mockTenants.find(t => t.id === activeTenantId);
 
   const location = useLocation();
   const [isMenuOpen, setIsMenuOpen] = useState(false);
@@ -64,100 +65,85 @@ export function MobileShell({ children, title, showBackButton, backLink }: Mobil
 
   const initials = user.name
     .split(" ")
-    .slice(-2)
-    .map((n) => n[0])
-    .join("");
-
-  const tabs = [
-    { to: "/mobile", label: "Home", icon: Home },
-    { to: "/mobile/projects", label: "Dự án", icon: Building },
-    { to: "/mobile/jobs", label: "Việc", icon: Briefcase },
-    { to: "/mobile/elevators", label: "Thang", icon: Building2 },
-    { to: "menu", label: "Menu", icon: LayoutGrid },
-  ];
+    .slice(-1)[0][0]
+    .toUpperCase();
 
   const menuItems = [
-    { to: "/mobile/leads", label: "Leads/CRM", icon: Users, color: "bg-orange-500" },
-    { to: "/mobile/portal", label: "Cổng Khách hàng", icon: LayoutGrid, color: "bg-indigo-500" },
-    {
-      to: "/mobile/route-plan",
-      label: "Lộ trình kỹ thuật",
-      icon: Navigation,
-      color: "bg-indigo-600",
-    },
-    { to: "/mobile/schedule", label: "Lịch bảo trì", icon: Calendar, color: "bg-pink-500" },
-    { to: "/mobile/inventory", label: "Kho vật tư", icon: Package, color: "bg-blue-500" },
-    { to: "/mobile/approvals", label: "Phê duyệt", icon: ShieldCheck, color: "bg-emerald-500" },
-    { to: "/mobile/accounting", label: "Kế toán", icon: CreditCard, color: "bg-purple-500" },
-    { to: "/mobile/reports", label: "Báo cáo", icon: BarChart3, color: "bg-amber-500" },
-    { to: "/mobile/hr", label: "Nhân sự", icon: ClipboardCheck, color: "bg-slate-500" },
-    { to: "/mobile/profile", label: "Tài khoản", icon: User, color: "bg-primary" },
-    { to: "/mobile/settings", label: "Cài đặt", icon: Settings, color: "bg-slate-700" },
+    { to: "/mobile/leads", label: "CRM Leads", icon: Users, color: "bg-indigo-500 shadow-indigo-500/20" },
+    { to: "/mobile/route-plan", label: "Lộ trình", icon: Navigation, color: "bg-blue-600 shadow-blue-600/20" },
+    { to: "/mobile/schedule", label: "Lịch bảo trì", icon: Calendar, color: "bg-rose-500 shadow-rose-500/20" },
+    { to: "/mobile/inventory", label: "Kho vật tư", icon: Package, color: "bg-emerald-500 shadow-emerald-500/20" },
+    { to: "/mobile/approvals", label: "Phê duyệt", icon: ShieldCheck, color: "bg-amber-500 shadow-amber-500/20" },
+    { to: "/mobile/projects", label: "Dự án", icon: Building, color: "bg-slate-700 shadow-slate-700/20" },
+    { to: "/mobile/accounting", label: "Tài chính", icon: CreditCard, color: "bg-purple-500 shadow-purple-500/20" },
+    { to: "/mobile/reports", label: "Báo cáo", icon: BarChart3, color: "bg-primary shadow-primary/20" },
+    { to: "/mobile/settings", label: "Cài đặt", icon: Settings, color: "bg-slate-500 shadow-slate-500/20" },
   ];
 
   const isActive = (to: string) =>
     location.pathname === to || (to !== "/mobile" && location.pathname.startsWith(to));
 
   return (
-    <div className="min-h-screen bg-slate-100/50 flex items-center justify-center p-0 md:p-8">
-      {/* Phone Frame Simulator */}
+    <div className="min-h-screen bg-slate-50 flex items-center justify-center p-0 md:p-12">
+      {/* Phone Frame Simulator - Ultra High Fidelity */}
       <div
         ref={shellRef}
-        className="relative w-full h-screen md:w-[390px] md:h-[844px] bg-background md:rounded-[3rem] md:border-[8px] md:border-slate-900 md:shadow-2xl overflow-hidden flex flex-col"
+        className="relative w-full h-screen md:w-[414px] md:h-[896px] bg-slate-50 md:rounded-[4rem] md:border-[12px] md:border-slate-900 md:shadow-[0_0_120px_-15px_rgba(30,41,59,0.3)] overflow-hidden flex flex-col transition-all duration-500"
       >
-        {/* Status Bar */}
-        <div className="h-10 w-full flex items-center justify-between px-6 pt-2 shrink-0 select-none">
-          <span className="text-xs font-bold">11:28</span>
+        {/* Status Bar (Dynamic) */}
+        <div className="h-12 w-full flex items-center justify-between px-8 pt-3 shrink-0 select-none z-50">
+          <span className="text-xs font-black tracking-tighter">11:28</span>
+          <div className="h-4.5 w-20 bg-slate-900 rounded-full mx-auto -mt-2 hidden md:block" /> {/* Dynamic Island Mimic */}
           <div className="flex gap-1.5 items-center">
             <div className="w-4 h-4 bg-foreground rounded-full opacity-10" />
-            <div className="w-3 h-2 bg-foreground rounded-full opacity-10" />
+            <div className="w-4 h-2.5 bg-foreground rounded-sm opacity-10" />
           </div>
         </div>
 
-        {/* Header */}
-        <header className="h-16 flex items-center justify-between px-4 sticky top-0 bg-background/80 backdrop-blur-md z-30 border-b">
-          <div className="flex items-center gap-2">
+        {/* Header - Enhanced Glassmorphism */}
+        <header className="h-20 flex items-center justify-between px-6 sticky top-0 bg-white/70 backdrop-blur-3xl z-[60] border-b border-slate-100/50">
+          <div className="flex items-center gap-3">
             {showBackButton || backLink ? (
-              backLink ? (
-                <Link to={backLink}>
-                  <Button
-                    variant="ghost"
-                    size="icon"
-                    className="-ml-2 h-9 w-9 rounded-full"
-                  >
-                    <ChevronLeft className="h-5 w-5" />
-                  </Button>
-                </Link>
-              ) : (
-                <Button
-                  variant="ghost"
-                  size="icon"
-                  className="-ml-2 h-9 w-9 rounded-full"
-                  onClick={() => window.history.back()}
-                >
-                  <ChevronLeft className="h-5 w-5" />
-                </Button>
-              )
+              <Button
+                variant="ghost"
+                size="icon"
+                className="-ml-2 h-10 w-10 rounded-2xl bg-slate-50/50 hover:bg-slate-100 active:scale-90 transition-all"
+                onClick={() => {
+                  if (backLink) window.location.href = backLink;
+                  else window.history.back();
+                }}
+              >
+                <ChevronLeft className="h-5 w-5" />
+              </Button>
             ) : (
-              <div className="h-8 w-8 rounded-lg bg-primary flex items-center justify-center">
-                <LayoutGrid className="h-4.5 w-4.5 text-white" />
+              <div className="h-10 w-10 rounded-2xl bg-slate-900 flex items-center justify-center shadow-lg shadow-slate-900/10">
+                <LayoutGrid className="h-5 w-5 text-white" />
               </div>
             )}
-            <h1 className="font-bold text-base truncate max-w-[160px]">{title || "ElevatorPro"}</h1>
+            <div className="flex flex-col min-w-0">
+               <h1 className="font-black text-[15px] text-slate-900 truncate leading-tight tracking-tight">
+                 {title || "ElevatorPro"}
+               </h1>
+               {!showBackButton && !backLink && (
+                 <span className="text-[10px] font-black text-primary uppercase tracking-widest flex items-center gap-1.5 mt-0.5">
+                   <Globe className="h-3 w-3" /> {activeTenant?.name?.split(' ')[0] || "Hệ thống"}
+                 </span>
+               )}
+            </div>
           </div>
 
-          <div className="flex items-center gap-3">
-            <Button variant="ghost" size="icon" className="h-9 w-9 rounded-full relative">
-              <Bell className="h-5 w-5" />
-              <span className="absolute top-2.5 right-2.5 w-1.5 h-1.5 bg-destructive rounded-full" />
+          <div className="flex items-center gap-2">
+            <Button variant="ghost" size="icon" className="h-10 w-10 rounded-2xl relative bg-slate-50/50">
+              <Bell className="h-5 w-5 text-slate-600" />
+              <span className="absolute top-3 right-3 w-2 h-2 bg-rose-500 rounded-full border-2 border-white" />
             </Button>
             <button 
               onClick={() => setIsAccountOpen(true)}
-              className="flex items-center focus:outline-none"
+              className="flex items-center p-1 rounded-2xl hover:bg-slate-50 transition-colors focus:outline-none"
             >
-              <Avatar className="h-8 w-8 ring-2 ring-primary/10 hover:ring-primary/30 transition-all">
-                <AvatarFallback className="bg-primary/10 text-primary text-[10px] font-bold">
-                  {initials}
+              <Avatar className="h-8 w-8 border border-white shadow-sm ring-1 ring-slate-100">
+                <AvatarFallback className="bg-indigo-50 text-indigo-600 text-[10px] font-black italic">
+                   {initials}
                 </AvatarFallback>
               </Avatar>
             </button>
@@ -165,20 +151,22 @@ export function MobileShell({ children, title, showBackButton, backLink }: Mobil
         </header>
 
         {/* Main Content Area */}
-        <main className="flex-1 overflow-y-auto pb-24 scrollbar-hide bg-slate-50/50">
+        <main className="flex-1 overflow-y-auto pb-32 scrollbar-hide bg-slate-50">
           <MobilePortalProvider container={portalNode}>
             {children}
           </MobilePortalProvider>
         </main>
 
-        {/* More Menu / Account Switcher Overlay */}
+        {/* Global Overlays (Menu / Auth) */}
         {(isMenuOpen || isAccountOpen) && (
-          <div className="absolute inset-0 bg-background z-50 animate-in fade-in slide-in-from-bottom-4 duration-200 flex flex-col">
-            <div className="p-6 pt-10 flex-1 overflow-y-auto">
-              <div className="flex items-center justify-between mb-6">
-                <h2 className="text-xl font-bold">
-                  {isAccountOpen ? "Chuyển tài khoản" : "Tất cả chức năng"}
-                </h2>
+          <div className="absolute inset-0 bg-slate-50/95 backdrop-blur-2xl z-[100] animate-in fade-in slide-in-from-bottom-10 duration-300 flex flex-col p-8 pt-16">
+              <div className="flex items-center justify-between mb-10">
+                <div className="flex flex-col">
+                  <h2 className="text-2xl font-black text-slate-900 tracking-tighter italic uppercase">
+                    {isAccountOpen ? "WORKSPACE" : "COMMAND HUB"}
+                  </h2>
+                  <p className="text-[10px] font-black text-slate-400 tracking-widest mt-1">SUPER APP INTEGRATION V2.0</p>
+                </div>
                 <Button
                   variant="ghost"
                   size="icon"
@@ -186,98 +174,63 @@ export function MobileShell({ children, title, showBackButton, backLink }: Mobil
                     setIsMenuOpen(false);
                     setIsAccountOpen(false);
                   }}
-                  className="rounded-full h-10 w-10 bg-muted"
+                  className="rounded-2xl h-12 w-12 bg-white shadow-xl border border-slate-100 active:scale-90"
                 >
-                  <X className="h-5 w-5" />
+                  <X className="h-6 w-6" />
                 </Button>
               </div>
 
               {isAccountOpen ? (
-                <div className="space-y-6">
+                <div className="space-y-10">
                   {/* Tenant Switcher */}
-                  <div className="space-y-3">
-                    <h3 className="text-xs font-bold uppercase text-muted-foreground flex items-center gap-2">
-                      <Globe className="h-3 w-3" /> Tổ chức (SaaS Tenant)
-                    </h3>
-                    <div className="grid grid-cols-1 gap-2">
+                  <div className="space-y-4">
+                    <h3 className="text-[10px] font-black uppercase text-slate-400 tracking-[0.2em] px-1">CHỌN TỔ CHỨC</h3>
+                    <div className="space-y-3">
                       {mockTenants.map((t) => (
-                        <Button
+                        <button
                           key={t.id}
-                          variant={activeTenantId === t.id ? "default" : "outline"}
-                          className="justify-start h-12 px-4 rounded-xl"
                           onClick={() => {
                             setTenantId(t.id);
-                            // Auto-login into director
                             const directorId = t.id === "t-1" ? "u-director-1" : "u-director-2";
                             setUserId(directorId);
                             setIsAccountOpen(false);
                           }}
-                        >
-                          <Building2 className="h-4 w-4 mr-3 shrink-0" />
-                          <span className="truncate">{t.name}</span>
-                          {activeTenantId === t.id && (
-                            <div className="ml-auto bg-primary-foreground/20 text-[10px] px-2 py-0.5 rounded-full">
-                              Hiện tại
-                            </div>
+                          className={cn(
+                            "w-full flex items-center justify-between p-5 rounded-3xl transition-all border-2",
+                            activeTenantId === t.id 
+                            ? "bg-slate-900 border-slate-900 text-white shadow-2xl shadow-slate-900/20" 
+                            : "bg-white border-slate-100 text-slate-600 hover:border-slate-200"
                           )}
-                        </Button>
+                        >
+                          <div className="flex items-center gap-4">
+                            <div className={cn("h-10 w-10 rounded-2xl flex items-center justify-center", activeTenantId === t.id ? "bg-white/10" : "bg-slate-50")}>
+                               <Building2 className="h-5 w-5" />
+                            </div>
+                            <span className="font-black text-sm uppercase tracking-tight">{t.name}</span>
+                          </div>
+                          {activeTenantId === t.id && <Check className="h-5 w-5 text-emerald-400" />}
+                        </button>
                       ))}
                     </div>
                   </div>
 
-                  {/* Role Switcher */}
+                  {/* Account Options */}
                   <div className="space-y-3">
-                    <h3 className="text-xs font-bold uppercase text-muted-foreground flex items-center gap-2">
-                      <Wrench className="h-3 w-3" /> Chuyển Role (Thử nghiệm)
-                    </h3>
-                    <div className="space-y-2">
-                      {mockUsers
-                        .filter((u) => u.memberships.some((m) => m.tenantId === activeTenantId))
-                        .map((u) => (
-                          <button
-                            key={u.id}
-                            onClick={() => {
-                              setUserId(u.id);
-                              setIsAccountOpen(false);
-                            }}
-                            className={cn(
-                              "w-full flex items-center gap-3 p-3 rounded-xl text-left transition-colors border",
-                              user.id === u.id
-                                ? "bg-primary/5 border-primary/20 ring-1 ring-primary/20"
-                                : "bg-card border-border hover:bg-muted/50",
-                            )}
-                          >
-                            <Avatar className="h-10 w-10 shrink-0">
-                              <AvatarFallback className="bg-primary/10 text-primary text-xs font-bold">
-                                {u.name
-                                  .split(" ")
-                                  .slice(-2)
-                                  .map((n) => n[0])
-                                  .join("")}
-                              </AvatarFallback>
-                            </Avatar>
-                            <div className="flex-1 min-w-0">
-                              <div className="text-sm font-bold truncate">
-                                {u.name.split("(")[0]}
-                              </div>
-                              <div className="text-[10px] text-muted-foreground truncate">
-                                {u.name.split("(")[1]
-                                  ? u.name.split("(")[1].replace(")", "")
-                                  : "Quyền hệ thống"}
-                              </div>
-                            </div>
-                            {user.id === u.id && (
-                              <div className="h-5 w-5 rounded-full bg-primary flex items-center justify-center">
-                                <Check className="h-3 w-3 text-white" />
-                              </div>
-                            )}
-                          </button>
-                        ))}
+                    <h3 className="text-[10px] font-black uppercase text-slate-400 tracking-[0.2em] px-1">QUẢN TRỊ VIÊN</h3>
+                    <div className="p-6 bg-white rounded-[2.5rem] border border-slate-100 shadow-sm flex items-center gap-4">
+                        <Avatar className="h-14 w-14">
+                           <AvatarFallback className="bg-primary text-white font-black text-sm italic">{initials}</AvatarFallback>
+                        </Avatar>
+                        <div className="flex-1 min-w-0">
+                           <p className="text-sm font-black text-slate-900 truncate">{user.name}</p>
+                           <p className="text-[10px] font-bold text-slate-400">ID: {user.id}</p>
+                        </div>
+                        <Button size="icon" variant="ghost" className="h-10 w-10 rounded-xl bg-slate-50"><LogOut className="h-4 w-4" /></Button>
                     </div>
                   </div>
                 </div>
               ) : (
-                <div className="grid grid-cols-3 gap-y-8 gap-x-4">
+                <div className="grid grid-cols-3 gap-6 scrollbar-hide flex-1 pb-10">
                   {menuItems.map((item) => {
                     const Icon = item.icon;
                     return (
@@ -285,125 +238,114 @@ export function MobileShell({ children, title, showBackButton, backLink }: Mobil
                         key={item.to}
                         to={item.to}
                         onClick={() => setIsMenuOpen(false)}
-                        className="flex flex-col items-center gap-2"
+                        className="flex flex-col items-center gap-3 active:scale-90 transition-transform"
                       >
                         <div
                           className={cn(
-                            "h-14 w-14 rounded-2xl flex items-center justify-center text-white shadow-lg",
+                            "h-16 w-16 rounded-[1.75rem] flex items-center justify-center text-white shadow-2xl",
                             item.color,
                           )}
                         >
                           <Icon className="h-7 w-7" />
                         </div>
-                        <span className="text-[11px] font-bold text-center leading-tight">
+                        <span className="text-[10px] font-black text-slate-900 text-center leading-tight uppercase tracking-widest h-8 flex items-center">
                           {item.label}
                         </span>
                       </Link>
                     );
                   })}
+                  <div className="flex flex-col items-center gap-3 opacity-30">
+                     <div className="h-16 w-16 rounded-[1.75rem] bg-slate-200 flex items-center justify-center text-slate-400 border-2 border-dashed border-slate-300">
+                        <HelpCircle className="h-7 w-7" />
+                     </div>
+                     <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest text-center leading-tight">SẮP TỚI</span>
+                  </div>
                 </div>
               )}
-            </div>
-            
-            <div className="p-6 border-t bg-muted/20">
-              <Link to="/admin" className="w-full">
-                <Button variant="outline" className="w-full rounded-xl h-12 text-muted-foreground">
-                  Thoát Mobile Demo & về trang Admin
-                </Button>
-              </Link>
-            </div>
+              
+              <div className="mt-auto pt-6 flex flex-col gap-3">
+                 <Link to="/admin" className="w-full">
+                    <Button variant="outline" className="w-full rounded-2xl h-14 border-slate-200 text-slate-400 font-black text-[10px] uppercase gap-2">
+                      QUAY LẠI TRÌNH QUẢN TRỊ <ChevronRight className="h-3.5 w-3.5" />
+                    </Button>
+                 </Link>
+                 <p className="text-center text-[9px] font-black text-slate-300 uppercase tracking-widest italic flex items-center justify-center gap-2">
+                    <ShieldCheck className="h-3 w-3" /> SECURED BY ELEVATORPRO CLOUD
+                 </p>
+              </div>
           </div>
         )}
 
-        {/* Bottom Tab Bar */}
-        <nav className="h-[72px] bg-background/95 backdrop-blur-lg border-t flex items-center justify-around px-2 absolute bottom-0 w-full z-40 pb-5">
-          <Link to="/mobile" className="flex flex-col items-center gap-1 group">
-            <Home
-              className={cn(
-                "h-5 w-5",
-                location.pathname === "/mobile" ? "text-primary font-bold" : "text-slate-400",
-              )}
-            />
-            <span
-              className={cn(
-                "text-[9px] font-bold",
-                location.pathname === "/mobile" ? "text-primary" : "text-slate-400",
-              )}
-            >
-              HOME
-            </span>
-          </Link>
-          <Link to="/mobile/projects" className="flex flex-col items-center gap-1">
-            <Building
-              className={cn(
-                "h-5 w-5",
-                location.pathname.startsWith("/mobile/projects")
-                  ? "text-primary"
-                  : "text-slate-400",
-              )}
-            />
-            <span
-              className={cn(
-                "text-[9px] font-bold",
-                location.pathname.startsWith("/mobile/projects")
-                  ? "text-primary"
-                  : "text-slate-400",
-              )}
-            >
-              DỰ ÁN
-            </span>
+        {/* Bottom Tab Bar - Premium Glassmorphism */}
+        <nav className="h-[84px] bg-white/70 backdrop-blur-3xl border-t border-slate-100/50 flex items-center justify-around px-4 absolute bottom-0 w-full z-[110] pb-8 shadow-[0_-10px_40px_-15px_rgba(30,41,59,0.1)]">
+          <Link to="/mobile" className="flex flex-col items-center gap-1.5 active:scale-90 transition-all">
+            <div className={cn(
+              "h-1 w-1 rounded-full mb-1 transition-all",
+              location.pathname === "/mobile" ? "bg-primary w-4" : "bg-transparent"
+            )} />
+            <Home className={cn("h-5 w-5", location.pathname === "/mobile" ? "text-primary" : "text-slate-400")} />
+            <span className={cn("text-[8px] font-black uppercase tracking-tighter font-mono", location.pathname === "/mobile" ? "text-primary" : "text-slate-400")}>HOME</span>
           </Link>
 
-          {/* Central QR Button */}
-          <Link to="/mobile/scanner" className="relative -mt-10">
-            <div className="h-14 w-14 rounded-2xl bg-primary text-white shadow-lg shadow-primary/30 flex items-center justify-center border-4 border-white active:scale-90 transition-transform">
+          <Link to="/mobile/projects" className="flex flex-col items-center gap-1.5 active:scale-90 transition-all">
+            <div className={cn(
+              "h-1 w-1 rounded-full mb-1 transition-all",
+              isActive("/mobile/projects") ? "bg-primary w-4" : "bg-transparent"
+            )} />
+            <Building className={cn("h-5 w-5", isActive("/mobile/projects") ? "text-primary" : "text-slate-400")} />
+            <span className={cn("text-[8px] font-black uppercase tracking-tighter font-mono", isActive("/mobile/projects") ? "text-primary" : "text-slate-400")}>PROJECTS</span>
+          </Link>
+
+          {/* Central Floating Action */}
+          <Link to="/mobile/scanner" className="relative -mt-10 group">
+            <div className="h-16 w-16 rounded-[1.75rem] bg-slate-900 text-white shadow-2xl shadow-slate-900/30 flex items-center justify-center border-[4px] border-white active:scale-90 transition-all group-hover:bg-primary group-hover:shadow-primary/30">
               <QrCode className="h-7 w-7" />
             </div>
           </Link>
 
-          <Link to="/mobile/jobs" className="flex flex-col items-center gap-1">
-            <Briefcase
-              className={cn(
-                "h-5 w-5",
-                location.pathname.startsWith("/mobile/jobs") ? "text-primary" : "text-slate-400",
-              )}
-            />
-            <span
-              className={cn(
-                "text-[9px] font-bold",
-                location.pathname.startsWith("/mobile/jobs") ? "text-primary" : "text-slate-400",
-              )}
-            >
-              CÔNG VIỆC
-            </span>
+          <Link to="/mobile/jobs" className="flex flex-col items-center gap-1.5 active:scale-90 transition-all">
+            <div className={cn(
+              "h-1 w-1 rounded-full mb-1 transition-all",
+              isActive("/mobile/jobs") ? "bg-primary w-4" : "bg-transparent"
+            )} />
+            <Briefcase className={cn("h-5 w-5", isActive("/mobile/jobs") ? "text-primary" : "text-slate-400")} />
+            <span className={cn("text-[8px] font-black uppercase tracking-tighter font-mono", isActive("/mobile/jobs") ? "text-primary" : "text-slate-400")}>SERVICE</span>
           </Link>
+
           <button
-            className="flex flex-col items-center gap-1"
             onClick={() => setIsMenuOpen(!isMenuOpen)}
+            className="flex flex-col items-center gap-1.5 active:scale-90 transition-all"
           >
+            <div className={cn(
+              "h-1 w-1 rounded-full mb-1 transition-all",
+              isMenuOpen ? "bg-primary w-4" : "bg-transparent"
+            )} />
             <LayoutGrid className={cn("h-5 w-5", isMenuOpen ? "text-primary" : "text-slate-400")} />
-            <span
-              className={cn("text-[9px] font-bold", isMenuOpen ? "text-primary" : "text-slate-400")}
-            >
-              MENU
-            </span>
+            <span className={cn("text-[8px] font-black uppercase tracking-tighter font-mono", isMenuOpen ? "text-primary" : "text-slate-400")}>COMMAND</span>
           </button>
         </nav>
 
         {/* Home Indicator */}
-        <div className="absolute bottom-1.5 left-1/2 -translate-x-1/2 w-32 h-1 bg-foreground/10 rounded-full z-50 pointer-events-none hidden md:block" />
+        <div className="absolute bottom-2 left-1/2 -translate-x-1/2 w-40 h-1 bg-slate-900/10 rounded-full z-[120] pointer-events-none" />
       </div>
 
-      {/* Exit Button - Desktop only */}
-      <div className="hidden lg:flex absolute top-8 right-8 flex-col items-end gap-3">
+      {/* Frame Context Info - High Aesthetic */}
+      <div className="hidden lg:flex absolute top-12 right-12 flex-col items-end gap-6 select-none animate-in fade-in slide-in-from-right-10 duration-700">
+        <div className="text-right">
+           <h4 className="text-3xl font-black text-slate-300 italic tracking-tighter uppercase mb-2">Simulating Next-Gen</h4>
+           <div className="flex items-center justify-end gap-3">
+              <span className="px-3 py-1 bg-emerald-50 text-emerald-600 text-[10px] font-black rounded-full border border-emerald-100">STABLE V2.4.0</span>
+              <span className="text-slate-400 text-xs font-bold font-mono">IPHONE 13 PRO MAX</span>
+           </div>
+        </div>
+        
+        <div className="w-px h-24 bg-gradient-to-b from-slate-200 to-transparent mr-4" />
+
         <Link to="/admin">
-          <Button variant="secondary" className="shadow-lg">
-            Thoát Mobile Demo
+          <Button variant="outline" className="h-16 px-8 rounded-[1.5rem] bg-white border-2 border-slate-100 shadow-2xl shadow-slate-900/5 hover:bg-slate-50 transition-all group font-black text-xs uppercase tracking-widest gap-3">
+            Exit Mobile View <ChevronRight className="h-4 w-4 group-hover:translate-x-1 transition-transform" />
           </Button>
         </Link>
-        <p className="text-muted-foreground text-xs text-right max-w-[200px]">
-          Đang mô phỏng trên khung hình <b>iPhone 13 Pro</b>
-        </p>
       </div>
     </div>
   );
