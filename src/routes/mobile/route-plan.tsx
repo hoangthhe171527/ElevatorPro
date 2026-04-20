@@ -34,6 +34,13 @@ function TechRoutePlanMobile() {
     });
   };
 
+  const handleOpenMap = (address: string) => {
+    const encodedAddress = encodeURIComponent(address);
+    // Generic Google Maps URL or iOS Maps URL
+    const url = `https://www.google.com/maps/search/?api=1&query=${encodedAddress}`;
+    window.open(url, "_blank");
+  };
+
   return (
     <MobileShell title="Lộ trình trong ngày" showBackButton backLink="/mobile/">
       {/* Map Simulation Area - Refined */}
@@ -74,14 +81,20 @@ function TechRoutePlanMobile() {
         </svg>
 
         <div className="absolute bottom-5 left-5 right-5 flex gap-3">
-          <Card className="flex-1 p-3.5 border-none shadow-2xl shadow-slate-900/10 bg-white/95 backdrop-blur-md rounded-2xl">
-            <span className="text-[8px] font-black text-slate-400 uppercase tracking-widest">Hành trình hôm nay</span>
-            <div className="flex items-center gap-3 mt-1 text-slate-900">
-              <Navigation className="h-4 w-4 text-primary" />
-              <span className="text-xs font-black font-mono">12.5 KM • 48 PHÚT</span>
+              <Button 
+                size="icon" 
+                onClick={() => handleOpenMap("123 Lộ trình thông minh, TP.HCM")}
+                className="h-12 w-12 rounded-2xl bg-primary text-white shadow-xl shadow-primary/20 shrink-0"
+              >
+                <Navigation className="h-5 w-5" />
+              </Button>
             </div>
           </Card>
-          <Button size="icon" className="h-12 w-12 rounded-2xl bg-primary text-white shadow-xl shadow-primary/20 shrink-0">
+          <Button 
+            size="icon" 
+            onClick={() => handleOpenMap("123 Lộ trình thông minh, TP.HCM")}
+            className="h-12 w-12 rounded-2xl bg-primary text-white shadow-xl shadow-primary/20 shrink-0"
+          >
             <TrendingUp className="h-5 w-5" />
           </Button>
         </div>
@@ -131,9 +144,23 @@ function TechRoutePlanMobile() {
                         <ChevronRight className="h-4 w-4 text-slate-200 mt-1" />
                       </div>
 
-                      <div className="mt-4 flex items-center gap-2 text-[10px] text-slate-500 font-bold leading-none">
-                        <MapPin className="h-3 w-3 shrink-0 text-slate-300" />
-                        <span className="truncate">{customer?.address}</span>
+                      <div className="mt-4 flex items-center justify-between gap-2 overflow-hidden">
+                        <div className="flex items-center gap-2 text-[10px] text-slate-500 font-bold leading-none min-w-0 flex-1">
+                          <MapPin className="h-3 w-3 shrink-0 text-slate-300" />
+                          <span className="truncate">{customer?.address}</span>
+                        </div>
+                        <Button 
+                          variant="ghost" 
+                          size="icon" 
+                          className="h-8 w-8 rounded-full bg-slate-50 shrink-0"
+                          onClick={(e) => {
+                            e.preventDefault();
+                            e.stopPropagation();
+                            handleOpenMap(customer?.address || "");
+                          }}
+                        >
+                           <Navigation className="h-3.5 w-3.5 text-primary" />
+                        </Button>
                       </div>
                     </Card>
                   </Link>
