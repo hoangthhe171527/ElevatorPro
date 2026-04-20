@@ -14,7 +14,7 @@ import {
   Users,
   CreditCard,
   Warehouse,
-  Route,
+  Route as RouteIcon,
   Zap
 } from "lucide-react";
 import { Card } from "@/components/ui/card";
@@ -40,7 +40,7 @@ function MobileDashboard() {
 
   const techModules = [
     { label: "Quét QR", icon: QrCode, color: "bg-indigo-600 text-white", path: "/mobile/scanner" },
-    { label: "Lộ trình", icon: Route, color: "bg-emerald-50 text-emerald-600", path: "/mobile/tech/route-plan" },
+    { label: "Lộ trình", icon: RouteIcon, color: "bg-emerald-50 text-emerald-600", path: "/mobile/tech/route-plan" },
     { label: "Công việc", icon: Briefcase, color: "bg-amber-50 text-amber-600", path: "/mobile/jobs" },
     { label: "Thiết bị", icon: SettingsIcon, color: "bg-blue-50 text-blue-600", path: "/mobile/elevators" },
     { label: "Vật tư", icon: Warehouse, color: "bg-slate-50 text-slate-600", path: "/mobile/inventory" },
