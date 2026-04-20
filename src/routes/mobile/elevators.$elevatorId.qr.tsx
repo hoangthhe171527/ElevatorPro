@@ -5,7 +5,7 @@ import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { QrCode, ArrowLeft, Download, Share2, Printer } from "lucide-react";
 
-export const Route = createFileRoute("/mobile/elevators/$elevatorId/qr" as any)({
+export const Route = createFileRoute("/mobile/elevators/$elevatorId/qr")({
   head: ({ params }) => ({ meta: [{ title: `Mã QR Thang máy ${params.elevatorId} — Mobile` }] }),
   component: ElevatorQRMobile,
 });

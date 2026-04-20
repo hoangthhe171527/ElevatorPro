@@ -17,7 +17,7 @@ import { mockElevators } from "@/lib/mock-data";
 import { Send, CheckCircle2, Phone, ArrowLeft, Camera, AlertTriangle } from "lucide-react";
 import { toast } from "sonner";
 
-export const Route = createFileRoute("/mobile/portal/issues" as any)({
+export const Route = createFileRoute("/mobile/portal/issues")({
   head: () => ({ meta: [{ title: "Báo lỗi mới — Mobile" }] }),
   component: MobileReportIssue,
 });
