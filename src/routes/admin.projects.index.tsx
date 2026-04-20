@@ -55,8 +55,8 @@ function ProjectsPage() {
                   <div>
                     <CardTitle className="text-lg">
                       <Link 
-                        to="/admin/projects/$projectId" 
-                        params={{ projectId: proj.id }}
+                        to={"/admin/projects/$projectId" as any} 
+                        params={{ projectId: proj.id } as any}
                         className="flex items-center gap-2 hover:text-primary transition-colors"
                       >
                         <Building className="h-5 w-5 text-primary" />
@@ -67,7 +67,7 @@ function ProjectsPage() {
                     <p className="text-sm text-muted-foreground mt-1">{proj.address}</p>
                   </div>
                   <div className="flex gap-2">
-                    <Link to="/admin/projects/$projectId" params={{ projectId: proj.id }}>
+                    <Link to={"/admin/projects/$projectId" as any} params={{ projectId: proj.id } as any}>
                       <Button variant="outline" size="sm" className="h-9 px-3 gap-1.5">
                         <ChevronRight className="h-4 w-4" /> Chi tiết
                       </Button>
