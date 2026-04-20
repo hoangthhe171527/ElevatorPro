@@ -12,7 +12,8 @@ import { User, Mail, Phone, ShieldCheck, Key, Save } from "lucide-react";
 import { ConfirmationDialog } from "@/components/common/ConfirmationDialog";
 import { toast } from "sonner";
 
-export const Route = createFileRoute("/admin/profile" as any)({
+// @ts-expect-error - Route type generation lag
+export const Route = createFileRoute("/admin/profile")({
   head: () => ({ meta: [{ title: "Hồ sơ cá nhân — ElevatorPro" }] }),
   component: ProfilePage,
 });
