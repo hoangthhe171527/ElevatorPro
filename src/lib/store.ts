@@ -7,9 +7,11 @@ interface AppState {
   userId: string;
   activeTenantId: string;
   activeJobCheckIn: string | null;
+  hasHydrated: boolean; // Tracking hydration for Web UI
   setUserId: (userId: string) => void;
   setTenantId: (tenantId: string) => void;
   setJobCheckIn: (jobId: string | null) => void;
+  setHasHydrated: (val: boolean) => void;
 }
 
 export const useAppStore = create<AppState>()(
@@ -18,6 +20,7 @@ export const useAppStore = create<AppState>()(
       userId: "u-director-1",
       activeTenantId: "t-1",
       activeJobCheckIn: null,
+      hasHydrated: false,
       setUserId: (userId) => {
         const user = mockUsers.find((u) => u.id === userId);
         const activeTenantId = user?.memberships?.[0]?.tenantId || get().activeTenantId;
@@ -27,8 +30,14 @@ export const useAppStore = create<AppState>()(
         set({ activeTenantId: tenantId });
       },
       setJobCheckIn: (jobId) => set({ activeJobCheckIn: jobId }),
+      setHasHydrated: (val) => set({ hasHydrated: val }),
     }),
-    { name: "elevator-app-state-v3" },
+    {
+      name: "elevator-app-state-v3",
+      onRehydrateStorage: () => (state) => {
+        state?.setHasHydrated(true);
+      },
+    },
   ),
 );
 

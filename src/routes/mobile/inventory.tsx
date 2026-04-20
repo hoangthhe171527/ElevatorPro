@@ -12,10 +12,12 @@ import {
   ArrowDownToLine,
   Navigation,
   Box,
+  CheckCircle2,
 } from "lucide-react";
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
+import { toast } from "sonner";
 
 export const Route = createFileRoute("/mobile/inventory")({
   head: () => ({ meta: [{ title: "Kho vật tư — Mobile" }] }),
@@ -122,15 +124,41 @@ function MobileInventory() {
                       </div>
                     </div>
 
-                    <div className="mt-3 flex items-center justify-end">
-                      <div className="text-primary font-black text-[10px] flex items-center gap-1 uppercase tracking-tighter">
-                         QUẢN LÝ <ChevronRight className="h-3 w-3" />
-                      </div>
+                    <div className="mt-4 flex items-center justify-between">
+                       {isLow ? (
+                         <div className="flex items-center gap-1.5 text-amber-600 animate-pulse">
+                            <AlertTriangle className="h-3.5 w-3.5" />
+                            <span className="text-[9px] font-black uppercase italic tracking-tighter">Cần nhập thêm</span>
+                         </div>
+                       ) : (
+                         <div className="flex items-center gap-1.5 text-emerald-500">
+                            <CheckCircle2 className="h-3.5 w-3.5" />
+                            <span className="text-[9px] font-black uppercase tracking-tighter">Sẵn sàng</span>
+                         </div>
+                       )}
+                       <div className="flex gap-2">
+                          {isLow && (
+                            <Button 
+                              size="sm" 
+                              variant="outline" 
+                              className="h-8 rounded-xl border-amber-200 bg-amber-50 text-amber-600 text-[9px] font-black uppercase px-3 shadow-sm active:scale-95 transition-all"
+                              onClick={(e) => {
+                                e.preventDefault();
+                                toast.success("Đã gửi yêu cầu nhập vật tư!");
+                              }}
+                            >
+                              Yêu cầu
+                            </Button>
+                          )}
+                          <div className="text-primary font-black text-[10px] flex items-center gap-1 uppercase tracking-tighter bg-primary/5 px-3 py-1.5 rounded-xl">
+                             CHI TIẾT <ChevronRight className="h-3 w-3" />
+                          </div>
+                       </div>
                     </div>
-                  </div>
-                </div>
-              </Card>
-            </Link>
+                 </div>
+              </div>
+            </Card>
+          </Link>
           );
         })}
       </div>

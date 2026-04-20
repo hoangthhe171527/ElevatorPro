@@ -47,45 +47,35 @@ function MobileReports() {
   ];
 
   return (
-    <MobileShell title="Báo cáo & Phân tích">
-      {/* Date Filter Bar */}
-      <div className="sticky top-0 bg-slate-50/80 backdrop-blur-sm z-20 px-4 py-3 border-b flex items-center justify-between">
-        <div className="flex items-center gap-2">
-          <Calendar className="h-4 w-4 text-primary" />
-          <span className="text-xs font-bold uppercase tracking-tight">Tháng 4, 2026</span>
-        </div>
-        <Button
-          variant="ghost"
-          size="sm"
-          className="h-8 text-[10px] font-bold text-slate-500 gap-1.5"
-        >
-          <Filter className="h-3.5 w-3.5" /> LỌC
+          <Filter className="h-3 w-3" /> Lọc kỳ
         </Button>
       </div>
 
-      <div className="p-4 space-y-6">
-        {/* KPI Grid */}
-        <div className="grid grid-cols-1 gap-3">
+      <div className="p-6 space-y-8">
+        <div className="grid grid-cols-1 gap-4">
           {kpis.map((kpi, idx) => {
             const Icon = kpi.icon;
             return (
               <Card
                 key={idx}
-                className="p-4 border-none shadow-sm flex items-center justify-between bg-white"
+                className="p-5 border-none shadow-sm flex items-center justify-between bg-white rounded-[2rem] active:scale-95 transition-all"
               >
                 <div className="flex items-center gap-4">
-                  <div className="h-10 w-10 rounded-xl bg-slate-50 flex items-center justify-center text-slate-400">
-                    <Icon className="h-5 w-5" />
+                  <div className="h-12 w-12 rounded-[1.25rem] bg-slate-50 flex items-center justify-center text-slate-500">
+                    <Icon className="h-6 w-6" />
                   </div>
                   <div>
-                    <p className="text-[10px] font-bold text-muted-foreground uppercase">
+                    <p className="text-[9px] font-black text-slate-400 uppercase tracking-widest italic">
                       {kpi.label}
                     </p>
-                    <p className="text-lg font-bold mt-0.5">{kpi.value}</p>
+                    <p className="text-xl font-black mt-1 text-slate-900">{kpi.value}</p>
                   </div>
                 </div>
                 <div
-                  className={`flex items-center gap-1 text-[10px] font-bold ${kpi.trend.startsWith("+") ? "text-emerald-500" : "text-orange-500"}`}
+                  className={cn(
+                    "flex items-center gap-1.5 px-3 py-1.5 rounded-full text-[9px] font-black",
+                    kpi.trend.startsWith("+") ? "bg-emerald-50 text-emerald-600" : "bg-orange-50 text-orange-600"
+                  )}
                 >
                   {kpi.trend.startsWith("+") ? (
                     <TrendingUp className="h-3 w-3" />

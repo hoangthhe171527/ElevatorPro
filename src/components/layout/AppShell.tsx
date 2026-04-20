@@ -184,18 +184,24 @@ export function AppShell({ children }: { children: React.ReactNode }) {
   const setUserId = useAppStore((s) => s.setUserId);
   const activeTenantId = useAppStore((s) => s.activeTenantId);
   const setTenantId = useAppStore((s) => s.setTenantId);
+  const hasHydrated = useAppStore((s) => s.hasHydrated);
   const user = useCurrentUser();
   const permissions = useCurrentPermissions();
   const location = useLocation();
   const [mobileSidebarOpen, setMobileSidebarOpen] = useState(false);
 
-  // Filter groups
-  const visibleGroups = navConfig
-    .map((g) => ({
-      ...g,
-      items: g.items.filter((item) => item.permissions.some((p) => permissions.includes(p))),
-    }))
-    .filter((g) => g.items.length > 0);
+  // Filter groups - only compute if hydrated to avoid flashes of wrong/empty content
+  const visibleGroups = hasHydrated 
+    ? navConfig
+        .map((g) => ({
+          ...g,
+          items: g.items.filter((item) => item.permissions.some((p) => permissions.includes(p))),
+        }))
+        .filter((g) => g.items.length > 0)
+    : [];
+
+  // Wait for hydration to avoid permission flickering on first load
+  if (!hasHydrated) return null;
 
   const initials = user.name
     .split(" ")

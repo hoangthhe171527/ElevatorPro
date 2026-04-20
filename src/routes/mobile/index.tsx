@@ -3,6 +3,7 @@ import { MobileShell } from "@/components/layout/MobileShell";
 import { cn } from "@/lib/utils";
 import {
   mockJobs,
+  mockProjects,
   mockContracts,
   mockRequests,
   mockLeads,
@@ -88,7 +89,7 @@ function MobileDashboard() {
               {/* Management Insight Banner */}
               <div className="bg-slate-900 rounded-[2rem] p-6 relative overflow-hidden shadow-2xl shadow-slate-900/20">
                 <div className="relative z-10">
-                    <p className="text-white/40 text-[9px] font-black uppercase tracking-widest mb-1">Dòng tiền hệ thống</p>
+                    <p className="text-white/40 text-[9px] font-black uppercase tracking-widest mb-1 italic">TÌNH HÌNH TÀI CHÍNH</p>
                     <div className="flex items-baseline gap-2">
                         <h3 className="text-2xl font-black text-white leading-none">{formatVND(totalRevenue)}</h3>
                         <div className="bg-emerald-500/20 text-emerald-400 text-[8px] font-black px-2 py-0.5 rounded-full flex items-center gap-1">
@@ -97,19 +98,34 @@ function MobileDashboard() {
                     </div>
                     
                     <div className="grid grid-cols-2 gap-3 mt-6">
-                        <Link to="/mobile/accounting" className="bg-white/5 backdrop-blur-md rounded-xl p-3 border border-white/10">
-                            <CreditCard className="h-4 w-4 text-primary mb-2" />
-                            <p className="text-[8px] font-black text-white/50 uppercase">Kế toán</p>
-                            <p className="text-[10px] font-black text-white mt-0.5">Dòng thu/chi</p>
-                        </Link>
-                        <Link to="/mobile/approvals" className="bg-white/5 backdrop-blur-md rounded-xl p-3 border border-white/10">
-                            <AlertTriangle className="h-4 w-4 text-amber-400 mb-2" />
-                            <p className="text-[8px] font-black text-white/50 uppercase">Duyệt chi</p>
-                            <p className="text-[10px] font-black text-white mt-0.5">{pendingApprovals.length} Chờ xử lý</p>
-                        </Link>
+                        <div className="bg-white/5 backdrop-blur-md rounded-xl p-3 border border-white/10">
+                            <h4 className="text-[14px] font-black text-white">{mockProjects.length}</h4>
+                            <p className="text-[8px] font-black text-white/50 uppercase">Dự án thầu</p>
+                        </div>
+                        <div className="bg-white/5 backdrop-blur-md rounded-xl p-3 border border-white/10">
+                            <h4 className="text-[14px] font-black text-white text-amber-400">{pendingApprovals.length}</h4>
+                            <p className="text-[8px] font-black text-white/50 uppercase">Chờ phê duyệt</p>
+                        </div>
                     </div>
                 </div>
                 <div className="absolute top-[-20%] right-[-10%] w-48 h-48 bg-primary/20 rounded-full blur-3xl pointer-events-none" />
+              </div>
+
+              <div className="grid grid-cols-2 gap-4">
+                 <Link to="/mobile/accounting" className="p-4 bg-white rounded-3xl border border-slate-50 shadow-sm">
+                    <div className="h-10 w-10 rounded-2xl bg-indigo-50 text-indigo-600 flex items-center justify-center mb-3">
+                       <CreditCard className="h-5 w-5" />
+                    </div>
+                    <p className="text-[10px] font-black text-slate-400 uppercase">Dòng tiền</p>
+                    <p className="text-[11px] font-black text-slate-900 mt-1">Quản lý thu chi</p>
+                 </Link>
+                 <Link to="/mobile/reports" className="p-4 bg-white rounded-3xl border border-slate-50 shadow-sm">
+                    <div className="h-10 w-10 rounded-2xl bg-amber-50 text-amber-600 flex items-center justify-center mb-3">
+                       <TrendingUp className="h-5 w-5" />
+                    </div>
+                    <p className="text-[10px] font-black text-slate-400 uppercase">Hiệu suất</p>
+                    <p className="text-[11px] font-black text-slate-900 mt-1">Báo cáo chỉ số</p>
+                 </Link>
               </div>
             </>
           )}
@@ -119,19 +135,37 @@ function MobileDashboard() {
               {/* Sales Pipeline Widget */}
               <Card className="p-5 border-none shadow-sm bg-gradient-to-br from-indigo-600 to-indigo-700 rounded-[2rem] text-white overflow-hidden relative">
                 <div className="relative z-10">
-                  <p className="text-white/60 text-[9px] font-black uppercase tracking-widest mb-1">Cơ hội bán hàng</p>
+                  <p className="text-white/60 text-[9px] font-black uppercase tracking-widest mb-1 italic">PHỄU BÁN HÀNG</p>
                   <div className="flex justify-between items-end">
                     <div>
-                      <h3 className="text-2xl font-black tracking-tight">{mockLeads.length} Leads</h3>
-                      <p className="text-[10px] opacity-80 mt-1 font-bold">5 Khách hàng quan tâm mạnh</p>
+                      <h3 className="text-3xl font-black tracking-tight">{mockLeads.length} <span className="text-xs opacity-60">Leads</span></h3>
+                      <div className="flex gap-2 mt-2">
+                        <div className="px-2 py-0.5 bg-white/10 rounded-full text-[8px] font-black uppercase">Chờ xử lý: 3</div>
+                        <div className="px-2 py-0.5 bg-emerald-500/30 rounded-full text-[8px] font-black uppercase text-emerald-300">Tỷ lệ chốt: 12%</div>
+                      </div>
                     </div>
                     <Link to="/mobile/leads">
-                      <Button size="sm" className="bg-white text-indigo-700 font-black text-[10px] rounded-lg h-8 px-4">XEM PHỄU</Button>
+                      <Button size="icon" className="bg-white text-indigo-700 rounded-2xl h-12 w-12 shadow-xl active:scale-90">
+                         <Users className="h-5 w-5" />
+                      </Button>
                     </Link>
                   </div>
                 </div>
-                <Users className="absolute -bottom-4 -right-2 h-24 w-24 opacity-10" />
+                <Briefcase className="absolute -bottom-4 -right-2 h-24 w-24 opacity-10" />
               </Card>
+
+              <div className="bg-white p-5 rounded-[2rem] border border-slate-100 flex items-center justify-between">
+                 <div className="flex items-center gap-3">
+                    <div className="h-10 w-10 rounded-2xl bg-rose-50 text-rose-500 flex items-center justify-center">
+                       <DollarSign className="h-5 w-5" />
+                    </div>
+                    <div>
+                       <p className="text-[10px] font-black text-slate-400 uppercase">Dự kiến hoa hồng</p>
+                       <p className="text-sm font-black text-slate-900 italic tracking-tight">{formatVND(12500000)}</p>
+                    </div>
+                 </div>
+                 <Button variant="ghost" size="icon" className="rounded-xl"><ChevronRight className="h-4 w-4" /></Button>
+              </div>
 
               <section>
                  <div className="flex items-center justify-between mb-3 px-1">
@@ -167,27 +201,43 @@ function MobileDashboard() {
                 {activeJobId ? (
                   <Card className="p-5 border-none shadow-xl bg-primary text-white rounded-[2rem] relative overflow-hidden">
                     <div className="relative z-10">
-                       <p className="text-white/60 text-[9px] font-black uppercase tracking-widest mb-1 flex items-center gap-1.5">
-                         <Zap className="h-3 w-3 animate-pulse" /> ĐANG THỰC HIỆN
+                       <p className="text-white/60 text-[9px] font-black uppercase tracking-widest mb-1 flex items-center gap-1.5 italic">
+                         <Zap className="h-3 w-3 animate-pulse text-yellow-300" /> NHIỆM VỤ HIỆN TẠI
                        </p>
                        <h3 className="text-lg font-black tracking-tight leading-tight mb-4">
                          {mockJobs.find(j => j.id === activeJobId)?.title}
                        </h3>
+                       <div className="flex items-center gap-4 mb-4">
+                          <div className="flex flex-col">
+                             <span className="text-[8px] text-white/50 uppercase font-bold">Check-in lúc</span>
+                             <span className="text-xs font-black">08:45 AM</span>
+                          </div>
+                          <div className="w-px h-6 bg-white/20" />
+                          <div className="flex flex-col">
+                             <span className="text-[8px] text-white/50 uppercase font-bold">Thời gian đã làm</span>
+                             <span className="text-xs font-black">1h 20m</span>
+                          </div>
+                       </div>
                        <Link to={`/mobile/jobs/${activeJobId}`}>
-                         <Button className="w-full bg-white text-primary font-black text-[10px] h-10 rounded-xl shadow-lg">CẬP NHẬT TIẾN ĐỘ</Button>
+                         <Button className="w-full bg-white text-primary font-black text-[10px] h-10 rounded-xl shadow-lg hover:bg-slate-50 uppercase">CẬP NHẬT TIẾN ĐỘ THI CÔNG</Button>
                        </Link>
                     </div>
                     <Briefcase className="absolute -top-4 -right-4 h-24 w-24 opacity-10" />
                   </Card>
                 ) : (
                   <Card className="p-5 border-none shadow-sm bg-white rounded-[2rem] border border-slate-100 flex items-center justify-between">
-                    <div>
-                      <h3 className="text-base font-black text-slate-900 tracking-tight">Bắt đầu ngày mới?</h3>
-                      <p className="text-[10px] text-slate-400 font-bold mt-0.5">Xác nhận lộ trình di chuyển ngay</p>
+                    <div className="flex items-center gap-4">
+                      <div className="h-12 w-12 rounded-2xl bg-primary/10 text-primary flex items-center justify-center">
+                         <Navigation className="h-6 w-6" />
+                      </div>
+                      <div>
+                        <h3 className="text-base font-black text-slate-900 tracking-tight">Cần lộ trình?</h3>
+                        <p className="text-[10px] text-slate-400 font-bold mt-0.5 uppercase tracking-tighter">BẮT ĐẦU DI CHUYỂN NGAY</p>
+                      </div>
                     </div>
                     <Link to="/mobile/route-plan">
-                      <Button size="icon" className="h-12 w-12 rounded-2xl bg-primary text-white shadow-lg shadow-primary/20">
-                        <Navigation className="h-5 w-5" />
+                      <Button size="icon" className="h-10 w-10 rounded-xl bg-slate-900 text-white shadow-lg active:scale-95 transition-all">
+                        <ChevronRight className="h-4 w-4" />
                       </Button>
                     </Link>
                   </Card>
@@ -197,15 +247,15 @@ function MobileDashboard() {
                    <Link to="/mobile/schedule">
                       <Card className="p-4 border-none shadow-sm bg-white rounded-3xl">
                         <Calendar className="h-5 w-5 text-indigo-500 mb-2" />
-                        <p className="text-[10px] font-black text-slate-400 uppercase">Lịch trực</p>
-                        <p className="text-xs font-black text-slate-900 mt-1">4 Việc sắp tới</p>
+                        <p className="text-[10px] font-black text-slate-400 uppercase">Lịch bảo trì</p>
+                        <p className="text-xs font-black text-slate-900 mt-1 italic tracking-tight">4 Việc hôm nay</p>
                       </Card>
                    </Link>
                    <Link to="/mobile/inventory">
                       <Card className="p-4 border-none shadow-sm bg-white rounded-3xl">
                         <Package className="h-5 w-5 text-amber-500 mb-2" />
-                        <p className="text-[10px] font-black text-slate-400 uppercase">Vật tư</p>
-                        <p className="text-xs font-black text-slate-900 mt-1">{lowStock.length > 0 ? `${lowStock.length} Mã cạn` : "Đầy đủ"}</p>
+                        <p className="text-[10px] font-black text-slate-400 uppercase">Yêu cầu vật tư</p>
+                        <p className="text-xs font-black text-slate-900 mt-1 italic tracking-tight">{lowStock.length > 0 ? `${lowStock.length} Mã cạn` : "Dịu dàng"}</p>
                       </Card>
                    </Link>
                 </div>

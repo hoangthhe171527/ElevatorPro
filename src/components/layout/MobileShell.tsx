@@ -69,19 +69,21 @@ export function MobileShell({ children, title, showBackButton, backLink }: Mobil
     .toUpperCase();
 
   const menuItems = [
-    { to: "/mobile/leads", label: "CRM Leads", icon: Users, color: "bg-indigo-500 shadow-indigo-500/20" },
-    { to: "/mobile/route-plan", label: "Lộ trình", icon: Navigation, color: "bg-blue-600 shadow-blue-600/20" },
-    { to: "/mobile/schedule", label: "Lịch bảo trì", icon: Calendar, color: "bg-rose-500 shadow-rose-500/20" },
-    { to: "/mobile/inventory", label: "Kho vật tư", icon: Package, color: "bg-emerald-500 shadow-emerald-500/20" },
-    { to: "/mobile/approvals", label: "Phê duyệt", icon: ShieldCheck, color: "bg-amber-500 shadow-amber-500/20" },
-    { to: "/mobile/projects", label: "Dự án", icon: Building, color: "bg-slate-700 shadow-slate-700/20" },
-    { to: "/mobile/accounting", label: "Tài chính", icon: CreditCard, color: "bg-purple-500 shadow-purple-500/20" },
-    { to: "/mobile/reports", label: "Báo cáo", icon: BarChart3, color: "bg-primary shadow-primary/20" },
-    { to: "/mobile/settings", label: "Cài đặt", icon: Settings, color: "bg-slate-500 shadow-slate-500/20" },
-  ];
+    { to: "/mobile/leads", label: "CRM Leads", icon: Users, color: "bg-indigo-500 shadow-indigo-500/20", permissions: ["director", "sales"] },
+    { to: "/mobile/route-plan", label: "Lộ trình", icon: Navigation, color: "bg-blue-600 shadow-blue-600/20", permissions: ["director", "field_tech", "maintenance_mgmt"] },
+    { to: "/mobile/schedule", label: "Lịch bảo trì", icon: Calendar, color: "bg-rose-500 shadow-rose-500/20", permissions: ["director", "maintenance_mgmt", "field_tech"] },
+    { to: "/mobile/inventory", label: "Kho vật tư", icon: Package, color: "bg-emerald-500 shadow-emerald-500/20", permissions: ["director", "install_mgmt", "maintenance_mgmt", "field_tech", "accounting"] },
+    { to: "/mobile/approvals", label: "Phê duyệt", icon: ShieldCheck, color: "bg-amber-500 shadow-amber-500/20", permissions: ["director", "install_mgmt", "maintenance_mgmt", "hr_admin", "accounting"] },
+    { to: "/mobile/projects", label: "Dự án", icon: Building, color: "bg-slate-700 shadow-slate-700/20", permissions: ["director", "install_mgmt", "sales"] },
+    { to: "/mobile/accounting", label: "Tài chính", icon: CreditCard, color: "bg-purple-500 shadow-purple-500/20", permissions: ["director", "accounting"] },
+    { to: "/mobile/reports", label: "Báo cáo", icon: BarChart3, color: "bg-primary shadow-primary/20", permissions: ["director", "sales", "accounting", "hr_admin"] },
+    { to: "/mobile/settings", label: "Cài đặt", icon: Settings, color: "bg-slate-500 shadow-slate-500/20", permissions: ["director", "sales", "hr_admin", "accounting", "field_tech", "install_mgmt", "maintenance_mgmt"] },
+  ].filter(item => item.permissions.some(p => permissions.includes(p as any)));
 
   const isActive = (to: string) =>
     location.pathname === to || (to !== "/mobile" && location.pathname.startsWith(to));
+
+  const currentRoleName = user.name.split("(")[1] ? user.name.split("(")[1].replace(")", "") : "Thành viên";
 
   return (
     <div className="min-h-screen bg-slate-50 flex items-center justify-center p-0 md:p-12">
@@ -121,11 +123,18 @@ export function MobileShell({ children, title, showBackButton, backLink }: Mobil
               </div>
             )}
             <div className="flex flex-col min-w-0">
-               <h1 className="font-black text-[15px] text-slate-900 truncate leading-tight tracking-tight">
-                 {title || "ElevatorPro"}
-               </h1>
+               <div className="flex items-center gap-2">
+                 <h1 className="font-black text-[15px] text-slate-900 truncate leading-tight tracking-tight">
+                   {title || "ElevatorPro"}
+                 </h1>
+                 {!showBackButton && !backLink && (
+                   <div className="px-2 py-0.5 rounded-full bg-primary/10 border border-primary/20 text-[8px] font-black text-primary uppercase shrink-0">
+                      {currentRoleName}
+                   </div>
+                 )}
+               </div>
                {!showBackButton && !backLink && (
-                 <span className="text-[10px] font-black text-primary uppercase tracking-widest flex items-center gap-1.5 mt-0.5">
+                 <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest flex items-center gap-1.5 mt-0.5">
                    <Globe className="h-3 w-3" /> {activeTenant?.name?.split(' ')[0] || "Hệ thống"}
                  </span>
                )}
@@ -138,7 +147,7 @@ export function MobileShell({ children, title, showBackButton, backLink }: Mobil
               <span className="absolute top-3 right-3 w-2 h-2 bg-rose-500 rounded-full border-2 border-white" />
             </Button>
             <button 
-              onClick={() => setIsAccountOpen(true)}
+              onClick={() => setIsMenuOpen(true)}
               className="flex items-center p-1 rounded-2xl hover:bg-slate-50 transition-colors focus:outline-none"
             >
               <Avatar className="h-8 w-8 border border-white shadow-sm ring-1 ring-slate-100">
@@ -157,13 +166,13 @@ export function MobileShell({ children, title, showBackButton, backLink }: Mobil
           </MobilePortalProvider>
         </main>
 
-        {/* Global Overlays (Menu / Auth) */}
+        {/* Global Overlays (Menu / Auth / Switch Role) */}
         {(isMenuOpen || isAccountOpen) && (
           <div className="absolute inset-0 bg-slate-50/95 backdrop-blur-2xl z-[100] animate-in fade-in slide-in-from-bottom-10 duration-300 flex flex-col p-8 pt-16">
-              <div className="flex items-center justify-between mb-10">
+              <div className="flex items-center justify-between mb-8">
                 <div className="flex flex-col">
                   <h2 className="text-2xl font-black text-slate-900 tracking-tighter italic uppercase">
-                    {isAccountOpen ? "WORKSPACE" : "COMMAND HUB"}
+                    {isMenuOpen ? "COMMAND HUB" : "WORKSPACE"}
                   </h2>
                   <p className="text-[10px] font-black text-slate-400 tracking-widest mt-1">SUPER APP INTEGRATION V2.0</p>
                 </div>
@@ -178,6 +187,44 @@ export function MobileShell({ children, title, showBackButton, backLink }: Mobil
                 >
                   <X className="h-6 w-6" />
                 </Button>
+              </div>
+
+              {/* Role Switcher - Always prominent in Command Hub too */}
+              <div className="mb-10 space-y-4">
+                  <h3 className="text-[10px] font-black uppercase text-slate-400 tracking-[0.2em] px-1 italic">
+                    CHUYỂN ĐỔI VAI TRÒ
+                  </h3>
+                  <div className="flex gap-2 overflow-x-auto pb-4 scrollbar-hide">
+                    {mockUsers
+                      .filter((u) => u.memberships.some((m) => m.tenantId === activeTenantId))
+                      .map((u) => {
+                         const roleLabel = u.name.split("(")[1] ? u.name.split("(")[1].replace(")", "") : "User";
+                         const isCurrent = user.id === u.id;
+                         return (
+                           <button
+                             key={u.id}
+                             onClick={() => {
+                               setUserId(u.id);
+                               setIsMenuOpen(false);
+                               setIsAccountOpen(false);
+                             }}
+                             className={cn(
+                               "shrink-0 flex flex-col items-center gap-2 p-3 rounded-[1.5rem] border-2 transition-all w-24",
+                               isCurrent ? "bg-primary border-primary text-white shadow-lg shadow-primary/20" : "bg-white border-slate-100 text-slate-400 hover:border-slate-200"
+                             )}
+                           >
+                             <Avatar className="h-10 w-10 border-2 border-white/20">
+                                <AvatarFallback className={cn("text-[9px] font-black", isCurrent ? "bg-white/20 text-white" : "bg-slate-50 text-slate-400")}>
+                                  {u.name.split(' ').slice(-1)[0][0]}
+                                </AvatarFallback>
+                             </Avatar>
+                             <span className={cn("text-[8px] font-black uppercase tracking-tighter truncate w-full text-center", isCurrent ? "text-white" : "text-slate-900")}>
+                               {roleLabel}
+                             </span>
+                           </button>
+                         );
+                      })}
+                  </div>
               </div>
 
               {isAccountOpen ? (
@@ -213,24 +260,9 @@ export function MobileShell({ children, title, showBackButton, backLink }: Mobil
                       ))}
                     </div>
                   </div>
-
-                  {/* Account Options */}
-                  <div className="space-y-3">
-                    <h3 className="text-[10px] font-black uppercase text-slate-400 tracking-[0.2em] px-1">QUẢN TRỊ VIÊN</h3>
-                    <div className="p-6 bg-white rounded-[2.5rem] border border-slate-100 shadow-sm flex items-center gap-4">
-                        <Avatar className="h-14 w-14">
-                           <AvatarFallback className="bg-primary text-white font-black text-sm italic">{initials}</AvatarFallback>
-                        </Avatar>
-                        <div className="flex-1 min-w-0">
-                           <p className="text-sm font-black text-slate-900 truncate">{user.name}</p>
-                           <p className="text-[10px] font-bold text-slate-400">ID: {user.id}</p>
-                        </div>
-                        <Button size="icon" variant="ghost" className="h-10 w-10 rounded-xl bg-slate-50"><LogOut className="h-4 w-4" /></Button>
-                    </div>
-                  </div>
                 </div>
               ) : (
-                <div className="grid grid-cols-3 gap-6 scrollbar-hide flex-1 pb-10">
+                <div className="grid grid-cols-3 gap-6 scrollbar-hide flex-1 pb-10 overflow-y-auto">
                   {menuItems.map((item) => {
                     const Icon = item.icon;
                     return (
@@ -254,12 +286,6 @@ export function MobileShell({ children, title, showBackButton, backLink }: Mobil
                       </Link>
                     );
                   })}
-                  <div className="flex flex-col items-center gap-3 opacity-30">
-                     <div className="h-16 w-16 rounded-[1.75rem] bg-slate-200 flex items-center justify-center text-slate-400 border-2 border-dashed border-slate-300">
-                        <HelpCircle className="h-7 w-7" />
-                     </div>
-                     <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest text-center leading-tight">SẮP TỚI</span>
-                  </div>
                 </div>
               )}
               
