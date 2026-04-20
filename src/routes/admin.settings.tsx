@@ -11,7 +11,7 @@ import { Bell, Monitor, Globe, Clock, Save, Eye, Palette } from "lucide-react";
 import { ConfirmationDialog } from "@/components/common/ConfirmationDialog";
 import { toast } from "sonner";
 
-export const Route = createFileRoute("/admin/settings")({
+export const Route = createFileRoute("/admin/settings" as any)({
   head: () => ({ meta: [{ title: "Cài đặt hệ thống — ElevatorPro" }] }),
   component: SettingsPage,
 });

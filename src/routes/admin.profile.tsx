@@ -12,7 +12,7 @@ import { User, Mail, Phone, ShieldCheck, Key, Save } from "lucide-react";
 import { ConfirmationDialog } from "@/components/common/ConfirmationDialog";
 import { toast } from "sonner";
 
-export const Route = createFileRoute("/admin/profile")({
+export const Route = createFileRoute("/admin/profile" as any)({
   head: () => ({ meta: [{ title: "Hồ sơ cá nhân — ElevatorPro" }] }),
   component: ProfilePage,
 });
