@@ -35,6 +35,7 @@ function MobileApprovals() {
 
   const [activeTab, setActiveTab] = useState<"pending" | "history">("pending");
   const [confirmId, setConfirmId] = useState<string | null>(null);
+  const [rejectId, setRejectId] = useState<string | null>(null);
 
   if (!canAccess) {
     return (
@@ -204,7 +205,7 @@ function MobileApprovals() {
                     <Button
                       variant="outline"
                       className="flex-1 h-11 rounded-2xl border-slate-100 text-slate-400 hover:text-red-500 hover:bg-red-50 hover:border-red-100 font-black text-[10px] tracking-widest transition-all"
-                      onClick={() => toast.error("Đã từ chối yêu cầu")}
+                      onClick={() => setRejectId(req.id)}
                     >
                       <XCircle className="h-4 w-4 mr-2" /> TỪ CHỐI
                     </Button>
@@ -247,6 +248,18 @@ function MobileApprovals() {
           setConfirmId(null);
         }}
         variant="success"
+      />
+
+      <ConfirmationDialog
+        open={!!rejectId}
+        onOpenChange={(o) => !o && setRejectId(null)}
+        title="Xác nhận từ chối"
+        description="Bạn có chắc chắn muốn từ chối yêu cầu này? Hành động này sẽ thông báo cho người yêu cầu biết yêu cầu không được chấp nhận."
+        onConfirm={() => {
+          toast.error("Đã từ chối yêu cầu thành công!");
+          setRejectId(null);
+        }}
+        variant="destructive"
       />
     </MobileShell>
   );

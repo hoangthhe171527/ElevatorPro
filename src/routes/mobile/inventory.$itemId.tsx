@@ -11,6 +11,8 @@ import {
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { toast } from "sonner";
+import { useState } from "react";
+import { ConfirmationDialog } from "@/components/common/ConfirmationDialog";
 
 export const Route = createFileRoute("/mobile/inventory/$itemId")({
   head: ({ params }) => ({ meta: [{ title: `Vật tư ${params.itemId}` }] }),
@@ -20,6 +22,7 @@ export const Route = createFileRoute("/mobile/inventory/$itemId")({
 function InventoryDetailMobile() {
   const { itemId } = Route.useParams();
   const item = mockInventory.find((i) => i.id === itemId);
+  const [requestOpen, setRequestOpen] = useState(false);
 
   if (!item) {
     return (
@@ -30,6 +33,13 @@ function InventoryDetailMobile() {
   }
 
   const isLow = item.stock <= item.reorderLevel;
+
+  const handleRequestStock = () => {
+    toast.success("YÊU CẦU NHẬP KHO ĐÃ GỬI", {
+      description: `Đã gửi yêu cầu nhập thêm ${item.reorderLevel * 2} ${item.unit} cho vật tư ${item.name}.`
+    });
+    setRequestOpen(false);
+  };
 
   // Mock transaction history
   const transactions = [
@@ -113,7 +123,7 @@ function InventoryDetailMobile() {
            <section>
               <div className="grid grid-cols-2 gap-3">
                  <Button 
-                   onClick={() => toast.success("ĐÃ GỬI YÊU CẦU NHẬP HÀNG")}
+                   onClick={() => setRequestOpen(true)}
                    className="h-16 rounded-[1.5rem] bg-slate-900 text-white font-black text-[10px] uppercase gap-2 flex-col"
                  >
                     <ArrowUpRight className="h-4 w-4 text-emerald-400" /> Yêu cầu nhập
@@ -121,11 +131,22 @@ function InventoryDetailMobile() {
                  <Button 
                    variant="outline" 
                    className="h-16 rounded-[1.5rem] bg-white border-slate-100 font-black text-[10px] uppercase gap-2 flex-col"
+                   onClick={() => toast.info("Chọn phiếu việc để xuất vật tư...")}
                  >
                     <ArrowDownLeft className="h-4 w-4 text-rose-400" /> Xuất lắp đặt
                  </Button>
               </div>
            </section>
+
+           <ConfirmationDialog
+             open={requestOpen}
+             onOpenChange={setRequestOpen}
+             title="Xác nhận yêu cầu nhập hàng"
+             description={`Bạn có muốn gửi yêu cầu bộ phận kho nhập thêm ${item.name} (${item.code}) không?`}
+             onConfirm={handleRequestStock}
+             variant="info"
+             icon={<ShoppingCart className="h-5 w-5 text-blue-500" />}
+           />
 
            {/* Recent Transactions */}
            <section className="pb-10">

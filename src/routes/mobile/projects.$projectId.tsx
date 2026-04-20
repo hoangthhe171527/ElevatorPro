@@ -121,6 +121,15 @@ function ProjectDetailMobile() {
             </Button>
           </Card>
 
+          <ConfirmationDialog
+            open={confirmOpen}
+            onOpenChange={setConfirmOpen}
+            title="Xác nhận hoàn thành giai đoạn"
+            description={`Bạn có chắc chắn muốn xác nhận hoàn thành giai đoạn ${PROJECT_STAGE_LABELS[project.stage]} cho dự án này không?`}
+            onConfirm={handleAdvance}
+            variant="success"
+          />
+
           {/* Client Info */}
           <section>
             <div className="flex items-center justify-between mb-4 px-1">

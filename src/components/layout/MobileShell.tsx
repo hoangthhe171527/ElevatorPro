@@ -132,8 +132,8 @@ export function MobileShell({ children, title, showBackButton, backLink }: Mobil
         </div>
 
         {/* Header - Unified & Compact */}
-        <header className="h-[72px] flex items-center justify-between px-6 sticky top-0 bg-white/80 backdrop-blur-3xl z-[60] border-b border-slate-100 italic transition-all">
-          <div className="flex items-center gap-4">
+        <header className="h-[72px] flex items-center px-6 sticky top-0 bg-white/80 backdrop-blur-3xl z-[60] border-b border-slate-100 italic transition-all">
+          <div className="flex items-center gap-4 z-10 w-[110px] shrink-0">
             {showBackButton || backLink ? (
               <Button
                 variant="ghost"
@@ -147,11 +147,11 @@ export function MobileShell({ children, title, showBackButton, backLink }: Mobil
                 <ChevronLeft className="h-5 w-5" />
               </Button>
             ) : (
-              <button 
+              <button
                 onClick={() => setIsAccountOpen(true)}
-                className="flex items-center gap-3 active:scale-95 transition-transform"
+                className="flex items-center gap-3 active:scale-95 transition-transform min-w-0"
               >
-                <div className="h-11 w-11 rounded-2xl bg-slate-900 flex items-center justify-center shadow-lg shadow-slate-900/10">
+                <div className="h-11 w-11 rounded-2xl bg-slate-900 flex items-center justify-center shadow-lg shadow-slate-900/10 shrink-0">
                   <Avatar className="h-full w-full rounded-2xl">
                     <AvatarFallback className="bg-slate-900 text-white text-[10px] font-black italic">
                       {initials}
@@ -159,35 +159,35 @@ export function MobileShell({ children, title, showBackButton, backLink }: Mobil
                   </Avatar>
                 </div>
                 <div className="flex flex-col items-start min-w-0">
-                  <h1 className="font-black text-[14px] text-slate-900 leading-none tracking-tight truncate max-w-[120px]">
+                  <h1 className="font-black text-[14px] text-slate-900 leading-none tracking-tight truncate w-full">
                     {user.name.split(' ')[0]}
                   </h1>
-                  <span className="text-[8px] font-black text-slate-400 uppercase tracking-widest mt-1 flex items-center gap-1">
-                    <Globe className="h-2.5 w-2.5 text-primary" /> {activeTenant?.name?.split(' ')[0]}
+                  <span className="text-[8px] font-black text-slate-400 uppercase tracking-widest mt-1 flex items-center gap-1 overflow-hidden">
+                    <Globe className="h-2.5 w-2.5 text-primary shrink-0" /> <span className="truncate">{activeTenant?.name?.split(' ')[0]}</span>
                   </span>
                 </div>
               </button>
             )}
           </div>
 
-          {!showBackButton && !backLink && (
-            <div className="absolute left-1/2 -translate-x-1/2 flex flex-col items-center pointer-events-none">
-               <span className="text-[10px] font-black text-slate-900 uppercase tracking-[0.2em]">{title || "COMMAND"}</span>
-               <div className="px-2 py-0.5 rounded-full bg-emerald-500/10 text-[7px] font-black text-emerald-600 uppercase tracking-widest mt-1 border border-emerald-500/20">
-                  {role} • {companySize}
-               </div>
-            </div>
-          )}
+          <div className="flex-1 flex flex-col items-center justify-center min-w-0 px-1 overflow-hidden">
+               <span className="text-[11px] font-black text-slate-900 uppercase tracking-[0.15em] line-clamp-2 text-center w-full leading-tight">{title || "COMMAND"}</span>
+               {!showBackButton && !backLink && (
+                 <div className="px-2 py-0.5 rounded-full bg-emerald-500/10 text-[7px] font-black text-emerald-600 uppercase tracking-widest mt-1 border border-emerald-500/20 whitespace-nowrap">
+                    {role} • {companySize}
+                 </div>
+               )}
+          </div>
 
-          <div className="flex items-center gap-2">
-            <Button variant="ghost" size="icon" className="h-10 w-10 rounded-2xl relative bg-slate-50 border border-slate-100">
+          <div className="flex items-center gap-2 z-10 w-[110px] shrink-0 justify-end">
+            <Button variant="ghost" size="icon" className="h-10 w-10 rounded-2xl relative bg-slate-50 border border-slate-100 shrink-0">
               <Bell className="h-5 w-5 text-slate-600" />
               <span className="absolute top-2.5 right-2.5 w-2 h-2 bg-rose-500 rounded-full border-2 border-white" />
             </Button>
             <Button 
               variant="ghost" 
               size="icon" 
-              className="h-10 w-10 rounded-2xl bg-slate-50 border border-slate-100"
+              className="h-10 w-10 rounded-2xl bg-slate-50 border border-slate-100 shrink-0"
               onClick={() => setIsMenuOpen(true)}
             >
               <LayoutGrid className="h-5 w-5 text-slate-600" />
@@ -322,11 +322,6 @@ export function MobileShell({ children, title, showBackButton, backLink }: Mobil
               </div>
               
               <div className="mt-8 flex flex-col gap-4">
-                 <Link to="/admin" className="w-full">
-                    <Button variant="outline" className="w-full rounded-2xl h-14 border-slate-200 text-slate-400 font-black text-[10px] uppercase gap-2">
-                      QUAY LẠI TRÌNH QUẢN TRỊ <ChevronRight className="h-3.5 w-3.5" />
-                    </Button>
-                 </Link>
                  <p className="text-center text-[9px] font-black text-slate-300 uppercase tracking-widest italic flex items-center justify-center gap-2">
                     <ShieldCheck className="h-3 w-3" /> SECURED BY ELEVATORPRO CLOUD
                  </p>
@@ -386,14 +381,6 @@ export function MobileShell({ children, title, showBackButton, backLink }: Mobil
               <span className="text-slate-400 text-xs font-bold font-mono">IPHONE 13 PRO MAX</span>
            </div>
         </div>
-        
-        <div className="w-px h-24 bg-gradient-to-b from-slate-200 to-transparent mr-4" />
-
-        <Link to="/admin">
-          <Button variant="outline" className="h-16 px-8 rounded-[1.5rem] bg-white border-2 border-slate-100 shadow-2xl shadow-slate-900/5 hover:bg-slate-50 transition-all group font-black text-xs uppercase tracking-widest gap-3">
-            Exit Mobile View <ChevronRight className="h-4 w-4 group-hover:translate-x-1 transition-transform" />
-          </Button>
-        </Link>
       </div>
     </div>
   );

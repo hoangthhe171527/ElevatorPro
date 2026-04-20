@@ -17,8 +17,12 @@ import {
   Calendar,
   Layers,
   FileText,
+  AlertTriangle,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { useState } from "react";
+import { toast } from "sonner";
+import { ConfirmationDialog } from "@/components/common/ConfirmationDialog";
 
 export const Route = createFileRoute("/mobile/elevators/$elevatorId")({
   head: ({ params }) => ({ meta: [{ title: `Thang máy ${params.elevatorId} — Mobile` }] }),
@@ -28,6 +32,7 @@ export const Route = createFileRoute("/mobile/elevators/$elevatorId")({
 function ElevatorDetailMobile() {
   const { elevatorId } = Route.useParams();
   const elevator = mockElevators.find((e) => e.id === elevatorId);
+  const [reportOpen, setReportOpen] = useState(false);
 
   if (!elevator) return <div>Elevator not found</div>;
 
@@ -38,6 +43,13 @@ function ElevatorDetailMobile() {
     { date: "10/01/2026", type: "Sửa chữa", tech: "Trần Văn B", result: "Thay relay" },
     { date: "20/11/2025", type: "Kiểm định", tech: "Trung tâm 2", result: "Đạt" },
   ];
+
+  const handleReportIssue = () => {
+    toast.success("ĐÃ GỬI BÁO CÁO SỰ CỐ", {
+      description: "Đội ngũ kỹ thuật đã được thông báo và sẽ phản hồi sớm nhất."
+    });
+    setReportOpen(false);
+  };
 
   return (
     <MobileShell title="Chi tiết thiết bị" showBackButton>
@@ -72,16 +84,30 @@ function ElevatorDetailMobile() {
 
         {/* Quick Actions */}
         <div className="grid grid-cols-2 gap-3">
-          <Button className="h-12 rounded-xl bg-primary shadow-lg shadow-primary/20 gap-2 font-bold text-xs">
+          <Button 
+            onClick={() => setReportOpen(true)}
+            className="h-12 rounded-xl bg-rose-500 hover:bg-rose-600 shadow-lg shadow-rose-500/20 gap-2 font-bold text-xs"
+          >
             <Wrench className="h-4 w-4" /> BÁO HỎNG
           </Button>
           <Button
             variant="outline"
             className="h-12 rounded-xl border-slate-200 gap-2 font-bold text-xs bg-white"
+            onClick={() => toast.info("Đang mở lịch đặt bảo trì...")}
           >
             <Calendar className="h-4 w-4 text-primary" /> ĐẶT LỊCH
           </Button>
         </div>
+
+        <ConfirmationDialog
+          open={reportOpen}
+          onOpenChange={setReportOpen}
+          title="Báo cáo sự cố thiết bị"
+          description={`Xác nhận tạo phiếu yêu cầu sửa chữa khẩn cấp cho thiết bị ${elevator.code} tại ${elevator.building}?`}
+          onConfirm={handleReportIssue}
+          variant="danger"
+          icon={<AlertTriangle className="h-5 w-5 text-rose-500" />}
+        />
 
         {/* Tech Specs */}
         <section>

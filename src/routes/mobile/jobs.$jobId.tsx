@@ -1,4 +1,4 @@
-import { createFileRoute } from "@tanstack/react-router";
+﻿import { createFileRoute } from "@tanstack/react-router";
 import { MobileShell } from "@/components/layout/MobileShell";
 import { mockJobs, getCustomer, formatVND } from "@/lib/mock-data";
 import { Card } from "@/components/ui/card";
@@ -81,7 +81,6 @@ function JobDetailMobile() {
   return (
     <MobileShell title={job.code} showBackButton backLink="/mobile/jobs">
       <div className="flex flex-col pb-28">
-        {/* Header Summary */}
         <div className="px-6 py-6 bg-white border-b border-slate-50">
            <div className="flex justify-between items-start mb-4">
               <div className="min-w-0 flex-1 pr-4">
@@ -100,7 +99,6 @@ function JobDetailMobile() {
               </div>
            </div>
 
-           {/* Execution Bar */}
            <div className="mt-6">
               {!isCheckedIn ? (
                 <Button 
@@ -126,7 +124,6 @@ function JobDetailMobile() {
         </div>
 
         <div className="p-5 space-y-8">
-          {/* Site Context Information */}
           <Card className="p-5 border-none shadow-sm bg-white rounded-[2rem]">
              <div className="space-y-5">
                 <div className="flex items-start gap-4">
@@ -150,7 +147,6 @@ function JobDetailMobile() {
              </div>
           </Card>
 
-          {/* Interactive Technical Checklist */}
           <section>
              <div className="flex items-center justify-between mb-4 px-1">
                 <h3 className="text-[10px] font-black uppercase text-slate-400 tracking-widest flex items-center gap-2">
@@ -185,7 +181,6 @@ function JobDetailMobile() {
              </Card>
           </section>
 
-          {/* Field Media & Evidence */}
           <section>
              <h3 className="text-[10px] font-black uppercase text-slate-400 tracking-widest px-1 mb-4 flex items-center gap-2">
                 <Camera className="h-4 w-4" /> Hình ảnh & Nghiệm thu
@@ -202,14 +197,13 @@ function JobDetailMobile() {
                 <Button 
                   variant="outline" 
                   className="h-28 rounded-3xl border-dashed border-2 bg-slate-50 flex-col gap-2 p-0 active:bg-emerald-50 transition-colors"
-                  onClick={() => toast.info("Đang mở camera chụp ảnh Hoàn thành...")}
+                  onClick={() => toast.info("Đang mở camera chụp ảnh Kết quả...")}
                 >
                    <Camera className="h-6 w-6 text-slate-300" />
-                   <span className="text-[9px] font-black text-slate-400 uppercase">Ảnh hoàn thành</span>
+                   <span className="text-[9px] font-black text-slate-400 uppercase">Ảnh sau việc</span>
                 </Button>
              </div>
              
-             {/* Signature Pad Placeholder */}
              <div className="mt-4">
                 <p className="text-[9px] font-black text-slate-400 uppercase mb-2 px-1">Chữ ký xác nhận của khách hàng</p>
                 <div 
@@ -222,7 +216,6 @@ function JobDetailMobile() {
              </div>
           </section>
 
-          {/* Technician Notes */}
           <section>
              <div className="flex items-center justify-between mb-4 px-1">
                 <h3 className="text-[10px] font-black uppercase text-slate-400 tracking-widest">Ghi chú hiện trường</h3>
@@ -243,7 +236,6 @@ function JobDetailMobile() {
              </Card>
           </section>
 
-          {/* Quick Support / Links */}
           <div className="grid grid-cols-2 gap-3 pt-4">
              <Button variant="outline" className="h-14 rounded-2xl bg-white border-slate-100 gap-2 shadow-sm font-black text-[10px] uppercase">
                 <Package className="h-4 w-4 text-slate-400" /> Yêu cầu vật tư
