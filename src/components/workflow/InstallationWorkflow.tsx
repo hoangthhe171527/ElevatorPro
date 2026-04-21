@@ -151,6 +151,7 @@ export function InstallationWorkflow({
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         {/* Left: Dynamic Gate Management */}
         <div className="lg:col-span-2 space-y-4">
+          <div className="flex items-center justify-between">
             <div className="flex items-center gap-2">
               <h3 className="text-lg font-semibold flex items-center gap-2">
                 Giai đoạn: <span className="text-primary font-bold">{PROJECT_STAGE_LABELS[currentStage]}</span>
