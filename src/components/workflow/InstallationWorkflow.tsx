@@ -23,7 +23,9 @@ import {
   AlertCircle,
   FileText,
   UserCheck,
-  RefreshCw
+  RefreshCw,
+  Send,
+  Mail
 } from "lucide-react";
 import { ApprovalGateCard } from "./ApprovalGateCard";
 import { toast } from "sonner";
@@ -162,9 +164,22 @@ export function InstallationWorkflow({
                 </Badge>
               )}
             </div>
-            <Badge variant="outline" className={`${allTasksDone ? 'bg-success/10 text-success' : 'bg-blue-50'} animate-none`}>
-              {allTasksDone ? 'Sẵn sàng duyệt' : 'Đang xử lý'}
-            </Badge>
+            <div className="flex items-center gap-2">
+              <Badge variant="outline" className={`${allTasksDone ? 'bg-success/10 text-success' : 'bg-blue-50'} animate-none`}>
+                {allTasksDone ? 'Sẵn sàng duyệt' : 'Đang xử lý'}
+              </Badge>
+              
+              {currentStage === "contract" && (
+                <Button 
+                  size="sm" 
+                  variant="default" 
+                  className="h-8 bg-blue-600 hover:bg-blue-700"
+                  onClick={() => toast.success("Đã gửi bản thảo hợp đồng qua Zalo và Email cho khách!")}
+                >
+                  <Send className="h-3 w-3 mr-2" /> Gửi hợp đồng
+                </Button>
+              )}
+            </div>
           </div>
 
           <div className="p-4 bg-muted/30 rounded-xl border border-dashed text-sm">

@@ -11,8 +11,17 @@ import {
   priorityLabel,
   priorityVariant,
 } from "@/lib/status-variants";
-import { mockJobs, getCustomer, getElevator, getUser, formatDateTime } from "@/lib/mock-data";
+import { mockJobs, getCustomer, getElevator, getUser, formatDateTime, type Job } from "@/lib/mock-data";
 import {
+  ArrowLeft,
+  Building2,
+  Calendar,
+  Clock,
+  User,
+  MapPin,
+  ClipboardList,
+  Camera,
+  CheckCircle2,
   AlertCircle,
   UserCheck,
   CreditCard,
@@ -21,6 +30,7 @@ import {
 } from "lucide-react";
 import { toast } from "sonner";
 import { ConfirmationDialog } from "@/components/common/ConfirmationDialog";
+import { DispatchJobModal } from "@/components/common/Modals";
 
 export const Route = createFileRoute("/admin/jobs/$jobId")({
   loader: ({ params }) => {
@@ -63,6 +73,19 @@ function AdminJobDetail() {
 
   const handleSendToCustomer = () => {
     toast.info("Đã gửi thông báo yêu cầu khách hàng xác nhận trên Portal.");
+  };
+
+  const handleDispatch = (jobId: string, userId: string) => {
+    // In a real app, this would be an API call. 
+    // For the mock, we update the local job instance partially if needed, 
+    // but the loader will re-fetch the mockJobs which is global.
+    const jobRef = mockJobs.find(j => j.id === jobId);
+    if (jobRef) {
+      jobRef.assignedTo = userId;
+      jobRef.status = "scheduled";
+      setStatus("scheduled");
+      toast.success("Đã phân công kỹ thuật viên thành công!");
+    }
   };
 
   return (
@@ -397,6 +420,8 @@ function AdminJobDetail() {
         setEditOpen={setEditOpen}
         techOpen={techOpen}
         setTechOpen={setTechOpen}
+        job={job}
+        onDispatch={handleDispatch}
       />
     </AppShell>
   );
@@ -407,11 +432,15 @@ function ConfirmationModals({
   setEditOpen,
   techOpen,
   setTechOpen,
+  job,
+  onDispatch,
 }: {
   editOpen: boolean;
   setEditOpen: (o: boolean) => void;
   techOpen: boolean;
   setTechOpen: (o: boolean) => void;
+  job: Job;
+  onDispatch: (jobId: string, userId: string) => void;
 }) {
   return (
     <>
@@ -422,12 +451,12 @@ function ConfirmationModals({
         description="Bạn có chắc chắn muốn mở trình chỉnh sửa nội dung công việc này?"
         onConfirm={() => toast.success("Đã mở form chỉnh sửa")}
       />
-      <ConfirmationDialog
+      
+      <DispatchJobModal 
         open={techOpen}
-        onOpenChange={setTechOpen}
-        title="Xác nhận thay đổi nhân sự"
-        description="Bạn có chắc chắn muốn thay đổi kỹ thuật viên phụ trách cho công việc này không?"
-        onConfirm={() => toast.info("Mở Modal thay đổi người")}
+        onClose={() => setTechOpen(false)}
+        job={job}
+        onDispatch={onDispatch}
       />
     </>
   );
