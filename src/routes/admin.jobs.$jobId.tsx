@@ -13,16 +13,11 @@ import {
 } from "@/lib/status-variants";
 import { mockJobs, getCustomer, getElevator, getUser, formatDateTime } from "@/lib/mock-data";
 import {
-  ArrowLeft,
-  Building2,
-  Calendar,
-  Clock,
-  User,
-  MapPin,
-  ClipboardList,
-  Camera,
-  CheckCircle2,
   AlertCircle,
+  UserCheck,
+  CreditCard,
+  Send,
+  Wrench,
 } from "lucide-react";
 import { toast } from "sonner";
 import { ConfirmationDialog } from "@/components/common/ConfirmationDialog";
@@ -55,8 +50,20 @@ function AdminJobDetail() {
   const elevator = job.elevatorId ? getElevator(job.elevatorId) : undefined;
   const tech = job.assignedTo ? getUser(job.assignedTo) : undefined;
   const [status, setStatus] = useState(job.status);
+  const [isApproved, setIsApproved] = useState(job.isManagerApproved || false);
+  const [isConfirmed, setIsConfirmed] = useState(job.isCustomerConfirmed || false);
   const [editOpen, setEditOpen] = useState(false);
   const [techOpen, setTechOpen] = useState(false);
+
+  const handleManagerApprove = () => {
+    setIsApproved(true);
+    setStatus("manager_approved");
+    toast.success("Hồ sơ kỹ thuật đã được duyệt!");
+  };
+
+  const handleSendToCustomer = () => {
+    toast.info("Đã gửi thông báo yêu cầu khách hàng xác nhận trên Portal.");
+  };
 
   return (
     <AppShell>
@@ -78,7 +85,52 @@ function AdminJobDetail() {
           </div>
         }
       />
+      <div className="mb-6">
+        <div className="flex items-center justify-between overflow-x-auto pb-4">
+          {[
+            { id: "scheduled", label: "Lên lịch", icon: Calendar },
+            { id: "in_progress", label: "Thực hiện", icon: Wrench },
+            ...(job.tenantId === "t-1" ? [
+              { id: "review", label: "QT duyệt", icon: UserCheck },
+              { id: "customer", label: "Khách ký", icon: Send }
+            ] : []),
+            ...(job.type === "repair" ? [{ id: "payment", label: "Thanh toán", icon: CreditCard }] : []),
+            { id: "completed", label: "Hoàn thành", icon: CheckCircle2 },
+          ].map((s, idx, arr) => {
+            const isDone = (status === "completed") || 
+                           (s.id === "scheduled" && ["scheduled", "in_progress", "manager_approved", "customer_confirmed", "completed"].includes(status)) ||
+                           (s.id === "in_progress" && ["in_progress", "manager_approved", "customer_confirmed", "completed"].includes(status)) ||
+                           (s.id === "review" && (isApproved || status === "completed")) ||
+                           (s.id === "customer" && (isConfirmed || status === "completed"));
+            
+            const isCurrent = (s.id === "scheduled" && status === "scheduled") ||
+                             (s.id === "in_progress" && status === "in_progress") ||
+                             (s.id === "review" && (status === "in_progress" && job.report && !isApproved)) ||
+                             (s.id === "customer" && status === "manager_approved") ||
+                             (job.tenantId === "t-2" && s.id === "completed" && status === "in_progress" && job.report);
 
+            return (
+              <div key={s.id} className="flex items-center">
+                <div className="flex flex-col items-center gap-1 min-w-[100px]">
+                  <div className={`h-10 w-10 rounded-full flex items-center justify-center border-2 transition-colors ${
+                    isDone ? "bg-primary border-primary text-primary-foreground" : 
+                    isCurrent ? "border-primary text-primary animate-pulse" : 
+                    "border-muted text-muted-foreground"
+                  }`}>
+                    <s.icon className="h-5 w-5" />
+                  </div>
+                  <span className={`text-[10px] uppercase font-bold ${isCurrent ? "text-primary" : "text-muted-foreground"}`}>
+                    {s.label}
+                  </span>
+                </div>
+                {idx < arr.length - 1 && (
+                  <div className={`h-[2px] w-8 sm:w-16 mx-2 ${isDone ? "bg-primary" : "bg-muted"}`} />
+                )}
+              </div>
+            );
+          })}
+        </div>
+      </div>
       <div className="grid gap-6 lg:grid-cols-3 mt-6">
         {/* Left Column: Main Detail */}
         <div className="lg:col-span-2 space-y-6">
@@ -125,24 +177,79 @@ function AdminJobDetail() {
               </div>
             </div>
 
-            {/* Admin specific tracking view */}
-            <div className="mt-6">
+            {/* Technical Approvals */}
+            <div className="mt-8 pt-6 border-t">
               <h3 className="font-semibold mb-4 text-sm uppercase tracking-wide text-muted-foreground">
-                Tiến độ kỹ thuật
+                Phê duyệt & Chốt việc
               </h3>
-              {job.report ? (
-                <div className="p-4 rounded-lg bg-muted/30 border border-muted flex gap-3">
-                  <CheckCircle2 className="h-5 w-5 text-success shrink-0 mt-0.5" />
-                  <div>
-                    <div className="font-medium text-sm">Biên bản nghiệm thu</div>
-                    <div className="text-sm text-muted-foreground mt-1 italic">"{job.report}"</div>
+              
+              <div className="grid sm:grid-cols-2 gap-4">
+                {job.tenantId === "t-1" ? (
+                  <>
+                    <div className={`p-4 rounded-xl border flex items-center justify-between ${isApproved ? "bg-success/5 border-success/20" : "bg-muted/30 border-muted"}`}>
+                      <div className="flex items-center gap-3">
+                        <div className={`h-8 w-8 rounded-full flex items-center justify-center ${isApproved ? "bg-success text-success-foreground" : "bg-muted-foreground/20"}`}>
+                          <UserCheck className="h-4 w-4" />
+                        </div>
+                        <div>
+                          <div className="text-sm font-semibold">Duyệt kỹ thuật</div>
+                          <div className="text-xs text-muted-foreground">{isApproved ? "Quản lý đã duyệt" : "Đang chờ duyệt"}</div>
+                        </div>
+                      </div>
+                      {!isApproved && job.report && (
+                        <Button size="sm" onClick={handleManagerApprove}>Duyệt ngay</Button>
+                      )}
+                    </div>
+
+                    <div className={`p-4 rounded-xl border flex items-center justify-between ${isConfirmed ? "bg-success/5 border-success/20" : "bg-muted/30 border-muted"}`}>
+                      <div className="flex items-center gap-3">
+                        <div className={`h-8 w-8 rounded-full flex items-center justify-center ${isConfirmed ? "bg-success text-success-foreground" : "bg-muted-foreground/20"}`}>
+                          <Send className="h-4 w-4" />
+                        </div>
+                        <div>
+                          <div className="text-sm font-semibold">Xác nhận khách hàng</div>
+                          <div className="text-xs text-muted-foreground">{isConfirmed ? "Khách đã xác nhận" : "Chưa xác nhận"}</div>
+                        </div>
+                      </div>
+                      {isApproved && !isConfirmed && (
+                        <Button size="sm" variant="outline" onClick={handleSendToCustomer}>Gửi yêu cầu</Button>
+                      )}
+                    </div>
+                  </>
+                ) : (
+                  <div className={`col-span-2 p-6 rounded-xl border-2 border-dashed flex flex-col items-center justify-center gap-4 ${status === "completed" ? "bg-success/5 border-success/20" : "bg-blue-500/5 border-blue-500/20"}`}>
+                    {status === "completed" ? (
+                      <>
+                        <CheckCircle2 className="h-10 w-10 text-success" />
+                        <div className="text-center">
+                          <div className="font-bold text-success">Công việc đã hoàn tất</div>
+                          <div className="text-sm text-muted-foreground font-medium">Báo cáo kỹ thuật đã được ghi nhận.</div>
+                        </div>
+                      </>
+                    ) : (
+                      <>
+                        <Wrench className="h-10 w-10 text-blue-500 opacity-50" />
+                        <div className="text-center">
+                          <div className="font-bold text-blue-700">Chế độ linh hoạt (t-2)</div>
+                          <div className="text-sm text-muted-foreground font-medium">Kỹ sư xác nhận xong báo cáo là có thể hoàn tất ngay.</div>
+                        </div>
+                        {job.report && (
+                           <Button onClick={() => {
+                             setStatus("completed");
+                             toast.success("Đã hoàn tất công việc!");
+                           }}>Xác nhận Hoàn thành</Button>
+                        )}
+                      </>
+                    )}
                   </div>
-                </div>
-              ) : (
-                <div className="p-4 rounded-lg bg-warning/10 border border-warning/20 flex gap-3 text-warning-foreground">
+                )}
+              </div>
+
+              {job.type === "maintenance" && !isConfirmed && (
+                <div className="mt-4 p-4 rounded-lg bg-blue-500/5 border border-blue-500/10 flex gap-3 text-blue-700">
                   <AlertCircle className="h-5 w-5 shrink-0" />
-                  <div className="text-sm">
-                    Kỹ thuật viên chưa cập nhật biên bản nghiệm thu hoặc công việc đang diễn ra.
+                  <div className="text-xs">
+                    Lưu ý: Nếu phát sinh hư hỏng trong quá trình bảo trì, hãy bấm <strong>"Tạo task sửa chữa"</strong> để theo dõi chi phí riêng biệt.
                   </div>
                 </div>
               )}

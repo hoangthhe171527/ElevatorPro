@@ -14,10 +14,18 @@ export type Permission =
   | "field_tech" // Kỹ thuật viên hiện trường
   | "customer"; // Khách hàng
 
-export type LeadStatus = "new" | "contacted" | "quoted" | "negotiating" | "won" | "lost";
-export type ContractStatus = "active" | "expiring" | "expired" | "draft";
+export type LeadStatus = "new" | "contacted" | "quote_pending" | "quoted" | "negotiating" | "won" | "lost";
+export type ContractStatus = "active" | "expiring" | "expired" | "draft" | "renewal_pending";
 export type ContractType = "install" | "maintenance" | "repair";
-export type JobStatus = "pending" | "scheduled" | "in_progress" | "completed" | "cancelled";
+export type JobStatus =
+  | "pending"
+  | "scheduled"
+  | "in_progress"
+  | "manager_approved"
+  | "customer_confirmed"
+  | "payment_pending"
+  | "completed"
+  | "cancelled";
 export type JobType = "install" | "maintenance" | "repair" | "inspection";
 export type JobPriority = "low" | "normal" | "high" | "urgent";
 export type ElevatorStatus = "operational" | "maintenance_due" | "out_of_order" | "under_install";
@@ -59,16 +67,16 @@ export interface Customer {
 
 // New model: Project (Công trình)
 export type ProjectStage =
-  | "survey" // Khảo sát & Ký HĐ
-  | "design" // Bản vẽ & Kỹ thuật
-  | "procurement" // Đặt hàng nhà máy
-  | "in_transit" // Hàng đang về
-  | "mechanic_install" // Thi công cơ khí
-  | "electric_install" // Thi công điện
-  | "inspection" // Kiểm định an toàn
-  | "handover"; // Bàn giao
+  | "lead" // GĐ1: Lead -> Sales
+  | "contract" // GĐ2: Chốt deal -> Hợp đồng
+  | "technical" // GĐ3: Kỹ thuật & bản vẽ
+  | "procurement" // GĐ4: Đặt hàng
+  | "warehouse" // GĐ5: Nhận hàng + thanh toán
+  | "installation" // GĐ6: Lắp đặt
+  | "completion" // GĐ7: Hoàn thiện
+  | "transition"; // GĐ8: Chuyển bảo trì
 
-export type RequestType = "material" | "budget" | "project_advance" | "completion";
+export type RequestType = "material" | "budget" | "project_advance" | "completion" | "lead_quote";
 export type RequestStatus = "pending" | "approved" | "rejected";
 
 export interface ApprovalRequest {
@@ -86,25 +94,100 @@ export interface ApprovalRequest {
 }
 
 export const PROJECT_STAGES: ProjectStage[] = [
-  "survey",
-  "design",
+  "lead",
+  "contract",
+  "technical",
   "procurement",
-  "in_transit",
-  "mechanic_install",
-  "electric_install",
-  "inspection",
-  "handover",
+  "warehouse",
+  "installation",
+  "completion",
+  "transition",
 ];
 
 export const PROJECT_STAGE_LABELS: Record<ProjectStage, string> = {
-  survey: "Khảo sát",
-  design: "Bản vẽ",
+  lead: "Lead → Báo giá",
+  contract: "Ký hợp đồng",
+  technical: "Kỹ thuật & Bản vẽ",
   procurement: "Đặt hàng",
-  in_transit: "Hàng về",
-  mechanic_install: "Lắp cơ khí",
-  electric_install: "Lắp điện",
-  inspection: "Kiểm định",
-  handover: "Bàn giao",
+  warehouse: "Nhận hàng & Thanh toán",
+  installation: "Lắp đặt",
+  completion: "Hoàn thiện",
+  transition: "Chuyển bảo trì",
+};
+
+// Workflow Gate Configuration
+export interface WorkflowGate {
+  approvers: Permission[];
+  label: string;
+  isFlexible?: boolean; // If true, can bypass request/approve cycle for t-2
+}
+
+export const STRATEGIC_WORKFLOW: Record<string, Record<ProjectStage, WorkflowGate>> = {
+  "t-1": { // LARGE COMPANY (Complex - Structured)
+    lead: { approvers: ["director"], label: "Director duyệt giá" },
+    contract: { approvers: ["director", "accounting"], label: "Director duyệt HĐ + Accounting xác nhận tiền" },
+    technical: { approvers: ["install_mgmt"], label: "Install Manager xác nhận kỹ thuật" },
+    procurement: { approvers: ["director", "accounting"], label: "Director duyệt chi + Accounting check ngân sách" },
+    warehouse: { approvers: ["accounting", "install_mgmt"], label: "Accounting + Install xác nhận nhận hàng" },
+    installation: { approvers: ["install_mgmt"], label: "Install Manager quản lý thi công" },
+    completion: { approvers: ["install_mgmt", "accounting", "director"], label: "Install xác nhận KT + Accounting xác nhận tiền + Director duyệt đóng" },
+    transition: { approvers: ["maintenance_mgmt"], label: "Maintenance Manager tiếp nhận vận hành" },
+  },
+  "t-2": { // SMALL COMPANY (Simplified - Flexible)
+    lead: { approvers: ["director"], label: "Sếp tự báo giá", isFlexible: true },
+    contract: { approvers: ["director", "accounting"], label: "Sếp ký + Kế toán ghi nhận", isFlexible: true },
+    technical: { approvers: ["install_mgmt"], label: "Kỹ sư triển khai", isFlexible: true },
+    procurement: { approvers: ["director"], label: "Sếp duyệt mua", isFlexible: true },
+    warehouse: { approvers: ["accounting"], label: "Kế toán check tiền", isFlexible: true },
+    installation: { approvers: ["install_mgmt"], label: "Kỹ sư lắp đặt", isFlexible: true },
+    completion: { approvers: ["director", "accounting"], label: "Sếp nghiệm thu", isFlexible: true },
+    transition: { approvers: ["maintenance_mgmt"], label: "Tiếp nhận bảo trì", isFlexible: true },
+  }
+};
+
+export interface StageTask {
+  id: string;
+  label: string;
+  requiredRole: Permission;
+}
+
+export const STAGE_SUB_TASKS: Record<ProjectStage, StageTask[]> = {
+  lead: [
+    { id: "lead_survey", label: "Sales khảo sát nhu cầu", requiredRole: "sales" },
+    { id: "proposal_sent", label: "Sales lên phương án & Báo giá", requiredRole: "sales" },
+  ],
+  contract: [
+    { id: "contract_sent", label: "Sales gửi hợp đồng", requiredRole: "sales" },
+    { id: "customer_signed", label: "Khách hàng ký xác nhận", requiredRole: "customer" },
+    { id: "payment_advance", label: "Accounting xác nhận tạm ứng", requiredRole: "accounting" },
+  ],
+  technical: [
+    { id: "site_survey_detailed", label: "Install khảo sát chi tiết", requiredRole: "install_mgmt" },
+    { id: "drawings_created", label: "Install lên bản vẽ kỹ thuật", requiredRole: "install_mgmt" },
+    { id: "customer_confirm_drawings", label: "Khách hàng xác nhận bản vẽ", requiredRole: "customer" },
+  ],
+  procurement: [
+    { id: "purchase_request", label: "Install tạo yêu cầu mua hàng", requiredRole: "install_mgmt" },
+    { id: "budget_check", label: "Accounting check ngân sách", requiredRole: "accounting" },
+  ],
+  warehouse: [
+    { id: "goods_received", label: "Nhận hàng & Kiểm định (QC)", requiredRole: "install_mgmt" },
+    { id: "accounts_payable", label: "Accounting ghi nhận công nợ", requiredRole: "accounting" },
+    { id: "payment_stage_2", label: "Thu tiền đợt 2", requiredRole: "accounting" },
+  ],
+  installation: [
+    { id: "work_assignment", label: "Install phân công nhân sự", requiredRole: "install_mgmt" },
+    { id: "field_installation", label: "Field Tech thi công lắp đặt", requiredRole: "field_tech" },
+    { id: "progress_update", label: "Update tiến độ lắp đặt", requiredRole: "field_tech" },
+  ],
+  completion: [
+    { id: "safety_inspection", label: "Kiểm định an toàn & Bàn giao", requiredRole: "install_mgmt" },
+    { id: "final_settlement", label: "Quyết toán & Thu tiền đợt cuối", requiredRole: "accounting" },
+  ],
+  transition: [
+    { id: "maintenance_contract", label: "Tạo hợp đồng bảo trì", requiredRole: "sales_maintenance" },
+    { id: "handover_maintenance", label: "Chuyển giao bộ phận Bảo trì", requiredRole: "maintenance_mgmt" },
+  ],
 };
 
 export interface Project {
@@ -128,7 +211,7 @@ export const mockProjects: Project[] = [
     customerId: "c-1",
     startDate: "2024-01-01",
     status: "in_progress",
-    stage: "electric_install",
+    stage: "installation",
   },
   {
     tenantId: "t-1",
@@ -138,7 +221,7 @@ export const mockProjects: Project[] = [
     customerId: "c-2",
     startDate: "2023-11-01",
     status: "completed",
-    stage: "handover",
+    stage: "transition",
   },
   {
     tenantId: "t-1",
@@ -148,7 +231,7 @@ export const mockProjects: Project[] = [
     customerId: "c-3",
     startDate: "2024-06-01",
     status: "in_progress",
-    stage: "mechanic_install",
+    stage: "completion",
   },
   {
     tenantId: "t-1",
@@ -158,7 +241,17 @@ export const mockProjects: Project[] = [
     customerId: "c-4",
     startDate: "2025-01-10",
     status: "in_progress",
-    stage: "in_transit",
+    stage: "warehouse",
+  },
+  {
+    tenantId: "t-1",
+    id: "p-5",
+    name: "Dự án Goldmark City Block C",
+    address: "136 Hồ Tùng Mậu",
+    customerId: "c-1",
+    startDate: "2026-04-15",
+    status: "in_progress",
+    stage: "lead",
   },
 ];
 
@@ -257,6 +350,10 @@ export interface Job {
   beforePhotos: string[];
   afterPhotos: string[];
   report?: string;
+  isManagerApproved?: boolean;
+  isCustomerConfirmed?: boolean;
+  hasIssues?: boolean;
+  cost?: number; // For repairs
   createdAt: string;
 }
 
@@ -716,7 +813,7 @@ const _mockLeads: Omit<Lead, "tenantId">[] = [
     assignedTo: "u-admin",
     estimatedValue: 7200000000,
     nextFollowUp: "2026-05-02",
-    createdAt: "2026-03-01",
+    createdAt: "2026-04-03",
   },
 ];
 
@@ -816,6 +913,20 @@ const _mockContracts: Omit<Contract, "tenantId">[] = [
         status: "overdue",
       },
     ],
+  },
+  {
+    id: "ct-10",
+    code: "HD-2023-0004",
+    customerId: "c-4",
+    type: "maintenance",
+    value: 45000000,
+    paid: 45000000,
+    startDate: "2023-06-01",
+    endDate: "2024-05-31",
+    status: "renewal_pending",
+    items: ["Bảo trì 12 tháng", "Tặng 1 lần thay dầu"],
+    signedAt: "2023-05-20",
+    milestones: [],
   },
 ];
 
@@ -1165,6 +1276,8 @@ const _mockJobs: Omit<Job, "tenantId">[] = [
     beforePhotos: ["b1.jpg", "b2.jpg"],
     afterPhotos: ["a1.jpg", "a2.jpg"],
     report: "Tất cả thang hoạt động bình thường. Đã thay dầu hộp số thang 1.",
+    isManagerApproved: true,
+    isCustomerConfirmed: true,
     createdAt: "2026-04-08",
   },
   {
@@ -1300,6 +1413,45 @@ const _mockJobs: Omit<Job, "tenantId">[] = [
     beforePhotos: [],
     afterPhotos: [],
     createdAt: "2026-04-17",
+  },
+  {
+    id: "j-13",
+    code: "CV-2026-0428",
+    type: "maintenance",
+    title: "Bảo trì định kỳ - Goldmark City",
+    description: "Bảo trì tháng 4 cho Block C",
+    customerId: "c-1",
+    elevatorId: "e-1",
+    assignedTo: "u-tech-1",
+    priority: "normal",
+    status: "manager_approved",
+    scheduledFor: "2026-04-20T09:00:00",
+    completedAt: "2026-04-20T11:00:00",
+    beforePhotos: ["bt-1.jpg"],
+    afterPhotos: ["at-1.jpg"],
+    report: "Thang hoạt động tốt, đã vệ sinh cabin.",
+    isManagerApproved: true,
+    createdAt: "2026-04-18",
+  },
+  {
+    id: "j-14",
+    code: "CV-2026-0429",
+    type: "repair",
+    title: "Thay hiển thị tầng - Hà Đông",
+    description: "Bộ hiển thị tầng 1 bị lỗi sọc",
+    customerId: "c-3",
+    elevatorId: "e-8",
+    assignedTo: "u-tech-2",
+    priority: "high",
+    status: "payment_pending",
+    scheduledFor: "2026-04-21T14:00:00",
+    completedAt: "2026-04-21T15:30:00",
+    beforePhotos: ["err.jpg"],
+    afterPhotos: ["fix.jpg"],
+    report: "Đã thay card hiển thị mới.",
+    isManagerApproved: true,
+    cost: 1250000,
+    createdAt: "2026-04-20",
   },
 ];
 
@@ -1549,6 +1701,44 @@ export const mockRequests: ApprovalRequest[] = [
     urgency: "normal",
     targetId: "p-4",
   },
+  {
+    tenantId: "t-1",
+    id: "req-5",
+    type: "lead_quote",
+    title: "Duyệt báo giá: Tòa nhà Goldmark City",
+    description: "Báo giá lắp mới 4 thang máy block C - Giá đề xuất 2.4 tỷ",
+    requestedBy: "u-sales-1",
+    requestedAt: "2026-04-21T09:00:00",
+    status: "pending",
+    urgency: "high",
+    targetId: "l-1",
+    amount: 2400000000,
+  },
+  {
+    tenantId: "t-1",
+    id: "req-6",
+    type: "contract_approval",
+    title: "Duyệt hợp đồng: Vinhomes Block C",
+    description: "Hợp đồng lắp mới 4 thang máy - Cần Director duyệt ký.",
+    requestedBy: "u-sales-1",
+    requestedAt: "2026-04-21T10:15:00",
+    status: "pending",
+    urgency: "critical",
+    targetId: "p-5",
+  },
+  {
+    tenantId: "t-1",
+    id: "req-7",
+    type: "budget",
+    title: "Tạm ứng mua thiết bị đợt 1",
+    description: "Tạm ứng 800 triệu nhập khẩu máy kéo Mitsubishi.",
+    requestedBy: "u-mgmt-install-1",
+    requestedAt: "2026-04-21T11:00:00",
+    status: "pending",
+    urgency: "high",
+    amount: 800000000,
+    targetId: "p-4",
+  },
 ];
 
 // Helper getters
@@ -1621,7 +1811,7 @@ export function advanceProjectStage(projectId: string) {
   const currentIndex = PROJECT_STAGES.indexOf(proj.stage);
   if (currentIndex < PROJECT_STAGES.length - 1) {
     proj.stage = PROJECT_STAGES[currentIndex + 1];
-    if (proj.stage === "handover") proj.status = "completed";
+    if (proj.stage === "completion") proj.status = "completed";
   }
 }
 

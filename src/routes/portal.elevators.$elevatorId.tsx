@@ -263,8 +263,22 @@ function PortalElevatorDetail() {
                       )}
                     </div>
                     {j.report && (
-                      <div className="bg-muted p-3 rounded-lg text-sm text-foreground/80 mt-3 italic border-l-2 border-primary/50">
+                      <div className="bg-muted p-3 rounded-lg text-sm text-foreground/80 mt-3 italic border-l-2 border-primary/50 relative group/report">
                         "{j.report}"
+                        {j.status === "manager_approved" && (
+                          <div className="mt-4 flex justify-end">
+                            <Button 
+                              size="sm" 
+                              className="bg-success hover:bg-success/90"
+                              onClick={() => {
+                                // Simulate confirmation
+                                import("sonner").then(({ toast }) => toast.success("Cảm ơn bạn đã xác nhận chất lượng bảo trì!"));
+                              }}
+                            >
+                              <CheckCircle2 className="h-4 w-4 mr-2" /> Xác nhận hiệu quả
+                            </Button>
+                          </div>
+                        )}
                       </div>
                     )}
                   </div>

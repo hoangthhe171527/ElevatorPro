@@ -6,6 +6,9 @@ export const jobStatusVariant: Record<string, StatusVariant> = {
   scheduled: "info",
   in_progress: "warning",
   completed: "success",
+  manager_approved: "info",
+  customer_confirmed: "success",
+  payment_pending: "warning",
   cancelled: "destructive",
 };
 
@@ -14,6 +17,9 @@ export const jobStatusLabel: Record<string, string> = {
   scheduled: "Đã lên lịch",
   in_progress: "Đang thực hiện",
   completed: "Hoàn thành",
+  manager_approved: "Chờ khách xác nhận",
+  customer_confirmed: "Khách đã xác nhận",
+  payment_pending: "Chờ thanh toán",
   cancelled: "Đã hủy",
 };
 
@@ -22,6 +28,7 @@ export const contractStatusVariant: Record<string, StatusVariant> = {
   expiring: "warning",
   expired: "destructive",
   draft: "muted",
+  renewal_pending: "info",
 };
 
 export const contractStatusLabel: Record<string, string> = {
@@ -29,6 +36,7 @@ export const contractStatusLabel: Record<string, string> = {
   expiring: "Sắp hết hạn",
   expired: "Hết hạn",
   draft: "Bản nháp",
+  renewal_pending: "Đang chờ tái ký",
 };
 
 export const leadStatusVariant: Record<string, StatusVariant> = {
@@ -36,6 +44,7 @@ export const leadStatusVariant: Record<string, StatusVariant> = {
   contacted: "primary",
   quoted: "warning",
   negotiating: "warning",
+  quote_pending: "warning",
   won: "success",
   lost: "destructive",
 };
@@ -45,6 +54,7 @@ export const leadStatusLabel: Record<string, string> = {
   contacted: "Đã liên hệ",
   quoted: "Đã báo giá",
   negotiating: "Đang đàm phán",
+  quote_pending: "Chờ sếp duyệt",
   won: "Chốt",
   lost: "Mất",
 };

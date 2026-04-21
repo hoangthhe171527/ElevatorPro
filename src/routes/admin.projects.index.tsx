@@ -157,22 +157,20 @@ function ProjectsPage() {
                     </div>
                     <div>
                       <span className="font-semibold text-primary">Việc cần làm hiện tại: </span>
-                      {proj.stage === "survey" &&
-                        "Cử kỹ thuật khảo sát hiện trường và báo cáo sai lệch so với hợp đồng."}
-                      {proj.stage === "design" &&
-                        "Lên bản vẽ hố thang và chờ khách hàng ký duyệt bản cứng."}
+                      {proj.stage === "lead" &&
+                        "Liên hệ khách hàng, thu thập thông tin và khảo sát nhu cầu ban đầu."}
+                      {proj.stage === "contract" &&
+                        "Đàm phán chi tiết và hoàn tất ký kết hợp đồng theo báo giá đã duyệt."}
+                      {proj.stage === "technical" &&
+                        "Cử kỹ thuật khảo sát chi tiết hố thang và phát hành bản vẽ thiết kế."}
                       {proj.stage === "procurement" &&
-                        "Tạo đơn đặt hàng (PO) gửi nhà máy sản xuất."}
-                      {proj.stage === "in_transit" &&
-                        "Theo dõi tàu biển. Cảnh báo khách hàng chuẩn bị mặt bằng tập kết."}
-                      {proj.stage === "mechanic_install" &&
-                        "Điều phối đội thầu phụ cơ khí vào công trình."}
-                      {proj.stage === "electric_install" &&
-                        "Điều phối kỹ thuật viên điện nội bộ để đấu nối tủ điện."}
-                      {proj.stage === "inspection" &&
-                        "Đăng ký cơ quan kiểm định độc lập đến dán tem an toàn."}
-                      {proj.stage === "handover" &&
-                        "Ký biên bản bàn giao, kích hoạt bảo hành, báo kế toán thu tiền đợt cuối."}
+                        "Xử lý đơn đặt hàng với nhà máy sản xuất (PO) và theo dõi tiến độ."}
+                      {proj.stage === "warehouse" &&
+                        "Kiểm tra hàng về kho, thực hiện QC và chuẩn bị vật tư lắp đặt."}
+                      {proj.stage === "installation" &&
+                        "Điều phối đội lắp đặt cơ khí và điện vào công trình thi công."}
+                      {proj.stage === "completion" &&
+                        "Đăng ký kiểm định an toàn, nghiệm thu bàn giao và quyết toán hợp đồng."}
                     </div>
                   </div>
                 </CardFooter>

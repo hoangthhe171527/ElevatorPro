@@ -1631,13 +1631,14 @@ interface RenewContractModalProps {
 
 export function RenewContractModal({ open, onClose, contractCode }: RenewContractModalProps) {
   const [loading, setLoading] = useState(false);
-  const [newTotal, setNewTotal] = useState("0");
+  const [newTotal, setNewTotal] = useState("");
+  const [message, setMessage] = useState("Kính gửi Quý khách, hợp đồng của Quý khách sắp hết hạn. Chúng tôi xin đề xuất tái ký để tiếp tục duy trì dịch vụ tốt nhất.");
 
   const handle = async () => {
     setLoading(true);
     await new Promise((r) => setTimeout(r, 600));
     setLoading(false);
-    toast.success(`Đã tạo bản nháp tái ký cho HĐ ${contractCode}`);
+    toast.success(`Đã gửi yêu cầu tái ký tới khách hàng cho HĐ ${contractCode}`);
     onClose();
   };
 
@@ -1646,35 +1647,43 @@ export function RenewContractModal({ open, onClose, contractCode }: RenewContrac
       <DialogContent className="max-w-md">
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
-            <RefreshCw className="h-5 w-5 text-primary" /> Tái ký hợp đồng
+            <RefreshCw className="h-5 w-5 text-primary" /> Yêu cầu khách hàng tái ký
           </DialogTitle>
         </DialogHeader>
         <div className="space-y-4 py-4">
-          <div className="text-sm">
-            Bạn đang yêu cầu tạo bản nháp tái ký cho hợp đồng{" "}
-            <span className="font-bold underline">{contractCode}</span>.
+          <div className="text-sm text-muted-foreground">
+            Hợp đồng: <span className="font-bold text-foreground">{contractCode}</span>
           </div>
           <div>
-            <label className="text-sm font-medium">Giá trị hợp đồng mới dự kiến (VND)</label>
+            <label className="text-sm font-medium">Giá trị dự kiến cho kỳ mới (VND)</label>
             <Input
               type="number"
               className="mt-1"
-              placeholder="VD: 50000000"
+              placeholder="Nhập giá trị đề xuất..."
               value={newTotal}
               onChange={(e) => setNewTotal(e.target.value)}
             />
           </div>
-          <p className="text-xs text-muted-foreground italic">
-            * Sau khi xác nhận, hệ thống sẽ sinh 1 hợp đồng nháp mới với các thông tin kế thừa và
-            chuyển sang trạng thái "Thương thảo".
-          </p>
+          <div>
+            <label className="text-sm font-medium">Thông điệp gửi khách hàng</label>
+            <Textarea
+              className="mt-1"
+              rows={4}
+              value={message}
+              onChange={(e) => setMessage(e.target.value)}
+            />
+          </div>
+          <div className="p-3 bg-primary/5 rounded-lg border border-primary/10 text-[11px] text-primary flex gap-2">
+            <RefreshCw className="h-4 w-4 shrink-0" />
+            <p>Hợp đồng sẽ được chuyển sang trạng thái <b>"Đang chờ tái ký"</b> và gửi thông báo tới ứng dụng của Khách hàng.</p>
+          </div>
         </div>
         <DialogFooter>
           <Button variant="outline" onClick={onClose} disabled={loading}>
             Hủy
           </Button>
           <Button onClick={handle} disabled={loading}>
-            {loading ? "Đang tạo..." : "Xác nhận tạo nháp"}
+            {loading ? "Đang gửi..." : "Gửi yêu cầu xác nhận"}
           </Button>
         </DialogFooter>
       </DialogContent>

@@ -18,7 +18,7 @@ import { StatusBadge } from "@/components/common/StatusBadge";
 import { contractStatusLabel, contractStatusVariant } from "@/lib/status-variants";
 import { Progress } from "@/components/ui/progress";
 import { mockContracts, formatVND, formatDate, getCustomer, type Contract } from "@/lib/mock-data";
-import { Plus, Search, FileText, Calendar, User, Banknote, RefreshCw } from "lucide-react";
+import { Plus, Search, FileText, Calendar, User, Banknote, RefreshCw, Timer } from "lucide-react";
 import {
   RecordPaymentModal,
   CreateContractModal,
@@ -26,6 +26,7 @@ import {
 } from "@/components/common/Modals";
 import { toast } from "sonner";
 import { ConfirmationDialog } from "@/components/common/ConfirmationDialog";
+import { useCurrentPermissions, useCanWrite } from "@/lib/store";
 
 export const Route = createFileRoute("/admin/contracts")({
   head: () => ({ meta: [{ title: "Hợp đồng — ElevatorPro" }] }),
@@ -40,6 +41,10 @@ const typeLabel: Record<string, string> = {
 };
 
 function ContractsPage() {
+  const permissions = useCurrentPermissions();
+  const canCreate = useCanWrite("contracts");
+  const isAccounting = permissions.includes("accounting") || permissions.includes("director");
+  
   const [page, setPage] = useState(1);
   const [search, setSearch] = useState("");
   const [statusFilter, setStatusFilter] = useState("all");
@@ -70,9 +75,11 @@ function ContractsPage() {
         title="Hợp đồng"
         description="Trung tâm vận hành — gắn với khách hàng và sinh ra công việc"
         actions={
-          <Button onClick={() => setCreateOpen(true)}>
-            <Plus className="h-4 w-4 mr-1.5" /> Tạo hợp đồng
-          </Button>
+          canCreate && (
+            <Button onClick={() => setCreateOpen(true)}>
+              <Plus className="h-4 w-4 mr-1.5" /> Tạo hợp đồng
+            </Button>
+          )
         }
       />
 
@@ -206,24 +213,35 @@ function ContractsPage() {
                     </div>
 
                     <div className="flex gap-2 pt-1">
-                      {remaining > 0 && (
+                      {remaining > 0 && isAccounting && (
                         <Button
                           size="sm"
                           variant="outline"
-                          className="flex-1 gap-1.5 text-xs"
+                          className="flex-1 gap-1.5 text-xs text-success border-success/20 hover:bg-success/5"
                           onClick={() => setConfirmPaymentId(c.id)}
                         >
                           <Banknote className="h-3.5 w-3.5" /> Ghi nhận thu
                         </Button>
                       )}
-                      {c.status === "expiring" && (
+                      {!isAccounting && remaining > 0 && (
+                        <div className="flex-1 text-[10px] text-muted-foreground bg-muted/30 rounded p-1 text-center">
+                          Chờ kế toán thu tiền
+                        </div>
+                      )}
+                      {c.status === "expiring" && canCreate && (
                         <Button
                           size="sm"
-                          className="flex-1 gap-1.5 text-xs"
+                          className="flex-1 gap-1.5 text-xs bg-primary hover:bg-primary/90"
                           onClick={() => setConfirmRenewId(c.id)}
                         >
-                          <RefreshCw className="h-3.5 w-3.5" /> Tái ký
+                          <RefreshCw className="h-3.5 w-3.5" /> Gửi yêu cầu tái ký
                         </Button>
+                      )}
+                      {c.status === "renewal_pending" && (
+                        <div className="flex-1 flex items-center justify-center gap-1.5 p-2 rounded bg-info/10 text-info text-[10px] font-medium border border-info/20">
+                          <Timer className="h-3.5 w-3.5 animate-pulse" />
+                          Đang chờ khách xác nhận
+                        </div>
                       )}
                     </div>
                   </div>
@@ -277,15 +295,15 @@ function ContractsPage() {
       <ConfirmationDialog
         open={!!confirmRenewId}
         onOpenChange={(o) => !o && setConfirmRenewId(null)}
-        title="Xác nhận tái ký hợp đồng"
-        description="Bắt đầu quy trình soạn thảo phụ lục tái ký cho hợp đồng sắp hết hạn này?"
+        title="Yêu cầu khách hàng xác nhận tái ký"
+        description="Hệ thống sẽ gửi thông báo và yêu cầu xác nhận tới ứng dụng của khách hàng. Bạn có chắc chắn muốn bắt đầu quy trình này?"
         onConfirm={() => {
           const c = mockContracts.find((contract) => contract.id === confirmRenewId);
           if (c) setRenewContract(c);
           setConfirmRenewId(null);
         }}
-        confirmText="Bắt đầu tái ký"
-        variant="success"
+        confirmText="Gửi yêu cầu"
+        variant="primary"
       />
     </AppShell>
   );

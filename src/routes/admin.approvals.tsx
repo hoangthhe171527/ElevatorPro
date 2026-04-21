@@ -14,6 +14,8 @@ import {
   AlertTriangle,
   User,
   ArrowRight,
+  ShieldCheck,
+  TrendingUp,
 } from "lucide-react";
 import { mockRequests, getUser, getProject, formatVND, formatDate } from "@/lib/mock-data";
 import { useAppStore } from "@/lib/store";
@@ -31,6 +33,9 @@ const TYPE_ICONS = {
   budget: DollarSign,
   project_advance: ArrowRight,
   completion: CheckCircle2,
+  workflow_gate: ShieldCheck,
+  lead_quote: TrendingUp,
+  contract_approval: FileText,
 };
 
 const TYPE_LABELS = {
@@ -38,6 +43,9 @@ const TYPE_LABELS = {
   budget: "Dự trù ngân sách",
   project_advance: "Đạt tiến độ",
   completion: "Nghiệm thu bản giao",
+  workflow_gate: "Phê duyệt Giai đoạn",
+  lead_quote: "Duyệt báo giá Lead",
+  contract_approval: "Duyệt hợp đồng",
 };
 
 const URGENCY_STYLES = {

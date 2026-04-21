@@ -38,6 +38,7 @@ import {
 } from "@/lib/status-variants";
 import { CreateJobModal } from "@/components/common/Modals";
 import { ConfirmationDialog } from "@/components/common/ConfirmationDialog";
+import { InstallationWorkflow } from "@/components/workflow/InstallationWorkflow";
 
 export const Route = createFileRoute("/admin/projects/$projectId")({
   loader: ({ params }) => {
@@ -60,7 +61,6 @@ function ProjectDetailPage() {
   const customer = getCustomer(project.customerId);
   const jobs = mockJobs.filter((j) => j.projectId === project.id);
   const isCompleted = project.status === "completed";
-  const currentStageIndex = PROJECT_STAGES.indexOf(project.stage);
 
   const handleAdvance = () => {
     advanceProjectStage(project.id);
@@ -82,15 +82,6 @@ function ProjectDetailPage() {
         description="Quản lý tiến độ thi công và các hạng mục công việc liên quan."
         actions={
           <div className="flex gap-2">
-            {!isCompleted && (
-              <Button
-                onClick={() => setConfirmOpen(true)}
-                variant="outline"
-                className="border-primary text-primary hover:bg-primary/5"
-              >
-                <Check className="h-4 w-4 mr-1.5" /> Hoàn tất: {PROJECT_STAGE_LABELS[project.stage as keyof typeof PROJECT_STAGE_LABELS]}
-              </Button>
-            )}
             <Button onClick={() => setCreateJobOpen(true)}>
               <Plus className="h-4 w-4 mr-1.5" /> Tạo công việc
             </Button>
@@ -186,63 +177,30 @@ function ProjectDetailPage() {
                 {jobs.filter((j) => j.status === "completed").length}
               </span>
             </div>
-            <div className="flex justify-between items-center py-2 border-b border-dashed">
-              <span className="text-sm text-muted-foreground">Giai đoạn hiện tại</span>
-              <span className="font-bold text-primary">{PROJECT_STAGE_LABELS[project.stage as keyof typeof PROJECT_STAGE_LABELS]}</span>
+            <div className="flex justify-between items-center py-1.5 px-2 bg-muted/50 rounded-md">
+              <span className="text-[10px] font-bold text-muted-foreground uppercase">Giai đoạn hiện tại</span>
+              <span className="font-bold text-primary text-sm ml-auto">
+                {PROJECT_STAGE_LABELS[project.stage as keyof typeof PROJECT_STAGE_LABELS]}
+              </span>
             </div>
           </CardContent>
         </Card>
       </div>
 
-      {/* Progress Stepper */}
-      <Card className="mb-8 overflow-hidden">
-        <CardHeader className="bg-muted/30">
-          <CardTitle className="text-base">Lộ trình triển khai</CardTitle>
-        </CardHeader>
-        <CardContent className="pt-10 pb-12">
-          <div className="relative max-w-5xl mx-auto px-4">
-            {/* Stepper background line */}
-            <div className="absolute top-1/2 left-0 w-full h-1 bg-muted -translate-y-1/2 rounded" />
-
-            {/* Stepper progress line */}
-            <div
-              className="absolute top-1/2 left-0 h-1 bg-primary -translate-y-1/2 rounded transition-all duration-700"
-              style={{ width: `${(currentStageIndex / (PROJECT_STAGES.length - 1)) * 100}%` }}
-            />
-
-            {/* Stepper nodes */}
-            <div className="relative flex justify-between">
-              {PROJECT_STAGES.map((stage, idx) => {
-                const isPast = idx < currentStageIndex;
-                const isCurrent = idx === currentStageIndex;
-                return (
-                  <div key={stage} className="flex flex-col items-center gap-3 w-20">
-                    <div
-                      className={`
-                       z-10 flex h-10 w-10 items-center justify-center rounded-full text-sm font-semibold border-2 shadow-sm transition-all duration-300
-                       ${
-                         isPast
-                           ? "bg-primary border-primary text-primary-foreground"
-                           : isCurrent
-                             ? "bg-background border-primary text-primary ring-4 ring-primary/10"
-                             : "bg-background border-muted text-muted-foreground"
-                       }
-                     `}
-                    >
-                      {isPast ? <Check className="h-5 w-5" /> : idx + 1}
-                    </div>
-                    <div
-                      className={`text-[11px] text-center font-bold uppercase tracking-tight leading-tight ${isCurrent ? "text-primary" : "text-muted-foreground"}`}
-                    >
-                      {PROJECT_STAGE_LABELS[stage as keyof typeof PROJECT_STAGE_LABELS]}
-                    </div>
-                  </div>
-                );
-              })}
-            </div>
-          </div>
-        </CardContent>
-      </Card>
+      {/* NEW: Installation Workflow Stepper */}
+      <div className="mb-8">
+          <InstallationWorkflow 
+            projectId={project.id}
+            currentStage={project.stage}
+            tenantId={project.tenantId}
+            onStageChange={(newStage) => {
+                // Update local state and mock data
+                advanceProjectStage(project.id);
+                const updated = mockProjects.find((p) => p.id === project.id);
+                if (updated) setProject({ ...updated });
+            }}
+          />
+      </div>
 
       {/* Jobs / Workloads List */}
       <Card>
@@ -316,15 +274,6 @@ function ProjectDetailPage() {
         onClose={() => setCreateJobOpen(false)}
         defaultProjectId={project.id}
         defaultCustomerId={project.customerId}
-      />
-
-      <ConfirmationDialog
-        open={confirmOpen}
-        onOpenChange={setConfirmOpen}
-        title="Xác nhận giai đoạn hoàn tất"
-        description={`Bạn có chắc chắn muốn xác nhận hoàn tất giai đoạn "${PROJECT_STAGE_LABELS[project.stage as keyof typeof PROJECT_STAGE_LABELS]}" cho dự án này không?`}
-        onConfirm={handleAdvance}
-        variant="success"
       />
     </AppShell>
   );
