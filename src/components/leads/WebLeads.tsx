@@ -34,9 +34,10 @@ import {
   UserPlus,
   FileSignature,
   FileText,
-  ClipboardList
+  ClipboardList,
+  ShieldCheck
 } from "lucide-react";
-import { ConvertLeadModal, CreateLeadModal, CreateJobModal, UploadDocumentModal } from "@/components/common/Modals";
+import { ConvertLeadModal, CreateLeadModal, CreateJobModal, UploadDocumentModal, CreateContractModal } from "@/components/common/Modals";
 import { toast } from "sonner";
 import { ConfirmationDialog } from "@/components/common/ConfirmationDialog";
 import { useAppStore } from "@/lib/store";
@@ -70,6 +71,7 @@ export function WebLeads() {
   const [surveyLead, setSurveyLead] = useState<Lead | null>(null);
   const [uploadQuoteLead, setUploadQuoteLead] = useState<Lead | null>(null);
   const [uploadContractLead, setUploadContractLead] = useState<Lead | null>(null);
+  const [maintenanceContractLead, setMaintenanceContractLead] = useState<Lead | null>(null);
 
   const filtered = leads.filter((l) => {
     const matchTenant = l.tenantId === activeTenantId;
@@ -306,6 +308,9 @@ export function WebLeads() {
                             </Button>
                           </DropdownMenuTrigger>
                           <DropdownMenuContent align="end">
+                            <DropdownMenuItem className="font-semibold text-indigo-600" onClick={() => setMaintenanceContractLead(l)}>
+                              <ShieldCheck className="h-4 w-4 mr-2" /> Tạo HĐ bảo trì
+                            </DropdownMenuItem>
                             <DropdownMenuItem className="text-destructive font-semibold" onClick={() => handleStatusUpdate(l, 'lost')}>
                               Ghi nhận thất bại (Lost)
                             </DropdownMenuItem>
@@ -386,6 +391,18 @@ export function WebLeads() {
            }}
          />
        )}
+
+      {/* B3: Lead → HĐ bảo trì cho KH mới (service_only) */}
+      {maintenanceContractLead && (
+        <CreateContractModal 
+          open={true} 
+          onClose={() => {
+            setMaintenanceContractLead(null);
+            toast.info("Lead sẽ được tự động chuyển thành Khách hàng khi hợp đồng bảo trì được ký.");
+            handleStatusUpdate(maintenanceContractLead, 'won');
+          }} 
+        />
+      )}
     </AppShell>
   );
 }

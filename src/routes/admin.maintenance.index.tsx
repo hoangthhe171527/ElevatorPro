@@ -32,6 +32,8 @@ import {
 } from "lucide-react";
 import { StatusBadge } from "@/components/common/StatusBadge";
 import { toast } from "sonner";
+import { CreateContractModal, CreateJobModal } from "@/components/common/Modals";
+import { useAppStore } from "@/lib/store";
 
 export const Route = createFileRoute("/admin/maintenance/")({
   head: () => ({ meta: [{ title: "Giám sát Bảo trì — ElevatorPro" }] }),
@@ -40,6 +42,9 @@ export const Route = createFileRoute("/admin/maintenance/")({
 
 function MaintenanceOversightPage() {
   const [search, setSearch] = useState("");
+  const [renewContractOpen, setRenewContractOpen] = useState(false);
+  const [renewCustomerId, setRenewCustomerId] = useState("");
+  const [scheduleOpen, setScheduleOpen] = useState(false);
   const today = new Date();
 
   const maintenanceContracts = useMemo(() => {
@@ -95,6 +100,7 @@ function MaintenanceOversightPage() {
   };
 
   return (
+    <>
     <AppShell>
       <PageHeader 
         title="Giám sát Bảo trì" 
@@ -184,12 +190,15 @@ function MaintenanceOversightPage() {
                    <Phone className="h-3.5 w-3.5 mr-1.5" /> Gọi điện
                 </Button>
                 {c.isExpiringSoon && (
-                  <Button size="sm" className="flex-1 lg:w-32 bg-rose-600 hover:bg-rose-700" onClick={() => toast.success("Đã gửi yêu cầu tái ký hợp đồng bảo trì cho bộ phận Sales!")}>
+                  <Button size="sm" className="flex-1 lg:w-32 bg-rose-600 hover:bg-rose-700" onClick={() => {
+                    setRenewCustomerId(c.customerId);
+                    setRenewContractOpen(true);
+                  }}>
                      <RefreshCw className="h-3.5 w-3.5 mr-1.5" /> Tái ký ngay
                   </Button>
                 )}
                 {!c.latestJob || c.latestJob.status === 'completed' ? (
-                  <Button size="sm" className="flex-1 lg:w-32" onClick={() => toast.info("Điều phối thợ bảo trì lượt mới")}>
+                  <Button size="sm" className="flex-1 lg:w-32" onClick={() => setScheduleOpen(true)}>
                     <Plus className="h-3.5 w-3.5 mr-1.5" /> Lên lịch
                   </Button>
                 ) : (
@@ -215,6 +224,19 @@ function MaintenanceOversightPage() {
         )}
       </div>
     </AppShell>
+
+    <CreateContractModal 
+      open={renewContractOpen} 
+      onClose={() => setRenewContractOpen(false)} 
+      defaultCustomerId={renewCustomerId}
+    />
+    <CreateJobModal 
+      open={scheduleOpen} 
+      onClose={() => setScheduleOpen(false)} 
+      defaultType="maintenance" 
+      defaultTitle="Bảo trì định kỳ"
+    />
+    </>
   );
 }
 

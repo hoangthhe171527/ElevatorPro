@@ -342,13 +342,26 @@ export function CreateJobModal({
                   <SelectValue placeholder="Chọn kỹ thuật..." />
                 </SelectTrigger>
                 <SelectContent>
-                  {technicians.map((u) => (
-                    <SelectItem key={u.id} value={u.id}>
-                      {u.name}
-                    </SelectItem>
-                  ))}
+                  {technicians.map((u) => {
+                    const activeJobs = mockJobs.filter(j => j.assignedTo === u.id && j.status !== 'completed' && j.status !== 'cancelled').length;
+                    return (
+                      <SelectItem key={u.id} value={u.id}>
+                        <span className="flex items-center gap-2 w-full">
+                          {u.name}
+                          <span className={`ml-auto text-[10px] font-bold px-1.5 py-0.5 rounded-full ${activeJobs >= 5 ? 'bg-destructive/10 text-destructive' : activeJobs >= 3 ? 'bg-warning/10 text-warning-foreground' : 'bg-success/10 text-success'}`}>
+                            {activeJobs} việc
+                          </span>
+                        </span>
+                      </SelectItem>
+                    );
+                  })}
                 </SelectContent>
               </Select>
+              {techId && (
+                <p className="text-[10px] text-muted-foreground mt-1 flex items-center gap-1">
+                  💡 Gợi ý: KTV này đang có <span className="font-bold">{mockJobs.filter(j => j.assignedTo === techId && j.status !== 'completed' && j.status !== 'cancelled').length}</span> việc chưa hoàn thành
+                </p>
+              )}
             </div>
             <div>
               <label className="text-sm font-medium">

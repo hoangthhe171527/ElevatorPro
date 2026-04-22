@@ -37,6 +37,7 @@ import {
   Clock,
   ChevronRight,
   Filter,
+  ClipboardCheck,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 
@@ -68,6 +69,7 @@ export function MobileTechJobsList({ search }: { search: { tab?: string } }) {
       <div className="px-4 py-2 bg-white border-b overflow-x-auto hide-scrollbar">
         <div className="flex items-center gap-4 text-xs font-bold uppercase tracking-widest">
            <Link to="/app/tech/jobs" search={{ tab: 'install' } as any} className={cn("pb-2 border-b-2 transition-all whitespace-nowrap", tab === 'install' ? "border-primary text-primary" : "border-transparent text-muted-foreground")}>Lắp đặt</Link>
+           <Link to="/app/tech/jobs" search={{ tab: 'inspection' } as any} className={cn("pb-2 border-b-2 transition-all whitespace-nowrap", tab === 'inspection' ? "border-primary text-primary" : "border-transparent text-muted-foreground")}>Khảo sát</Link>
            <Link to="/app/tech/jobs" search={{ tab: 'maintenance' } as any} className={cn("pb-2 border-b-2 transition-all whitespace-nowrap", tab === 'maintenance' ? "border-primary text-primary" : "border-transparent text-muted-foreground")}>Bảo trì</Link>
            <Link to="/app/tech/jobs" search={{ tab: 'repair' } as any} className={cn("pb-2 border-b-2 transition-all whitespace-nowrap", tab === 'repair' ? "border-primary text-primary" : "border-transparent text-muted-foreground")}>Sửa chữa</Link>
            <Link to="/app/tech/jobs" search={{ tab: 'warranty' } as any} className={cn("pb-2 border-b-2 transition-all whitespace-nowrap", tab === 'warranty' ? "border-primary text-primary" : "border-transparent text-muted-foreground")}>Bảo hành</Link>
@@ -156,9 +158,9 @@ export function MobileTechJobsList({ search }: { search: { tab?: string } }) {
                     <Card className="p-4 rounded-[24px] border-none shadow-lg shadow-slate-900/5 items-center flex gap-4 hover:bg-slate-50 transition-colors">
                        <div className={cn(
                          "h-12 w-12 rounded-2xl flex items-center justify-center shadow-inner shrink-0",
-                         job.type === 'maintenance' ? "bg-blue-50 text-blue-500" : "bg-amber-50 text-amber-500"
+                         job.type === 'inspection' ? "bg-indigo-50 text-indigo-500" : job.type === 'maintenance' ? "bg-blue-50 text-blue-500" : "bg-amber-50 text-amber-500"
                        )}>
-                          <Clock className="h-5 w-5" />
+                          {job.type === 'inspection' ? <ClipboardCheck className="h-5 w-5" /> : <Clock className="h-5 w-5" />}
                        </div>
                        <div className="flex-1 min-w-0">
                           <div className="flex items-center gap-2 mb-0.5">

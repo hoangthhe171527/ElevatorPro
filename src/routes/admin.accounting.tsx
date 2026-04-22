@@ -12,12 +12,16 @@ import {
   CheckCircle2,
   AlertTriangle,
   ChevronRight,
+  ShieldCheck,
+  Wrench,
+  Send,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { mockContracts, markMilestonePaid, formatVND, formatDate } from "@/lib/mock-data";
+import { mockContracts, markMilestonePaid, formatVND, formatDate, mockJobs, getCustomer } from "@/lib/mock-data";
 import { useState } from "react";
 import { useAppStore, useCanWrite } from "@/lib/store";
+import { toast } from "sonner";
 import { DataPagination } from "@/components/common/DataPagination";
 import {
   Dialog,
@@ -229,6 +233,144 @@ function AccountingPage() {
             pageSize={pageSize}
             onPageChange={setCurrentPage}
           />
+        </CardContent>
+      </Card>
+
+      {/* ── B1: CEO Đối soát & Duyệt tổng thanh toán ── */}
+      <Card className="mt-6">
+        <CardHeader>
+          <CardTitle className="text-lg flex items-center gap-2">
+            <ShieldCheck className="h-5 w-5 text-primary" />
+            CEO — Đối soát & Duyệt tổng thanh toán
+          </CardTitle>
+        </CardHeader>
+        <CardContent>
+          <div className="divide-y">
+            {contracts.filter(c => c.accountantVerified && !c.ceoVerified).map(c => {
+              const totalPaid = c.paymentStages.stage1Paid + c.paymentStages.stage2Paid + c.paymentStages.stage3Paid;
+              const remaining = c.value - totalPaid;
+              return (
+                <div key={c.id} className="p-4 flex items-center justify-between hover:bg-muted/50 transition-colors">
+                  <div className="flex gap-4">
+                    <div className="mt-1 flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-indigo-500/10 text-indigo-600">
+                      <ShieldCheck className="h-5 w-5" />
+                    </div>
+                    <div>
+                      <div className="flex items-center gap-2">
+                        <div className="font-semibold">{c.code}</div>
+                        <Badge className="bg-indigo-100 text-indigo-700 text-[10px]">Kế toán đã xác nhận</Badge>
+                      </div>
+                      <div className="text-sm text-muted-foreground mt-1">
+                        Tổng HĐ: <span className="font-medium text-foreground">{formatVND(c.value)}</span> • 
+                        Đã thu: <span className="text-success font-medium">{formatVND(totalPaid)}</span> • 
+                        Còn lại: <span className="text-warning-foreground font-medium">{formatVND(remaining)}</span>
+                      </div>
+                      <div className="text-xs text-muted-foreground mt-0.5">
+                        Đợt 1: {formatVND(c.paymentStages.stage1Paid)} • Đợt 2: {formatVND(c.paymentStages.stage2Paid)} • Đợt 3: {formatVND(c.paymentStages.stage3Paid)}
+                      </div>
+                    </div>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <Button 
+                      variant="outline" 
+                      size="sm"
+                      className="text-destructive border-destructive/30 hover:bg-destructive/5"
+                      onClick={() => toast.info("Đã gửi yêu cầu kế toán đối soát lại số liệu.")}
+                    >
+                      Yêu cầu đối soát
+                    </Button>
+                    <Button 
+                      size="sm"
+                      className="bg-success hover:bg-success/90 gap-1.5"
+                      onClick={() => {
+                        const updated = contracts.map(item => item.id === c.id ? { ...item, ceoVerified: true } : item);
+                        setContracts(updated);
+                        toast.success(`CEO đã duyệt đối soát HĐ ${c.code}. Hệ thống đã ghi nhận hoàn tất thanh toán.`);
+                      }}
+                    >
+                      <CheckCircle2 className="h-4 w-4" /> CEO Duyệt
+                    </Button>
+                  </div>
+                </div>
+              );
+            })}
+            {contracts.filter(c => c.accountantVerified && !c.ceoVerified).length === 0 && (
+              <div className="p-8 text-center text-muted-foreground">
+                <CheckCircle2 className="h-10 w-10 mx-auto text-muted-foreground/30 mb-3" />
+                <p>Không có hợp đồng nào chờ CEO duyệt đối soát.</p>
+              </div>
+            )}
+          </div>
+        </CardContent>
+      </Card>
+
+      {/* ── A1: Hóa đơn sửa chữa / bảo trì ── */}
+      <Card className="mt-6">
+        <CardHeader>
+          <div className="flex items-center justify-between">
+            <CardTitle className="text-lg flex items-center gap-2">
+              <Wrench className="h-5 w-5 text-orange-500" />
+              Hóa đơn sửa chữa & Bảo trì
+            </CardTitle>
+            <Button size="sm" variant="outline" className="gap-1.5">
+              <Plus className="h-3.5 w-3.5" /> Tạo hóa đơn
+            </Button>
+          </div>
+        </CardHeader>
+        <CardContent className="p-0">
+          <div className="divide-y">
+            {mockJobs.filter(j => (j.type === 'repair' || j.type === 'maintenance') && j.status === 'completed' && j.repairQuote).map(j => {
+              const cus = getCustomer(j.customerId);
+              return (
+                <div key={j.id} className="p-4 flex items-center justify-between hover:bg-muted/50 transition-colors">
+                  <div className="flex gap-4">
+                    <div className={`mt-1 flex h-10 w-10 shrink-0 items-center justify-center rounded-full ${j.type === 'repair' ? 'bg-orange-500/10 text-orange-600' : 'bg-blue-500/10 text-blue-600'}`}>
+                      <Wrench className="h-5 w-5" />
+                    </div>
+                    <div>
+                      <div className="flex items-center gap-2">
+                        <span className="font-semibold">{j.code}</span>
+                        <Badge variant="secondary" className="text-[10px]">{j.type === 'repair' ? 'Sửa chữa' : 'Bảo trì'}</Badge>
+                      </div>
+                      <div className="text-sm mt-1">{j.title}</div>
+                      <div className="text-xs text-muted-foreground mt-0.5">
+                        KH: {cus?.name} • Tổng: <span className="font-bold text-foreground">{formatVND(j.repairQuote?.total || j.cost || 0)}</span>
+                      </div>
+                    </div>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <Button 
+                      size="sm" 
+                      variant="outline"
+                      className="gap-1.5"
+                      onClick={() => {
+                        toast.success(`Đã xuất hóa đơn VAT cho công việc ${j.code}. File PDF đã được tạo.`);
+                        setTimeout(() => toast.info("Hệ thống tự động gửi hóa đơn cho khách hàng qua email."), 1000);
+                      }}
+                    >
+                      <FileText className="h-3.5 w-3.5" /> Xuất HĐ VAT
+                    </Button>
+                    <Button 
+                      size="sm" 
+                      className="gap-1.5"
+                      onClick={() => {
+                        toast.success(`Đã gửi hóa đơn cho ${cus?.name}. Đang chờ thanh toán.`);
+                      }}
+                    >
+                      <Send className="h-3.5 w-3.5" /> Gửi KH
+                    </Button>
+                  </div>
+                </div>
+              );
+            })}
+            {mockJobs.filter(j => (j.type === 'repair' || j.type === 'maintenance') && j.status === 'completed' && j.repairQuote).length === 0 && (
+              <div className="p-8 text-center text-muted-foreground">
+                <Wrench className="h-10 w-10 mx-auto text-muted-foreground/30 mb-3" />
+                <p>Không có hóa đơn sửa chữa/bảo trì nào cần xử lý.</p>
+                <p className="text-xs mt-1">Hóa đơn sẽ xuất hiện khi kỹ thuật viên hoàn thành sửa chữa có báo giá.</p>
+              </div>
+            )}
+          </div>
         </CardContent>
       </Card>
 

@@ -26,7 +26,7 @@ import {
   priorityLabel,
   priorityVariant,
 } from "@/lib/status-variants";
-import { mockJobs, formatDateTime, getCustomer, mockProjects, getUser, type Job } from "@/lib/mock-data";
+import { mockJobs, formatDateTime, getCustomer, mockProjects, getUser, mockIssues, mockElevators, type Job, type IssueReport } from "@/lib/mock-data";
 import { useAppStore } from "@/lib/store";
 import { toast } from "sonner";
 import {
@@ -41,6 +41,10 @@ import {
   User,
   Plus,
   Send,
+  AlertTriangle,
+  ClipboardCheck,
+  QrCode,
+  Phone,
 } from "lucide-react";
 import { DispatchJobModal } from "@/components/common/Modals";
 import { Button } from "@/components/ui/button";
@@ -179,18 +183,29 @@ export function WebJobsMonitor({ tab: routeTab }: { tab: string }) {
           setPage(1);
         }}>
           <div className="border-b bg-muted/20 px-4 pt-4">
-            <TabsList className="grid w-full grid-cols-4 h-12 bg-transparent gap-2 p-0">
-              <TabsTrigger value="install" className="data-[state=active]:bg-background data-[state=active]:shadow-none data-[state=active]:border-b-2 data-[state=active]:border-orange-500 rounded-none h-full border-b-2 border-transparent font-bold">
+            <TabsList className="grid w-full grid-cols-6 h-12 bg-transparent gap-2 p-0">
+              <TabsTrigger value="install" className="data-[state=active]:bg-background data-[state=active]:shadow-none data-[state=active]:border-b-2 data-[state=active]:border-orange-500 rounded-none h-full border-b-2 border-transparent font-bold text-xs">
                 Lắp đặt
               </TabsTrigger>
-              <TabsTrigger value="maintenance" className="data-[state=active]:bg-background data-[state=active]:shadow-none data-[state=active]:border-b-2 data-[state=active]:border-blue-500 rounded-none h-full border-b-2 border-transparent font-bold">
+              <TabsTrigger value="maintenance" className="data-[state=active]:bg-background data-[state=active]:shadow-none data-[state=active]:border-b-2 data-[state=active]:border-blue-500 rounded-none h-full border-b-2 border-transparent font-bold text-xs">
                 Bảo trì
               </TabsTrigger>
-              <TabsTrigger value="warranty" className="data-[state=active]:bg-background data-[state=active]:shadow-none data-[state=active]:border-b-2 data-[state=active]:border-green-600 rounded-none h-full border-b-2 border-transparent font-bold">
+              <TabsTrigger value="warranty" className="data-[state=active]:bg-background data-[state=active]:shadow-none data-[state=active]:border-b-2 data-[state=active]:border-green-600 rounded-none h-full border-b-2 border-transparent font-bold text-xs">
                 Bảo hành
               </TabsTrigger>
-              <TabsTrigger value="repair" className="data-[state=active]:bg-background data-[state=active]:shadow-none data-[state=active]:border-b-2 data-[state=active]:border-red-500 rounded-none h-full border-b-2 border-transparent font-bold">
+              <TabsTrigger value="repair" className="data-[state=active]:bg-background data-[state=active]:shadow-none data-[state=active]:border-b-2 data-[state=active]:border-red-500 rounded-none h-full border-b-2 border-transparent font-bold text-xs">
                 Sửa chữa
+              </TabsTrigger>
+              <TabsTrigger value="inspection" className="data-[state=active]:bg-background data-[state=active]:shadow-none data-[state=active]:border-b-2 data-[state=active]:border-indigo-500 rounded-none h-full border-b-2 border-transparent font-bold text-xs">
+                Khảo sát
+              </TabsTrigger>
+              <TabsTrigger value="incident" className="data-[state=active]:bg-background data-[state=active]:shadow-none data-[state=active]:border-b-2 data-[state=active]:border-rose-500 rounded-none h-full border-b-2 border-transparent font-bold text-xs relative">
+                Sự cố QR
+                {mockIssues.filter(i => i.status === 'open').length > 0 && (
+                  <span className="absolute -top-1 -right-1 h-4 w-4 bg-destructive text-white text-[9px] font-black rounded-full flex items-center justify-center animate-pulse">
+                    {mockIssues.filter(i => i.status === 'open').length}
+                  </span>
+                )}
               </TabsTrigger>
             </TabsList>
           </div>
@@ -277,6 +292,81 @@ export function WebJobsMonitor({ tab: routeTab }: { tab: string }) {
 
           <TabsContent value="repair" className="mt-0">
              {renderJobList(paged)}
+          </TabsContent>
+
+          <TabsContent value="inspection" className="mt-0">
+             {renderJobList(paged)}
+          </TabsContent>
+
+          {/* B6: Sự cố từ QR — CEO Inbox */}
+          <TabsContent value="incident" className="mt-0">
+            <div className="divide-y border-t">
+              {mockIssues.map((issue) => {
+                const elev = mockElevators.find(e => e.id === issue.elevatorId);
+                const cus = getCustomer(issue.customerId);
+                const statusMap: Record<string, { label: string; color: string }> = {
+                  open: { label: 'Chờ phân công', color: 'bg-destructive/10 text-destructive' },
+                  scheduled: { label: 'Đã phân công', color: 'bg-blue-500/10 text-blue-600' },
+                  resolved: { label: 'Đã xử lý', color: 'bg-success/10 text-success' },
+                };
+                const st = statusMap[issue.status] || statusMap.open;
+                return (
+                  <div key={issue.id} className="p-4 hover:bg-muted/10 transition-colors group">
+                    <div className="flex items-center gap-4">
+                      <div className={`h-10 w-10 shrink-0 rounded-lg flex items-center justify-center ${issue.status === 'open' ? 'bg-destructive/10 text-destructive' : 'bg-primary/10 text-primary'}`}>
+                        {issue.status === 'open' ? <AlertTriangle className="h-5 w-5" /> : <QrCode className="h-5 w-5" />}
+                      </div>
+                      <div className="flex-1 min-w-0">
+                        <div className="flex items-center justify-between gap-4 mb-1">
+                          <div className="flex items-center gap-2 min-w-0">
+                            <span className="text-[10px] font-mono font-bold text-muted-foreground tracking-tighter bg-muted px-1.5 py-0.5 rounded uppercase">
+                              {elev?.code || 'N/A'}
+                            </span>
+                            <span className="font-bold text-sm truncate">{issue.description}</span>
+                          </div>
+                          <Badge className={`text-[10px] ${st.color}`}>{st.label}</Badge>
+                        </div>
+                        <div className="flex flex-wrap items-center gap-x-4 gap-y-1 text-xs text-muted-foreground">
+                          <div className="flex items-center gap-1.5">
+                            <Calendar className="h-3.5 w-3.5" />
+                            {formatDateTime(issue.reportedAt)}
+                          </div>
+                          <div className="flex items-center gap-1.5">
+                            <MapPin className="h-3.5 w-3.5" />
+                            <span className="font-medium text-foreground">{cus?.name}</span>
+                          </div>
+                          <div className="flex items-center gap-1.5">
+                            <QrCode className="h-3.5 w-3.5" />
+                            <span className="text-primary font-semibold text-[11px]">Qua QR Code</span>
+                          </div>
+                        </div>
+                      </div>
+                      <div className="flex items-center gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                        {issue.status === 'open' && (
+                          <Button 
+                            size="sm" 
+                            className="gap-1.5"
+                            onClick={() => {
+                              setSelectedJob(allTenantJobs[0]);
+                              setDispatchOpen(true);
+                              toast.info('Tạo công việc sửa chữa từ sự cố QR — chọn KTV phù hợp.');
+                            }}
+                          >
+                            <Send className="h-3.5 w-3.5" /> Phân công
+                          </Button>
+                        )}
+                      </div>
+                    </div>
+                  </div>
+                );
+              })}
+              {mockIssues.length === 0 && (
+                <div className="p-12 text-center">
+                  <QrCode className="h-12 w-12 text-muted-foreground/30 mx-auto mb-4" />
+                  <p className="text-sm text-muted-foreground">Không có sự cố nào từ QR Code.</p>
+                </div>
+              )}
+            </div>
           </TabsContent>
         </Tabs>
 

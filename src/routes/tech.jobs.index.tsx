@@ -42,6 +42,7 @@ import {
   Activity,
   CheckCircle2,
   ChevronRight,
+  ClipboardCheck,
 } from "lucide-react";
 
 export const Route = createFileRoute("/tech/jobs/")({
@@ -112,7 +113,7 @@ export function TechJobs({ search }: { search: { tab?: string } }) {
       <div className="divide-y border-t">
         {jobs.map((j) => {
           const cus = getCustomer(j.customerId);
-          const Icon = j.type === 'maintenance' ? Activity : j.type === 'warranty' ? ShieldCheck : j.type === 'install' ? Hammer : Wrench;
+          const Icon = j.type === 'inspection' ? ClipboardCheck : j.type === 'maintenance' ? Activity : j.type === 'warranty' ? ShieldCheck : j.type === 'install' ? Hammer : Wrench;
           return (
             <div key={j.id} className="p-4 hover:bg-muted/20 transition-colors group">
               <div className="flex items-center gap-4">
@@ -131,7 +132,7 @@ export function TechJobs({ search }: { search: { tab?: string } }) {
                         {j.code}
                        </span>
                        <Link
-                          to={(j.type === "maintenance" || j.type === "warranty" || j.type === "repair" ? `${prefix}/tech/maint/$jobId` : `${prefix}/tech/jobs/$jobId`) as any}
+                          to={(j.type === "inspection" || j.type === "maintenance" || j.type === "warranty" || j.type === "repair" ? `${prefix}/tech/maint/$jobId` : `${prefix}/tech/jobs/$jobId`) as any}
                           params={{ jobId: j.id } as any}
                           className="font-bold text-sm truncate hover:text-primary transition-colors"
                         >
@@ -163,7 +164,7 @@ export function TechJobs({ search }: { search: { tab?: string } }) {
 
                 {/* Action Arrow */}
                 <Link 
-                  to={(j.type === "maintenance" || j.type === "warranty" || j.type === "repair" ? `${prefix}/tech/maint/$jobId` : `${prefix}/tech/jobs/$jobId`) as any} 
+                  to={(j.type === "inspection" || j.type === "maintenance" || j.type === "warranty" || j.type === "repair" ? `${prefix}/tech/maint/$jobId` : `${prefix}/tech/jobs/$jobId`) as any} 
                   params={{ jobId: j.id } as any} 
                   className="p-2 hover:bg-muted rounded-full opacity-0 group-hover:opacity-100 transition-opacity"
                 >
@@ -190,9 +191,12 @@ export function TechJobs({ search }: { search: { tab?: string } }) {
           setPage(1);
         }}>
           <div className="border-b bg-muted/20 px-4 pt-4">
-            <TabsList className="grid w-full grid-cols-4 h-12 bg-transparent gap-2 p-0">
+            <TabsList className="grid w-full grid-cols-5 h-12 bg-transparent gap-2 p-0">
               <TabsTrigger value="install" className="data-[state=active]:bg-background data-[state=active]:shadow-none data-[state=active]:border-b-2 data-[state=active]:border-orange-500 rounded-none h-full border-b-2 border-transparent font-bold">
                 Lắp đặt
+              </TabsTrigger>
+              <TabsTrigger value="inspection" className="data-[state=active]:bg-background data-[state=active]:shadow-none data-[state=active]:border-b-2 data-[state=active]:border-indigo-500 rounded-none h-full border-b-2 border-transparent font-bold">
+                Khảo sát
               </TabsTrigger>
               <TabsTrigger value="maintenance" className="data-[state=active]:bg-background data-[state=active]:shadow-none data-[state=active]:border-b-2 data-[state=active]:border-blue-500 rounded-none h-full border-b-2 border-transparent font-bold">
                 Bảo trì
@@ -276,6 +280,10 @@ export function TechJobs({ search }: { search: { tab?: string } }) {
                   </div>
                 )}
              </div>
+          </TabsContent>
+
+          <TabsContent value="inspection" className="mt-0">
+             {renderJobList(paged)}
           </TabsContent>
 
           <TabsContent value="maintenance" className="mt-0">

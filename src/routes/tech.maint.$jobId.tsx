@@ -98,6 +98,22 @@ export function MaintenanceWizard({ job }: { job: Job }) {
 
   const handleFinish = () => {
     toast.success("Đã hoàn thành toàn bộ quy trình bảo trì!");
+    
+    // B5: Thông báo kế toán sau bảo trì
+    setTimeout(() => {
+      toast.info("📋 Hệ thống đã gửi thông báo đến Kế toán để liên hệ khách hàng nhắc thanh toán.", { duration: 5000 });
+    }, 1200);
+    
+    if (usedParts.length > 0) {
+      const totalPartsValue = usedParts.reduce((sum, up) => {
+        const part = mockInventory.find(i => i.id === up.id);
+        return sum + (part?.unitPrice || 0) * up.qty;
+      }, 0);
+      setTimeout(() => {
+        toast.info(`💰 Giá trị vật tư thay thế: ${formatVND(totalPartsValue)} — đã cập nhật vào giá trị hợp đồng bảo trì.`, { duration: 5000 });
+      }, 2400);
+    }
+    
     navigate({ to: "/tech/jobs", search: { tab: 'maintenance' } });
   };
 
