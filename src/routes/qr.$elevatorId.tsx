@@ -41,7 +41,9 @@ import {
   Calendar,
   Wrench,
   Cog,
+  RefreshCw,
 } from "lucide-react";
+import { Badge } from "@/components/ui/badge";
 import { toast } from "sonner";
 
 export const Route = createFileRoute("/qr/$elevatorId")({
@@ -111,7 +113,7 @@ function QRPage() {
   const [historyOpen, setHistoryOpen] = useState(false);
 
   const permissions = useCurrentPermissions();
-  const isStaff = !permissions.includes("customer");
+  const isStaff = permissions.length > 0;
   const isAdmin = permissions.some((p) =>
     ["director", "maintenance_mgmt", "install_mgmt", "accounting", "hr_admin", "sales"].includes(p),
   );
@@ -123,6 +125,29 @@ function QRPage() {
   const [photoCount, setPhotoCount] = useState(0);
   const [ticketNo, setTicketNo] = useState("");
   const [submitting, setSubmitting] = useState(false);
+
+  // Verification state
+  const [isVerified, setIsVerified] = useState(false);
+  const [last6Digits, setLast6Digits] = useState("");
+  const [verifying, setVerifying] = useState(false);
+
+  const handleVerify = async () => {
+    if (last6Digits.length < 6) {
+      toast.error("Vui lòng nhập đủ 6 số");
+      return;
+    }
+    setVerifying(true);
+    await new Promise((r) => setTimeout(r, 600));
+    setVerifying(false);
+    
+    const correctDigits = customer?.phone.replace(/\D/g, "").slice(-6);
+    if (last6Digits === correctDigits) {
+      setIsVerified(true);
+      toast.success("Xác thực chủ thang thành công!");
+    } else {
+      toast.error("Mã xác thực không đúng. Vui lòng kiểm tra lại số điện thoại đăng ký.");
+    }
+  };
 
   const isUrgent = issueType === "Kẹt người trong thang";
 
@@ -181,27 +206,72 @@ function QRPage() {
       </header>
 
       <div className="container max-w-lg mx-auto px-4 py-5">
-        {/* ── STEP: HOME ── */}
-        {step === "home" && (
-          <div className="space-y-4">
+        {/* ── STEP: VERIFICATION (MANDATORY) ── */}
+        {!isVerified && (
+          <div className="space-y-6 py-8 animate-in fade-in zoom-in duration-500">
+            <div className="text-center space-y-2">
+               <div className="h-16 w-16 bg-primary/10 rounded-full flex items-center justify-center mx-auto mb-4 border-2 border-primary/20">
+                  <Shield size={32} className="text-primary" />
+               </div>
+               <h2 className="text-2xl font-black tracking-tight">Xác thực chủ sở hữu</h2>
+               <p className="text-sm text-muted-foreground px-6">
+                  Vui lòng nhập 6 số cuối của số điện thoại đã đăng ký với hệ thống để xem thông tin chi tiết thang máy.
+               </p>
+            </div>
+
+            <Card className="p-6 shadow-xl border-t-4 border-t-primary">
+               <div className="space-y-4">
+                  <div className="space-y-2">
+                     <label className="text-[10px] font-black uppercase tracking-widest text-muted-foreground">Mã xác thực (6 số cuối SĐT)</label>
+                     <Input 
+                        type="password" 
+                        pattern="[0-9]*" 
+                        inputMode="numeric"
+                        placeholder="••••••" 
+                        className="text-center text-2xl h-14 tracking-[0.5em] font-black"
+                        maxLength={6}
+                        value={last6Digits}
+                        onChange={(e) => setLast6Digits(e.target.value.replace(/\D/g, ""))}
+                     />
+                  </div>
+                  <Button 
+                    className="w-full h-12 rounded-xl bg-primary hover:bg-primary/90 font-bold shadow-lg shadow-primary/20"
+                    onClick={handleVerify}
+                    disabled={verifying}
+                  >
+                    {verifying ? (
+                      <RefreshCw className="h-4 w-4 animate-spin mr-2" />
+                    ) : (
+                      <CheckCircle2 className="h-4 w-4 mr-2" />
+                    )}
+                    XÁC NHẬN TRUY CẬP
+                  </Button>
+               </div>
+            </Card>
+
+            <div className="text-center">
+               <a href="tel:19001234" className="text-xs font-bold text-muted-foreground hover:text-primary transition-colors flex items-center justify-center gap-2">
+                  <Phone size={14} /> Bạn gặp khó khăn? Liên hệ 1900 1234
+               </a>
+            </div>
+          </div>
+        )}
+
+        {/* ── STEP: AUTHENTICATED DASHBOARD ── */}
+        {isVerified && (step === "home" || step === "info") && (
+          <div className="space-y-4 animate-in slide-in-from-bottom-4 duration-500">
             {/* Elevator hero */}
-            <Card className="p-5 text-center bg-gradient-to-br from-primary to-primary/80 text-primary-foreground relative overflow-hidden">
-              <div className="absolute top-0 right-0 p-4 opacity-20">
-                <Shield className="w-24 h-24" />
-              </div>
+            <Card className="p-5 text-center bg-gradient-to-br from-sidebar to-sidebar/90 text-sidebar-foreground relative overflow-hidden shadow-xl border-0">
               <div className="relative z-10">
-                <div className="inline-flex h-14 w-14 items-center justify-center rounded-2xl bg-primary-foreground/20 mb-3">
-                  <Building2 className="h-7 w-7" />
+                <div className="inline-flex h-12 w-12 items-center justify-center rounded-2xl bg-white/10 mb-3 backdrop-blur-sm">
+                  <Building2 className="h-6 w-6" />
                 </div>
-                <h1 className="text-2xl font-bold font-mono">{elevator.code}</h1>
-                <p className="text-sm opacity-90 mt-0.5">
-                  {elevator.brand} {elevator.model} · {elevator.floors} tầng
-                </p>
-                <p className="text-xs opacity-70 mt-0.5">{elevator.building}</p>
+                <h1 className="text-2xl font-black font-mono tracking-tighter">{elevator.code}</h1>
+                <p className="text-xs opacity-70 font-medium">{elevator.building}</p>
                 <div className="mt-3 flex justify-center">
                   <StatusBadge
                     variant={elevatorStatusVariant[elevator.status]}
-                    className="bg-white/20 border-white/30 text-white"
+                    className="bg-white/10 border-white/20 text-white backdrop-blur-sm"
                   >
                     {elevatorStatusLabel[elevator.status]}
                   </StatusBadge>
@@ -209,63 +279,112 @@ function QRPage() {
               </div>
             </Card>
 
-            {/* Staff shortcut */}
-            {isStaff && (
-              <div className="mt-4">
-                <Link
-                  to={isAdmin ? "/admin/elevators/$elevatorId" : "/tech"}
-                  params={isAdmin ? { elevatorId: elevator.id } : {}}
-                >
-                  <div className="flex items-center gap-3 p-4 rounded-xl bg-orange-500 text-white shadow-md hover:opacity-90 transition-opacity">
-                    <Shield className="h-6 w-6 shrink-0" />
-                    <div className="flex-1">
-                      <div className="text-sm font-semibold">Quyền nhân viên nội bộ</div>
-                      <div className="text-xs opacity-90">Mở trong bảng điều khiển ngay</div>
-                    </div>
-                    <ArrowLeft className="h-5 w-5 rotate-180" />
+            {/* Upcoming Schedule */}
+            <Card className="p-4 border-l-4 border-l-primary bg-primary/5">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-3">
+                  <div className="h-10 w-10 bg-primary/10 rounded-xl flex items-center justify-center text-primary">
+                    <Calendar size={20} />
                   </div>
-                </Link>
+                  <div>
+                    <div className="text-[10px] font-black uppercase text-muted-foreground leading-none mb-1">Lịch bảo trì tiếp theo</div>
+                    <div className="text-sm font-black text-primary">{formatDate(elevator.nextMaintenance)}</div>
+                  </div>
+                </div>
+                <div className="text-right">
+                   <div className="text-[10px] font-bold text-muted-foreground uppercase leading-none mb-1">Trạng thái</div>
+                   <Badge variant="outline" className="text-[10px] bg-white">Sắp tới</Badge>
+                </div>
               </div>
-            )}
+            </Card>
 
             {/* 2 main actions */}
             <div className="grid grid-cols-2 gap-3">
               <button
                 onClick={() => setStep("report")}
-                className="flex flex-col items-center gap-3 p-5 rounded-xl border-2 border-destructive/30 bg-destructive/5 hover:bg-destructive/10 hover:border-destructive/50 transition-colors text-center"
+                className="group flex flex-col items-center gap-3 p-5 rounded-2xl border-2 border-destructive/20 bg-destructive/[0.02] hover:bg-destructive/10 hover:border-destructive/40 transition-all text-center"
               >
-                <div className="flex h-12 w-12 items-center justify-center rounded-full bg-destructive/10 text-destructive">
+                <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-destructive text-white shadow-lg shadow-destructive/20 group-hover:scale-110 transition-transform">
                   <AlertTriangle className="h-6 w-6" />
                 </div>
                 <div>
-                  <div className="font-semibold text-sm">Báo sự cố</div>
-                  <div className="text-xs text-muted-foreground mt-0.5">Gửi yêu cầu xử lý</div>
+                  <div className="font-black text-xs uppercase tracking-tight text-destructive">Báo sự cố</div>
+                  <div className="text-[10px] text-muted-foreground mt-0.5 font-medium">Yêu cầu sửa chữa</div>
                 </div>
               </button>
 
               <button
-                onClick={() => setStep("info")}
-                className="flex flex-col items-center gap-3 p-5 rounded-xl border-2 border-primary/30 bg-primary/5 hover:bg-primary/10 hover:border-primary/50 transition-colors text-center"
+                onClick={() => setHistoryOpen(!historyOpen)}
+                className="group flex flex-col items-center gap-3 p-5 rounded-2xl border-2 border-primary/20 bg-primary/[0.02] hover:bg-primary/10 hover:border-primary/40 transition-all text-center"
               >
-                <div className="flex h-12 w-12 items-center justify-center rounded-full bg-primary/10 text-primary">
-                  <Info className="h-6 w-6" />
+                <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-primary text-white shadow-lg shadow-primary/20 group-hover:scale-110 transition-transform">
+                  <Wrench className="h-6 w-6" />
                 </div>
                 <div>
-                  <div className="font-semibold text-sm">Xem thông tin</div>
-                  <div className="text-xs text-muted-foreground mt-0.5">Kỹ thuật & kiểm định</div>
+                  <div className="font-black text-xs uppercase tracking-tight text-primary underline underline-offset-4 decoration-primary/30">Lịch sử thang</div>
+                  <div className="text-[10px] text-muted-foreground mt-0.5 font-medium">Kỹ thuật & bảo trì</div>
                 </div>
               </button>
             </div>
 
+            {/* Repair/Maintenance History Detail (Expandable) */}
+            {historyOpen && (
+              <div className="space-y-3 animate-in slide-in-from-top-2 duration-300 pt-2">
+                 <h4 className="text-[11px] font-black uppercase text-muted-foreground tracking-widest px-1">Nhật ký vận hành</h4>
+                 <div className="space-y-2">
+                    {history.map(j => (
+                      <Card key={j.id} className="p-3 shadow-sm hover:shadow-md transition-shadow border-muted/50">
+                        <div className="flex justify-between items-start mb-2">
+                           <div className="flex items-center gap-2">
+                              <Badge variant="secondary" className="text-[10px]">{j.type === 'maintenance' ? 'Bảo trì' : 'Sửa chữa'}</Badge>
+                              <span className="text-xs font-mono font-bold">{j.code}</span>
+                           </div>
+                           <span className="text-[10px] font-medium text-muted-foreground">{formatDate(j.scheduledFor)}</span>
+                        </div>
+                        <div className="text-xs font-bold truncate mb-1">{j.title}</div>
+                        <div className="text-[10px] text-muted-foreground line-clamp-2">{j.report || "Hoàn thành quy trình tiêu chuẩn."}</div>
+                      </Card>
+                    ))}
+                 </div>
+              </div>
+            )}
+
+            {/* Technical Detail Info Card */}
+            {step === "info" && (
+              <div className="space-y-4 pt-4">
+                <Card className="p-4">
+                  <h3 className="font-bold text-sm mb-3 flex items-center gap-2">
+                    <Building2 className="h-4 w-4 text-primary" /> Thông số kỹ thuật
+                  </h3>
+                  <div className="space-y-2 text-sm">
+                    <Row label="Thương hiệu" value={elevator.brand} />
+                    <Row label="Model" value={elevator.model} />
+                    <Row label="Số tầng" value={`${elevator.floors} tập tầng`} />
+                    <Row label="Ngày lắp đặt" value={formatDate(elevator.installedAt)} />
+                    <Row label="Bảo hành đến" value={formatDate(elevator.warrantyUntil)} highlight />
+                  </div>
+                </Card>
+
+                <Card className="p-4">
+                  <h3 className="font-semibold text-sm mb-3 flex items-center gap-2">
+                    <Shield className="h-4 w-4 text-success" /> Kiểm định an toàn
+                  </h3>
+                  <div className="space-y-2 text-sm">
+                    <Row label="Ngày kiểm định" value="20/04/2025" />
+                    <Row label="Hiệu lực đến" value="20/04/2026" highlight />
+                    <Row label="Đơn vị KĐ" value="Trung tâm Kiểm định KT" />
+                  </div>
+                </Card>
+              </div>
+            )}
+
             {/* Hotline card */}
             <Card className="p-4 border-destructive/20 bg-destructive/5">
               <div className="flex items-center gap-3">
-                <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-destructive/10 text-destructive">
+                <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-destructive text-white shadow-lg shadow-destructive/20 animate-pulse">
                   <Phone className="h-5 w-5" />
                 </div>
                 <div className="flex-1">
-                  <div className="text-sm font-semibold">Khẩn cấp? Gọi ngay</div>
-                  <div className="text-xs text-muted-foreground">Hỗ trợ 24/7 — có người trực</div>
                 </div>
                 <a href="tel:19001234">
                   <Button size="sm" variant="destructive" className="gap-1.5">
@@ -279,11 +398,19 @@ function QRPage() {
             <Card className="overflow-hidden">
               <button
                 className="w-full flex items-center justify-between px-4 py-3 hover:bg-muted/30 transition-colors"
-                onClick={() => setHistoryOpen((v) => !v)}
+                onClick={() => {
+                   if (!isVerified) {
+                      toast.info("Vui lòng xác minh chủ thang để xem lịch sử bảo trì");
+                      setStep("info"); // Redirect to verification card in info step
+                   } else {
+                      setHistoryOpen((v) => !v);
+                   }
+                }}
               >
                 <span className="font-medium text-sm flex items-center gap-2">
                   <Wrench className="h-4 w-4 text-muted-foreground" />
                   Lịch sử bảo trì ({history.length})
+                  {!isVerified && <Shield className="h-3 w-3 text-muted-foreground/50" />}
                 </span>
                 {historyOpen ? (
                   <ChevronUp className="h-4 w-4 text-muted-foreground" />
@@ -291,7 +418,7 @@ function QRPage() {
                   <ChevronDown className="h-4 w-4 text-muted-foreground" />
                 )}
               </button>
-              {historyOpen && (
+              {historyOpen && isVerified && (
                 <div className="border-t divide-y">
                   {history.map((j) => (
                     <div key={j.id} className="flex items-start gap-3 px-4 py-3">
@@ -542,54 +669,88 @@ function QRPage() {
               </p>
             </div>
 
-            {/* Technical info */}
-            <Card className="p-4">
-              <h3 className="font-semibold text-sm mb-3 flex items-center gap-2">
-                <Building2 className="h-4 w-4 text-primary" /> Thông số kỹ thuật
-              </h3>
-              <div className="space-y-2 text-sm">
-                <Row label="Hãng / Model" value={`${elevator.brand} ${elevator.model}`} />
-                <Row label="Số tầng" value={`${elevator.floors} tầng`} />
-                <Row label="Vị trí" value={`${elevator.building}, ${elevator.address}`} />
-                <Row label="Chủ sở hữu" value={customer?.name || "—"} />
-                <Row label="Ngày lắp đặt" value={formatDate(elevator.installedAt)} />
-                <Row label="Bảo hành đến" value={formatDate(elevator.warrantyUntil)} />
-              </div>
-            </Card>
+            {!isVerified && (
+              <Card className="p-6 border-primary/20 bg-primary/5">
+                 <div className="text-center mb-4">
+                    <Shield className="h-10 w-10 text-primary mx-auto mb-2" />
+                    <h3 className="font-bold">Xác thực chủ sở hữu</h3>
+                    <p className="text-xs text-muted-foreground mt-1">Để xem chi tiết lịch sử bảo trì và thông số kỹ thuật, vui lòng xác nhận bằng số điện thoại đăng ký.</p>
+                 </div>
+                 <div className="space-y-3">
+                    <div className="relative">
+                       <Input 
+                          placeholder="Nhập 6 số cuối SĐT" 
+                          className="pl-3 pr-20 h-12 text-center text-lg font-mono tracking-[0.5em]"
+                          maxLength={6}
+                          type="tel"
+                          value={last6Digits}
+                          onChange={(e) => setLast6Digits(e.target.value.replace(/\D/g, ""))}
+                       />
+                       <Button 
+                          className="absolute right-1 top-1 bottom-1 px-3" 
+                          onClick={handleVerify}
+                          disabled={verifying || last6Digits.length < 6}
+                       >
+                          {verifying ? "..." : "Xác nhận"}
+                       </Button>
+                    </div>
+                    <p className="text-[10px] text-center text-muted-foreground italic">Gợi ý: Số điện thoại đại diện của {customer?.name}</p>
+                 </div>
+              </Card>
+            )}
 
-            {/* Maintenance schedule */}
-            <Card className="p-4">
-              <h3 className="font-semibold text-sm mb-3 flex items-center gap-2">
-                <Calendar className="h-4 w-4 text-primary" /> Lịch bảo trì
-              </h3>
-              <div className="space-y-2 text-sm">
-                <Row label="Bảo trì gần nhất" value={formatDate(elevator.lastMaintenance)} />
-                <Row
-                  label="Bảo trì tiếp theo"
-                  value={formatDate(elevator.nextMaintenance)}
-                  highlight
-                />
-              </div>
-              {elevator.status === "maintenance_due" && (
-                <div className="mt-3 flex items-center gap-2 p-2.5 rounded-lg bg-warning/10 text-warning-foreground text-xs">
-                  <AlertTriangle className="h-3.5 w-3.5 shrink-0" />
-                  Thang đã đến hạn bảo trì — vui lòng liên hệ đơn vị dịch vụ
-                </div>
-              )}
-            </Card>
+            {isVerified && (
+              <>
+                {/* Technical info */}
+                <Card className="p-4">
+                  <h3 className="font-semibold text-sm mb-3 flex items-center gap-2">
+                    <Building2 className="h-4 w-4 text-primary" /> Thông số kỹ thuật
+                  </h3>
+                  <div className="space-y-2 text-sm">
+                    <Row label="Hãng / Model" value={`${elevator.brand} ${elevator.model}`} />
+                    <Row label="Số tầng" value={`${elevator.floors} tầng`} />
+                    <Row label="Vị trí" value={`${elevator.building}, ${elevator.address}`} />
+                    <Row label="Chủ sở hữu" value={customer?.name || "—"} />
+                    <Row label="Ngày lắp đặt" value={formatDate(elevator.installedAt)} />
+                    <Row label="Bảo hành đến" value={formatDate(elevator.warrantyUntil)} />
+                  </div>
+                </Card>
 
-            {/* Legal inspection */}
-            <Card className="p-4">
-              <h3 className="font-semibold text-sm mb-3 flex items-center gap-2">
-                <Shield className="h-4 w-4 text-success" /> Kiểm định an toàn
-              </h3>
-              <div className="space-y-2 text-sm">
-                <Row label="Số kiểm định" value="KD-2025-04821" />
-                <Row label="Ngày kiểm định" value="20/04/2025" />
-                <Row label="Hiệu lực đến" value="20/04/2026" highlight />
-                <Row label="Đơn vị KĐ" value="TT Kiểm định KTKT Hà Nội" />
-              </div>
-            </Card>
+                {/* Maintenance schedule */}
+                <Card className="p-4">
+                  <h3 className="font-semibold text-sm mb-3 flex items-center gap-2">
+                    <Calendar className="h-4 w-4 text-primary" /> Lịch bảo trì
+                  </h3>
+                  <div className="space-y-2 text-sm">
+                    <Row label="Bảo trì gần nhất" value={formatDate(elevator.lastMaintenance)} />
+                    <Row
+                      label="Bảo trì tiếp theo"
+                      value={formatDate(elevator.nextMaintenance)}
+                      highlight
+                    />
+                  </div>
+                  {elevator.status === "maintenance_due" && (
+                    <div className="mt-3 flex items-center gap-2 p-2.5 rounded-lg bg-warning/10 text-warning-foreground text-xs">
+                      <AlertTriangle className="h-3.5 w-3.5 shrink-0" />
+                      Thang đã đến hạn bảo trì — vui lòng liên hệ đơn vị dịch vụ
+                    </div>
+                  )}
+                </Card>
+
+                {/* Legal inspection */}
+                <Card className="p-4">
+                  <h3 className="font-semibold text-sm mb-3 flex items-center gap-2">
+                    <Shield className="h-4 w-4 text-success" /> Kiểm định an toàn
+                  </h3>
+                  <div className="space-y-2 text-sm">
+                    <Row label="Số kiểm định" value="KD-2025-04821" />
+                    <Row label="Ngày kiểm định" value="20/04/2025" />
+                    <Row label="Hiệu lực đến" value="20/04/2026" highlight />
+                    <Row label="Đơn vị KĐ" value="TT Kiểm định KTKT Hà Nội" />
+                  </div>
+                </Card>
+              </>
+            )}
 
             <Button onClick={() => setStep("report")} variant="outline" className="w-full gap-2">
               <AlertTriangle className="h-4 w-4" /> Phát hiện sự cố? Báo ngay

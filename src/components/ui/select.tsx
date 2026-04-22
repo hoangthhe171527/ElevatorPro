@@ -3,7 +3,6 @@
 import * as React from "react";
 import * as SelectPrimitive from "@radix-ui/react-select";
 import { Check, ChevronDown, ChevronUp } from "lucide-react";
-import { MobilePortalContext } from "@/components/layout/MobilePortalContext";
 
 import { cn } from "@/lib/utils";
 import { normalizeMojibakeNode, normalizeMojibakeText } from "@/lib/text-normalize";
@@ -75,10 +74,10 @@ const SelectContent = React.forwardRef<
   React.ElementRef<typeof SelectPrimitive.Content>,
   React.ComponentPropsWithoutRef<typeof SelectPrimitive.Content>
 >(({ className, children, position = "popper", ...props }, ref) => {
-  const portalContainer = React.useContext(MobilePortalContext);
+  const normalizedChildren = React.useMemo(() => normalizeMojibakeNode(children), [children]);
   
   return (
-    <SelectPrimitive.Portal container={portalContainer}>
+    <SelectPrimitive.Portal>
       <SelectPrimitive.Content
         ref={ref}
         className={cn(

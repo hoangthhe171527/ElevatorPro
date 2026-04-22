@@ -1,9 +1,9 @@
-﻿import { create } from "zustand";
+import { create } from "zustand";
 import { persist } from "zustand/middleware";
 import type { Permission } from "./mock-data";
 import { mockUsers } from "./mock-data";
 
-type MobileRole = "admin" | "tech" | "customer";
+type AppRole = "admin" | "tech";
 
 const ADMIN_PERMISSIONS: Permission[] = [
   "director",
@@ -16,7 +16,6 @@ const ADMIN_PERMISSIONS: Permission[] = [
 ];
 
 const TECH_PERMISSIONS: Permission[] = ["field_tech", "tech_survey"];
-const CUSTOMER_PERMISSIONS: Permission[] = ["customer"];
 
 function getPermissionsForTenant(userId: string, tenantId: string): Permission[] {
   const user = mockUsers.find((u) => u.id === userId);
@@ -24,20 +23,18 @@ function getPermissionsForTenant(userId: string, tenantId: string): Permission[]
   return membership?.permissions || [];
 }
 
-function hasRoleInTenant(userId: string, tenantId: string, role: MobileRole): boolean {
+function hasRoleInTenant(userId: string, tenantId: string, role: AppRole): boolean {
   const permissions = getPermissionsForTenant(userId, tenantId);
   if (!permissions.length) return false;
 
   const rolePermissions =
     role === "admin"
       ? ADMIN_PERMISSIONS
-      : role === "tech"
-        ? TECH_PERMISSIONS
-        : CUSTOMER_PERMISSIONS;
+      : TECH_PERMISSIONS;
   return permissions.some((p) => rolePermissions.includes(p));
 }
 
-function findUserIdForRole(tenantId: string, role: MobileRole): string | null {
+function findUserIdForRole(tenantId: string, role: AppRole): string | null {
   const candidate = mockUsers.find((u) => {
     const hasTenant = u.memberships.some((m) => m.tenantId === tenantId);
     if (!hasTenant) return false;
@@ -47,7 +44,7 @@ function findUserIdForRole(tenantId: string, role: MobileRole): string | null {
   return candidate?.id || null;
 }
 
-function resolveRoleForUser(userId: string, tenantId: string, preferredRole?: MobileRole): MobileRole {
+function resolveRoleForUser(userId: string, tenantId: string, preferredRole?: AppRole): AppRole {
   if (preferredRole && hasRoleInTenant(userId, tenantId, preferredRole)) {
     return preferredRole;
   }
@@ -60,10 +57,6 @@ function resolveRoleForUser(userId: string, tenantId: string, preferredRole?: Mo
     return "tech";
   }
 
-  if (hasRoleInTenant(userId, tenantId, "customer")) {
-    return "customer";
-  }
-
   return "admin";
 }
 
@@ -73,13 +66,17 @@ interface AppState {
   activeJobCheckIn: string | null;
   hasHydrated: boolean;
   companySize: "large" | "small";
-  mainRole: MobileRole; // Thêm để điều khiển dashboard Mobile
+  mainRole: AppRole;
+  quickIncidentOpen: boolean;
+  isAppPreview: boolean;
   setUserId: (userId: string) => void;
   setTenantId: (tenantId: string) => void;
   setJobCheckIn: (jobId: string | null) => void;
   setHasHydrated: (val: boolean) => void;
   setCompanySize: (size: "large" | "small") => void;
-  setMainRole: (role: MobileRole) => void;
+  setMainRole: (role: AppRole) => void;
+  setQuickIncidentOpen: (val: boolean) => void;
+  setAppPreview: (val: boolean) => void;
 }
 
 export const useAppStore = create<AppState>()(
@@ -91,6 +88,8 @@ export const useAppStore = create<AppState>()(
       hasHydrated: false,
       companySize: "large",
       mainRole: "admin",
+      quickIncidentOpen: false,
+      isAppPreview: false,
       setUserId: (userId) => {
         const user = mockUsers.find((u) => u.id === userId);
         const currentTenant = get().activeTenantId;
@@ -98,7 +97,12 @@ export const useAppStore = create<AppState>()(
           ? currentTenant
           : user?.memberships?.[0]?.tenantId || currentTenant;
         const mainRole = resolveRoleForUser(userId, activeTenantId, get().mainRole);
-        set({ userId, activeTenantId, mainRole, activeJobCheckIn: null });
+        set({ 
+          userId, 
+          activeTenantId, 
+          mainRole, 
+          activeJobCheckIn: null,
+        });
       },
       setTenantId: (tenantId) => {
         const preferredRole = get().mainRole;
@@ -106,7 +110,7 @@ export const useAppStore = create<AppState>()(
           ? get().userId
           : findUserIdForRole(tenantId, preferredRole);
 
-        const fallbackRole: MobileRole = preferredRole === "admin" ? "tech" : "admin";
+        const fallbackRole: AppRole = "tech";
         const fallbackUserId = preferredUserId || findUserIdForRole(tenantId, fallbackRole);
         const finalUserId = fallbackUserId || get().userId;
         const finalRole = resolveRoleForUser(finalUserId, tenantId, preferredRole);
@@ -117,6 +121,7 @@ export const useAppStore = create<AppState>()(
           userId: finalUserId,
           mainRole: finalRole,
           activeJobCheckIn: null,
+          quickIncidentOpen: false,
         });
       },
       setJobCheckIn: (jobId) => set({ activeJobCheckIn: jobId }),
@@ -132,11 +137,23 @@ export const useAppStore = create<AppState>()(
           ? currentUserId
           : findUserIdForRole(tenantId, role) || currentUserId;
         const nextRole = resolveRoleForUser(nextUserId, tenantId, role);
-        set({ userId: nextUserId, mainRole: nextRole, activeJobCheckIn: null });
+        set({ 
+          userId: nextUserId, 
+          mainRole: nextRole, 
+          activeJobCheckIn: null,
+        });
       },
+      setQuickIncidentOpen: (val) => set({ quickIncidentOpen: val }),
+      setAppPreview: (val) => set({ isAppPreview: val }),
     }),
     {
-      name: "elevator-app-state-v5",
+      name: "elevator-app-state-v6",
+      partialize: (state) => ({
+        userId: state.userId,
+        activeTenantId: state.activeTenantId,
+        companySize: state.companySize,
+        mainRole: state.mainRole,
+      }),
       onRehydrateStorage: () => (state) => {
         state?.setHasHydrated(true);
       },
@@ -153,7 +170,7 @@ export function useMainRole() {
   return useAppStore((s) => s.mainRole);
 }
 
-export function setMainRole(role: MobileRole) {
+export function setMainRole(role: AppRole) {
   useAppStore.getState().setMainRole(role);
 }
 
@@ -164,16 +181,23 @@ export function useCurrentPermissions(): Permission[] {
   return membership?.permissions || [];
 }
 
+export function useIsSmallCompany() {
+  const companySize = useAppStore((s) => s.companySize);
+  return companySize === "small";
+}
+
 export function useCanWrite(module: "projects" | "hr" | "accounting" | "inventory" | "jobs" | "leads" | "contracts") {
   const permissions = useCurrentPermissions();
-  if (permissions.includes("director")) return true;
+  const isDirector = permissions.includes("director");
+  
   switch (module) {
-    case "projects": return permissions.includes("install_mgmt") || permissions.includes("tech_survey");
-    case "hr": return permissions.includes("hr_admin");
-    case "accounting": return permissions.includes("accounting");
-    case "inventory": return permissions.includes("maintenance_mgmt") || permissions.includes("install_mgmt") || permissions.includes("field_tech");
-    case "jobs": return permissions.includes("maintenance_mgmt") || permissions.includes("install_mgmt") || permissions.includes("field_tech");
-    case "leads": case "contracts": return permissions.includes("sales") || permissions.includes("sales_maintenance");
+    case "projects": return isDirector || permissions.includes("install_mgmt") || permissions.includes("tech_survey");
+    case "hr": return isDirector || permissions.includes("hr_admin");
+    case "accounting": return isDirector || permissions.includes("accounting");
+    case "inventory": return isDirector || permissions.includes("maintenance_mgmt") || permissions.includes("install_mgmt") || permissions.includes("field_tech");
+    case "jobs": return isDirector || permissions.includes("maintenance_mgmt") || permissions.includes("install_mgmt") || permissions.includes("field_tech");
+    case "leads": return isDirector || permissions.includes("sales") || permissions.includes("sales_maintenance");
+    case "contracts": return permissions.includes("accounting"); // Chỉ kế toán mới được tạo hợp đồng
     default: return false;
   }
 }

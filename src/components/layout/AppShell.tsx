@@ -1,5 +1,5 @@
-// src/components/layout/AppShell.tsx  ← THAY THẾ FILE CŨ
-import { Link, useLocation } from "@tanstack/react-router";
+import { useState, useEffect } from "react";
+import { Link, useLocation, useNavigate } from "@tanstack/react-router";
 import { useAppStore, useCurrentUser, useCurrentPermissions } from "@/lib/store";
 import type { Permission } from "@/lib/mock-data";
 import { mockTenants, mockUsers } from "@/lib/mock-data";
@@ -10,22 +10,28 @@ import {
   Briefcase,
   Cog,
   Package,
-  BarChart3,
+  History,
   Calendar,
   Wrench,
-  QrCode,
   ChevronDown,
   LogOut,
   Building2,
   AlertTriangle,
-  UserCog,
-  Map,
   Route as RouteIcon,
   Menu,
   X,
-  Wallet,
-  Building,
   CheckCircle2,
+  Hammer,
+  Activity,
+  Smartphone,
+  CheckSquare,
+  Inbox,
+  Layers,
+  Construction,
+  ClipboardList,
+  CircleDollarSign,
+  PhoneCall,
+  User,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import {
@@ -41,216 +47,192 @@ import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { GlobalSearch } from "@/components/common/GlobalSearch";
 import { NotificationPanel } from "@/components/common/NotificationPanel";
-import { useState } from "react";
+import { CreateHotlineIncidentModal } from "@/components/common/Modals";
+import { MobileBottomNav } from "./MobileBottomNav";
 
 interface NavItem {
   to: string;
   label: string;
-  icon: React.ComponentType<{ className?: string }>;
-  permissions: Permission[];
+  icon: any;
+  permissions: string[];
+  search?: Record<string, any>;
+  children?: { to: string; label: string; search?: Record<string, any> }[];
 }
 
 const navConfig: { group: string; items: NavItem[] }[] = [
   {
-    group: "Quản trị & Phân tích",
+    group: "Bảng điều khiển (Admin)",
     items: [
-      {
-        to: "/admin",
-        label: "Dashboard",
-        icon: LayoutDashboard,
-        permissions: [
-          "director",
-          "sales",
-          "install_mgmt",
-          "maintenance_mgmt",
-          "hr_admin",
-          "accounting",
-        ],
+      { 
+        to: "/admin", 
+        label: "Dashboard", 
+        icon: LayoutDashboard, 
+        permissions: ["director", "sales", "sales_maintenance", "hr_admin", "accounting", "install_mgmt", "maintenance_mgmt"] 
       },
-      {
-        to: "/admin/approvals",
-        label: "Phê duyệt (Workflows)",
-        icon: CheckCircle2,
-        permissions: ["director", "install_mgmt", "maintenance_mgmt", "hr_admin", "accounting"],
-      },
-      {
-        to: "/admin/reports",
-        label: "Báo cáo",
-        icon: BarChart3,
-        permissions: ["director", "sales", "accounting", "hr_admin"],
-      },
+      { to: "/admin/approvals", label: "Phê duyệt", icon: CheckSquare, permissions: ["director", "accounting", "install_mgmt", "maintenance_mgmt"] },
+      { to: "/admin/reports", label: "Báo cáo", icon: History, permissions: ["director", "accounting"] },
     ],
   },
   {
-    group: "Kinh doanh",
+    group: "Quản lý kinh doanh",
     items: [
-      {
-        to: "/admin/leads",
-        label: "Khách hàng tiềm năng",
-        icon: UserCog,
-        permissions: ["director", "sales"],
-      },
-      {
-        to: "/admin/customers",
-        label: "Khách hàng",
-        icon: Users,
-        permissions: ["director", "sales", "maintenance_mgmt", "accounting", "sales_maintenance"],
-      },
-      {
-        to: "/admin/contracts",
-        label: "Hợp đồng",
-        icon: FileText,
-        permissions: ["director", "sales", "sales_maintenance", "accounting"],
-      },
+      { to: "/admin/customers", label: "Khách hàng", icon: Users, permissions: ["director", "sales", "sales_maintenance", "accounting"] },
+      { to: "/admin/leads", label: "Cơ hội (Leads)", icon: Inbox, permissions: ["director", "sales", "sales_maintenance"] },
+      { to: "/admin/contracts", label: "Hợp đồng", icon: FileText, permissions: ["director", "sales", "sales_maintenance", "accounting"] },
     ],
   },
   {
-    group: "Kỹ thuật vận hành",
+    group: "Vận hành kỹ thuật",
     items: [
+      { to: "/admin/elevators", label: "Thang máy", icon: Layers, permissions: ["director", "install_mgmt", "maintenance_mgmt", "sales_maintenance"] },
       {
         to: "/admin/projects",
-        label: "Dự án Lắp đặt",
-        icon: Building,
-        permissions: ["director", "install_mgmt", "sales"],
+        label: "Dự án lắp đặt",
+        icon: Construction,
+        permissions: ["director", "install_mgmt"],
       },
       {
         to: "/admin/jobs",
-        label: "Công việc (Điều phối)",
+        label: "Việc bảo trì/sửa",
         icon: Briefcase,
-        permissions: ["director", "install_mgmt", "maintenance_mgmt", "tech_survey"],
-      },
-      {
-        to: "/admin/elevators",
-        label: "Thang máy",
-        icon: Building2,
-        permissions: [
-          "director",
-          "install_mgmt",
-          "maintenance_mgmt",
-          "tech_survey",
-          "sales_maintenance",
+        permissions: ["director", "maintenance_mgmt"],
+        children: [
+          { to: "/admin/jobs", label: "Đang xử lý", search: { status: "open" } },
+          { to: "/admin/jobs", label: "Lịch bảo trì", search: { type: "maintenance" } },
+          { to: "/admin/maintenance", label: "Kế hoạch năm" },
         ],
       },
-      {
-        to: "/admin/inventory",
-        label: "Kho vật tư",
-        icon: Package,
-        permissions: ["director", "install_mgmt", "maintenance_mgmt", "accounting"],
-      },
+      { to: "/admin/inventory", label: "Kho vật tư", icon: Layers, permissions: ["director", "install_mgmt", "maintenance_mgmt"] },
     ],
   },
   {
-    group: "Backoffice (Kế toán - NS)",
+    group: "Nhân sự & Kế toán",
     items: [
-      {
-        to: "/admin/accounting",
-        label: "Kế toán & Công nợ",
-        icon: Wallet,
-        permissions: ["director", "accounting"],
-      },
-      {
-        to: "/admin/hr",
-        label: "Nhân sự & Hiệu suất",
-        icon: Users,
-        permissions: ["director", "hr_admin"],
-      },
+      { to: "/admin/hr", label: "Cán bộ nhân viên", icon: User, permissions: ["director", "hr_admin"] },
+      { to: "/admin/accounting", label: "Kế toán/Thu tiền", icon: CircleDollarSign, permissions: ["director", "accounting"] },
     ],
   },
   {
     group: "App Hiện trường (Field App)",
     items: [
       { to: "/tech", label: "Hôm nay", icon: LayoutDashboard, permissions: ["field_tech"] },
-      {
-        to: "/tech/jobs",
-        label: "Công việc & lộ trình",
-        icon: RouteIcon,
-        permissions: ["field_tech"],
-      },
+      { to: "/tech/route-plan", label: "Lộ trình tối ưu", icon: RouteIcon, permissions: ["field_tech"] },
+      { to: "/tech/jobs", label: "Công việc của tôi", icon: ClipboardList, permissions: ["field_tech"] },
       { to: "/tech/schedule", label: "Lịch", icon: Calendar, permissions: ["field_tech"] },
-    ],
-  },
-  {
-    group: "Portal Khách hàng",
-    items: [
-      { to: "/portal", label: "Tổng quan", icon: LayoutDashboard, permissions: ["customer"] },
-      { to: "/portal/elevators", label: "Thang máy", icon: Building2, permissions: ["customer"] },
-      { to: "/portal/contracts", label: "Hợp đồng", icon: FileText, permissions: ["customer"] },
-      { to: "/portal/issues", label: "Báo lỗi", icon: AlertTriangle, permissions: ["customer"] },
     ],
   },
 ];
 
-export function AppShell({ children }: { children: React.ReactNode }) {
-  const setUserId = useAppStore((s) => s.setUserId);
-  const activeTenantId = useAppStore((s) => s.activeTenantId);
-  const setTenantId = useAppStore((s) => s.setTenantId);
-  const hasHydrated = useAppStore((s) => s.hasHydrated);
-  const user = useCurrentUser();
-  const permissions = useCurrentPermissions();
-  const location = useLocation();
-  const [mobileSidebarOpen, setMobileSidebarOpen] = useState(false);
+function SidebarItem({ 
+  item, 
+  isRouteActive,
+  onClick
+}: { 
+  item: NavItem; 
+  isRouteActive: (to: string, search?: Record<string, any>) => boolean;
+  onClick?: () => void;
+}) {
+  const active = isRouteActive(item.to, item.search);
+  const [open, setOpen] = useState(active);
+  const Icon = item.icon;
 
-  // Filter groups - only compute if hydrated to avoid flashes of wrong/empty content
-  const visibleGroups = hasHydrated 
-    ? navConfig
-        .map((g) => ({
-          ...g,
-          items: g.items.filter((item) => item.permissions.some((p) => permissions.includes(p))),
-        }))
-        .filter((g) => g.items.length > 0)
-    : [];
+  const handleClick = () => {
+    if (onClick) onClick();
+  };
 
-  // Wait for hydration to avoid permission flickering on first load
-  if (!hasHydrated) return null;
+  if (item.children) {
+    return (
+      <div className="space-y-1">
+        <button
+          onClick={() => setOpen(!open)}
+          className={cn(
+            "flex w-full items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium transition-all",
+            active
+              ? "bg-sidebar-accent text-sidebar-accent-foreground shadow-sm"
+              : "text-sidebar-foreground/70 hover:bg-sidebar-accent/50 hover:text-sidebar-foreground"
+          )}
+        >
+          <Icon className="h-4 w-4" />
+          <span className="flex-1 text-left">{item.label}</span>
+          <ChevronDown className={cn("h-3 w-3 transition-transform", open && "rotate-180")} />
+        </button>
+        {open && (
+          <div className="ml-4 space-y-1 border-l border-sidebar-border pl-4">
+            {item.children.map((child) => (
+              <Link
+                key={child.label}
+                to={child.to as any}
+                search={child.search as any}
+                onClick={handleClick}
+                className={cn(
+                  "block rounded-lg px-3 py-1.5 text-xs font-medium transition-all",
+                  isRouteActive(child.to, child.search)
+                    ? "text-sidebar-primary font-bold"
+                    : "text-sidebar-foreground/60 hover:text-sidebar-foreground hover:bg-sidebar-accent/30"
+                )}
+              >
+                {child.label}
+              </Link>
+            ))}
+          </div>
+        )}
+      </div>
+    );
+  }
 
-  const initials = user.name
-    .split(" ")
-    .slice(-2)
-    .map((n) => n[0])
-    .join("");
+  return (
+    <Link
+      to={item.to as any}
+      search={item.search as any}
+      onClick={handleClick}
+      className={cn(
+        "flex items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium transition-all",
+        active
+          ? "bg-sidebar-accent text-sidebar-accent-foreground shadow-sm"
+          : "text-sidebar-foreground/70 hover:bg-sidebar-accent/50 hover:text-sidebar-foreground"
+      )}
+    >
+      <Icon className="h-4 w-4" />
+      {item.label}
+    </Link>
+  );
+}
 
-  const isActive = (to: string) =>
-    location.pathname === to ||
-    (to !== "/admin" && to !== "/tech" && to !== "/portal" && location.pathname.startsWith(to));
-
-  const SidebarContent = () => (
+function SidebarContent({ 
+  visibleGroups, 
+  isRouteActive,
+  onItemClick
+}: { 
+  visibleGroups: any[]; 
+  isRouteActive: any;
+  onItemClick?: () => void;
+}) {
+  return (
     <>
       <div className="flex h-16 items-center gap-2 px-6 border-b border-sidebar-border">
-        <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-sidebar-primary">
-          <Cog className="h-5 w-5 text-sidebar-primary-foreground" />
+        <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-primary">
+          <Cog className="h-5 w-5 text-primary-foreground" />
         </div>
         <div>
-          <div className="font-semibold leading-tight">ElevatorPro</div>
-          <div className="text-[11px] text-sidebar-foreground/60">Quản lý dịch vụ thang máy</div>
+          <div className="font-bold leading-tight tracking-tight">ElevatorPro</div>
+          <div className="text-[10px] text-sidebar-foreground/50 font-medium uppercase tracking-wider">Service Management</div>
         </div>
       </div>
-      <nav className="flex-1 overflow-y-auto px-3 py-4 space-y-6">
+      <nav className="flex-1 overflow-y-auto px-3 py-4 space-y-6 scrollbar-hide">
         {visibleGroups.map((g) => (
           <div key={g.group}>
-            <div className="px-3 mb-2 text-[11px] font-semibold uppercase tracking-wider text-sidebar-foreground/50">
+            <div className="px-3 mb-2 text-[10px] font-bold uppercase tracking-widest text-sidebar-foreground/40">
               {g.group}
             </div>
             <div className="space-y-1">
-              {g.items.map((item) => {
-                const active = isActive(item.to);
-                const Icon = item.icon;
-                return (
-                  <Link
-                    key={item.to}
-                    to={item.to}
-                    onClick={() => setMobileSidebarOpen(false)}
-                    className={cn(
-                      "flex items-center gap-3 rounded-md px-3 py-2 text-sm font-medium transition-colors",
-                      active
-                        ? "bg-sidebar-primary text-sidebar-primary-foreground"
-                        : "text-sidebar-foreground/80 hover:bg-sidebar-accent hover:text-sidebar-accent-foreground",
-                    )}
-                  >
-                    <Icon className="h-4 w-4" />
-                    {item.label}
-                  </Link>
-                );
-              })}
+              {g.items.map((item: NavItem) => (
+                <SidebarItem 
+                  key={item.label} 
+                  item={item} 
+                  isRouteActive={isRouteActive} 
+                  onClick={onItemClick}
+                />
+              ))}
             </div>
           </div>
         ))}
@@ -258,24 +240,89 @@ export function AppShell({ children }: { children: React.ReactNode }) {
       <div className="border-t border-sidebar-border p-3">
         <Link
           to="/"
-          className="flex items-center gap-2 px-3 py-2 text-xs text-sidebar-foreground/60 hover:text-sidebar-foreground"
+          className="flex items-center gap-2 px-3 py-2 text-xs font-bold text-sidebar-foreground/50 hover:text-sidebar-foreground transition-colors"
         >
           <LogOut className="h-3.5 w-3.5" /> Về trang chủ
         </Link>
       </div>
     </>
   );
+}
+
+export function AppShell({ 
+  children, 
+  className,
+  secondaryNav
+}: { 
+  children: React.ReactNode; 
+  className?: string;
+  secondaryNav?: React.ReactNode;
+}) {
+  const setUserId = useAppStore((s) => s.setUserId);
+  const activeTenantId = useAppStore((s) => s.activeTenantId);
+  const setTenantId = useAppStore((s) => s.setTenantId);
+  const user = useCurrentUser();
+  const permissions = useCurrentPermissions();
+  const location = useLocation();
+  const { pathname } = location;
+  const [mobileSidebarOpen, setMobileSidebarOpen] = useState(false);
+  const quickIncidentOpen = useAppStore((s) => s.quickIncidentOpen);
+  const setQuickIncidentOpen = useAppStore((s) => s.setQuickIncidentOpen);
+  const isAppPreviewStored = useAppStore((s) => s.isAppPreview);
+  const setAppPreview = useAppStore((s) => s.setAppPreview);
+  const navigate = useNavigate();
+
+  const isAppPreview = pathname.startsWith("/app");
+
+  useEffect(() => {
+    if (isAppPreview !== isAppPreviewStored) {
+      setAppPreview(isAppPreview);
+    }
+  }, [isAppPreview, isAppPreviewStored, setAppPreview]);
+
+  const visibleGroups = navConfig
+        .map((g) => ({
+          ...g,
+          items: g.items.filter((item) => item.permissions.some((p) => permissions.includes(p))),
+        }))
+        .filter((g) => g.items.length > 0);
+
+  const initials = user.name
+    .split(" ")
+    .slice(-2)
+    .map((n) => n[0])
+    .join("");
+
+  const isRouteActive = (to: string, search?: Record<string, any>) => {
+    const currentPath = pathname.startsWith("/app") 
+      ? pathname.replace("/app", "") 
+      : pathname;
+    
+    const normalizedTo = to.startsWith("/app") ? to.replace("/app", "") : to;
+
+    const isBaseActive = currentPath === normalizedTo ||
+      (normalizedTo !== "/admin" && normalizedTo !== "/tech" && normalizedTo !== "/portal" && currentPath.startsWith(normalizedTo));
+    
+    if (!search || Object.keys(search).length === 0) return isBaseActive;
+    
+    const query = new URLSearchParams(location.search);
+    const searchMatch = Object.entries(search).every(([k, v]) => query.get(k) === String(v));
+    return isBaseActive && searchMatch;
+  };
 
   return (
-    <div className="flex min-h-screen w-full bg-muted/30">
-      {/* Desktop Sidebar */}
-      <aside className="hidden lg:flex w-64 shrink-0 flex-col bg-sidebar text-sidebar-foreground">
-        <SidebarContent />
-      </aside>
+    <div className={cn("flex min-h-screen w-full", isAppPreview ? "bg-slate-200" : "bg-muted/30")}>
+      {!isAppPreview && (
+        <aside className="hidden lg:flex w-64 shrink-0 flex-col bg-sidebar text-sidebar-foreground sticky top-0 h-screen">
+          <SidebarContent 
+            visibleGroups={visibleGroups} 
+            isRouteActive={isRouteActive} 
+          />
+        </aside>
+      )}
 
-      {/* Mobile Sidebar Overlay */}
-      {mobileSidebarOpen && (
-        <div className="lg:hidden fixed inset-0 z-40">
+      {mobileSidebarOpen && !isAppPreview && (
+        <div className="lg:hidden fixed inset-0 z-50">
           <div
             className="absolute inset-0 bg-black/50"
             onClick={() => setMobileSidebarOpen(false)}
@@ -291,176 +338,198 @@ export function AppShell({ children }: { children: React.ReactNode }) {
                 <X className="h-4 w-4" />
               </Button>
             </div>
-            <SidebarContent />
+            <SidebarContent 
+              visibleGroups={visibleGroups} 
+              isRouteActive={isRouteActive} 
+              onItemClick={() => setMobileSidebarOpen(false)}
+            />
           </aside>
         </div>
       )}
 
-      {/* Main */}
-      <div className="flex flex-1 flex-col min-w-0">
-        <header className="sticky top-0 z-30 flex h-16 items-center gap-3 border-b bg-background px-4 lg:px-6">
-          {/* Mobile hamburger */}
-          <Button
-            variant="ghost"
-            size="icon"
-            className="lg:hidden"
-            onClick={() => setMobileSidebarOpen(true)}
-          >
-            <Menu className="h-5 w-5" />
-          </Button>
+      <div className={cn(
+        "flex flex-1 flex-col min-w-0 transition-all duration-500",
+        isAppPreview ? "items-center justify-center p-4 lg:p-12 overflow-hidden" : "pb-16 lg:pb-0"
+      )}>
+        
+        {/* Standard Web Header - HIDDEN in App Preview */}
+        {!isAppPreview && (
+          <header className="sticky top-0 z-30 flex h-16 items-center gap-3 border-b bg-background px-4 lg:px-6">
+            <Button
+              variant="ghost"
+              size="icon"
+              className="lg:hidden"
+              onClick={() => setMobileSidebarOpen(true)}
+            >
+              <Menu className="h-5 w-5" />
+            </Button>
 
-          {/* Global search */}
-          <GlobalSearch />
+            <div className="hidden sm:block flex-1">
+              <GlobalSearch />
+            </div>
 
-          {/* Tenant switcher */}
-          <div className="hidden md:flex items-center ml-auto mr-2 pr-4 border-r">
+            <div className="hidden md:flex items-center ml-auto mr-2 pr-4 border-r">
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <Button variant="ghost" size="sm" className="gap-2 shrink-0 h-8 font-medium">
+                    <Building2 className="h-4 w-4 text-primary" />
+                    <span>
+                      {mockTenants.find((t) => t.id === activeTenantId)?.name || "Select Tenant"}
+                    </span>
+                    <ChevronDown className="h-3 w-3 opacity-50" />
+                  </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="end" className="w-56">
+                  <DropdownMenuLabel>Tổ chức (SaaS Tenant)</DropdownMenuLabel>
+                  <DropdownMenuSeparator />
+                  {mockTenants.map((t) => (
+                    <DropdownMenuItem
+                      key={t.id}
+                      onClick={() => {
+                        setTenantId(t.id);
+                        const directorId = t.id === "t-1" ? "u-director-1" : "u-director-2";
+                        setUserId(directorId);
+                        window.location.href = "/admin";
+                      }}
+                    >
+                      {t.name}
+                      {activeTenantId === t.id && (
+                        <Badge variant="secondary" className="ml-auto">Hiện tại</Badge>
+                      )}
+                    </DropdownMenuItem>
+                  ))}
+                </DropdownMenuContent>
+              </DropdownMenu>
+            </div>
+
+            <Button 
+              variant="outline" 
+              size="sm" 
+              className="gap-2 h-9 px-3 rounded-full mr-2"
+              onClick={() => {
+                const target = location.pathname.startsWith("/admin") 
+                  ? location.pathname.replace("/admin", "/app/admin")
+                  : "/app/admin";
+                navigate({ to: target as any });
+              }}
+            >
+              <Smartphone className="h-4 w-4" />
+              <span className="hidden xl:inline text-[10px] font-black uppercase tracking-widest text-slate-500">Xem giao diện App</span>
+            </Button>
+
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
-                <Button variant="ghost" size="sm" className="gap-2 shrink-0 h-8 font-medium">
-                  <Building2 className="h-4 w-4 text-primary" />
-                  <span>
-                    {mockTenants.find((t) => t.id === activeTenantId)?.name || "Select Tenant"}
+                <Button variant="outline" size="sm" className="gap-2 shrink-0 max-w-[200px] truncate">
+                  <Wrench className="h-3.5 w-3.5 shrink-0" />
+                  <span className="hidden sm:inline truncate">
+                    {user.name.split("(")[1] ? user.name.split("(")[1].replace(")", "") : user.name}
                   </span>
-                  <ChevronDown className="h-3 w-3 opacity-50" />
+                  <ChevronDown className="h-3 w-3 shrink-0" />
                 </Button>
               </DropdownMenuTrigger>
-              <DropdownMenuContent align="end" className="w-56">
-                <DropdownMenuLabel>Tổ chức (SaaS Tenant)</DropdownMenuLabel>
+              <DropdownMenuContent align="end" className="w-64">
+                <DropdownMenuLabel>Chuyển Role (Công ty hiện tại)</DropdownMenuLabel>
                 <DropdownMenuSeparator />
-                {mockTenants.map((t) => (
-                  <DropdownMenuItem
-                    key={t.id}
-                    onClick={() => {
-                      setTenantId(t.id);
-                      // Auto-login into the director of the newly selected tenant
-                      const directorId = t.id === "t-1" ? "u-director-1" : "u-director-2";
-                      setUserId(directorId);
-                      window.location.href = "/admin"; // reset to dashboard
-                    }}
-                  >
-                    {t.name}
-                    {activeTenantId === t.id && (
-                      <Badge variant="secondary" className="ml-auto">
-                        Hiện tại
-                      </Badge>
-                    )}
-                  </DropdownMenuItem>
-                ))}
+                {mockUsers
+                  .filter((u) => u.memberships.some((m) => m.tenantId === activeTenantId))
+                  .map((u) => (
+                    <DropdownMenuItem
+                      key={u.id}
+                      onClick={() => {
+                        setUserId(u.id);
+                        const isTech = u.memberships[0]?.permissions.includes("field_tech");
+                        let target = isTech ? "/tech" : "/admin";
+                        // If we are in app mode, stay in app mode
+                        if (isAppPreview) target = `/app${target}`;
+                        window.location.href = target;
+                      }}
+                      className="flex items-start flex-col gap-1 py-2"
+                    >
+                      <div className="font-semibold">{u.name.split("(")[0]}</div>
+                      <div className="text-xs font-semibold text-primary/80">
+                        Vai: {u.name.split("(")[1] ? u.name.split("(")[1].replace(")", "") : "Chuyên viên"}
+                      </div>
+                    </DropdownMenuItem>
+                  ))}
               </DropdownMenuContent>
             </DropdownMenu>
-          </div>
 
-          {/* Role switcher */}
-          <DropdownMenu>
-            <DropdownMenuTrigger asChild>
-              <Button variant="outline" size="sm" className="gap-2 shrink-0 max-w-[200px] truncate">
-                <Wrench className="h-3.5 w-3.5 shrink-0" />
-                <span className="hidden sm:inline truncate">
-                  {user.name.split("(")[1] ? user.name.split("(")[1].replace(")", "") : user.name}
-                </span>
-                <ChevronDown className="h-3 w-3 shrink-0" />
-              </Button>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent align="end" className="w-64">
-              <DropdownMenuLabel>Chuyển Role (Công ty hiện tại)</DropdownMenuLabel>
-              <DropdownMenuSeparator />
-              {mockUsers
-                .filter((u) => u.memberships.some((m) => m.tenantId === activeTenantId))
-                .map((u) => (
-                  <DropdownMenuItem
-                    key={u.id}
-                    onClick={() => {
-                      setUserId(u.id);
-                      const isTech = u.memberships[0]?.permissions.includes("field_tech");
-                      const isCus = u.memberships[0]?.permissions.includes("customer");
-                      const isHR =
-                        u.memberships[0]?.permissions.includes("hr_admin") &&
-                        u.memberships[0]?.permissions.length === 1;
-                      const isAcc =
-                        u.memberships[0]?.permissions.includes("accounting") &&
-                        u.memberships[0]?.permissions.length === 1;
+            <NotificationPanel />
 
-                      let target = "/admin";
-                      if (isTech) target = "/tech";
-                      if (isCus) target = "/portal";
-                      if (isHR) target = "/admin/hr";
-                      if (isAcc) target = "/admin/accounting";
+            <Avatar className="h-8 w-8 ml-2">
+              <AvatarFallback className="bg-primary text-primary-foreground text-xs">{initials}</AvatarFallback>
+            </Avatar>
+          </header>
+        )}
 
-                      window.location.href = target;
-                    }}
-                    className="flex items-start flex-col gap-1 py-2"
-                  >
-                    <div className="font-semibold">{u.name.split("(")[0]}</div>
-                    <div className="text-xs font-semibold text-primary/80 truncate">
-                      Vai:{" "}
-                      {u.name.split("(")[1] ? u.name.split("(")[1].replace(")", "") : "Chuyên viên"}
-                    </div>
-                    <div className="text-[10px] text-muted-foreground opacity-80 max-w-[220px] truncate">
-                      Quyền:{" "}
-                      {u.memberships
-                        .find((m) => m.tenantId === activeTenantId)
-                        ?.permissions.slice(0, 3)
-                        .join(", ")}
-                      {u.memberships.find((m) => m.tenantId === activeTenantId)!.permissions
-                        .length > 3
-                        ? "..."
-                        : ""}
-                    </div>
-                    {user.id === u.id && (
-                      <Badge variant="secondary" className="absolute right-2 top-2">
-                        Đang chọn
-                      </Badge>
-                    )}
-                  </DropdownMenuItem>
-                ))}
-            </DropdownMenuContent>
-          </DropdownMenu>
-
-          {/* Notification bell */}
-          <NotificationPanel />
-
-          {/* Demo QR */}
-          <Link to="/qr/$elevatorId" params={{ elevatorId: "e-1" }} className="hidden sm:flex">
-            <Button variant="ghost" size="icon" title="Demo QR thang máy">
-              <QrCode className="h-4 w-4" />
-            </Button>
-          </Link>
-
-          {/* User avatar */}
-          <DropdownMenu>
-            <DropdownMenuTrigger asChild>
-              <Button variant="ghost" className="gap-2 px-2">
-                <Avatar className="h-7 w-7">
-                  <AvatarFallback className="bg-primary text-primary-foreground text-xs">
-                    {initials}
-                  </AvatarFallback>
-                </Avatar>
-                <div className="hidden md:block text-left">
-                  <div className="text-xs font-medium leading-tight">{user.name}</div>
-                  <div className="text-[10px] text-muted-foreground truncate max-w-[100px]">
-                    {user.name.split("(")[1] ? user.name.split("(")[1].replace(")", "") : "RBAC"}
+        {/* --- SMARTPHONE SIMULATOR WRAPPER --- */}
+        <div 
+          className={cn(
+            "flex flex-col min-w-0 transition-all relative",
+            isAppPreview ? (
+              "mx-auto my-auto shrink-0 w-[390px] h-[844px] bg-white rounded-[48px] shadow-[0_0_0_8px_#111,0_30px_60px_rgba(0,0,0,0.3)] border-[8px] border-[#111] overflow-hidden"
+            ) : (
+              "flex-1 w-full h-full"
+            )
+          )}
+          style={isAppPreview ? { transform: 'scale(min(1, calc((100vh - 100px) / 844)))', transformOrigin: 'center' } : {}}
+        >
+          
+          {/* Simulated Status Bar (Clock, Signal, Island) */}
+          {isAppPreview && (
+            <div className="h-12 w-full flex items-center justify-between px-7 pt-2 shrink-0 select-none pointer-events-none bg-white z-50">
+               <div className="text-[14px] font-black tracking-tight">{new Date().getHours()}:{new Date().getMinutes().toString().padStart(2, '0')}</div>
+               {/* Apple Dynamic Island Simulation */}
+               <div className="absolute top-2.5 left-1/2 -translate-x-1/2 h-[30px] w-[100px] bg-black rounded-full shadow-sm flex items-center justify-end px-2">
+                 <div className="h-2 w-2 rounded-full bg-emerald-500 mr-1 opacity-80" />
+               </div>
+               <div className="flex items-center gap-1.5 opacity-80">
+                  <Activity className="h-3 w-3 fill-current" />
+                  <div className="h-2.5 w-5 rounded-sm border border-slate-900 relative">
+                     <div className="absolute inset-[1px] bg-slate-900 w-[70%]" />
                   </div>
-                </div>
-              </Button>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent align="end">
-              <DropdownMenuLabel>Tài khoản</DropdownMenuLabel>
-              <DropdownMenuSeparator />
-              <DropdownMenuItem asChild>
-                <Link to="/admin/profile">Hồ sơ</Link>
-              </DropdownMenuItem>
-              <DropdownMenuItem asChild>
-                <Link to="/admin/settings">Cài đặt</Link>
-              </DropdownMenuItem>
-              <DropdownMenuSeparator />
-              <DropdownMenuItem asChild>
-                <Link to="/">Đăng xuất</Link>
-              </DropdownMenuItem>
-            </DropdownMenuContent>
-          </DropdownMenu>
-        </header>
+               </div>
+            </div>
+          )}
 
-        <main className="flex-1 p-4 lg:p-6">{children}</main>
+          {/* Floating Exit/Role Controls for Preview Mode */}
+          {isAppPreview && (
+            <div className="absolute top-14 left-0 right-0 z-50 flex justify-center gap-2 pointer-events-auto">
+               <Button 
+                variant="secondary" 
+                size="sm" 
+                className="h-8 rounded-full bg-slate-900 text-white hover:bg-slate-800 text-[10px] font-black uppercase tracking-widest px-4 shadow-xl"
+                onClick={() => {
+                  const target = location.pathname.replace("/app", "");
+                  navigate({ to: target || "/" as any });
+                  setAppPreview(false);
+                }}
+               >
+                 <X className="mr-2 h-3 w-3" /> Thoát Xem Thử
+               </Button>
+            </div>
+          )}
+
+          {/* Actual Content Area */}
+          <main className={cn(
+            "flex-1 overflow-y-auto bg-slate-50/50 relative scrollbar-hide",
+            isAppPreview ? "px-4 pb-28 pt-4" : "p-4 lg:p-6"
+          )}>
+            {secondaryNav && (
+              <div className={cn("sticky top-0 z-40 mb-4", isAppPreview ? "-mx-4 -mt-4" : "")}>
+                {secondaryNav}
+              </div>
+            )}
+            {children}
+          </main>
+
+          <MobileBottomNav />
+          
+          <CreateHotlineIncidentModal 
+            open={quickIncidentOpen} 
+            onOpenChange={setQuickIncidentOpen} 
+          />
+        </div>
       </div>
     </div>
   );

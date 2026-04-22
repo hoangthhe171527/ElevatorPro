@@ -8,8 +8,9 @@ import {
   STRATEGIC_WORKFLOW, 
   ProjectStage,
   advanceProjectStage,
-  STAGE_SUB_TASKS
-} from "@/lib/mock-data";
+  STAGE_SUB_TASKS,
+  INSTALL_STAGES_TEMPLATE
+ } from "@/lib/mock-data";
 import { 
   Check, 
   AlertTriangle, 
@@ -45,6 +46,7 @@ const STAGE_ICONS: Record<ProjectStage, any> = {
   technical: ClipboardCheck,
   procurement: PackageSearch,
   warehouse: Truck,
+  waiting_for_equipment: Timer,
   installation: Hammer,
   completion: Check,
   transition: RefreshCw,
@@ -65,8 +67,18 @@ export function InstallationWorkflow({
 
   const currentStageIndex = PROJECT_STAGES.indexOf(currentStage);
   const workflow = STRATEGIC_WORKFLOW[tenantId] || STRATEGIC_WORKFLOW["t-2"];
-  const currentGate = workflow[currentStage];
-  const subTasks = STAGE_SUB_TASKS[currentStage] || [];
+   const currentGate = workflow[currentStage];
+   
+   const subTasks = useMemo(() => {
+     if (tenantId === 't-2' && currentStage === 'installation') {
+       return INSTALL_STAGES_TEMPLATE.map(s => ({
+         id: s.id,
+         label: s.label,
+         requiredRole: 'field_tech' as any
+       }));
+     }
+     return STAGE_SUB_TASKS[currentStage] || [];
+   }, [tenantId, currentStage]);
 
   const isDirector = permissions.includes("director");
   const isAccounting = permissions.includes("accounting");

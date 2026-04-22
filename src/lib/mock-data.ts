@@ -11,22 +11,22 @@ export type Permission =
   | "maintenance_mgmt" // Kỹ thuật - Quản lý bảo trì
   | "accounting" // Kế toán
   | "hr_admin" // Hành chính nhân sự
-  | "field_tech" // Kỹ thuật viên hiện trường
-  | "customer"; // Khách hàng
+  | "field_tech"; // Kỹ thuật viên hiện trường
 
-export type LeadStatus = "new" | "contacted" | "quote_pending" | "quoted" | "negotiating" | "won" | "lost";
-export type ContractStatus = "active" | "expiring" | "expired" | "draft" | "renewal_pending";
+export type LeadStatus = "new" | "contacted" | "quote_pending" | "quoted" | "negotiating" | "contract_pending" | "won" | "lost";
+export type ContractStatus = "active" | "expiring" | "expired" | "draft";
 export type ContractType = "install" | "maintenance" | "repair";
 export type JobStatus =
   | "pending"
   | "scheduled"
+  | "appointment_confirmed"
   | "in_progress"
   | "manager_approved"
-  | "customer_confirmed"
   | "payment_pending"
+  | "waiting_for_materials"
   | "completed"
   | "cancelled";
-export type JobType = "install" | "maintenance" | "repair" | "inspection";
+export type JobType = "install" | "maintenance" | "repair" | "warranty" | "inspection";
 export type JobPriority = "low" | "normal" | "high" | "urgent";
 export type ElevatorStatus = "operational" | "maintenance_due" | "out_of_order" | "under_install";
 
@@ -63,6 +63,26 @@ export interface Customer {
   createdAt: string;
   lat: number;
   lng: number;
+  referralPoints?: number;
+  referredById?: string; 
+  convertedFromLeadId?: string;
+  customerType: "buying" | "service_only"; 
+}
+
+export type InvoiceStatus = "draft" | "sent" | "partially_paid" | "paid" | "overdue" | "cancelled";
+
+export interface Invoice {
+  tenantId: string;
+  id: string;
+  code: string;
+  customerId: string;
+  targetType: "project" | "contract";
+  targetId: string;
+  amount: number;
+  dueDate: string;
+  status: InvoiceStatus;
+  description: string;
+  createdAt: string;
 }
 
 // New model: Project (Công trình)
@@ -73,10 +93,11 @@ export type ProjectStage =
   | "procurement" // GĐ4: Đặt hàng
   | "warehouse" // GĐ5: Nhận hàng + thanh toán
   | "installation" // GĐ6: Lắp đặt
+  | "waiting_for_equipment" // GĐ: Chờ thiết bị về công trình
   | "completion" // GĐ7: Hoàn thiện
   | "transition"; // GĐ8: Chuyển bảo trì
 
-export type RequestType = "material" | "budget" | "project_advance" | "completion" | "lead_quote";
+export type RequestType = "material" | "budget" | "project_advance" | "completion" | "lead_quote" | "contract_approval";
 export type RequestStatus = "pending" | "approved" | "rejected";
 
 export interface ApprovalRequest {
@@ -100,6 +121,7 @@ export const PROJECT_STAGES: ProjectStage[] = [
   "procurement",
   "warehouse",
   "installation",
+  "waiting_for_equipment",
   "completion",
   "transition",
 ];
@@ -111,6 +133,7 @@ export const PROJECT_STAGE_LABELS: Record<ProjectStage, string> = {
   procurement: "Đặt hàng",
   warehouse: "Nhận hàng & Thanh toán",
   installation: "Lắp đặt",
+  waiting_for_equipment: "Chờ thiết bị",
   completion: "Hoàn thiện",
   transition: "Chuyển bảo trì",
 };
@@ -126,6 +149,7 @@ export const STRATEGIC_WORKFLOW: Record<string, Record<ProjectStage, WorkflowGat
   "t-1": { // LARGE COMPANY (Complex - Structured)
     lead: { approvers: ["director"], label: "Director duyệt giá" },
     contract: { approvers: ["director", "accounting"], label: "Director duyệt HĐ + Accounting xác nhận tiền" },
+    waiting_for_equipment: { approvers: ["director", "accounting"], label: "CEO confirm thiết bị + Accounting thu tiền đợt 2" },
     technical: { approvers: ["install_mgmt"], label: "Install Manager xác nhận kỹ thuật" },
     procurement: { approvers: ["director", "accounting"], label: "Director duyệt chi + Accounting check ngân sách" },
     warehouse: { approvers: ["accounting", "install_mgmt"], label: "Accounting + Install xác nhận nhận hàng" },
@@ -136,6 +160,7 @@ export const STRATEGIC_WORKFLOW: Record<string, Record<ProjectStage, WorkflowGat
   "t-2": { // SMALL COMPANY (Simplified - Flexible)
     lead: { approvers: ["director"], label: "Sếp tự báo giá", isFlexible: true },
     contract: { approvers: ["director", "accounting"], label: "Sếp ký + Kế toán ghi nhận", isFlexible: true },
+    waiting_for_equipment: { approvers: ["director", "accounting"], label: "Kiểm hàng về + Thu tiền đợt 2", isFlexible: true },
     technical: { approvers: ["install_mgmt"], label: "Kỹ sư triển khai", isFlexible: true },
     procurement: { approvers: ["director"], label: "Sếp duyệt mua", isFlexible: true },
     warehouse: { approvers: ["accounting"], label: "Kế toán check tiền", isFlexible: true },
@@ -151,6 +176,17 @@ export interface StageTask {
   requiredRole: Permission;
 }
 
+export const INSTALL_STAGES_TEMPLATE = [
+  { id: "step-1", label: "Giai đoạn 1: Thả chì (Plumbing)", order: 1 },
+  { id: "step-2", label: "Giai đoạn 2: Lắp ray (Rails)", order: 2 },
+  { id: "step-3", label: "Giai đoạn 3: Máy kéo – thả cáp (Machine & Ropes)", order: 3 },
+  { id: "step-4", label: "Giai đoạn 4: Lắp cửa tầng (Floor Doors)", order: 4 },
+  { id: "step-5", label: "Giai đoạn 5: Lắp cabin (Cabin)", order: 5 },
+  { id: "step-6", label: "Giai đoạn 6: Điện và hiệu chỉnh (Electrical)", order: 6 },
+  { id: "step-7", label: "Giai đoạn 7: Kiểm định (Inspection)", order: 7 },
+  { id: "step-8", label: "Giai đoạn 8: Bàn giao (Handover)", order: 8 },
+];
+
 export const STAGE_SUB_TASKS: Record<ProjectStage, StageTask[]> = {
   lead: [
     { id: "lead_survey", label: "Sales khảo sát nhu cầu", requiredRole: "sales" },
@@ -158,13 +194,13 @@ export const STAGE_SUB_TASKS: Record<ProjectStage, StageTask[]> = {
   ],
   contract: [
     { id: "contract_sent", label: "Sales gửi hợp đồng", requiredRole: "sales" },
-    { id: "customer_signed", label: "Khách hàng ký xác nhận", requiredRole: "customer" },
+    { id: "customer_signed", label: "CEO check HĐ đã ký (Upload file)", requiredRole: "director" },
     { id: "payment_advance", label: "Accounting xác nhận tạm ứng", requiredRole: "accounting" },
   ],
   technical: [
     { id: "site_survey_detailed", label: "Install khảo sát chi tiết", requiredRole: "install_mgmt" },
     { id: "drawings_created", label: "Install lên bản vẽ kỹ thuật", requiredRole: "install_mgmt" },
-    { id: "customer_confirm_drawings", label: "Khách hàng xác nhận bản vẽ", requiredRole: "customer" },
+    { id: "customer_confirm_drawings", label: "Sales check khách chuyển mẫu", requiredRole: "sales" },
   ],
   procurement: [
     { id: "purchase_request", label: "Install tạo yêu cầu mua hàng", requiredRole: "install_mgmt" },
@@ -184,6 +220,10 @@ export const STAGE_SUB_TASKS: Record<ProjectStage, StageTask[]> = {
     { id: "safety_inspection", label: "Kiểm định an toàn & Bàn giao", requiredRole: "install_mgmt" },
     { id: "final_settlement", label: "Quyết toán & Thu tiền đợt cuối", requiredRole: "accounting" },
   ],
+  waiting_for_equipment: [
+    { id: "eq_arrival_check", label: "CEO check hàng về công trình", requiredRole: "director" },
+    { id: "eq_payment_stage2", label: "Kế toán thu tiền đợt 2", requiredRole: "accounting" },
+  ],
   transition: [
     { id: "maintenance_contract", label: "Tạo hợp đồng bảo trì", requiredRole: "sales_maintenance" },
     { id: "handover_maintenance", label: "Chuyển giao bộ phận Bảo trì", requiredRole: "maintenance_mgmt" },
@@ -200,6 +240,7 @@ export interface Project {
   endDate?: string;
   status: "planning" | "in_progress" | "completed";
   stage: ProjectStage;
+  contractId?: string;
 }
 
 export const mockProjects: Project[] = [
@@ -253,6 +294,36 @@ export const mockProjects: Project[] = [
     status: "in_progress",
     stage: "lead",
   },
+  {
+    tenantId: "t-2",
+    id: "p-sample",
+    name: "Dự án Lắp đặt - Nhà Phố Anh Hoàng",
+    address: "Khu đô thị Sala, Quận 2, TP.HCM",
+    customerId: "c-1",
+    startDate: "2026-04-09",
+    status: "in_progress",
+    stage: "installation",
+  },
+  {
+    tenantId: "t-2",
+    id: "p-new-1",
+    name: "Lắp đặt Thang máy Biệt thự Gamuda",
+    address: "Trần Phú, Hoàng Mai, Hà Nội",
+    customerId: "c-11",
+    startDate: "2026-03-20",
+    status: "in_progress",
+    stage: "installation",
+  },
+  {
+    tenantId: "t-2",
+    id: "p-new-2",
+    name: "Dự án Shophouse Sun Group",
+    address: "Bãi Cháy, Hạ Long",
+    customerId: "c-8",
+    startDate: "2026-04-01",
+    status: "in_progress",
+    stage: "installation",
+  },
 ];
 
 export interface Lead {
@@ -270,6 +341,8 @@ export interface Lead {
   nextFollowUp: string;
   createdAt: string;
   customerId?: string; // optional link to existing Customer
+  quoteFileUrl?: string; // Mandatory for moving to Contract
+  contractFileUrl?: string; // Mandatory for Won status
 }
 
 export interface PaymentMilestone {
@@ -298,6 +371,14 @@ export interface Contract {
   items: string[];
   signedAt: string;
   milestones: PaymentMilestone[];
+  contractFileUrl?: string;
+  paymentStages: {
+    stage1Paid: number; // Tạm ứng ký HĐ
+    stage2Paid: number; // Thiết bị về công trình
+    stage3Paid: number; // Quyết toán handover
+  };
+  accountantVerified: boolean;
+  ceoVerified: boolean;
 }
 
 export type LifecyclePhase =
@@ -350,10 +431,43 @@ export interface Job {
   beforePhotos: string[];
   afterPhotos: string[];
   report?: string;
+  surveyReport?: {
+    pitDepth?: string;
+    overheadHeight?: string;
+    shaftDimensions?: string;
+    powerSupply?: string;
+    specialNotes?: string;
+  };
+  appointmentConfirmed?: boolean;
   isManagerApproved?: boolean;
-  isCustomerConfirmed?: boolean;
   hasIssues?: boolean;
   cost?: number; // For repairs
+  maintenanceSteps?: {
+    id: string;
+    label: string;
+    description?: string;
+    result: "ok" | "repair" | "replace" | "pending";
+    photo?: string;
+    resolved: boolean;
+  }[];
+  partsUsed?: {
+    partId: string;
+    quantity: number;
+    priceAtPoint: number;
+    status: "in_stock" | "out_of_stock";
+  }[];
+  isHotline?: boolean;
+  customerConfirmed?: boolean;
+  repairQuote?: {
+    items: {
+      id: string;
+      name: string;
+      price: number;
+      quantity: number;
+    }[];
+    total: number;
+    isApproved: boolean;
+  };
   createdAt: string;
 }
 
@@ -472,17 +586,7 @@ export const mockUsers: User[] = [
     memberships: [{ tenantId: "t-2", permissions: ["accounting", "hr_admin"] }],
   },
 
-  // --- Khách hàng (Dùng chung cho demo dễ) ---
-  {
-    id: "u-cus-1",
-    name: "Hoàng Văn Khách Hàng (Portal)",
-    email: "customer@gmail.com",
-    phone: "0987 654 321",
-    memberships: [
-      { tenantId: "t-1", permissions: ["customer"] },
-      { tenantId: "t-2", permissions: ["customer"] },
-    ],
-  },
+  // --- Khách hàng đã bỏ ---
 ];
 
 // ---------- CUSTOMERS ----------
@@ -499,6 +603,7 @@ const _mockCustomers: Omit<Customer, "tenantId">[] = [
     createdAt: "2024-03-15",
     lat: 20.9796,
     lng: 105.9419,
+    customerType: "buying",
   },
   {
     id: "c-2",
@@ -512,6 +617,7 @@ const _mockCustomers: Omit<Customer, "tenantId">[] = [
     createdAt: "2023-11-02",
     lat: 21.015,
     lng: 105.7818,
+    customerType: "buying",
   },
   {
     id: "c-3",
@@ -525,6 +631,7 @@ const _mockCustomers: Omit<Customer, "tenantId">[] = [
     createdAt: "2024-06-20",
     lat: 20.9712,
     lng: 105.7762,
+    customerType: "service_only",
   },
   {
     id: "c-4",
@@ -538,6 +645,7 @@ const _mockCustomers: Omit<Customer, "tenantId">[] = [
     createdAt: "2025-01-10",
     lat: 21.0356,
     lng: 105.8118,
+    customerType: "buying",
   },
   {
     id: "c-5",
@@ -551,6 +659,7 @@ const _mockCustomers: Omit<Customer, "tenantId">[] = [
     createdAt: "2023-08-14",
     lat: 21.0245,
     lng: 105.8412,
+    customerType: "service_only",
   },
   {
     id: "c-6",
@@ -564,6 +673,7 @@ const _mockCustomers: Omit<Customer, "tenantId">[] = [
     createdAt: "2024-09-05",
     lat: 20.9961,
     lng: 105.8676,
+    customerType: "service_only",
   },
   {
     id: "c-7",
@@ -577,6 +687,7 @@ const _mockCustomers: Omit<Customer, "tenantId">[] = [
     createdAt: "2025-02-20",
     lat: 21.0345,
     lng: 105.7905,
+    customerType: "buying",
   },
   {
     id: "c-8",
@@ -590,6 +701,7 @@ const _mockCustomers: Omit<Customer, "tenantId">[] = [
     createdAt: "2024-04-18",
     lat: 21.0438,
     lng: 105.8425,
+    customerType: "service_only",
   },
   {
     id: "c-9",
@@ -603,6 +715,7 @@ const _mockCustomers: Omit<Customer, "tenantId">[] = [
     createdAt: "2023-05-12",
     lat: 21.005,
     lng: 105.843,
+    customerType: "service_only",
   },
   {
     id: "c-10",
@@ -616,6 +729,7 @@ const _mockCustomers: Omit<Customer, "tenantId">[] = [
     createdAt: "2022-12-01",
     lat: 21.0335,
     lng: 105.8118,
+    customerType: "service_only",
   },
   {
     id: "c-11",
@@ -629,6 +743,7 @@ const _mockCustomers: Omit<Customer, "tenantId">[] = [
     createdAt: "2025-03-08",
     lat: 21.0145,
     lng: 105.7985,
+    customerType: "buying",
   },
   {
     id: "c-12",
@@ -642,7 +757,80 @@ const _mockCustomers: Omit<Customer, "tenantId">[] = [
     createdAt: "2024-07-22",
     lat: 20.965,
     lng: 105.943,
+    customerType: "service_only",
   },
+  {
+    id: "c-custom-1",
+    name: "Chung cư HPC Landmark",
+    contactPerson: "Lê Anh Tuấn",
+    phone: "0904 123 456",
+    email: "tuan.le@hpc.vn",
+    address: "Tố Hữu, Hà Đông, Hà Nội",
+    type: "business",
+    elevatorCount: 12,
+    createdAt: "2024-01-10",
+    lat: 20.9712,
+    lng: 105.7533,
+    customerType: "service_only",
+  },
+  {
+    id: "c-custom-2",
+    name: "Tòa nhà Keangnam",
+    contactPerson: "Park Sang Hoon",
+    phone: "0912 998 877",
+    email: "park.sh@keangnam.vn",
+    address: "Phạm Hùng, Nam Từ Liêm, Hà Nội",
+    type: "business",
+    elevatorCount: 48,
+    createdAt: "2023-05-20",
+    lat: 21.0173,
+    lng: 105.7840,
+    customerType: "service_only",
+  },
+  {
+    id: "c-custom-3",
+    name: "Aeon Mall Long Biên",
+    contactPerson: "Nguyễn Minh Đức",
+    phone: "0989 555 666",
+    email: "duc.nm@aeon.vn",
+    address: "Cổ Linh, Long Biên, Hà Nội",
+    type: "business",
+    elevatorCount: 15,
+    createdAt: "2024-02-15",
+    lat: 21.0263,
+    lng: 105.8975,
+    customerType: "buying",
+    referralPoints: 100,
+  },
+];
+
+export const mockInvoices: Invoice[] = [
+  {
+    tenantId: "t-1",
+    id: "inv-1",
+    code: "INV-2026-0001",
+    customerId: "c-1",
+    targetType: "project",
+    targetId: "p-1",
+    amount: 1920000000, // 80% of 2.4B
+    dueDate: "2026-04-30",
+    status: "paid",
+    description: "Thanh toán đợt 1 (80%) - Dự án Vinhomes",
+    createdAt: "2026-04-01",
+  },
+  {
+    tenantId: "t-2",
+    id: "inv-2",
+    code: "INV-2026-0002",
+    customerId: "c-1",
+    targetType: "project",
+    targetId: "p-sample",
+    amount: 304000000, // 80% of 380M
+    dueDate: "2026-04-15",
+    status: "paid",
+    description: "Thanh toán đợt 1 - Nhà Phố Anh Hoàng",
+    createdAt: "2026-04-09",
+  }
 ];
 
 // ---------- LEADS ----------
@@ -660,6 +848,7 @@ const _mockLeads: Omit<Lead, "tenantId">[] = [
     estimatedValue: 2400000000,
     nextFollowUp: "2026-04-25",
     createdAt: "2026-03-12",
+    quoteFileUrl: "https://example.com/quote-l1.pdf",
   },
   {
     id: "l-2",
@@ -832,6 +1021,10 @@ const _mockContracts: Omit<Contract, "tenantId">[] = [
     items: ["Bảo trì 4 thang Mitsubishi định kỳ 1 tháng/lần"],
     signedAt: "2024-03-20",
     milestones: [],
+    contractFileUrl: "https://example.com/contract-ct1.pdf",
+    paymentStages: { stage1Paid: 240000000, stage2Paid: 0, stage3Paid: 0 },
+    accountantVerified: true,
+    ceoVerified: true,
   },
   {
     id: "ct-2",
@@ -846,6 +1039,10 @@ const _mockContracts: Omit<Contract, "tenantId">[] = [
     items: ["Lắp đặt 6 thang máy Otis 21 tầng"],
     signedAt: "2023-11-10",
     milestones: [],
+    contractFileUrl: "https://example.com/contract-ct2.pdf",
+    paymentStages: { stage1Paid: 1000000000, stage2Paid: 2000000000, stage3Paid: 600000000 },
+    accountantVerified: true,
+    ceoVerified: true,
   },
   {
     id: "ct-4",
@@ -883,6 +1080,10 @@ const _mockContracts: Omit<Contract, "tenantId">[] = [
         status: "pending",
       },
     ],
+    contractFileUrl: "https://example.com/contract-ct4.pdf",
+    paymentStages: { stage1Paid: 160000000, stage2Paid: 0, stage3Paid: 0 },
+    accountantVerified: true,
+    ceoVerified: true,
   },
   {
     id: "ct-7",
@@ -913,6 +1114,10 @@ const _mockContracts: Omit<Contract, "tenantId">[] = [
         status: "overdue",
       },
     ],
+    contractFileUrl: "https://example.com/contract-ct7.pdf",
+    paymentStages: { stage1Paid: 90000000, stage2Paid: 0, stage3Paid: 0 },
+    accountantVerified: true,
+    ceoVerified: true,
   },
   {
     id: "ct-10",
@@ -923,10 +1128,14 @@ const _mockContracts: Omit<Contract, "tenantId">[] = [
     paid: 45000000,
     startDate: "2023-06-01",
     endDate: "2024-05-31",
-    status: "renewal_pending",
+    status: "active",
     items: ["Bảo trì 12 tháng", "Tặng 1 lần thay dầu"],
     signedAt: "2023-05-20",
     milestones: [],
+    contractFileUrl: "https://example.com/contract-ct10.pdf",
+    paymentStages: { stage1Paid: 45000000, stage2Paid: 0, stage3Paid: 0 },
+    accountantVerified: true,
+    ceoVerified: true,
   },
 ];
 
@@ -1277,7 +1486,6 @@ const _mockJobs: Omit<Job, "tenantId">[] = [
     afterPhotos: ["a1.jpg", "a2.jpg"],
     report: "Tất cả thang hoạt động bình thường. Đã thay dầu hộp số thang 1.",
     isManagerApproved: true,
-    isCustomerConfirmed: true,
     createdAt: "2026-04-08",
   },
   {
@@ -1451,6 +1659,364 @@ const _mockJobs: Omit<Job, "tenantId">[] = [
     report: "Đã thay card hiển thị mới.",
     isManagerApproved: true,
     cost: 1250000,
+    createdAt: "2026-04-20",
+  },
+  // Sample Installation project stages for u-tech-all-2 (Hoàng Kỹ Sư)
+  {
+    id: "j-auto-p-sample-step-1",
+    code: "JOB-INSTALL-1",
+    type: "install",
+    title: "Giai đoạn 1: Thả chì (Plumbing)",
+    description: "Khảo sát và thả dây chì định vị hố thang máy.",
+    customerId: "c-1",
+    projectId: "p-sample",
+    assignedTo: "u-tech-all-2",
+    priority: "normal",
+    status: "completed",
+    scheduledFor: "2026-04-10T08:00:00",
+    beforePhotos: [],
+    afterPhotos: [],
+    createdAt: "2026-04-09",
+  },
+  {
+    id: "j-auto-p-sample-step-2",
+    code: "JOB-INSTALL-2",
+    type: "install",
+    title: "Giai đoạn 2: Lắp ray (Rails)",
+    description: "Lắp đặt hệ thống ray dẫn hướng cabin và đối trọng.",
+    customerId: "c-1",
+    projectId: "p-sample",
+    assignedTo: "u-tech-all-2",
+    priority: "normal",
+    status: "in_progress",
+    scheduledFor: "2026-04-22T09:00:00",
+    beforePhotos: [],
+    afterPhotos: [],
+    createdAt: "2026-04-09",
+  },
+  {
+    id: "j-auto-p-sample-step-3",
+    code: "JOB-INSTALL-3",
+    type: "install",
+    title: "Giai đoạn 3: Máy kéo – thả cáp (Machine & Ropes)",
+    description: "Lắp đặt máy kéo và hệ thống cáp tải.",
+    customerId: "c-1",
+    projectId: "p-sample",
+    assignedTo: "u-tech-all-2",
+    priority: "normal",
+    status: "scheduled",
+    scheduledFor: "2026-04-29T08:00:00",
+    beforePhotos: [],
+    afterPhotos: [],
+    createdAt: "2026-04-09",
+  },
+  {
+    id: "j-auto-p-sample-step-4",
+    code: "JOB-INSTALL-4",
+    type: "install",
+    title: "Giai đoạn 4: Lắp cửa tầng (Floor Doors)",
+    description: "Lắp đặt hệ thống cửa tầng cho các tầng.",
+    customerId: "c-1",
+    projectId: "p-sample",
+    assignedTo: "u-tech-all-2",
+    priority: "normal",
+    status: "pending",
+    scheduledFor: "2026-05-06T08:00:00",
+    beforePhotos: [],
+    afterPhotos: [],
+    createdAt: "2026-04-09",
+  },
+  {
+    id: "j-auto-p-sample-step-5",
+    code: "JOB-INSTALL-5",
+    type: "install",
+    title: "Giai đoạn 5: Lắp cabin (Cabin)",
+    description: "Lắp khung cabin và vách cabin.",
+    customerId: "c-1",
+    projectId: "p-sample",
+    assignedTo: "u-tech-all-2",
+    priority: "normal",
+    status: "pending",
+    scheduledFor: "2026-05-13T08:00:00",
+    beforePhotos: [],
+    afterPhotos: [],
+    createdAt: "2026-04-09",
+  },
+  {
+    id: "j-auto-p-sample-step-6",
+    code: "JOB-INSTALL-6",
+    type: "install",
+    title: "Giai đoạn 6: Điện và hiệu chỉnh (Electrical)",
+    description: "Đấu nối tủ điều khiển và chạy thử hiệu chỉnh.",
+    customerId: "c-1",
+    projectId: "p-sample",
+    assignedTo: "u-tech-all-2",
+    priority: "normal",
+    status: "pending",
+    scheduledFor: "2026-05-20T08:00:00",
+    beforePhotos: [],
+    afterPhotos: [],
+    createdAt: "2026-04-09",
+  },
+  {
+    id: "j-auto-p-sample-step-7",
+    code: "JOB-INSTALL-7",
+    type: "install",
+    title: "Giai đoạn 7: Kiểm định (Inspection)",
+    description: "Thực hiện kiểm định an toàn cấp phép vận hành.",
+    customerId: "c-1",
+    projectId: "p-sample",
+    assignedTo: "u-tech-all-2",
+    priority: "normal",
+    status: "pending",
+    scheduledFor: "2026-05-27T08:00:00",
+    beforePhotos: [],
+    afterPhotos: [],
+    createdAt: "2026-04-09",
+  },
+  {
+    id: "j-auto-p-sample-step-8",
+    code: "JOB-INSTALL-8",
+    type: "install",
+    title: "Giai đoạn 8: Bàn giao (Handover)",
+    description: "Bàn giao chìa khóa và hướng dẫn sử dụng cho khách hàng.",
+    customerId: "c-1",
+    projectId: "p-sample",
+    assignedTo: "u-tech-all-2",
+    priority: "normal",
+    status: "pending",
+    scheduledFor: "2026-06-03T08:00:00",
+    beforePhotos: [],
+    afterPhotos: [],
+    createdAt: "2026-04-09",
+  },
+  {
+    id: "j-maint-3",
+    code: "BT-2026-04-05",
+    type: "maintenance",
+    title: "Bảo trì: Kiểm tra định kỳ đột xuất",
+    description: "Sếp yêu cầu kiểm tra kỹ thuật sau khi có phản ánh chất lượng.",
+    customerId: "c-custom-3",
+    elevatorId: "e-1",
+    assignedTo: "u-tech-all-2",
+    priority: "normal",
+    status: "appointment_confirmed",
+    scheduledFor: "2026-04-22T14:30:00",
+    beforePhotos: [],
+    afterPhotos: [],
+    createdAt: "2026-04-20",
+  },
+  // --- ADDED NEW INDEPENDENT JOBS ---
+  // INSTALLATION (Project p-new-1)
+  {
+    id: "j-install-p1-s1",
+    code: "LD-GM-01",
+    type: "install",
+    title: "GĐ 1: Thả chì - Biệt thự Gamuda",
+    description: "Thả dây dọi và kiểm tra hố thang.",
+    customerId: "c-11",
+    projectId: "p-new-1",
+    assignedTo: "u-tech-all-2",
+    priority: "normal",
+    status: "completed",
+    scheduledFor: "2026-04-01T08:00:00",
+    beforePhotos: [],
+    afterPhotos: [],
+    createdAt: "2026-03-25",
+  },
+  {
+    id: "j-install-p1-s2",
+    code: "LD-GM-02",
+    type: "install",
+    title: "GĐ 2: Lắp ray - Biệt thự Gamuda",
+    description: "Lắp đặt hệ thống ray dẫn hướng.",
+    customerId: "c-11",
+    projectId: "p-new-1",
+    assignedTo: "u-tech-all-2",
+    priority: "high",
+    status: "in_progress",
+    scheduledFor: "2026-04-22T08:00:00",
+    beforePhotos: [],
+    afterPhotos: [],
+    createdAt: "2026-03-25",
+  },
+  // MAINTENANCE
+  {
+    id: "j-maint-bulk-1",
+    code: "BT-LC-01",
+    type: "maintenance",
+    title: "Bảo trì: Lotte Center - Thang S1",
+    description: "Bảo trì định kỳ tháng 4.",
+    customerId: "c-10",
+    elevatorId: "e-15",
+    assignedTo: "u-tech-all-2",
+    priority: "normal",
+    status: "scheduled",
+    scheduledFor: "2026-04-25T08:00:00",
+    beforePhotos: [],
+    afterPhotos: [],
+    createdAt: "2026-04-10",
+  },
+  {
+    id: "j-maint-bulk-2",
+    code: "BT-BK-01",
+    type: "maintenance",
+    title: "Bảo trì: ĐH Bách Khoa - Thang Thư viện",
+    description: "Kiểm tra hệ thống cứu hộ tự động.",
+    customerId: "c-9",
+    elevatorId: "e-16",
+    assignedTo: "u-tech-all-2",
+    priority: "normal",
+    status: "pending",
+    scheduledFor: "2026-04-28T14:00:00",
+    beforePhotos: [],
+    afterPhotos: [],
+    createdAt: "2026-04-10",
+  },
+  {
+    id: "j-maint-bulk-3",
+    code: "BT-DP-01",
+    type: "maintenance",
+    title: "Bảo trì: Diamond Plaza - Thang khách 1",
+    description: "Vệ sinh hố thang và châm dầu.",
+    customerId: "c-5",
+    elevatorId: "e-10",
+    assignedTo: "u-tech-all-2",
+    priority: "low",
+    status: "scheduled",
+    scheduledFor: "2026-04-26T10:00:00",
+    beforePhotos: [],
+    afterPhotos: [],
+    createdAt: "2026-04-10",
+  },
+  // WARRANTY
+  {
+    id: "j-warranty-bulk-1",
+    code: "BH-ECO-01",
+    type: "warranty",
+    title: "Bảo hành: Ecopark - Lỗi gọi tầng",
+    description: "Bảng gọi tầng G không sáng đèn.",
+    customerId: "c-12",
+    elevatorId: "e-11",
+    assignedTo: "u-tech-all-2",
+    priority: "high",
+    status: "scheduled",
+    scheduledFor: "2026-04-24T09:00:00",
+    beforePhotos: [],
+    afterPhotos: [],
+    createdAt: "2026-04-20",
+  },
+  {
+    id: "j-warranty-bulk-2",
+    code: "BH-TC-01",
+    type: "warranty",
+    title: "Bảo hành: Times City - Tiếng rung cabin",
+    description: "Cabin rung nhẹ khi qua tầng 15.",
+    customerId: "c-6",
+    elevatorId: "e-11",
+    assignedTo: "u-tech-all-2",
+    priority: "normal",
+    status: "pending",
+    scheduledFor: "2026-04-27T15:00:00",
+    beforePhotos: [],
+    afterPhotos: [],
+    createdAt: "2026-04-20",
+  },
+  // REPAIR
+  {
+    id: "j-repair-bulk-1",
+    code: "SC-VH-01",
+    type: "repair",
+    title: "Sửa chữa: Thay biến tần Mitsubishi",
+    description: "Biến tần cũ bị cháy do sụt áp.",
+    customerId: "c-1",
+    elevatorId: "e-1",
+    assignedTo: "u-tech-all-2",
+    priority: "urgent",
+    status: "scheduled",
+    scheduledFor: "2026-04-23T08:30:00",
+    beforePhotos: [],
+    afterPhotos: [],
+    createdAt: "2026-04-21",
+  },
+  {
+    id: "j-repair-bulk-2",
+    code: "SC-ST-01",
+    type: "repair",
+    title: "Sửa chữa: Sunshine Tower - Thay cáp tải",
+    description: "Cáp tải bị tẽ sợi, cần thay thế cụm 4 sợi.",
+    customerId: "c-2",
+    elevatorId: "e-6",
+    assignedTo: "u-tech-all-2",
+    priority: "high",
+    status: "pending",
+    scheduledFor: "2026-04-29T08:00:00",
+    beforePhotos: [],
+    afterPhotos: [],
+    createdAt: "2026-04-21",
+  },
+  {
+    id: "j-warranty-1",
+    code: "BH-2026-0001",
+    type: "warranty",
+    title: "Bảo hành: Lỗi bảng gọi tầng 5",
+    description: "Nút bấm tầng 5 không ăn, cần kiểm tra cáp tín hiệu.",
+    customerId: "c-1",
+    elevatorId: "e-1",
+    assignedTo: "u-tech-all-2",
+    priority: "high",
+    status: "scheduled",
+    scheduledFor: "2026-04-22T08:00:00",
+    beforePhotos: [],
+    afterPhotos: [],
+    createdAt: "2026-04-20",
+  },
+  {
+    id: "j-maint-1",
+    code: "BT-2026-04-01",
+    type: "maintenance",
+    title: "Bảo trì định kỳ tháng 4 - Thang 01",
+    description: "Kiểm tra hố thang, cabin, bộ cứu hộ và châm dầu ray.",
+    customerId: "c-custom-2",
+    elevatorId: "e-1",
+    assignedTo: "u-tech-all-2",
+    priority: "normal",
+    status: "scheduled",
+    scheduledFor: "2026-04-22T09:30:00",
+    beforePhotos: [],
+    afterPhotos: [],
+    createdAt: "2026-04-01",
+  },
+  {
+    id: "j-repair-1",
+    code: "SC-2026-0032",
+    type: "repair",
+    title: "Sửa chữa: Thay cảm biến cửa",
+    description: "Cửa không đóng được, nghi hỏng Photocell.",
+    customerId: "c-custom-1",
+    elevatorId: "e-1",
+    assignedTo: "u-tech-all-2",
+    priority: "urgent",
+    status: "in_progress",
+    scheduledFor: "2026-04-22T11:00:00",
+    beforePhotos: [],
+    afterPhotos: [],
+    createdAt: "2026-04-21",
+  },
+  {
+    id: "j-maint-3",
+    code: "BT-2026-04-05",
+    type: "maintenance",
+    title: "Bảo trì: Kiểm tra định kỳ đột xuất",
+    description: "Sếp yêu cầu kiểm tra kỹ thuật sau khi có phản ánh chất lượng.",
+    customerId: "c-custom-3",
+    elevatorId: "e-1",
+    assignedTo: "u-tech-all-2",
+    priority: "normal",
+    status: "appointment_confirmed",
+    scheduledFor: "2026-04-22T14:30:00",
+    beforePhotos: [],
+    afterPhotos: [],
     createdAt: "2026-04-20",
   },
 ];
@@ -1856,6 +2422,7 @@ export function formatDateTime(value: string) {
 export const techBases: Record<string, { name: string; lat: number; lng: number }> = {
   "u-tech-1": { name: "Kho A - Cầu Giấy", lat: 21.0285, lng: 105.8 },
   "u-tech-2": { name: "Kho B - Hà Đông", lat: 20.98, lng: 105.79 },
+  "u-tech-all-2": { name: "Trung tâm dịch vụ Cầu Giấy", lat: 21.0285, lng: 105.8 },
 };
 
 export const mapBounds = {

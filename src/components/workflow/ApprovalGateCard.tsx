@@ -31,7 +31,6 @@ const PERMISSION_LABELS: Record<Permission, string> = {
   accounting: "Phòng Kế toán",
   hr_admin: "Hành chính & Pháp chế",
   field_tech: "Kỹ thuật viên",
-  customer: "Khách hàng"
 };
 
 export function ApprovalGateCard({ 

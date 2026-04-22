@@ -63,7 +63,7 @@ const personas = [
   {
     id: "u-tech-1",
     title: "Kỹ thuật viên",
-    desc: "Sử dụng Mobile App để nhận việc, báo cáo checklist, check-in, chụp ảnh trước-sau.",
+    desc: "Kỹ thuật viên thực hiện công việc tại công trình, báo cáo biên bản kỹ thuật online.",
     href: "/tech",
     color: "bg-info",
     icon: Wrench,
@@ -146,15 +146,6 @@ function LandingPage() {
             </a>
           </div>
           <div className="flex items-center gap-2">
-            <Link to="/mobile">
-              <Button
-                variant="outline"
-                size="sm"
-                className="gap-2 hidden sm:flex border-primary text-primary hover:bg-primary/5"
-              >
-                <QrCode className="h-3.5 w-3.5" /> Giao diện Mobile
-              </Button>
-            </Link>
             <Link to="/admin">
               <Button size="sm" className="gap-2">
                 Vào hệ thống <ArrowRight className="h-3.5 w-3.5" />
@@ -178,21 +169,14 @@ function LandingPage() {
           Quản lý từ một tập thể vài người "đa nhiệm" (Multi-role) đến các tổng công ty chia tách
           độc lập các phòng Kế toán, Kinh doanh, Điều phối Kỹ thuật.
         </p>
-        <div className="mt-8 flex flex-wrap items-center justify-center gap-3">
-          <Link to="/mobile">
+          <Link to="/admin" onClick={() => setUserId("u-director")}>
             <Button
               size="lg"
               className="gap-2 bg-primary hover:bg-primary/90 text-white border-2 border-primary shadow-lg shadow-primary/20"
             >
-              Trải nghiệm Mobile App <Zap className="h-4 w-4" />
+              Vào hệ thống Admin <Zap className="h-4 w-4" />
             </Button>
           </Link>
-          <Link to="/admin" onClick={() => setUserId("u-director")}>
-            <Button size="lg" variant="outline" className="gap-2">
-              Vào bản Web (BOD) <ArrowRight className="h-4 w-4" />
-            </Button>
-          </Link>
-        </div>
       </section>
 
       {/* Roles */}

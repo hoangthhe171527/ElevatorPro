@@ -9,76 +9,69 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
+import { Route as AppRouteImport } from './routes/app'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as TechIndexRouteImport } from './routes/tech.index'
 import { Route as PortalIndexRouteImport } from './routes/portal.index'
-import { Route as MobileIndexRouteImport } from './routes/mobile/index'
 import { Route as AdminIndexRouteImport } from './routes/admin.index'
 import { Route as TechScheduleRouteImport } from './routes/tech.schedule'
 import { Route as TechRoutePlanRouteImport } from './routes/tech.route-plan'
 import { Route as QrElevatorIdRouteImport } from './routes/qr.$elevatorId'
 import { Route as PortalIssuesRouteImport } from './routes/portal.issues'
 import { Route as PortalContractsRouteImport } from './routes/portal.contracts'
-import { Route as MobileSupportRouteImport } from './routes/mobile/support'
-import { Route as MobileSettingsRouteImport } from './routes/mobile/settings'
-import { Route as MobileScheduleRouteImport } from './routes/mobile/schedule'
-import { Route as MobileScannerRouteImport } from './routes/mobile/scanner'
-import { Route as MobileRoutePlanRouteImport } from './routes/mobile/route-plan'
-import { Route as MobileReportsRouteImport } from './routes/mobile/reports'
-import { Route as MobileProjectsRouteImport } from './routes/mobile/projects'
-import { Route as MobileProfileRouteImport } from './routes/mobile/profile'
-import { Route as MobilePortalRouteImport } from './routes/mobile/portal'
-import { Route as MobileLeadsRouteImport } from './routes/mobile/leads'
-import { Route as MobileJobsRouteImport } from './routes/mobile/jobs'
-import { Route as MobileInventoryRouteImport } from './routes/mobile/inventory'
-import { Route as MobileHrRouteImport } from './routes/mobile/hr'
-import { Route as MobileElevatorsRouteImport } from './routes/mobile/elevators'
-import { Route as MobileCustomersRouteImport } from './routes/mobile/customers'
-import { Route as MobileContractsRouteImport } from './routes/mobile/contracts'
-import { Route as MobileApprovalsRouteImport } from './routes/mobile/approvals'
-import { Route as MobileAccountingRouteImport } from './routes/mobile/accounting'
 import { Route as AdminSettingsRouteImport } from './routes/admin.settings'
 import { Route as AdminReportsRouteImport } from './routes/admin.reports'
 import { Route as AdminProfileRouteImport } from './routes/admin.profile'
 import { Route as AdminLeadsRouteImport } from './routes/admin.leads'
+import { Route as AdminJobsRouteImport } from './routes/admin.jobs'
 import { Route as AdminHrRouteImport } from './routes/admin.hr'
 import { Route as AdminContractsRouteImport } from './routes/admin.contracts'
 import { Route as AdminApprovalsRouteImport } from './routes/admin.approvals'
 import { Route as AdminAccountingRouteImport } from './routes/admin.accounting'
 import { Route as TechJobsIndexRouteImport } from './routes/tech.jobs.index'
 import { Route as PortalElevatorsIndexRouteImport } from './routes/portal.elevators.index'
-import { Route as MobileTechIndexRouteImport } from './routes/mobile/tech.index'
+import { Route as AppTechIndexRouteImport } from './routes/app.tech.index'
+import { Route as AppAdminIndexRouteImport } from './routes/app.admin.index'
 import { Route as AdminProjectsIndexRouteImport } from './routes/admin.projects.index'
+import { Route as AdminMaintenanceIndexRouteImport } from './routes/admin.maintenance.index'
 import { Route as AdminJobsIndexRouteImport } from './routes/admin.jobs.index'
 import { Route as AdminInventoryIndexRouteImport } from './routes/admin.inventory.index'
 import { Route as AdminElevatorsIndexRouteImport } from './routes/admin.elevators.index'
 import { Route as AdminCustomersIndexRouteImport } from './routes/admin.customers.index'
+import { Route as TechProjectsProjectIdRouteImport } from './routes/tech.projects.$projectId'
+import { Route as TechMaintJobIdRouteImport } from './routes/tech.maint.$jobId'
 import { Route as TechJobsJobIdRouteImport } from './routes/tech.jobs.$jobId'
 import { Route as PortalElevatorsElevatorIdRouteImport } from './routes/portal.elevators.$elevatorId'
-import { Route as MobileTechScheduleRouteImport } from './routes/mobile/tech.schedule'
-import { Route as MobileTechRoutePlanRouteImport } from './routes/mobile/tech.route-plan'
-import { Route as MobileProjectsProjectIdRouteImport } from './routes/mobile/projects.$projectId'
-import { Route as MobilePortalIssuesRouteImport } from './routes/mobile/portal.issues'
-import { Route as MobilePortalElevatorsRouteImport } from './routes/mobile/portal.elevators'
-import { Route as MobilePortalContractsRouteImport } from './routes/mobile/portal.contracts'
-import { Route as MobilePortalBillingRouteImport } from './routes/mobile/portal.billing'
-import { Route as MobileLeadsLeadIdRouteImport } from './routes/mobile/leads.$leadId'
-import { Route as MobileJobsJobIdRouteImport } from './routes/mobile/jobs.$jobId'
-import { Route as MobileInventoryItemIdRouteImport } from './routes/mobile/inventory.$itemId'
-import { Route as MobileElevatorsElevatorIdRouteImport } from './routes/mobile/elevators.$elevatorId'
-import { Route as MobileCustomersCustomerIdRouteImport } from './routes/mobile/customers.$customerId'
-import { Route as MobileContractsContractIdRouteImport } from './routes/mobile/contracts.$contractId'
+import { Route as AppTechScheduleRouteImport } from './routes/app.tech.schedule'
+import { Route as AppTechRoutePlanRouteImport } from './routes/app.tech.route-plan'
+import { Route as AppAdminReportsRouteImport } from './routes/app.admin.reports'
+import { Route as AppAdminProfileRouteImport } from './routes/app.admin.profile'
+import { Route as AppAdminLeadsRouteImport } from './routes/app.admin.leads'
+import { Route as AppAdminContractsRouteImport } from './routes/app.admin.contracts'
+import { Route as AppAdminApprovalsRouteImport } from './routes/app.admin.approvals'
 import { Route as AdminProjectsProjectIdRouteImport } from './routes/admin.projects.$projectId'
 import { Route as AdminJobsJobIdRouteImport } from './routes/admin.jobs.$jobId'
 import { Route as AdminElevatorsElevatorIdRouteImport } from './routes/admin.elevators.$elevatorId'
 import { Route as AdminCustomersCustomerIdRouteImport } from './routes/admin.customers.$customerId'
-import { Route as MobileTechJobsIndexRouteImport } from './routes/mobile/tech.jobs.index'
-import { Route as MobileTechJobsJobIdRouteImport } from './routes/mobile/tech.jobs.$jobId'
-import { Route as MobilePortalIssuesIssueIdRouteImport } from './routes/mobile/portal.issues.$issueId'
-import { Route as MobilePortalElevatorsElevatorIdRouteImport } from './routes/mobile/portal.elevators.$elevatorId'
-import { Route as MobilePortalContractsContractIdRouteImport } from './routes/mobile/portal.contracts.$contractId'
+import { Route as AppTechJobsIndexRouteImport } from './routes/app.tech.jobs.index'
+import { Route as AppAdminProjectsIndexRouteImport } from './routes/app.admin.projects.index'
+import { Route as AppAdminJobsIndexRouteImport } from './routes/app.admin.jobs.index'
+import { Route as AppAdminElevatorsIndexRouteImport } from './routes/app.admin.elevators.index'
+import { Route as TechJobsJobIdMaintenanceRouteImport } from './routes/tech.jobs.$jobId.maintenance'
+import { Route as AppTechProjectsProjectIdRouteImport } from './routes/app.tech.projects.$projectId'
+import { Route as AppTechMaintJobIdRouteImport } from './routes/app.tech.maint.$jobId'
+import { Route as AppTechJobsJobIdRouteImport } from './routes/app.tech.jobs.$jobId'
+import { Route as AppAdminProjectsProjectIdRouteImport } from './routes/app.admin.projects.$projectId'
+import { Route as AppAdminJobsJobIdRouteImport } from './routes/app.admin.jobs.$jobId'
+import { Route as AppAdminElevatorsElevatorIdRouteImport } from './routes/app.admin.elevators.$elevatorId'
 import { Route as AdminElevatorsElevatorIdQrRouteImport } from './routes/admin.elevators.$elevatorId.qr'
+import { Route as AppTechJobsJobIdMaintenanceRouteImport } from './routes/app.tech.jobs.$jobId.maintenance'
 
+const AppRoute = AppRouteImport.update({
+  id: '/app',
+  path: '/app',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
@@ -92,11 +85,6 @@ const TechIndexRoute = TechIndexRouteImport.update({
 const PortalIndexRoute = PortalIndexRouteImport.update({
   id: '/portal/',
   path: '/portal/',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const MobileIndexRoute = MobileIndexRouteImport.update({
-  id: '/mobile/',
-  path: '/mobile/',
   getParentRoute: () => rootRouteImport,
 } as any)
 const AdminIndexRoute = AdminIndexRouteImport.update({
@@ -129,96 +117,6 @@ const PortalContractsRoute = PortalContractsRouteImport.update({
   path: '/portal/contracts',
   getParentRoute: () => rootRouteImport,
 } as any)
-const MobileSupportRoute = MobileSupportRouteImport.update({
-  id: '/mobile/support',
-  path: '/mobile/support',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const MobileSettingsRoute = MobileSettingsRouteImport.update({
-  id: '/mobile/settings',
-  path: '/mobile/settings',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const MobileScheduleRoute = MobileScheduleRouteImport.update({
-  id: '/mobile/schedule',
-  path: '/mobile/schedule',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const MobileScannerRoute = MobileScannerRouteImport.update({
-  id: '/mobile/scanner',
-  path: '/mobile/scanner',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const MobileRoutePlanRoute = MobileRoutePlanRouteImport.update({
-  id: '/mobile/route-plan',
-  path: '/mobile/route-plan',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const MobileReportsRoute = MobileReportsRouteImport.update({
-  id: '/mobile/reports',
-  path: '/mobile/reports',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const MobileProjectsRoute = MobileProjectsRouteImport.update({
-  id: '/mobile/projects',
-  path: '/mobile/projects',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const MobileProfileRoute = MobileProfileRouteImport.update({
-  id: '/mobile/profile',
-  path: '/mobile/profile',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const MobilePortalRoute = MobilePortalRouteImport.update({
-  id: '/mobile/portal',
-  path: '/mobile/portal',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const MobileLeadsRoute = MobileLeadsRouteImport.update({
-  id: '/mobile/leads',
-  path: '/mobile/leads',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const MobileJobsRoute = MobileJobsRouteImport.update({
-  id: '/mobile/jobs',
-  path: '/mobile/jobs',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const MobileInventoryRoute = MobileInventoryRouteImport.update({
-  id: '/mobile/inventory',
-  path: '/mobile/inventory',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const MobileHrRoute = MobileHrRouteImport.update({
-  id: '/mobile/hr',
-  path: '/mobile/hr',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const MobileElevatorsRoute = MobileElevatorsRouteImport.update({
-  id: '/mobile/elevators',
-  path: '/mobile/elevators',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const MobileCustomersRoute = MobileCustomersRouteImport.update({
-  id: '/mobile/customers',
-  path: '/mobile/customers',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const MobileContractsRoute = MobileContractsRouteImport.update({
-  id: '/mobile/contracts',
-  path: '/mobile/contracts',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const MobileApprovalsRoute = MobileApprovalsRouteImport.update({
-  id: '/mobile/approvals',
-  path: '/mobile/approvals',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const MobileAccountingRoute = MobileAccountingRouteImport.update({
-  id: '/mobile/accounting',
-  path: '/mobile/accounting',
-  getParentRoute: () => rootRouteImport,
-} as any)
 const AdminSettingsRoute = AdminSettingsRouteImport.update({
   id: '/admin/settings',
   path: '/admin/settings',
@@ -237,6 +135,11 @@ const AdminProfileRoute = AdminProfileRouteImport.update({
 const AdminLeadsRoute = AdminLeadsRouteImport.update({
   id: '/admin/leads',
   path: '/admin/leads',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AdminJobsRoute = AdminJobsRouteImport.update({
+  id: '/admin/jobs',
+  path: '/admin/jobs',
   getParentRoute: () => rootRouteImport,
 } as any)
 const AdminHrRoute = AdminHrRouteImport.update({
@@ -269,20 +172,30 @@ const PortalElevatorsIndexRoute = PortalElevatorsIndexRouteImport.update({
   path: '/portal/elevators/',
   getParentRoute: () => rootRouteImport,
 } as any)
-const MobileTechIndexRoute = MobileTechIndexRouteImport.update({
-  id: '/mobile/tech/',
-  path: '/mobile/tech/',
-  getParentRoute: () => rootRouteImport,
+const AppTechIndexRoute = AppTechIndexRouteImport.update({
+  id: '/tech/',
+  path: '/tech/',
+  getParentRoute: () => AppRoute,
+} as any)
+const AppAdminIndexRoute = AppAdminIndexRouteImport.update({
+  id: '/admin/',
+  path: '/admin/',
+  getParentRoute: () => AppRoute,
 } as any)
 const AdminProjectsIndexRoute = AdminProjectsIndexRouteImport.update({
   id: '/admin/projects/',
   path: '/admin/projects/',
   getParentRoute: () => rootRouteImport,
 } as any)
-const AdminJobsIndexRoute = AdminJobsIndexRouteImport.update({
-  id: '/admin/jobs/',
-  path: '/admin/jobs/',
+const AdminMaintenanceIndexRoute = AdminMaintenanceIndexRouteImport.update({
+  id: '/admin/maintenance/',
+  path: '/admin/maintenance/',
   getParentRoute: () => rootRouteImport,
+} as any)
+const AdminJobsIndexRoute = AdminJobsIndexRouteImport.update({
+  id: '/',
+  path: '/',
+  getParentRoute: () => AdminJobsRoute,
 } as any)
 const AdminInventoryIndexRoute = AdminInventoryIndexRouteImport.update({
   id: '/admin/inventory/',
@@ -299,6 +212,16 @@ const AdminCustomersIndexRoute = AdminCustomersIndexRouteImport.update({
   path: '/admin/customers/',
   getParentRoute: () => rootRouteImport,
 } as any)
+const TechProjectsProjectIdRoute = TechProjectsProjectIdRouteImport.update({
+  id: '/tech/projects/$projectId',
+  path: '/tech/projects/$projectId',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const TechMaintJobIdRoute = TechMaintJobIdRouteImport.update({
+  id: '/tech/maint/$jobId',
+  path: '/tech/maint/$jobId',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const TechJobsJobIdRoute = TechJobsJobIdRouteImport.update({
   id: '/tech/jobs/$jobId',
   path: '/tech/jobs/$jobId',
@@ -310,83 +233,50 @@ const PortalElevatorsElevatorIdRoute =
     path: '/portal/elevators/$elevatorId',
     getParentRoute: () => rootRouteImport,
   } as any)
-const MobileTechScheduleRoute = MobileTechScheduleRouteImport.update({
-  id: '/mobile/tech/schedule',
-  path: '/mobile/tech/schedule',
-  getParentRoute: () => rootRouteImport,
+const AppTechScheduleRoute = AppTechScheduleRouteImport.update({
+  id: '/tech/schedule',
+  path: '/tech/schedule',
+  getParentRoute: () => AppRoute,
 } as any)
-const MobileTechRoutePlanRoute = MobileTechRoutePlanRouteImport.update({
-  id: '/mobile/tech/route-plan',
-  path: '/mobile/tech/route-plan',
-  getParentRoute: () => rootRouteImport,
+const AppTechRoutePlanRoute = AppTechRoutePlanRouteImport.update({
+  id: '/tech/route-plan',
+  path: '/tech/route-plan',
+  getParentRoute: () => AppRoute,
 } as any)
-const MobileProjectsProjectIdRoute = MobileProjectsProjectIdRouteImport.update({
-  id: '/$projectId',
-  path: '/$projectId',
-  getParentRoute: () => MobileProjectsRoute,
+const AppAdminReportsRoute = AppAdminReportsRouteImport.update({
+  id: '/admin/reports',
+  path: '/admin/reports',
+  getParentRoute: () => AppRoute,
 } as any)
-const MobilePortalIssuesRoute = MobilePortalIssuesRouteImport.update({
-  id: '/issues',
-  path: '/issues',
-  getParentRoute: () => MobilePortalRoute,
+const AppAdminProfileRoute = AppAdminProfileRouteImport.update({
+  id: '/admin/profile',
+  path: '/admin/profile',
+  getParentRoute: () => AppRoute,
 } as any)
-const MobilePortalElevatorsRoute = MobilePortalElevatorsRouteImport.update({
-  id: '/elevators',
-  path: '/elevators',
-  getParentRoute: () => MobilePortalRoute,
+const AppAdminLeadsRoute = AppAdminLeadsRouteImport.update({
+  id: '/admin/leads',
+  path: '/admin/leads',
+  getParentRoute: () => AppRoute,
 } as any)
-const MobilePortalContractsRoute = MobilePortalContractsRouteImport.update({
-  id: '/contracts',
-  path: '/contracts',
-  getParentRoute: () => MobilePortalRoute,
+const AppAdminContractsRoute = AppAdminContractsRouteImport.update({
+  id: '/admin/contracts',
+  path: '/admin/contracts',
+  getParentRoute: () => AppRoute,
 } as any)
-const MobilePortalBillingRoute = MobilePortalBillingRouteImport.update({
-  id: '/billing',
-  path: '/billing',
-  getParentRoute: () => MobilePortalRoute,
+const AppAdminApprovalsRoute = AppAdminApprovalsRouteImport.update({
+  id: '/admin/approvals',
+  path: '/admin/approvals',
+  getParentRoute: () => AppRoute,
 } as any)
-const MobileLeadsLeadIdRoute = MobileLeadsLeadIdRouteImport.update({
-  id: '/$leadId',
-  path: '/$leadId',
-  getParentRoute: () => MobileLeadsRoute,
-} as any)
-const MobileJobsJobIdRoute = MobileJobsJobIdRouteImport.update({
-  id: '/$jobId',
-  path: '/$jobId',
-  getParentRoute: () => MobileJobsRoute,
-} as any)
-const MobileInventoryItemIdRoute = MobileInventoryItemIdRouteImport.update({
-  id: '/$itemId',
-  path: '/$itemId',
-  getParentRoute: () => MobileInventoryRoute,
-} as any)
-const MobileElevatorsElevatorIdRoute =
-  MobileElevatorsElevatorIdRouteImport.update({
-    id: '/$elevatorId',
-    path: '/$elevatorId',
-    getParentRoute: () => MobileElevatorsRoute,
-  } as any)
-const MobileCustomersCustomerIdRoute =
-  MobileCustomersCustomerIdRouteImport.update({
-    id: '/$customerId',
-    path: '/$customerId',
-    getParentRoute: () => MobileCustomersRoute,
-  } as any)
-const MobileContractsContractIdRoute =
-  MobileContractsContractIdRouteImport.update({
-    id: '/$contractId',
-    path: '/$contractId',
-    getParentRoute: () => MobileContractsRoute,
-  } as any)
 const AdminProjectsProjectIdRoute = AdminProjectsProjectIdRouteImport.update({
   id: '/admin/projects/$projectId',
   path: '/admin/projects/$projectId',
   getParentRoute: () => rootRouteImport,
 } as any)
 const AdminJobsJobIdRoute = AdminJobsJobIdRouteImport.update({
-  id: '/admin/jobs/$jobId',
-  path: '/admin/jobs/$jobId',
-  getParentRoute: () => rootRouteImport,
+  id: '/$jobId',
+  path: '/$jobId',
+  getParentRoute: () => AdminJobsRoute,
 } as any)
 const AdminElevatorsElevatorIdRoute =
   AdminElevatorsElevatorIdRouteImport.update({
@@ -400,33 +290,64 @@ const AdminCustomersCustomerIdRoute =
     path: '/admin/customers/$customerId',
     getParentRoute: () => rootRouteImport,
   } as any)
-const MobileTechJobsIndexRoute = MobileTechJobsIndexRouteImport.update({
-  id: '/mobile/tech/jobs/',
-  path: '/mobile/tech/jobs/',
-  getParentRoute: () => rootRouteImport,
+const AppTechJobsIndexRoute = AppTechJobsIndexRouteImport.update({
+  id: '/tech/jobs/',
+  path: '/tech/jobs/',
+  getParentRoute: () => AppRoute,
 } as any)
-const MobileTechJobsJobIdRoute = MobileTechJobsJobIdRouteImport.update({
-  id: '/mobile/tech/jobs/$jobId',
-  path: '/mobile/tech/jobs/$jobId',
-  getParentRoute: () => rootRouteImport,
+const AppAdminProjectsIndexRoute = AppAdminProjectsIndexRouteImport.update({
+  id: '/admin/projects/',
+  path: '/admin/projects/',
+  getParentRoute: () => AppRoute,
 } as any)
-const MobilePortalIssuesIssueIdRoute =
-  MobilePortalIssuesIssueIdRouteImport.update({
-    id: '/$issueId',
-    path: '/$issueId',
-    getParentRoute: () => MobilePortalIssuesRoute,
+const AppAdminJobsIndexRoute = AppAdminJobsIndexRouteImport.update({
+  id: '/admin/jobs/',
+  path: '/admin/jobs/',
+  getParentRoute: () => AppRoute,
+} as any)
+const AppAdminElevatorsIndexRoute = AppAdminElevatorsIndexRouteImport.update({
+  id: '/admin/elevators/',
+  path: '/admin/elevators/',
+  getParentRoute: () => AppRoute,
+} as any)
+const TechJobsJobIdMaintenanceRoute =
+  TechJobsJobIdMaintenanceRouteImport.update({
+    id: '/maintenance',
+    path: '/maintenance',
+    getParentRoute: () => TechJobsJobIdRoute,
   } as any)
-const MobilePortalElevatorsElevatorIdRoute =
-  MobilePortalElevatorsElevatorIdRouteImport.update({
-    id: '/$elevatorId',
-    path: '/$elevatorId',
-    getParentRoute: () => MobilePortalElevatorsRoute,
+const AppTechProjectsProjectIdRoute =
+  AppTechProjectsProjectIdRouteImport.update({
+    id: '/tech/projects/$projectId',
+    path: '/tech/projects/$projectId',
+    getParentRoute: () => AppRoute,
   } as any)
-const MobilePortalContractsContractIdRoute =
-  MobilePortalContractsContractIdRouteImport.update({
-    id: '/$contractId',
-    path: '/$contractId',
-    getParentRoute: () => MobilePortalContractsRoute,
+const AppTechMaintJobIdRoute = AppTechMaintJobIdRouteImport.update({
+  id: '/tech/maint/$jobId',
+  path: '/tech/maint/$jobId',
+  getParentRoute: () => AppRoute,
+} as any)
+const AppTechJobsJobIdRoute = AppTechJobsJobIdRouteImport.update({
+  id: '/tech/jobs/$jobId',
+  path: '/tech/jobs/$jobId',
+  getParentRoute: () => AppRoute,
+} as any)
+const AppAdminProjectsProjectIdRoute =
+  AppAdminProjectsProjectIdRouteImport.update({
+    id: '/admin/projects/$projectId',
+    path: '/admin/projects/$projectId',
+    getParentRoute: () => AppRoute,
+  } as any)
+const AppAdminJobsJobIdRoute = AppAdminJobsJobIdRouteImport.update({
+  id: '/admin/jobs/$jobId',
+  path: '/admin/jobs/$jobId',
+  getParentRoute: () => AppRoute,
+} as any)
+const AppAdminElevatorsElevatorIdRoute =
+  AppAdminElevatorsElevatorIdRouteImport.update({
+    id: '/admin/elevators/$elevatorId',
+    path: '/admin/elevators/$elevatorId',
+    getParentRoute: () => AppRoute,
   } as any)
 const AdminElevatorsElevatorIdQrRoute =
   AdminElevatorsElevatorIdQrRouteImport.update({
@@ -434,80 +355,75 @@ const AdminElevatorsElevatorIdQrRoute =
     path: '/qr',
     getParentRoute: () => AdminElevatorsElevatorIdRoute,
   } as any)
+const AppTechJobsJobIdMaintenanceRoute =
+  AppTechJobsJobIdMaintenanceRouteImport.update({
+    id: '/maintenance',
+    path: '/maintenance',
+    getParentRoute: () => AppTechJobsJobIdRoute,
+  } as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
+  '/app': typeof AppRouteWithChildren
   '/admin/accounting': typeof AdminAccountingRoute
   '/admin/approvals': typeof AdminApprovalsRoute
   '/admin/contracts': typeof AdminContractsRoute
   '/admin/hr': typeof AdminHrRoute
+  '/admin/jobs': typeof AdminJobsRouteWithChildren
   '/admin/leads': typeof AdminLeadsRoute
   '/admin/profile': typeof AdminProfileRoute
   '/admin/reports': typeof AdminReportsRoute
   '/admin/settings': typeof AdminSettingsRoute
-  '/mobile/accounting': typeof MobileAccountingRoute
-  '/mobile/approvals': typeof MobileApprovalsRoute
-  '/mobile/contracts': typeof MobileContractsRouteWithChildren
-  '/mobile/customers': typeof MobileCustomersRouteWithChildren
-  '/mobile/elevators': typeof MobileElevatorsRouteWithChildren
-  '/mobile/hr': typeof MobileHrRoute
-  '/mobile/inventory': typeof MobileInventoryRouteWithChildren
-  '/mobile/jobs': typeof MobileJobsRouteWithChildren
-  '/mobile/leads': typeof MobileLeadsRouteWithChildren
-  '/mobile/portal': typeof MobilePortalRouteWithChildren
-  '/mobile/profile': typeof MobileProfileRoute
-  '/mobile/projects': typeof MobileProjectsRouteWithChildren
-  '/mobile/reports': typeof MobileReportsRoute
-  '/mobile/route-plan': typeof MobileRoutePlanRoute
-  '/mobile/scanner': typeof MobileScannerRoute
-  '/mobile/schedule': typeof MobileScheduleRoute
-  '/mobile/settings': typeof MobileSettingsRoute
-  '/mobile/support': typeof MobileSupportRoute
   '/portal/contracts': typeof PortalContractsRoute
   '/portal/issues': typeof PortalIssuesRoute
   '/qr/$elevatorId': typeof QrElevatorIdRoute
   '/tech/route-plan': typeof TechRoutePlanRoute
   '/tech/schedule': typeof TechScheduleRoute
   '/admin/': typeof AdminIndexRoute
-  '/mobile/': typeof MobileIndexRoute
   '/portal/': typeof PortalIndexRoute
   '/tech/': typeof TechIndexRoute
   '/admin/customers/$customerId': typeof AdminCustomersCustomerIdRoute
   '/admin/elevators/$elevatorId': typeof AdminElevatorsElevatorIdRouteWithChildren
   '/admin/jobs/$jobId': typeof AdminJobsJobIdRoute
   '/admin/projects/$projectId': typeof AdminProjectsProjectIdRoute
-  '/mobile/contracts/$contractId': typeof MobileContractsContractIdRoute
-  '/mobile/customers/$customerId': typeof MobileCustomersCustomerIdRoute
-  '/mobile/elevators/$elevatorId': typeof MobileElevatorsElevatorIdRoute
-  '/mobile/inventory/$itemId': typeof MobileInventoryItemIdRoute
-  '/mobile/jobs/$jobId': typeof MobileJobsJobIdRoute
-  '/mobile/leads/$leadId': typeof MobileLeadsLeadIdRoute
-  '/mobile/portal/billing': typeof MobilePortalBillingRoute
-  '/mobile/portal/contracts': typeof MobilePortalContractsRouteWithChildren
-  '/mobile/portal/elevators': typeof MobilePortalElevatorsRouteWithChildren
-  '/mobile/portal/issues': typeof MobilePortalIssuesRouteWithChildren
-  '/mobile/projects/$projectId': typeof MobileProjectsProjectIdRoute
-  '/mobile/tech/route-plan': typeof MobileTechRoutePlanRoute
-  '/mobile/tech/schedule': typeof MobileTechScheduleRoute
+  '/app/admin/approvals': typeof AppAdminApprovalsRoute
+  '/app/admin/contracts': typeof AppAdminContractsRoute
+  '/app/admin/leads': typeof AppAdminLeadsRoute
+  '/app/admin/profile': typeof AppAdminProfileRoute
+  '/app/admin/reports': typeof AppAdminReportsRoute
+  '/app/tech/route-plan': typeof AppTechRoutePlanRoute
+  '/app/tech/schedule': typeof AppTechScheduleRoute
   '/portal/elevators/$elevatorId': typeof PortalElevatorsElevatorIdRoute
-  '/tech/jobs/$jobId': typeof TechJobsJobIdRoute
+  '/tech/jobs/$jobId': typeof TechJobsJobIdRouteWithChildren
+  '/tech/maint/$jobId': typeof TechMaintJobIdRoute
+  '/tech/projects/$projectId': typeof TechProjectsProjectIdRoute
   '/admin/customers/': typeof AdminCustomersIndexRoute
   '/admin/elevators/': typeof AdminElevatorsIndexRoute
   '/admin/inventory/': typeof AdminInventoryIndexRoute
   '/admin/jobs/': typeof AdminJobsIndexRoute
+  '/admin/maintenance/': typeof AdminMaintenanceIndexRoute
   '/admin/projects/': typeof AdminProjectsIndexRoute
-  '/mobile/tech/': typeof MobileTechIndexRoute
+  '/app/admin/': typeof AppAdminIndexRoute
+  '/app/tech/': typeof AppTechIndexRoute
   '/portal/elevators/': typeof PortalElevatorsIndexRoute
   '/tech/jobs/': typeof TechJobsIndexRoute
   '/admin/elevators/$elevatorId/qr': typeof AdminElevatorsElevatorIdQrRoute
-  '/mobile/portal/contracts/$contractId': typeof MobilePortalContractsContractIdRoute
-  '/mobile/portal/elevators/$elevatorId': typeof MobilePortalElevatorsElevatorIdRoute
-  '/mobile/portal/issues/$issueId': typeof MobilePortalIssuesIssueIdRoute
-  '/mobile/tech/jobs/$jobId': typeof MobileTechJobsJobIdRoute
-  '/mobile/tech/jobs/': typeof MobileTechJobsIndexRoute
+  '/app/admin/elevators/$elevatorId': typeof AppAdminElevatorsElevatorIdRoute
+  '/app/admin/jobs/$jobId': typeof AppAdminJobsJobIdRoute
+  '/app/admin/projects/$projectId': typeof AppAdminProjectsProjectIdRoute
+  '/app/tech/jobs/$jobId': typeof AppTechJobsJobIdRouteWithChildren
+  '/app/tech/maint/$jobId': typeof AppTechMaintJobIdRoute
+  '/app/tech/projects/$projectId': typeof AppTechProjectsProjectIdRoute
+  '/tech/jobs/$jobId/maintenance': typeof TechJobsJobIdMaintenanceRoute
+  '/app/admin/elevators/': typeof AppAdminElevatorsIndexRoute
+  '/app/admin/jobs/': typeof AppAdminJobsIndexRoute
+  '/app/admin/projects/': typeof AppAdminProjectsIndexRoute
+  '/app/tech/jobs/': typeof AppTechJobsIndexRoute
+  '/app/tech/jobs/$jobId/maintenance': typeof AppTechJobsJobIdMaintenanceRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/app': typeof AppRouteWithChildren
   '/admin/accounting': typeof AdminAccountingRoute
   '/admin/approvals': typeof AdminApprovalsRoute
   '/admin/contracts': typeof AdminContractsRoute
@@ -516,214 +432,177 @@ export interface FileRoutesByTo {
   '/admin/profile': typeof AdminProfileRoute
   '/admin/reports': typeof AdminReportsRoute
   '/admin/settings': typeof AdminSettingsRoute
-  '/mobile/accounting': typeof MobileAccountingRoute
-  '/mobile/approvals': typeof MobileApprovalsRoute
-  '/mobile/contracts': typeof MobileContractsRouteWithChildren
-  '/mobile/customers': typeof MobileCustomersRouteWithChildren
-  '/mobile/elevators': typeof MobileElevatorsRouteWithChildren
-  '/mobile/hr': typeof MobileHrRoute
-  '/mobile/inventory': typeof MobileInventoryRouteWithChildren
-  '/mobile/jobs': typeof MobileJobsRouteWithChildren
-  '/mobile/leads': typeof MobileLeadsRouteWithChildren
-  '/mobile/portal': typeof MobilePortalRouteWithChildren
-  '/mobile/profile': typeof MobileProfileRoute
-  '/mobile/projects': typeof MobileProjectsRouteWithChildren
-  '/mobile/reports': typeof MobileReportsRoute
-  '/mobile/route-plan': typeof MobileRoutePlanRoute
-  '/mobile/scanner': typeof MobileScannerRoute
-  '/mobile/schedule': typeof MobileScheduleRoute
-  '/mobile/settings': typeof MobileSettingsRoute
-  '/mobile/support': typeof MobileSupportRoute
   '/portal/contracts': typeof PortalContractsRoute
   '/portal/issues': typeof PortalIssuesRoute
   '/qr/$elevatorId': typeof QrElevatorIdRoute
   '/tech/route-plan': typeof TechRoutePlanRoute
   '/tech/schedule': typeof TechScheduleRoute
   '/admin': typeof AdminIndexRoute
-  '/mobile': typeof MobileIndexRoute
   '/portal': typeof PortalIndexRoute
   '/tech': typeof TechIndexRoute
   '/admin/customers/$customerId': typeof AdminCustomersCustomerIdRoute
   '/admin/elevators/$elevatorId': typeof AdminElevatorsElevatorIdRouteWithChildren
   '/admin/jobs/$jobId': typeof AdminJobsJobIdRoute
   '/admin/projects/$projectId': typeof AdminProjectsProjectIdRoute
-  '/mobile/contracts/$contractId': typeof MobileContractsContractIdRoute
-  '/mobile/customers/$customerId': typeof MobileCustomersCustomerIdRoute
-  '/mobile/elevators/$elevatorId': typeof MobileElevatorsElevatorIdRoute
-  '/mobile/inventory/$itemId': typeof MobileInventoryItemIdRoute
-  '/mobile/jobs/$jobId': typeof MobileJobsJobIdRoute
-  '/mobile/leads/$leadId': typeof MobileLeadsLeadIdRoute
-  '/mobile/portal/billing': typeof MobilePortalBillingRoute
-  '/mobile/portal/contracts': typeof MobilePortalContractsRouteWithChildren
-  '/mobile/portal/elevators': typeof MobilePortalElevatorsRouteWithChildren
-  '/mobile/portal/issues': typeof MobilePortalIssuesRouteWithChildren
-  '/mobile/projects/$projectId': typeof MobileProjectsProjectIdRoute
-  '/mobile/tech/route-plan': typeof MobileTechRoutePlanRoute
-  '/mobile/tech/schedule': typeof MobileTechScheduleRoute
+  '/app/admin/approvals': typeof AppAdminApprovalsRoute
+  '/app/admin/contracts': typeof AppAdminContractsRoute
+  '/app/admin/leads': typeof AppAdminLeadsRoute
+  '/app/admin/profile': typeof AppAdminProfileRoute
+  '/app/admin/reports': typeof AppAdminReportsRoute
+  '/app/tech/route-plan': typeof AppTechRoutePlanRoute
+  '/app/tech/schedule': typeof AppTechScheduleRoute
   '/portal/elevators/$elevatorId': typeof PortalElevatorsElevatorIdRoute
-  '/tech/jobs/$jobId': typeof TechJobsJobIdRoute
+  '/tech/jobs/$jobId': typeof TechJobsJobIdRouteWithChildren
+  '/tech/maint/$jobId': typeof TechMaintJobIdRoute
+  '/tech/projects/$projectId': typeof TechProjectsProjectIdRoute
   '/admin/customers': typeof AdminCustomersIndexRoute
   '/admin/elevators': typeof AdminElevatorsIndexRoute
   '/admin/inventory': typeof AdminInventoryIndexRoute
   '/admin/jobs': typeof AdminJobsIndexRoute
+  '/admin/maintenance': typeof AdminMaintenanceIndexRoute
   '/admin/projects': typeof AdminProjectsIndexRoute
-  '/mobile/tech': typeof MobileTechIndexRoute
+  '/app/admin': typeof AppAdminIndexRoute
+  '/app/tech': typeof AppTechIndexRoute
   '/portal/elevators': typeof PortalElevatorsIndexRoute
   '/tech/jobs': typeof TechJobsIndexRoute
   '/admin/elevators/$elevatorId/qr': typeof AdminElevatorsElevatorIdQrRoute
-  '/mobile/portal/contracts/$contractId': typeof MobilePortalContractsContractIdRoute
-  '/mobile/portal/elevators/$elevatorId': typeof MobilePortalElevatorsElevatorIdRoute
-  '/mobile/portal/issues/$issueId': typeof MobilePortalIssuesIssueIdRoute
-  '/mobile/tech/jobs/$jobId': typeof MobileTechJobsJobIdRoute
-  '/mobile/tech/jobs': typeof MobileTechJobsIndexRoute
+  '/app/admin/elevators/$elevatorId': typeof AppAdminElevatorsElevatorIdRoute
+  '/app/admin/jobs/$jobId': typeof AppAdminJobsJobIdRoute
+  '/app/admin/projects/$projectId': typeof AppAdminProjectsProjectIdRoute
+  '/app/tech/jobs/$jobId': typeof AppTechJobsJobIdRouteWithChildren
+  '/app/tech/maint/$jobId': typeof AppTechMaintJobIdRoute
+  '/app/tech/projects/$projectId': typeof AppTechProjectsProjectIdRoute
+  '/tech/jobs/$jobId/maintenance': typeof TechJobsJobIdMaintenanceRoute
+  '/app/admin/elevators': typeof AppAdminElevatorsIndexRoute
+  '/app/admin/jobs': typeof AppAdminJobsIndexRoute
+  '/app/admin/projects': typeof AppAdminProjectsIndexRoute
+  '/app/tech/jobs': typeof AppTechJobsIndexRoute
+  '/app/tech/jobs/$jobId/maintenance': typeof AppTechJobsJobIdMaintenanceRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
+  '/app': typeof AppRouteWithChildren
   '/admin/accounting': typeof AdminAccountingRoute
   '/admin/approvals': typeof AdminApprovalsRoute
   '/admin/contracts': typeof AdminContractsRoute
   '/admin/hr': typeof AdminHrRoute
+  '/admin/jobs': typeof AdminJobsRouteWithChildren
   '/admin/leads': typeof AdminLeadsRoute
   '/admin/profile': typeof AdminProfileRoute
   '/admin/reports': typeof AdminReportsRoute
   '/admin/settings': typeof AdminSettingsRoute
-  '/mobile/accounting': typeof MobileAccountingRoute
-  '/mobile/approvals': typeof MobileApprovalsRoute
-  '/mobile/contracts': typeof MobileContractsRouteWithChildren
-  '/mobile/customers': typeof MobileCustomersRouteWithChildren
-  '/mobile/elevators': typeof MobileElevatorsRouteWithChildren
-  '/mobile/hr': typeof MobileHrRoute
-  '/mobile/inventory': typeof MobileInventoryRouteWithChildren
-  '/mobile/jobs': typeof MobileJobsRouteWithChildren
-  '/mobile/leads': typeof MobileLeadsRouteWithChildren
-  '/mobile/portal': typeof MobilePortalRouteWithChildren
-  '/mobile/profile': typeof MobileProfileRoute
-  '/mobile/projects': typeof MobileProjectsRouteWithChildren
-  '/mobile/reports': typeof MobileReportsRoute
-  '/mobile/route-plan': typeof MobileRoutePlanRoute
-  '/mobile/scanner': typeof MobileScannerRoute
-  '/mobile/schedule': typeof MobileScheduleRoute
-  '/mobile/settings': typeof MobileSettingsRoute
-  '/mobile/support': typeof MobileSupportRoute
   '/portal/contracts': typeof PortalContractsRoute
   '/portal/issues': typeof PortalIssuesRoute
   '/qr/$elevatorId': typeof QrElevatorIdRoute
   '/tech/route-plan': typeof TechRoutePlanRoute
   '/tech/schedule': typeof TechScheduleRoute
   '/admin/': typeof AdminIndexRoute
-  '/mobile/': typeof MobileIndexRoute
   '/portal/': typeof PortalIndexRoute
   '/tech/': typeof TechIndexRoute
   '/admin/customers/$customerId': typeof AdminCustomersCustomerIdRoute
   '/admin/elevators/$elevatorId': typeof AdminElevatorsElevatorIdRouteWithChildren
   '/admin/jobs/$jobId': typeof AdminJobsJobIdRoute
   '/admin/projects/$projectId': typeof AdminProjectsProjectIdRoute
-  '/mobile/contracts/$contractId': typeof MobileContractsContractIdRoute
-  '/mobile/customers/$customerId': typeof MobileCustomersCustomerIdRoute
-  '/mobile/elevators/$elevatorId': typeof MobileElevatorsElevatorIdRoute
-  '/mobile/inventory/$itemId': typeof MobileInventoryItemIdRoute
-  '/mobile/jobs/$jobId': typeof MobileJobsJobIdRoute
-  '/mobile/leads/$leadId': typeof MobileLeadsLeadIdRoute
-  '/mobile/portal/billing': typeof MobilePortalBillingRoute
-  '/mobile/portal/contracts': typeof MobilePortalContractsRouteWithChildren
-  '/mobile/portal/elevators': typeof MobilePortalElevatorsRouteWithChildren
-  '/mobile/portal/issues': typeof MobilePortalIssuesRouteWithChildren
-  '/mobile/projects/$projectId': typeof MobileProjectsProjectIdRoute
-  '/mobile/tech/route-plan': typeof MobileTechRoutePlanRoute
-  '/mobile/tech/schedule': typeof MobileTechScheduleRoute
+  '/app/admin/approvals': typeof AppAdminApprovalsRoute
+  '/app/admin/contracts': typeof AppAdminContractsRoute
+  '/app/admin/leads': typeof AppAdminLeadsRoute
+  '/app/admin/profile': typeof AppAdminProfileRoute
+  '/app/admin/reports': typeof AppAdminReportsRoute
+  '/app/tech/route-plan': typeof AppTechRoutePlanRoute
+  '/app/tech/schedule': typeof AppTechScheduleRoute
   '/portal/elevators/$elevatorId': typeof PortalElevatorsElevatorIdRoute
-  '/tech/jobs/$jobId': typeof TechJobsJobIdRoute
+  '/tech/jobs/$jobId': typeof TechJobsJobIdRouteWithChildren
+  '/tech/maint/$jobId': typeof TechMaintJobIdRoute
+  '/tech/projects/$projectId': typeof TechProjectsProjectIdRoute
   '/admin/customers/': typeof AdminCustomersIndexRoute
   '/admin/elevators/': typeof AdminElevatorsIndexRoute
   '/admin/inventory/': typeof AdminInventoryIndexRoute
   '/admin/jobs/': typeof AdminJobsIndexRoute
+  '/admin/maintenance/': typeof AdminMaintenanceIndexRoute
   '/admin/projects/': typeof AdminProjectsIndexRoute
-  '/mobile/tech/': typeof MobileTechIndexRoute
+  '/app/admin/': typeof AppAdminIndexRoute
+  '/app/tech/': typeof AppTechIndexRoute
   '/portal/elevators/': typeof PortalElevatorsIndexRoute
   '/tech/jobs/': typeof TechJobsIndexRoute
   '/admin/elevators/$elevatorId/qr': typeof AdminElevatorsElevatorIdQrRoute
-  '/mobile/portal/contracts/$contractId': typeof MobilePortalContractsContractIdRoute
-  '/mobile/portal/elevators/$elevatorId': typeof MobilePortalElevatorsElevatorIdRoute
-  '/mobile/portal/issues/$issueId': typeof MobilePortalIssuesIssueIdRoute
-  '/mobile/tech/jobs/$jobId': typeof MobileTechJobsJobIdRoute
-  '/mobile/tech/jobs/': typeof MobileTechJobsIndexRoute
+  '/app/admin/elevators/$elevatorId': typeof AppAdminElevatorsElevatorIdRoute
+  '/app/admin/jobs/$jobId': typeof AppAdminJobsJobIdRoute
+  '/app/admin/projects/$projectId': typeof AppAdminProjectsProjectIdRoute
+  '/app/tech/jobs/$jobId': typeof AppTechJobsJobIdRouteWithChildren
+  '/app/tech/maint/$jobId': typeof AppTechMaintJobIdRoute
+  '/app/tech/projects/$projectId': typeof AppTechProjectsProjectIdRoute
+  '/tech/jobs/$jobId/maintenance': typeof TechJobsJobIdMaintenanceRoute
+  '/app/admin/elevators/': typeof AppAdminElevatorsIndexRoute
+  '/app/admin/jobs/': typeof AppAdminJobsIndexRoute
+  '/app/admin/projects/': typeof AppAdminProjectsIndexRoute
+  '/app/tech/jobs/': typeof AppTechJobsIndexRoute
+  '/app/tech/jobs/$jobId/maintenance': typeof AppTechJobsJobIdMaintenanceRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
   fullPaths:
     | '/'
+    | '/app'
     | '/admin/accounting'
     | '/admin/approvals'
     | '/admin/contracts'
     | '/admin/hr'
+    | '/admin/jobs'
     | '/admin/leads'
     | '/admin/profile'
     | '/admin/reports'
     | '/admin/settings'
-    | '/mobile/accounting'
-    | '/mobile/approvals'
-    | '/mobile/contracts'
-    | '/mobile/customers'
-    | '/mobile/elevators'
-    | '/mobile/hr'
-    | '/mobile/inventory'
-    | '/mobile/jobs'
-    | '/mobile/leads'
-    | '/mobile/portal'
-    | '/mobile/profile'
-    | '/mobile/projects'
-    | '/mobile/reports'
-    | '/mobile/route-plan'
-    | '/mobile/scanner'
-    | '/mobile/schedule'
-    | '/mobile/settings'
-    | '/mobile/support'
     | '/portal/contracts'
     | '/portal/issues'
     | '/qr/$elevatorId'
     | '/tech/route-plan'
     | '/tech/schedule'
     | '/admin/'
-    | '/mobile/'
     | '/portal/'
     | '/tech/'
     | '/admin/customers/$customerId'
     | '/admin/elevators/$elevatorId'
     | '/admin/jobs/$jobId'
     | '/admin/projects/$projectId'
-    | '/mobile/contracts/$contractId'
-    | '/mobile/customers/$customerId'
-    | '/mobile/elevators/$elevatorId'
-    | '/mobile/inventory/$itemId'
-    | '/mobile/jobs/$jobId'
-    | '/mobile/leads/$leadId'
-    | '/mobile/portal/billing'
-    | '/mobile/portal/contracts'
-    | '/mobile/portal/elevators'
-    | '/mobile/portal/issues'
-    | '/mobile/projects/$projectId'
-    | '/mobile/tech/route-plan'
-    | '/mobile/tech/schedule'
+    | '/app/admin/approvals'
+    | '/app/admin/contracts'
+    | '/app/admin/leads'
+    | '/app/admin/profile'
+    | '/app/admin/reports'
+    | '/app/tech/route-plan'
+    | '/app/tech/schedule'
     | '/portal/elevators/$elevatorId'
     | '/tech/jobs/$jobId'
+    | '/tech/maint/$jobId'
+    | '/tech/projects/$projectId'
     | '/admin/customers/'
     | '/admin/elevators/'
     | '/admin/inventory/'
     | '/admin/jobs/'
+    | '/admin/maintenance/'
     | '/admin/projects/'
-    | '/mobile/tech/'
+    | '/app/admin/'
+    | '/app/tech/'
     | '/portal/elevators/'
     | '/tech/jobs/'
     | '/admin/elevators/$elevatorId/qr'
-    | '/mobile/portal/contracts/$contractId'
-    | '/mobile/portal/elevators/$elevatorId'
-    | '/mobile/portal/issues/$issueId'
-    | '/mobile/tech/jobs/$jobId'
-    | '/mobile/tech/jobs/'
+    | '/app/admin/elevators/$elevatorId'
+    | '/app/admin/jobs/$jobId'
+    | '/app/admin/projects/$projectId'
+    | '/app/tech/jobs/$jobId'
+    | '/app/tech/maint/$jobId'
+    | '/app/tech/projects/$projectId'
+    | '/tech/jobs/$jobId/maintenance'
+    | '/app/admin/elevators/'
+    | '/app/admin/jobs/'
+    | '/app/admin/projects/'
+    | '/app/tech/jobs/'
+    | '/app/tech/jobs/$jobId/maintenance'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
+    | '/app'
     | '/admin/accounting'
     | '/admin/approvals'
     | '/admin/contracts'
@@ -732,198 +611,158 @@ export interface FileRouteTypes {
     | '/admin/profile'
     | '/admin/reports'
     | '/admin/settings'
-    | '/mobile/accounting'
-    | '/mobile/approvals'
-    | '/mobile/contracts'
-    | '/mobile/customers'
-    | '/mobile/elevators'
-    | '/mobile/hr'
-    | '/mobile/inventory'
-    | '/mobile/jobs'
-    | '/mobile/leads'
-    | '/mobile/portal'
-    | '/mobile/profile'
-    | '/mobile/projects'
-    | '/mobile/reports'
-    | '/mobile/route-plan'
-    | '/mobile/scanner'
-    | '/mobile/schedule'
-    | '/mobile/settings'
-    | '/mobile/support'
     | '/portal/contracts'
     | '/portal/issues'
     | '/qr/$elevatorId'
     | '/tech/route-plan'
     | '/tech/schedule'
     | '/admin'
-    | '/mobile'
     | '/portal'
     | '/tech'
     | '/admin/customers/$customerId'
     | '/admin/elevators/$elevatorId'
     | '/admin/jobs/$jobId'
     | '/admin/projects/$projectId'
-    | '/mobile/contracts/$contractId'
-    | '/mobile/customers/$customerId'
-    | '/mobile/elevators/$elevatorId'
-    | '/mobile/inventory/$itemId'
-    | '/mobile/jobs/$jobId'
-    | '/mobile/leads/$leadId'
-    | '/mobile/portal/billing'
-    | '/mobile/portal/contracts'
-    | '/mobile/portal/elevators'
-    | '/mobile/portal/issues'
-    | '/mobile/projects/$projectId'
-    | '/mobile/tech/route-plan'
-    | '/mobile/tech/schedule'
+    | '/app/admin/approvals'
+    | '/app/admin/contracts'
+    | '/app/admin/leads'
+    | '/app/admin/profile'
+    | '/app/admin/reports'
+    | '/app/tech/route-plan'
+    | '/app/tech/schedule'
     | '/portal/elevators/$elevatorId'
     | '/tech/jobs/$jobId'
+    | '/tech/maint/$jobId'
+    | '/tech/projects/$projectId'
     | '/admin/customers'
     | '/admin/elevators'
     | '/admin/inventory'
     | '/admin/jobs'
+    | '/admin/maintenance'
     | '/admin/projects'
-    | '/mobile/tech'
+    | '/app/admin'
+    | '/app/tech'
     | '/portal/elevators'
     | '/tech/jobs'
     | '/admin/elevators/$elevatorId/qr'
-    | '/mobile/portal/contracts/$contractId'
-    | '/mobile/portal/elevators/$elevatorId'
-    | '/mobile/portal/issues/$issueId'
-    | '/mobile/tech/jobs/$jobId'
-    | '/mobile/tech/jobs'
+    | '/app/admin/elevators/$elevatorId'
+    | '/app/admin/jobs/$jobId'
+    | '/app/admin/projects/$projectId'
+    | '/app/tech/jobs/$jobId'
+    | '/app/tech/maint/$jobId'
+    | '/app/tech/projects/$projectId'
+    | '/tech/jobs/$jobId/maintenance'
+    | '/app/admin/elevators'
+    | '/app/admin/jobs'
+    | '/app/admin/projects'
+    | '/app/tech/jobs'
+    | '/app/tech/jobs/$jobId/maintenance'
   id:
     | '__root__'
     | '/'
+    | '/app'
     | '/admin/accounting'
     | '/admin/approvals'
     | '/admin/contracts'
     | '/admin/hr'
+    | '/admin/jobs'
     | '/admin/leads'
     | '/admin/profile'
     | '/admin/reports'
     | '/admin/settings'
-    | '/mobile/accounting'
-    | '/mobile/approvals'
-    | '/mobile/contracts'
-    | '/mobile/customers'
-    | '/mobile/elevators'
-    | '/mobile/hr'
-    | '/mobile/inventory'
-    | '/mobile/jobs'
-    | '/mobile/leads'
-    | '/mobile/portal'
-    | '/mobile/profile'
-    | '/mobile/projects'
-    | '/mobile/reports'
-    | '/mobile/route-plan'
-    | '/mobile/scanner'
-    | '/mobile/schedule'
-    | '/mobile/settings'
-    | '/mobile/support'
     | '/portal/contracts'
     | '/portal/issues'
     | '/qr/$elevatorId'
     | '/tech/route-plan'
     | '/tech/schedule'
     | '/admin/'
-    | '/mobile/'
     | '/portal/'
     | '/tech/'
     | '/admin/customers/$customerId'
     | '/admin/elevators/$elevatorId'
     | '/admin/jobs/$jobId'
     | '/admin/projects/$projectId'
-    | '/mobile/contracts/$contractId'
-    | '/mobile/customers/$customerId'
-    | '/mobile/elevators/$elevatorId'
-    | '/mobile/inventory/$itemId'
-    | '/mobile/jobs/$jobId'
-    | '/mobile/leads/$leadId'
-    | '/mobile/portal/billing'
-    | '/mobile/portal/contracts'
-    | '/mobile/portal/elevators'
-    | '/mobile/portal/issues'
-    | '/mobile/projects/$projectId'
-    | '/mobile/tech/route-plan'
-    | '/mobile/tech/schedule'
+    | '/app/admin/approvals'
+    | '/app/admin/contracts'
+    | '/app/admin/leads'
+    | '/app/admin/profile'
+    | '/app/admin/reports'
+    | '/app/tech/route-plan'
+    | '/app/tech/schedule'
     | '/portal/elevators/$elevatorId'
     | '/tech/jobs/$jobId'
+    | '/tech/maint/$jobId'
+    | '/tech/projects/$projectId'
     | '/admin/customers/'
     | '/admin/elevators/'
     | '/admin/inventory/'
     | '/admin/jobs/'
+    | '/admin/maintenance/'
     | '/admin/projects/'
-    | '/mobile/tech/'
+    | '/app/admin/'
+    | '/app/tech/'
     | '/portal/elevators/'
     | '/tech/jobs/'
     | '/admin/elevators/$elevatorId/qr'
-    | '/mobile/portal/contracts/$contractId'
-    | '/mobile/portal/elevators/$elevatorId'
-    | '/mobile/portal/issues/$issueId'
-    | '/mobile/tech/jobs/$jobId'
-    | '/mobile/tech/jobs/'
+    | '/app/admin/elevators/$elevatorId'
+    | '/app/admin/jobs/$jobId'
+    | '/app/admin/projects/$projectId'
+    | '/app/tech/jobs/$jobId'
+    | '/app/tech/maint/$jobId'
+    | '/app/tech/projects/$projectId'
+    | '/tech/jobs/$jobId/maintenance'
+    | '/app/admin/elevators/'
+    | '/app/admin/jobs/'
+    | '/app/admin/projects/'
+    | '/app/tech/jobs/'
+    | '/app/tech/jobs/$jobId/maintenance'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
+  AppRoute: typeof AppRouteWithChildren
   AdminAccountingRoute: typeof AdminAccountingRoute
   AdminApprovalsRoute: typeof AdminApprovalsRoute
   AdminContractsRoute: typeof AdminContractsRoute
   AdminHrRoute: typeof AdminHrRoute
+  AdminJobsRoute: typeof AdminJobsRouteWithChildren
   AdminLeadsRoute: typeof AdminLeadsRoute
   AdminProfileRoute: typeof AdminProfileRoute
   AdminReportsRoute: typeof AdminReportsRoute
   AdminSettingsRoute: typeof AdminSettingsRoute
-  MobileAccountingRoute: typeof MobileAccountingRoute
-  MobileApprovalsRoute: typeof MobileApprovalsRoute
-  MobileContractsRoute: typeof MobileContractsRouteWithChildren
-  MobileCustomersRoute: typeof MobileCustomersRouteWithChildren
-  MobileElevatorsRoute: typeof MobileElevatorsRouteWithChildren
-  MobileHrRoute: typeof MobileHrRoute
-  MobileInventoryRoute: typeof MobileInventoryRouteWithChildren
-  MobileJobsRoute: typeof MobileJobsRouteWithChildren
-  MobileLeadsRoute: typeof MobileLeadsRouteWithChildren
-  MobilePortalRoute: typeof MobilePortalRouteWithChildren
-  MobileProfileRoute: typeof MobileProfileRoute
-  MobileProjectsRoute: typeof MobileProjectsRouteWithChildren
-  MobileReportsRoute: typeof MobileReportsRoute
-  MobileRoutePlanRoute: typeof MobileRoutePlanRoute
-  MobileScannerRoute: typeof MobileScannerRoute
-  MobileScheduleRoute: typeof MobileScheduleRoute
-  MobileSettingsRoute: typeof MobileSettingsRoute
-  MobileSupportRoute: typeof MobileSupportRoute
   PortalContractsRoute: typeof PortalContractsRoute
   PortalIssuesRoute: typeof PortalIssuesRoute
   QrElevatorIdRoute: typeof QrElevatorIdRoute
   TechRoutePlanRoute: typeof TechRoutePlanRoute
   TechScheduleRoute: typeof TechScheduleRoute
   AdminIndexRoute: typeof AdminIndexRoute
-  MobileIndexRoute: typeof MobileIndexRoute
   PortalIndexRoute: typeof PortalIndexRoute
   TechIndexRoute: typeof TechIndexRoute
   AdminCustomersCustomerIdRoute: typeof AdminCustomersCustomerIdRoute
   AdminElevatorsElevatorIdRoute: typeof AdminElevatorsElevatorIdRouteWithChildren
-  AdminJobsJobIdRoute: typeof AdminJobsJobIdRoute
   AdminProjectsProjectIdRoute: typeof AdminProjectsProjectIdRoute
-  MobileTechRoutePlanRoute: typeof MobileTechRoutePlanRoute
-  MobileTechScheduleRoute: typeof MobileTechScheduleRoute
   PortalElevatorsElevatorIdRoute: typeof PortalElevatorsElevatorIdRoute
-  TechJobsJobIdRoute: typeof TechJobsJobIdRoute
+  TechJobsJobIdRoute: typeof TechJobsJobIdRouteWithChildren
+  TechMaintJobIdRoute: typeof TechMaintJobIdRoute
+  TechProjectsProjectIdRoute: typeof TechProjectsProjectIdRoute
   AdminCustomersIndexRoute: typeof AdminCustomersIndexRoute
   AdminElevatorsIndexRoute: typeof AdminElevatorsIndexRoute
   AdminInventoryIndexRoute: typeof AdminInventoryIndexRoute
-  AdminJobsIndexRoute: typeof AdminJobsIndexRoute
+  AdminMaintenanceIndexRoute: typeof AdminMaintenanceIndexRoute
   AdminProjectsIndexRoute: typeof AdminProjectsIndexRoute
-  MobileTechIndexRoute: typeof MobileTechIndexRoute
   PortalElevatorsIndexRoute: typeof PortalElevatorsIndexRoute
   TechJobsIndexRoute: typeof TechJobsIndexRoute
-  MobileTechJobsJobIdRoute: typeof MobileTechJobsJobIdRoute
-  MobileTechJobsIndexRoute: typeof MobileTechJobsIndexRoute
 }
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
+    '/app': {
+      id: '/app'
+      path: '/app'
+      fullPath: '/app'
+      preLoaderRoute: typeof AppRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/': {
       id: '/'
       path: '/'
@@ -943,13 +782,6 @@ declare module '@tanstack/react-router' {
       path: '/portal'
       fullPath: '/portal/'
       preLoaderRoute: typeof PortalIndexRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/mobile/': {
-      id: '/mobile/'
-      path: '/mobile'
-      fullPath: '/mobile/'
-      preLoaderRoute: typeof MobileIndexRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/admin/': {
@@ -994,132 +826,6 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof PortalContractsRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/mobile/support': {
-      id: '/mobile/support'
-      path: '/mobile/support'
-      fullPath: '/mobile/support'
-      preLoaderRoute: typeof MobileSupportRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/mobile/settings': {
-      id: '/mobile/settings'
-      path: '/mobile/settings'
-      fullPath: '/mobile/settings'
-      preLoaderRoute: typeof MobileSettingsRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/mobile/schedule': {
-      id: '/mobile/schedule'
-      path: '/mobile/schedule'
-      fullPath: '/mobile/schedule'
-      preLoaderRoute: typeof MobileScheduleRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/mobile/scanner': {
-      id: '/mobile/scanner'
-      path: '/mobile/scanner'
-      fullPath: '/mobile/scanner'
-      preLoaderRoute: typeof MobileScannerRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/mobile/route-plan': {
-      id: '/mobile/route-plan'
-      path: '/mobile/route-plan'
-      fullPath: '/mobile/route-plan'
-      preLoaderRoute: typeof MobileRoutePlanRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/mobile/reports': {
-      id: '/mobile/reports'
-      path: '/mobile/reports'
-      fullPath: '/mobile/reports'
-      preLoaderRoute: typeof MobileReportsRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/mobile/projects': {
-      id: '/mobile/projects'
-      path: '/mobile/projects'
-      fullPath: '/mobile/projects'
-      preLoaderRoute: typeof MobileProjectsRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/mobile/profile': {
-      id: '/mobile/profile'
-      path: '/mobile/profile'
-      fullPath: '/mobile/profile'
-      preLoaderRoute: typeof MobileProfileRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/mobile/portal': {
-      id: '/mobile/portal'
-      path: '/mobile/portal'
-      fullPath: '/mobile/portal'
-      preLoaderRoute: typeof MobilePortalRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/mobile/leads': {
-      id: '/mobile/leads'
-      path: '/mobile/leads'
-      fullPath: '/mobile/leads'
-      preLoaderRoute: typeof MobileLeadsRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/mobile/jobs': {
-      id: '/mobile/jobs'
-      path: '/mobile/jobs'
-      fullPath: '/mobile/jobs'
-      preLoaderRoute: typeof MobileJobsRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/mobile/inventory': {
-      id: '/mobile/inventory'
-      path: '/mobile/inventory'
-      fullPath: '/mobile/inventory'
-      preLoaderRoute: typeof MobileInventoryRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/mobile/hr': {
-      id: '/mobile/hr'
-      path: '/mobile/hr'
-      fullPath: '/mobile/hr'
-      preLoaderRoute: typeof MobileHrRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/mobile/elevators': {
-      id: '/mobile/elevators'
-      path: '/mobile/elevators'
-      fullPath: '/mobile/elevators'
-      preLoaderRoute: typeof MobileElevatorsRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/mobile/customers': {
-      id: '/mobile/customers'
-      path: '/mobile/customers'
-      fullPath: '/mobile/customers'
-      preLoaderRoute: typeof MobileCustomersRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/mobile/contracts': {
-      id: '/mobile/contracts'
-      path: '/mobile/contracts'
-      fullPath: '/mobile/contracts'
-      preLoaderRoute: typeof MobileContractsRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/mobile/approvals': {
-      id: '/mobile/approvals'
-      path: '/mobile/approvals'
-      fullPath: '/mobile/approvals'
-      preLoaderRoute: typeof MobileApprovalsRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/mobile/accounting': {
-      id: '/mobile/accounting'
-      path: '/mobile/accounting'
-      fullPath: '/mobile/accounting'
-      preLoaderRoute: typeof MobileAccountingRouteImport
-      parentRoute: typeof rootRouteImport
-    }
     '/admin/settings': {
       id: '/admin/settings'
       path: '/admin/settings'
@@ -1146,6 +852,13 @@ declare module '@tanstack/react-router' {
       path: '/admin/leads'
       fullPath: '/admin/leads'
       preLoaderRoute: typeof AdminLeadsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/admin/jobs': {
+      id: '/admin/jobs'
+      path: '/admin/jobs'
+      fullPath: '/admin/jobs'
+      preLoaderRoute: typeof AdminJobsRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/admin/hr': {
@@ -1190,12 +903,19 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof PortalElevatorsIndexRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/mobile/tech/': {
-      id: '/mobile/tech/'
-      path: '/mobile/tech'
-      fullPath: '/mobile/tech/'
-      preLoaderRoute: typeof MobileTechIndexRouteImport
-      parentRoute: typeof rootRouteImport
+    '/app/tech/': {
+      id: '/app/tech/'
+      path: '/tech'
+      fullPath: '/app/tech/'
+      preLoaderRoute: typeof AppTechIndexRouteImport
+      parentRoute: typeof AppRoute
+    }
+    '/app/admin/': {
+      id: '/app/admin/'
+      path: '/admin'
+      fullPath: '/app/admin/'
+      preLoaderRoute: typeof AppAdminIndexRouteImport
+      parentRoute: typeof AppRoute
     }
     '/admin/projects/': {
       id: '/admin/projects/'
@@ -1204,12 +924,19 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AdminProjectsIndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/admin/maintenance/': {
+      id: '/admin/maintenance/'
+      path: '/admin/maintenance'
+      fullPath: '/admin/maintenance/'
+      preLoaderRoute: typeof AdminMaintenanceIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/admin/jobs/': {
       id: '/admin/jobs/'
-      path: '/admin/jobs'
+      path: '/'
       fullPath: '/admin/jobs/'
       preLoaderRoute: typeof AdminJobsIndexRouteImport
-      parentRoute: typeof rootRouteImport
+      parentRoute: typeof AdminJobsRoute
     }
     '/admin/inventory/': {
       id: '/admin/inventory/'
@@ -1232,6 +959,20 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AdminCustomersIndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/tech/projects/$projectId': {
+      id: '/tech/projects/$projectId'
+      path: '/tech/projects/$projectId'
+      fullPath: '/tech/projects/$projectId'
+      preLoaderRoute: typeof TechProjectsProjectIdRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/tech/maint/$jobId': {
+      id: '/tech/maint/$jobId'
+      path: '/tech/maint/$jobId'
+      fullPath: '/tech/maint/$jobId'
+      preLoaderRoute: typeof TechMaintJobIdRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/tech/jobs/$jobId': {
       id: '/tech/jobs/$jobId'
       path: '/tech/jobs/$jobId'
@@ -1246,96 +987,54 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof PortalElevatorsElevatorIdRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/mobile/tech/schedule': {
-      id: '/mobile/tech/schedule'
-      path: '/mobile/tech/schedule'
-      fullPath: '/mobile/tech/schedule'
-      preLoaderRoute: typeof MobileTechScheduleRouteImport
-      parentRoute: typeof rootRouteImport
+    '/app/tech/schedule': {
+      id: '/app/tech/schedule'
+      path: '/tech/schedule'
+      fullPath: '/app/tech/schedule'
+      preLoaderRoute: typeof AppTechScheduleRouteImport
+      parentRoute: typeof AppRoute
     }
-    '/mobile/tech/route-plan': {
-      id: '/mobile/tech/route-plan'
-      path: '/mobile/tech/route-plan'
-      fullPath: '/mobile/tech/route-plan'
-      preLoaderRoute: typeof MobileTechRoutePlanRouteImport
-      parentRoute: typeof rootRouteImport
+    '/app/tech/route-plan': {
+      id: '/app/tech/route-plan'
+      path: '/tech/route-plan'
+      fullPath: '/app/tech/route-plan'
+      preLoaderRoute: typeof AppTechRoutePlanRouteImport
+      parentRoute: typeof AppRoute
     }
-    '/mobile/projects/$projectId': {
-      id: '/mobile/projects/$projectId'
-      path: '/$projectId'
-      fullPath: '/mobile/projects/$projectId'
-      preLoaderRoute: typeof MobileProjectsProjectIdRouteImport
-      parentRoute: typeof MobileProjectsRoute
+    '/app/admin/reports': {
+      id: '/app/admin/reports'
+      path: '/admin/reports'
+      fullPath: '/app/admin/reports'
+      preLoaderRoute: typeof AppAdminReportsRouteImport
+      parentRoute: typeof AppRoute
     }
-    '/mobile/portal/issues': {
-      id: '/mobile/portal/issues'
-      path: '/issues'
-      fullPath: '/mobile/portal/issues'
-      preLoaderRoute: typeof MobilePortalIssuesRouteImport
-      parentRoute: typeof MobilePortalRoute
+    '/app/admin/profile': {
+      id: '/app/admin/profile'
+      path: '/admin/profile'
+      fullPath: '/app/admin/profile'
+      preLoaderRoute: typeof AppAdminProfileRouteImport
+      parentRoute: typeof AppRoute
     }
-    '/mobile/portal/elevators': {
-      id: '/mobile/portal/elevators'
-      path: '/elevators'
-      fullPath: '/mobile/portal/elevators'
-      preLoaderRoute: typeof MobilePortalElevatorsRouteImport
-      parentRoute: typeof MobilePortalRoute
+    '/app/admin/leads': {
+      id: '/app/admin/leads'
+      path: '/admin/leads'
+      fullPath: '/app/admin/leads'
+      preLoaderRoute: typeof AppAdminLeadsRouteImport
+      parentRoute: typeof AppRoute
     }
-    '/mobile/portal/contracts': {
-      id: '/mobile/portal/contracts'
-      path: '/contracts'
-      fullPath: '/mobile/portal/contracts'
-      preLoaderRoute: typeof MobilePortalContractsRouteImport
-      parentRoute: typeof MobilePortalRoute
+    '/app/admin/contracts': {
+      id: '/app/admin/contracts'
+      path: '/admin/contracts'
+      fullPath: '/app/admin/contracts'
+      preLoaderRoute: typeof AppAdminContractsRouteImport
+      parentRoute: typeof AppRoute
     }
-    '/mobile/portal/billing': {
-      id: '/mobile/portal/billing'
-      path: '/billing'
-      fullPath: '/mobile/portal/billing'
-      preLoaderRoute: typeof MobilePortalBillingRouteImport
-      parentRoute: typeof MobilePortalRoute
-    }
-    '/mobile/leads/$leadId': {
-      id: '/mobile/leads/$leadId'
-      path: '/$leadId'
-      fullPath: '/mobile/leads/$leadId'
-      preLoaderRoute: typeof MobileLeadsLeadIdRouteImport
-      parentRoute: typeof MobileLeadsRoute
-    }
-    '/mobile/jobs/$jobId': {
-      id: '/mobile/jobs/$jobId'
-      path: '/$jobId'
-      fullPath: '/mobile/jobs/$jobId'
-      preLoaderRoute: typeof MobileJobsJobIdRouteImport
-      parentRoute: typeof MobileJobsRoute
-    }
-    '/mobile/inventory/$itemId': {
-      id: '/mobile/inventory/$itemId'
-      path: '/$itemId'
-      fullPath: '/mobile/inventory/$itemId'
-      preLoaderRoute: typeof MobileInventoryItemIdRouteImport
-      parentRoute: typeof MobileInventoryRoute
-    }
-    '/mobile/elevators/$elevatorId': {
-      id: '/mobile/elevators/$elevatorId'
-      path: '/$elevatorId'
-      fullPath: '/mobile/elevators/$elevatorId'
-      preLoaderRoute: typeof MobileElevatorsElevatorIdRouteImport
-      parentRoute: typeof MobileElevatorsRoute
-    }
-    '/mobile/customers/$customerId': {
-      id: '/mobile/customers/$customerId'
-      path: '/$customerId'
-      fullPath: '/mobile/customers/$customerId'
-      preLoaderRoute: typeof MobileCustomersCustomerIdRouteImport
-      parentRoute: typeof MobileCustomersRoute
-    }
-    '/mobile/contracts/$contractId': {
-      id: '/mobile/contracts/$contractId'
-      path: '/$contractId'
-      fullPath: '/mobile/contracts/$contractId'
-      preLoaderRoute: typeof MobileContractsContractIdRouteImport
-      parentRoute: typeof MobileContractsRoute
+    '/app/admin/approvals': {
+      id: '/app/admin/approvals'
+      path: '/admin/approvals'
+      fullPath: '/app/admin/approvals'
+      preLoaderRoute: typeof AppAdminApprovalsRouteImport
+      parentRoute: typeof AppRoute
     }
     '/admin/projects/$projectId': {
       id: '/admin/projects/$projectId'
@@ -1346,10 +1045,10 @@ declare module '@tanstack/react-router' {
     }
     '/admin/jobs/$jobId': {
       id: '/admin/jobs/$jobId'
-      path: '/admin/jobs/$jobId'
+      path: '/$jobId'
       fullPath: '/admin/jobs/$jobId'
       preLoaderRoute: typeof AdminJobsJobIdRouteImport
-      parentRoute: typeof rootRouteImport
+      parentRoute: typeof AdminJobsRoute
     }
     '/admin/elevators/$elevatorId': {
       id: '/admin/elevators/$elevatorId'
@@ -1365,40 +1064,82 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AdminCustomersCustomerIdRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/mobile/tech/jobs/': {
-      id: '/mobile/tech/jobs/'
-      path: '/mobile/tech/jobs'
-      fullPath: '/mobile/tech/jobs/'
-      preLoaderRoute: typeof MobileTechJobsIndexRouteImport
-      parentRoute: typeof rootRouteImport
+    '/app/tech/jobs/': {
+      id: '/app/tech/jobs/'
+      path: '/tech/jobs'
+      fullPath: '/app/tech/jobs/'
+      preLoaderRoute: typeof AppTechJobsIndexRouteImport
+      parentRoute: typeof AppRoute
     }
-    '/mobile/tech/jobs/$jobId': {
-      id: '/mobile/tech/jobs/$jobId'
-      path: '/mobile/tech/jobs/$jobId'
-      fullPath: '/mobile/tech/jobs/$jobId'
-      preLoaderRoute: typeof MobileTechJobsJobIdRouteImport
-      parentRoute: typeof rootRouteImport
+    '/app/admin/projects/': {
+      id: '/app/admin/projects/'
+      path: '/admin/projects'
+      fullPath: '/app/admin/projects/'
+      preLoaderRoute: typeof AppAdminProjectsIndexRouteImport
+      parentRoute: typeof AppRoute
     }
-    '/mobile/portal/issues/$issueId': {
-      id: '/mobile/portal/issues/$issueId'
-      path: '/$issueId'
-      fullPath: '/mobile/portal/issues/$issueId'
-      preLoaderRoute: typeof MobilePortalIssuesIssueIdRouteImport
-      parentRoute: typeof MobilePortalIssuesRoute
+    '/app/admin/jobs/': {
+      id: '/app/admin/jobs/'
+      path: '/admin/jobs'
+      fullPath: '/app/admin/jobs/'
+      preLoaderRoute: typeof AppAdminJobsIndexRouteImport
+      parentRoute: typeof AppRoute
     }
-    '/mobile/portal/elevators/$elevatorId': {
-      id: '/mobile/portal/elevators/$elevatorId'
-      path: '/$elevatorId'
-      fullPath: '/mobile/portal/elevators/$elevatorId'
-      preLoaderRoute: typeof MobilePortalElevatorsElevatorIdRouteImport
-      parentRoute: typeof MobilePortalElevatorsRoute
+    '/app/admin/elevators/': {
+      id: '/app/admin/elevators/'
+      path: '/admin/elevators'
+      fullPath: '/app/admin/elevators/'
+      preLoaderRoute: typeof AppAdminElevatorsIndexRouteImport
+      parentRoute: typeof AppRoute
     }
-    '/mobile/portal/contracts/$contractId': {
-      id: '/mobile/portal/contracts/$contractId'
-      path: '/$contractId'
-      fullPath: '/mobile/portal/contracts/$contractId'
-      preLoaderRoute: typeof MobilePortalContractsContractIdRouteImport
-      parentRoute: typeof MobilePortalContractsRoute
+    '/tech/jobs/$jobId/maintenance': {
+      id: '/tech/jobs/$jobId/maintenance'
+      path: '/maintenance'
+      fullPath: '/tech/jobs/$jobId/maintenance'
+      preLoaderRoute: typeof TechJobsJobIdMaintenanceRouteImport
+      parentRoute: typeof TechJobsJobIdRoute
+    }
+    '/app/tech/projects/$projectId': {
+      id: '/app/tech/projects/$projectId'
+      path: '/tech/projects/$projectId'
+      fullPath: '/app/tech/projects/$projectId'
+      preLoaderRoute: typeof AppTechProjectsProjectIdRouteImport
+      parentRoute: typeof AppRoute
+    }
+    '/app/tech/maint/$jobId': {
+      id: '/app/tech/maint/$jobId'
+      path: '/tech/maint/$jobId'
+      fullPath: '/app/tech/maint/$jobId'
+      preLoaderRoute: typeof AppTechMaintJobIdRouteImport
+      parentRoute: typeof AppRoute
+    }
+    '/app/tech/jobs/$jobId': {
+      id: '/app/tech/jobs/$jobId'
+      path: '/tech/jobs/$jobId'
+      fullPath: '/app/tech/jobs/$jobId'
+      preLoaderRoute: typeof AppTechJobsJobIdRouteImport
+      parentRoute: typeof AppRoute
+    }
+    '/app/admin/projects/$projectId': {
+      id: '/app/admin/projects/$projectId'
+      path: '/admin/projects/$projectId'
+      fullPath: '/app/admin/projects/$projectId'
+      preLoaderRoute: typeof AppAdminProjectsProjectIdRouteImport
+      parentRoute: typeof AppRoute
+    }
+    '/app/admin/jobs/$jobId': {
+      id: '/app/admin/jobs/$jobId'
+      path: '/admin/jobs/$jobId'
+      fullPath: '/app/admin/jobs/$jobId'
+      preLoaderRoute: typeof AppAdminJobsJobIdRouteImport
+      parentRoute: typeof AppRoute
+    }
+    '/app/admin/elevators/$elevatorId': {
+      id: '/app/admin/elevators/$elevatorId'
+      path: '/admin/elevators/$elevatorId'
+      fullPath: '/app/admin/elevators/$elevatorId'
+      preLoaderRoute: typeof AppAdminElevatorsElevatorIdRouteImport
+      parentRoute: typeof AppRoute
     }
     '/admin/elevators/$elevatorId/qr': {
       id: '/admin/elevators/$elevatorId/qr'
@@ -1407,146 +1148,85 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AdminElevatorsElevatorIdQrRouteImport
       parentRoute: typeof AdminElevatorsElevatorIdRoute
     }
+    '/app/tech/jobs/$jobId/maintenance': {
+      id: '/app/tech/jobs/$jobId/maintenance'
+      path: '/maintenance'
+      fullPath: '/app/tech/jobs/$jobId/maintenance'
+      preLoaderRoute: typeof AppTechJobsJobIdMaintenanceRouteImport
+      parentRoute: typeof AppTechJobsJobIdRoute
+    }
   }
 }
 
-interface MobileContractsRouteChildren {
-  MobileContractsContractIdRoute: typeof MobileContractsContractIdRoute
+interface AppTechJobsJobIdRouteChildren {
+  AppTechJobsJobIdMaintenanceRoute: typeof AppTechJobsJobIdMaintenanceRoute
 }
 
-const MobileContractsRouteChildren: MobileContractsRouteChildren = {
-  MobileContractsContractIdRoute: MobileContractsContractIdRoute,
+const AppTechJobsJobIdRouteChildren: AppTechJobsJobIdRouteChildren = {
+  AppTechJobsJobIdMaintenanceRoute: AppTechJobsJobIdMaintenanceRoute,
 }
 
-const MobileContractsRouteWithChildren = MobileContractsRoute._addFileChildren(
-  MobileContractsRouteChildren,
-)
+const AppTechJobsJobIdRouteWithChildren =
+  AppTechJobsJobIdRoute._addFileChildren(AppTechJobsJobIdRouteChildren)
 
-interface MobileCustomersRouteChildren {
-  MobileCustomersCustomerIdRoute: typeof MobileCustomersCustomerIdRoute
+interface AppRouteChildren {
+  AppAdminApprovalsRoute: typeof AppAdminApprovalsRoute
+  AppAdminContractsRoute: typeof AppAdminContractsRoute
+  AppAdminLeadsRoute: typeof AppAdminLeadsRoute
+  AppAdminProfileRoute: typeof AppAdminProfileRoute
+  AppAdminReportsRoute: typeof AppAdminReportsRoute
+  AppTechRoutePlanRoute: typeof AppTechRoutePlanRoute
+  AppTechScheduleRoute: typeof AppTechScheduleRoute
+  AppAdminIndexRoute: typeof AppAdminIndexRoute
+  AppTechIndexRoute: typeof AppTechIndexRoute
+  AppAdminElevatorsElevatorIdRoute: typeof AppAdminElevatorsElevatorIdRoute
+  AppAdminJobsJobIdRoute: typeof AppAdminJobsJobIdRoute
+  AppAdminProjectsProjectIdRoute: typeof AppAdminProjectsProjectIdRoute
+  AppTechJobsJobIdRoute: typeof AppTechJobsJobIdRouteWithChildren
+  AppTechMaintJobIdRoute: typeof AppTechMaintJobIdRoute
+  AppTechProjectsProjectIdRoute: typeof AppTechProjectsProjectIdRoute
+  AppAdminElevatorsIndexRoute: typeof AppAdminElevatorsIndexRoute
+  AppAdminJobsIndexRoute: typeof AppAdminJobsIndexRoute
+  AppAdminProjectsIndexRoute: typeof AppAdminProjectsIndexRoute
+  AppTechJobsIndexRoute: typeof AppTechJobsIndexRoute
 }
 
-const MobileCustomersRouteChildren: MobileCustomersRouteChildren = {
-  MobileCustomersCustomerIdRoute: MobileCustomersCustomerIdRoute,
+const AppRouteChildren: AppRouteChildren = {
+  AppAdminApprovalsRoute: AppAdminApprovalsRoute,
+  AppAdminContractsRoute: AppAdminContractsRoute,
+  AppAdminLeadsRoute: AppAdminLeadsRoute,
+  AppAdminProfileRoute: AppAdminProfileRoute,
+  AppAdminReportsRoute: AppAdminReportsRoute,
+  AppTechRoutePlanRoute: AppTechRoutePlanRoute,
+  AppTechScheduleRoute: AppTechScheduleRoute,
+  AppAdminIndexRoute: AppAdminIndexRoute,
+  AppTechIndexRoute: AppTechIndexRoute,
+  AppAdminElevatorsElevatorIdRoute: AppAdminElevatorsElevatorIdRoute,
+  AppAdminJobsJobIdRoute: AppAdminJobsJobIdRoute,
+  AppAdminProjectsProjectIdRoute: AppAdminProjectsProjectIdRoute,
+  AppTechJobsJobIdRoute: AppTechJobsJobIdRouteWithChildren,
+  AppTechMaintJobIdRoute: AppTechMaintJobIdRoute,
+  AppTechProjectsProjectIdRoute: AppTechProjectsProjectIdRoute,
+  AppAdminElevatorsIndexRoute: AppAdminElevatorsIndexRoute,
+  AppAdminJobsIndexRoute: AppAdminJobsIndexRoute,
+  AppAdminProjectsIndexRoute: AppAdminProjectsIndexRoute,
+  AppTechJobsIndexRoute: AppTechJobsIndexRoute,
 }
 
-const MobileCustomersRouteWithChildren = MobileCustomersRoute._addFileChildren(
-  MobileCustomersRouteChildren,
-)
+const AppRouteWithChildren = AppRoute._addFileChildren(AppRouteChildren)
 
-interface MobileElevatorsRouteChildren {
-  MobileElevatorsElevatorIdRoute: typeof MobileElevatorsElevatorIdRoute
+interface AdminJobsRouteChildren {
+  AdminJobsJobIdRoute: typeof AdminJobsJobIdRoute
+  AdminJobsIndexRoute: typeof AdminJobsIndexRoute
 }
 
-const MobileElevatorsRouteChildren: MobileElevatorsRouteChildren = {
-  MobileElevatorsElevatorIdRoute: MobileElevatorsElevatorIdRoute,
+const AdminJobsRouteChildren: AdminJobsRouteChildren = {
+  AdminJobsJobIdRoute: AdminJobsJobIdRoute,
+  AdminJobsIndexRoute: AdminJobsIndexRoute,
 }
 
-const MobileElevatorsRouteWithChildren = MobileElevatorsRoute._addFileChildren(
-  MobileElevatorsRouteChildren,
-)
-
-interface MobileInventoryRouteChildren {
-  MobileInventoryItemIdRoute: typeof MobileInventoryItemIdRoute
-}
-
-const MobileInventoryRouteChildren: MobileInventoryRouteChildren = {
-  MobileInventoryItemIdRoute: MobileInventoryItemIdRoute,
-}
-
-const MobileInventoryRouteWithChildren = MobileInventoryRoute._addFileChildren(
-  MobileInventoryRouteChildren,
-)
-
-interface MobileJobsRouteChildren {
-  MobileJobsJobIdRoute: typeof MobileJobsJobIdRoute
-}
-
-const MobileJobsRouteChildren: MobileJobsRouteChildren = {
-  MobileJobsJobIdRoute: MobileJobsJobIdRoute,
-}
-
-const MobileJobsRouteWithChildren = MobileJobsRoute._addFileChildren(
-  MobileJobsRouteChildren,
-)
-
-interface MobileLeadsRouteChildren {
-  MobileLeadsLeadIdRoute: typeof MobileLeadsLeadIdRoute
-}
-
-const MobileLeadsRouteChildren: MobileLeadsRouteChildren = {
-  MobileLeadsLeadIdRoute: MobileLeadsLeadIdRoute,
-}
-
-const MobileLeadsRouteWithChildren = MobileLeadsRoute._addFileChildren(
-  MobileLeadsRouteChildren,
-)
-
-interface MobilePortalContractsRouteChildren {
-  MobilePortalContractsContractIdRoute: typeof MobilePortalContractsContractIdRoute
-}
-
-const MobilePortalContractsRouteChildren: MobilePortalContractsRouteChildren = {
-  MobilePortalContractsContractIdRoute: MobilePortalContractsContractIdRoute,
-}
-
-const MobilePortalContractsRouteWithChildren =
-  MobilePortalContractsRoute._addFileChildren(
-    MobilePortalContractsRouteChildren,
-  )
-
-interface MobilePortalElevatorsRouteChildren {
-  MobilePortalElevatorsElevatorIdRoute: typeof MobilePortalElevatorsElevatorIdRoute
-}
-
-const MobilePortalElevatorsRouteChildren: MobilePortalElevatorsRouteChildren = {
-  MobilePortalElevatorsElevatorIdRoute: MobilePortalElevatorsElevatorIdRoute,
-}
-
-const MobilePortalElevatorsRouteWithChildren =
-  MobilePortalElevatorsRoute._addFileChildren(
-    MobilePortalElevatorsRouteChildren,
-  )
-
-interface MobilePortalIssuesRouteChildren {
-  MobilePortalIssuesIssueIdRoute: typeof MobilePortalIssuesIssueIdRoute
-}
-
-const MobilePortalIssuesRouteChildren: MobilePortalIssuesRouteChildren = {
-  MobilePortalIssuesIssueIdRoute: MobilePortalIssuesIssueIdRoute,
-}
-
-const MobilePortalIssuesRouteWithChildren =
-  MobilePortalIssuesRoute._addFileChildren(MobilePortalIssuesRouteChildren)
-
-interface MobilePortalRouteChildren {
-  MobilePortalBillingRoute: typeof MobilePortalBillingRoute
-  MobilePortalContractsRoute: typeof MobilePortalContractsRouteWithChildren
-  MobilePortalElevatorsRoute: typeof MobilePortalElevatorsRouteWithChildren
-  MobilePortalIssuesRoute: typeof MobilePortalIssuesRouteWithChildren
-}
-
-const MobilePortalRouteChildren: MobilePortalRouteChildren = {
-  MobilePortalBillingRoute: MobilePortalBillingRoute,
-  MobilePortalContractsRoute: MobilePortalContractsRouteWithChildren,
-  MobilePortalElevatorsRoute: MobilePortalElevatorsRouteWithChildren,
-  MobilePortalIssuesRoute: MobilePortalIssuesRouteWithChildren,
-}
-
-const MobilePortalRouteWithChildren = MobilePortalRoute._addFileChildren(
-  MobilePortalRouteChildren,
-)
-
-interface MobileProjectsRouteChildren {
-  MobileProjectsProjectIdRoute: typeof MobileProjectsProjectIdRoute
-}
-
-const MobileProjectsRouteChildren: MobileProjectsRouteChildren = {
-  MobileProjectsProjectIdRoute: MobileProjectsProjectIdRoute,
-}
-
-const MobileProjectsRouteWithChildren = MobileProjectsRoute._addFileChildren(
-  MobileProjectsRouteChildren,
+const AdminJobsRouteWithChildren = AdminJobsRoute._addFileChildren(
+  AdminJobsRouteChildren,
 )
 
 interface AdminElevatorsElevatorIdRouteChildren {
@@ -1563,61 +1243,52 @@ const AdminElevatorsElevatorIdRouteWithChildren =
     AdminElevatorsElevatorIdRouteChildren,
   )
 
+interface TechJobsJobIdRouteChildren {
+  TechJobsJobIdMaintenanceRoute: typeof TechJobsJobIdMaintenanceRoute
+}
+
+const TechJobsJobIdRouteChildren: TechJobsJobIdRouteChildren = {
+  TechJobsJobIdMaintenanceRoute: TechJobsJobIdMaintenanceRoute,
+}
+
+const TechJobsJobIdRouteWithChildren = TechJobsJobIdRoute._addFileChildren(
+  TechJobsJobIdRouteChildren,
+)
+
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
+  AppRoute: AppRouteWithChildren,
   AdminAccountingRoute: AdminAccountingRoute,
   AdminApprovalsRoute: AdminApprovalsRoute,
   AdminContractsRoute: AdminContractsRoute,
   AdminHrRoute: AdminHrRoute,
+  AdminJobsRoute: AdminJobsRouteWithChildren,
   AdminLeadsRoute: AdminLeadsRoute,
   AdminProfileRoute: AdminProfileRoute,
   AdminReportsRoute: AdminReportsRoute,
   AdminSettingsRoute: AdminSettingsRoute,
-  MobileAccountingRoute: MobileAccountingRoute,
-  MobileApprovalsRoute: MobileApprovalsRoute,
-  MobileContractsRoute: MobileContractsRouteWithChildren,
-  MobileCustomersRoute: MobileCustomersRouteWithChildren,
-  MobileElevatorsRoute: MobileElevatorsRouteWithChildren,
-  MobileHrRoute: MobileHrRoute,
-  MobileInventoryRoute: MobileInventoryRouteWithChildren,
-  MobileJobsRoute: MobileJobsRouteWithChildren,
-  MobileLeadsRoute: MobileLeadsRouteWithChildren,
-  MobilePortalRoute: MobilePortalRouteWithChildren,
-  MobileProfileRoute: MobileProfileRoute,
-  MobileProjectsRoute: MobileProjectsRouteWithChildren,
-  MobileReportsRoute: MobileReportsRoute,
-  MobileRoutePlanRoute: MobileRoutePlanRoute,
-  MobileScannerRoute: MobileScannerRoute,
-  MobileScheduleRoute: MobileScheduleRoute,
-  MobileSettingsRoute: MobileSettingsRoute,
-  MobileSupportRoute: MobileSupportRoute,
   PortalContractsRoute: PortalContractsRoute,
   PortalIssuesRoute: PortalIssuesRoute,
   QrElevatorIdRoute: QrElevatorIdRoute,
   TechRoutePlanRoute: TechRoutePlanRoute,
   TechScheduleRoute: TechScheduleRoute,
   AdminIndexRoute: AdminIndexRoute,
-  MobileIndexRoute: MobileIndexRoute,
   PortalIndexRoute: PortalIndexRoute,
   TechIndexRoute: TechIndexRoute,
   AdminCustomersCustomerIdRoute: AdminCustomersCustomerIdRoute,
   AdminElevatorsElevatorIdRoute: AdminElevatorsElevatorIdRouteWithChildren,
-  AdminJobsJobIdRoute: AdminJobsJobIdRoute,
   AdminProjectsProjectIdRoute: AdminProjectsProjectIdRoute,
-  MobileTechRoutePlanRoute: MobileTechRoutePlanRoute,
-  MobileTechScheduleRoute: MobileTechScheduleRoute,
   PortalElevatorsElevatorIdRoute: PortalElevatorsElevatorIdRoute,
-  TechJobsJobIdRoute: TechJobsJobIdRoute,
+  TechJobsJobIdRoute: TechJobsJobIdRouteWithChildren,
+  TechMaintJobIdRoute: TechMaintJobIdRoute,
+  TechProjectsProjectIdRoute: TechProjectsProjectIdRoute,
   AdminCustomersIndexRoute: AdminCustomersIndexRoute,
   AdminElevatorsIndexRoute: AdminElevatorsIndexRoute,
   AdminInventoryIndexRoute: AdminInventoryIndexRoute,
-  AdminJobsIndexRoute: AdminJobsIndexRoute,
+  AdminMaintenanceIndexRoute: AdminMaintenanceIndexRoute,
   AdminProjectsIndexRoute: AdminProjectsIndexRoute,
-  MobileTechIndexRoute: MobileTechIndexRoute,
   PortalElevatorsIndexRoute: PortalElevatorsIndexRoute,
   TechJobsIndexRoute: TechJobsIndexRoute,
-  MobileTechJobsJobIdRoute: MobileTechJobsJobIdRoute,
-  MobileTechJobsIndexRoute: MobileTechJobsIndexRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)

@@ -1,5 +1,5 @@
 // src/routes/tech.route-plan.tsx  ← THAY THẾ
-import { createFileRoute, Link } from "@tanstack/react-router";
+import { createFileRoute, Link, useLocation } from "@tanstack/react-router";
 import { useMemo, useState } from "react";
 import { AppShell } from "@/components/layout/AppShell";
 import { PageHeader } from "@/components/common/PageHeader";
@@ -35,8 +35,14 @@ export const Route = createFileRoute("/tech/route-plan")({
   component: TechRoute,
 });
 
+function useAppPrefix() {
+  const { pathname } = useLocation();
+  return pathname.startsWith("/app") ? "/app" : "";
+}
+
 function TechRoute() {
   const userId = useAppStore((s) => s.userId);
+  const prefix = useAppPrefix();
   const [day, setDay] = useState<string>("all");
   const [completedStops, setCompletedStops] = useState<string[]>([]);
 
@@ -194,8 +200,8 @@ function TechRoute() {
                   </div>
                   <div className="flex-1 min-w-0">
                     <Link
-                      to="/tech/jobs/$jobId"
-                      params={{ jobId: s.jobId }}
+                      to={`${prefix}/tech/jobs/$jobId` as any}
+                      params={{ jobId: s.jobId } as any}
                       className="hover:underline"
                     >
                       <div className="flex items-center gap-2 flex-wrap">

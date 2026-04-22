@@ -1,5 +1,5 @@
 // src/routes/tech.jobs.$jobId.tsx  ← THAY THẾ FILE CŨ
-import { createFileRoute, Link, notFound } from "@tanstack/react-router";
+import { createFileRoute, Link, notFound, useLocation } from "@tanstack/react-router";
 import { useMemo, useState } from "react";
 import { AppShell } from "@/components/layout/AppShell";
 import { PageHeader } from "@/components/common/PageHeader";
@@ -13,6 +13,8 @@ import {
 } from "@/components/ui/select";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
+import { Input } from "@/components/ui/input";
+import { Badge } from "@/components/ui/badge";
 import { RouteMap } from "@/components/common/RouteMap";
 import { StatusBadge } from "@/components/common/StatusBadge";
 import {
@@ -28,8 +30,11 @@ import {
   formatDateTime,
   optimizeRoute,
   mockInventory,
+  formatVND,
+  INSTALL_STAGES_TEMPLATE,
+  type Job,
 } from "@/lib/mock-data";
-import { useAppStore } from "@/lib/store";
+import { useAppStore, useIsSmallCompany } from "@/lib/store";
 import {
   ArrowLeft,
   Camera,
@@ -38,6 +43,10 @@ import {
   Calendar,
   CheckCircle2,
   FileText,
+  ClipboardCheck,
+  Hammer,
+  AlertTriangle,
+  Check,
   Plus,
   Map as MapIcon,
   Navigation,
@@ -59,18 +68,28 @@ export const Route = createFileRoute("/tech/jobs/$jobId")({
     <AppShell>
       <div className="p-12 text-center">
         <p>Không tìm thấy</p>
-        <Link to="/tech/jobs">
+        <Link to="/tech/jobs" search={{ tab: 'install' }}>
           <Button className="mt-4">Quay lại</Button>
         </Link>
       </div>
     </AppShell>
   ),
-  component: TechJobDetail,
+  component: TechJobDetailContainer,
 });
 
-function TechJobDetail() {
+function TechJobDetailContainer() {
   const { job } = Route.useLoaderData();
+  return <TechJobDetail job={job} />;
+}
+
+function useAppPrefix() {
+  const { pathname } = useLocation();
+  return pathname.startsWith("/app") ? "/app" : "";
+}
+
+export function TechJobDetail({ job }: { job: Job }) {
   const userId = useAppStore((s) => s.userId);
+  const prefix = useAppPrefix();
   const cus = getCustomer(job.customerId);
   const elev = job.elevatorId ? getElevator(job.elevatorId) : undefined;
 
@@ -78,8 +97,19 @@ function TechJobDetail() {
   const [afterCount, setAfterCount] = useState<number>(job.afterPhotos.length);
   const [report, setReport] = useState<string>(job.report || "");
   const [status, setStatus] = useState<typeof job.status>(job.status);
+  const [surveyData, setSurveyData] = useState(job.surveyReport || {
+    pitDepth: "",
+    overheadHeight: "",
+    shaftDimensions: "",
+    powerSupply: "",
+    specialNotes: ""
+  });
+  const [appointmentConfirmed, setAppointmentConfirmed] = useState(job.appointmentConfirmed || false);
   const [usedParts, setUsedParts] = useState<{ id: string; qty: number }[]>([]);
   const [selectedPartId, setSelectedPartId] = useState("");
+  const [repairQuoteMode, setRepairQuoteMode] = useState(false);
+  const [repairItems, setRepairItems] = useState<{id: string, name: string, price: number, qty: number}[]>([]);
+  const [awaitingApproval, setAwaitingApproval] = useState(false);
 
   const addPart = () => {
     if (!selectedPartId) return;
@@ -147,12 +177,25 @@ function TechJobDetail() {
 
   return (
     <AppShell>
-      <Link
-        to="/tech/jobs"
-        className="inline-flex items-center gap-1 text-sm text-muted-foreground hover:text-foreground mb-4"
-      >
-        <ArrowLeft className="h-4 w-4" /> Quay lại
-      </Link>
+      <div className="flex flex-wrap items-center justify-between gap-4 mb-4">
+        <Link
+          to={`${prefix}/tech/jobs` as any}
+          search={{ tab: 'install' } as any}
+          className="inline-flex items-center gap-1 text-sm text-muted-foreground hover:text-foreground"
+        >
+          <ArrowLeft className="h-4 w-4" /> Quay lại danh sách
+        </Link>
+        
+        {job.projectId && (
+          <Link
+            to={`${prefix}/tech/projects/$projectId` as any}
+            params={{ projectId: job.projectId } as any}
+            className="inline-flex items-center gap-1.5 py-1 px-3 rounded-full bg-primary/10 text-primary text-xs font-bold hover:bg-primary/20 transition-colors"
+          >
+            <Hammer className="h-3 w-3" /> Xem 8 giai đoạn dự án
+          </Link>
+        )}
+      </div>
 
       <PageHeader title={job.title} description={job.code} />
 
@@ -165,12 +208,57 @@ function TechJobDetail() {
                 {priorityLabel[job.priority]}
               </StatusBadge>
             </div>
-            <p className="text-sm text-muted-foreground">{job.description}</p>
             <div className="mt-4 text-sm flex items-center gap-1.5">
               <Calendar className="h-4 w-4 text-primary" />
               <span className="font-medium">{formatDateTime(job.scheduledFor)}</span>
             </div>
           </Card>
+
+          {/* Installation Progress for Tech */}
+          {job.type === "install" && (
+            <Card className="p-5 overflow-hidden">
+              <div className="flex items-center justify-between mb-4">
+                <div className="flex items-center gap-2">
+                  <div className="p-2 rounded-lg bg-orange-100 text-orange-600">
+                    <Hammer className="h-4 w-4" />
+                  </div>
+                  <h3 className="font-bold text-sm uppercase tracking-wide">Tiến độ lắp đặt (8 giai đoạn)</h3>
+                </div>
+                <Badge variant="outline" className="text-[10px]">Đang thực hiện</Badge>
+              </div>
+              
+              <div className="grid grid-cols-4 sm:grid-cols-8 gap-2">
+                {INSTALL_STAGES_TEMPLATE.map((stage, idx) => {
+                  const isCurrent = job.title.includes(stage.label) || (job.code.includes(`INSTALL-${idx + 1}`));
+                  const isPast = !isCurrent && (job.code.match(/INSTALL-(\d+)/)?.[1] ? parseInt(job.code.match(/INSTALL-(\d+)/)![1]) > idx + 1 : false);
+                  
+                  return (
+                    <div key={stage.id} className="flex flex-col items-center gap-1">
+                      <div 
+                        className={`
+                          w-full h-1.5 rounded-full transition-all duration-500
+                          ${isCurrent ? "bg-primary animate-pulse" : isPast ? "bg-success" : "bg-muted"}
+                        `}
+                      />
+                      <span className={`text-[8px] font-bold text-center leading-tight truncate w-full ${isCurrent ? "text-primary" : "text-muted-foreground"}`}>
+                         {stage.label.split(': ')[1] || stage.label}
+                      </span>
+                    </div>
+                  );
+                })}
+              </div>
+              
+              <div className="mt-4 p-3 rounded-lg bg-muted/30 border border-dashed flex items-center justify-between">
+                 <div className="text-[10px] text-muted-foreground italic">
+                   Giai đoạn hiện tại của bạn: <span className="font-bold text-foreground">#{job.code.split('-').pop()} - {job.title}</span>
+                 </div>
+                 <Link to={`${prefix}/tech/jobs` as any} search={{ tab: 'install' } as any} className="text-[10px] font-bold text-primary hover:underline">
+                   Chi tiết dự án →
+                 </Link>
+              </div>
+            </Card>
+          )}
+
 
           <Card className="overflow-hidden">
             <div className="flex items-center gap-2 px-4 py-3 border-b">
@@ -192,7 +280,7 @@ function TechJobDetail() {
               ]}
             />
             <div className="flex items-center justify-between gap-2 p-3 border-t bg-muted/30">
-              <Link to="/tech/jobs" className="text-xs text-primary hover:underline">
+              <Link to={`${prefix}/tech/jobs` as any} search={{ tab: "install" } as any} className="text-xs text-primary hover:underline">
                 Xem lộ trình hôm nay →
               </Link>
               <Button size="sm" variant="outline" className="gap-1.5" onClick={openMapToJob}>
@@ -255,85 +343,216 @@ function TechJobDetail() {
             </div>
           </Card>
 
-          {/* Parts Used */}
-          <Card className="p-5">
-            <div className="flex items-center justify-between mb-4">
-              <div className="flex items-center gap-2">
-                <Package className="h-4 w-4" />
-                <h3 className="font-semibold">Vật tư thay thế</h3>
+          {/* Parts Used - Hide for Installation jobs as they don't replace parts on the fly */}
+          {job.type !== "install" && (
+            <Card className="p-5">
+              <div className="flex items-center justify-between mb-4">
+                <div className="flex items-center gap-2">
+                  <Package className="h-4 w-4" />
+                  <h3 className="font-semibold">Vật tư thay thế</h3>
+                </div>
               </div>
-            </div>
-            <div className="flex items-center gap-2 mb-4">
-              <Select value={selectedPartId} onValueChange={setSelectedPartId}>
-                <SelectTrigger className="flex-1">
-                  <SelectValue placeholder="Chọn vật tư từ kho..." />
-                </SelectTrigger>
-                <SelectContent>
-                  {mockInventory.map((item) => (
-                    <SelectItem key={item.id} value={item.id}>
-                      {item.name} ({item.stock} {item.unit} sẵn có)
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-              <Button onClick={addPart} variant="secondary">
-                Thêm
-              </Button>
-            </div>
+              <div className="flex items-center gap-2 mb-4">
+                <Select value={selectedPartId} onValueChange={setSelectedPartId}>
+                  <SelectTrigger className="flex-1">
+                    <SelectValue placeholder="Chọn vật tư từ kho..." />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {mockInventory.map((item) => (
+                      <SelectItem key={item.id} value={item.id}>
+                        {item.name} ({item.stock} {item.unit} sẵn có)
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+                <Button onClick={addPart} variant="secondary">
+                  Thêm
+                </Button>
+              </div>
 
-            {usedParts.length > 0 ? (
-              <div className="border rounded-lg overflow-hidden">
-                {usedParts.map((p, idx) => {
-                  const part = mockInventory.find((i) => i.id === p.id);
-                  if (!part) return null;
-                  return (
-                    <div
-                      key={p.id}
-                      className={`flex items-center justify-between p-3 ${idx < usedParts.length - 1 ? "border-b" : ""}`}
-                    >
-                      <div className="min-w-0 flex-1">
-                        <div className="font-medium text-sm truncate">{part.name}</div>
-                        <div className="text-xs text-muted-foreground">{part.code}</div>
-                      </div>
-                      <div className="flex items-center gap-3">
-                        <div className="flex items-center gap-2">
+              {usedParts.length > 0 ? (
+                <div className="border rounded-lg overflow-hidden">
+                  {usedParts.map((p, idx) => {
+                    const part = mockInventory.find((i) => i.id === p.id);
+                    if (!part) return null;
+                    return (
+                      <div
+                        key={p.id}
+                        className={`flex items-center justify-between p-3 ${idx < usedParts.length - 1 ? "border-b" : ""}`}
+                      >
+                        <div className="min-w-0 flex-1">
+                          <div className="font-medium text-sm truncate">{part.name}</div>
+                          <div className="text-xs text-muted-foreground">{part.code}</div>
+                        </div>
+                        <div className="flex items-center gap-3">
+                          <div className="flex items-center gap-2">
+                            <Button
+                              size="icon"
+                              variant="outline"
+                              className="h-7 w-7"
+                              onClick={() => updatePartQty(p.id, p.qty - 1)}
+                            >
+                              -
+                            </Button>
+                            <span className="w-6 text-center text-sm font-medium">{p.qty}</span>
+                            <Button
+                              size="icon"
+                              variant="outline"
+                              className="h-7 w-7"
+                              onClick={() => updatePartQty(p.id, p.qty + 1)}
+                            >
+                              +
+                            </Button>
+                          </div>
                           <Button
                             size="icon"
-                            variant="outline"
-                            className="h-7 w-7"
-                            onClick={() => updatePartQty(p.id, p.qty - 1)}
+                            variant="ghost"
+                            className="h-7 w-7 text-destructive hover:text-destructive hover:bg-destructive/10"
+                            onClick={() => removePart(p.id)}
                           >
-                            -
-                          </Button>
-                          <span className="w-6 text-center text-sm font-medium">{p.qty}</span>
-                          <Button
-                            size="icon"
-                            variant="outline"
-                            className="h-7 w-7"
-                            onClick={() => updatePartQty(p.id, p.qty + 1)}
-                          >
-                            +
+                            <Trash2 className="h-4 w-4" />
                           </Button>
                         </div>
-                        <Button
-                          size="icon"
-                          variant="ghost"
-                          className="h-7 w-7 text-destructive hover:text-destructive hover:bg-destructive/10"
-                          onClick={() => removePart(p.id)}
-                        >
-                          <Trash2 className="h-4 w-4" />
-                        </Button>
                       </div>
+                    );
+                  })}
+                </div>
+              ) : (
+                <div className="text-sm text-muted-foreground text-center py-4 bg-muted/30 rounded border border-dashed">
+                  Chưa thêm vật tư nào.
+                </div>
+              )}
+            </Card>
+          )}
+          {/* Reparation/Incident Workflow */}
+          {(job.type === "repair" || job.type === "warranty") && status === "in_progress" && (
+            <Card className="p-5 border-l-4 border-l-destructive shadow-lg bg-destructive/[0.02]">
+              <div className="flex items-center gap-2 mb-4">
+                <AlertTriangle className="h-5 w-5 text-destructive" />
+                <h3 className="font-black text-sm uppercase tracking-wider">Xử lý sự cố / Sửa chữa</h3>
+              </div>
+
+              <div className="space-y-6">
+                {/* Stage 1: Confirmation */}
+                <div className="flex items-center justify-between p-3 rounded-xl bg-background border shadow-sm">
+                   <div className="flex items-center gap-2">
+                      <div className={`h-6 w-6 rounded-full flex items-center justify-center ${job.customerConfirmed ? 'bg-success text-white' : 'bg-muted text-muted-foreground'}`}>
+                        <Check className="h-3.5 w-3.5" />
+                      </div>
+                      <span className="text-sm font-bold">Xác nhận với khách hàng</span>
+                   </div>
+                   {!job.customerConfirmed && (
+                     <Button size="sm" variant="outline" className="h-8 text-[10px] font-bold" onClick={() => toast.success("Đã ghi nhận xác nhận với khách qua điện thoại/trực tiếp.")}>
+                        XÁC NHẬN NGAY
+                     </Button>
+                   )}
+                </div>
+
+                {/* Stage 2: Photos */}
+                <div className="space-y-2">
+                   <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest">Hiện trạng lỗi (Chụp ảnh)</p>
+                   <Button variant="outline" className="w-full h-12 border-dashed border-2 border-muted-foreground/30 hover:border-primary hover:bg-primary/5 transition-all">
+                      <Camera className="h-5 w-5 mr-2" /> Chụp ảnh lỗi
+                   </Button>
+                </div>
+
+                {/* Stage 3: Decision */}
+                <div className="grid grid-cols-2 gap-3">
+                   <Button 
+                    className="h-16 flex flex-col items-center justify-center rounded-2xl bg-success hover:bg-success/90 shadow-lg shadow-success/10 border-b-4 border-success-foreground/20"
+                    onClick={() => toast.success("Đã ghi nhận: Lỗi nhẹ, khắc phục ngay.")}
+                   >
+                      <CheckCircle2 className="h-5 w-5 mb-1" />
+                      <span className="text-[10px] font-bold">LỖI NHẸ</span>
+                   </Button>
+                   <Button 
+                    variant="outline"
+                    className="h-16 flex flex-col items-center justify-center rounded-2xl border-2 border-destructive text-destructive hover:bg-destructive/5"
+                    onClick={() => setRepairQuoteMode(true)}
+                   >
+                      <Package className="h-5 w-5 mb-1" />
+                      <span className="text-[10px] font-bold">LỖI NẶNG (QUOTATION)</span>
+                   </Button>
+                </div>
+
+                {/* Repair Quote Builder */}
+                {repairQuoteMode && (
+                  <div className="mt-4 p-4 rounded-2xl bg-background border-2 border-destructive/20 animate-in slide-in-from-top-2 duration-300">
+                    <h4 className="text-xs font-black text-destructive uppercase mb-3 flex items-center gap-2">
+                      <FileText className="h-4 w-4" /> Báo giá thay thế tại chỗ
+                    </h4>
+                    
+                    <div className="flex gap-2 mb-3">
+                        <Select value={selectedPartId} onValueChange={setSelectedPartId}>
+                          <SelectTrigger className="grow h-10">
+                            <SelectValue placeholder="Chọn vật tư từ kho..." />
+                          </SelectTrigger>
+                          <SelectContent>
+                             {mockInventory.map(item => (
+                               <SelectItem key={item.id} value={item.id}>
+                                 {item.name} ({formatVND(item.unitPrice)})
+                               </SelectItem>
+                             ))}
+                          </SelectContent>
+                        </Select>
+                        <Button size="icon" onClick={() => {
+                          if (!selectedPartId) return;
+                          const part = mockInventory.find(i => i.id === selectedPartId);
+                          if (part) {
+                            setRepairItems([...repairItems, { id: part.id, name: part.name, price: part.unitPrice, qty: 1 }]);
+                            setSelectedPartId("");
+                          }
+                        }}>
+                          <Plus className="h-4 w-4" />
+                        </Button>
                     </div>
-                  );
-                })}
+
+                    <div className="space-y-2 mb-4 max-h-[150px] overflow-y-auto">
+                        {repairItems.map((item, idx) => (
+                          <div key={idx} className="flex items-center justify-between p-2 rounded-lg bg-muted/30 text-xs">
+                             <span className="font-bold">{item.name}</span>
+                             <span className="font-mono text-destructive">{formatVND(item.price)}</span>
+                          </div>
+                        ))}
+                    </div>
+
+                    <div className="flex items-center justify-between p-3 rounded-xl bg-destructive/5 mb-4 border border-destructive/10">
+                       <span className="text-xs font-bold uppercase">Tổng cộng:</span>
+                       <span className="text-lg font-black text-destructive">{formatVND(repairItems.reduce((s, i) => s + i.price, 0))}</span>
+                    </div>
+
+                    <Button 
+                      className="w-full h-12 rounded-xl bg-destructive hover:bg-destructive/90 font-black shadow-lg shadow-destructive/20"
+                      onClick={() => {
+                        toast.success("Báo giá đã lập! Vui lòng cho khách xem và duyệt trực tiếp.");
+                        setAwaitingApproval(true);
+                      }}
+                    >
+                      CHỐT BÁO GIÁ VỚI KHÁCH
+                    </Button>
+                  </div>
+                )}
+
+                {/* Awaiting Approval Action */}
+                {awaitingApproval && (
+                  <div className="mt-4 p-4 rounded-2xl bg-warning/10 border-2 border-dashed border-warning/30 flex flex-col items-center gap-3 text-center">
+                      <div className="text-xs font-bold text-warning-foreground uppercase tracking-widest">Đang chờ khách duyệt báo giá...</div>
+                      <Button 
+                        className="w-full h-12 rounded-xl bg-warning hover:bg-warning/90 text-warning-foreground font-black shadow-lg shadow-warning/20"
+                        onClick={() => {
+                          toast.success("Đã ghi nhận khách duyệt báo giá bên ngoài hệ thống!");
+                          setAwaitingApproval(false);
+                          setRepairQuoteMode(false);
+                          setStatus("in_progress");
+                        }}
+                      >
+                         KHÁCH ĐÃ DUYỆT (CHỐT SỬA)
+                      </Button>
+                  </div>
+                )}
               </div>
-            ) : (
-              <div className="text-sm text-muted-foreground text-center py-4 bg-muted/30 rounded border border-dashed">
-                Chưa thêm vật tư nào.
-              </div>
-            )}
-          </Card>
+            </Card>
+          )}
 
           {/* Report + action buttons */}
           <Card className="p-5">
@@ -348,7 +567,51 @@ function TechJobDetail() {
               rows={5}
             />
             <div className="mt-3 flex flex-wrap gap-2">
-              {status === "scheduled" && (
+              {status !== "completed" && status !== "cancelled" && (
+                <Button
+                  variant="outline"
+                  className="bg-warning/10 border-warning/30 text-warning-foreground hover:bg-warning/20 shadow-sm"
+                  onClick={() => {
+                    toast.info("Gửi yêu cầu đổi lịch lên CEO...");
+                    setTimeout(() => {
+                      toast.success("Đã gửi yêu cầu! CEO sẽ kiểm tra và điều chỉnh lại lịch bảo trì.");
+                    }, 1000);
+                  }}
+                >
+                  <Calendar className="h-4 w-4 mr-2" /> Yêu cầu đổi lịch
+                </Button>
+              )}
+
+              {job.type === "inspection" && status === "scheduled" && !appointmentConfirmed && (
+                <Button
+                  variant="outline"
+                  className="bg-blue-50 border-blue-200 text-blue-700 hover:bg-blue-100"
+                  onClick={() => {
+                    toast.success("Đang liên hệ với khách hàng...");
+                    setTimeout(() => {
+                      setAppointmentConfirmed(true);
+                      setStatus("appointment_confirmed");
+                      toast.success("Khách hàng đã xác nhận lịch khảo sát!");
+                    }, 1000);
+                  }}
+                >
+                  <Phone className="h-4 w-4 mr-2" /> Gọi điện & Hẹn lịch
+                </Button>
+              )}
+
+              {status === "appointment_confirmed" && (
+                <Button
+                  variant="outline"
+                  onClick={() => {
+                    setStatus("in_progress");
+                    toast.success("Bắt đầu khảo sát thực tế");
+                  }}
+                >
+                  Bắt đầu khảo sát
+                </Button>
+              )}
+
+              {status === "scheduled" && job.type !== "inspection" && (
                 <Button
                   variant="outline"
                   onClick={() => {
@@ -359,15 +622,30 @@ function TechJobDetail() {
                   Bắt đầu
                 </Button>
               )}
-              {status !== "completed" && (
+
+              {status !== "completed" && (status === "in_progress" || (job.type !== "inspection" && status !== "scheduled")) && (
                 <Button
                   onClick={() => {
-                    if (!report.trim()) {
+                    if (job.type === "inspection") {
+                      if (!surveyData.pitDepth || !surveyData.shaftDimensions) {
+                        toast.error("Vui lòng nhập đầy đủ thông số khảo sát quan trọng");
+                        return;
+                      }
+                    } else if (!report.trim()) {
                       toast.error("Vui lòng điền biên bản trước khi hoàn thành");
                       return;
                     }
+                    
+                    if (useIsSmallCompany() && (beforeCount === 0 || afterCount === 0)) {
+                      toast.error("Thiếu ảnh hiện trường! Vui lòng chụp ít nhất 1 ảnh Trước và 1 ảnh Sau.");
+                      return;
+                    }
+
                     setStatus("completed");
-                    toast.success("Đã hoàn thành & gửi biên bản cho khách hàng");
+                    toast.success("Đã hoàn thành công việc. Kết quả đã được ghi nhận vào hệ thống.");
+                    if (useIsSmallCompany()) {
+                      toast.info("Ghi chú: Kết quả khảo sát đã được gửi cho CEO để chuẩn bị báo giá.");
+                    }
                   }}
                   className="gap-1.5"
                 >
@@ -381,6 +659,67 @@ function TechJobDetail() {
               )}
             </div>
           </Card>
+
+          {job.type === "inspection" && status === "in_progress" && (
+            <Card className="p-5 border-blue-200 bg-blue-50/30">
+              <div className="flex items-center gap-2 mb-4">
+                <ClipboardCheck className="h-4 w-4 text-primary" />
+                <h3 className="font-semibold">Chi tiết thông số khảo sát</h3>
+              </div>
+              <div className="grid gap-4 sm:grid-cols-2">
+                <div>
+                  <label className="text-xs font-bold uppercase text-muted-foreground mb-1 block">Chiều sâu hố Pit (mm)</label>
+                  <Input 
+                    type="number" 
+                    placeholder="VD: 1200" 
+                    value={surveyData.pitDepth}
+                    onChange={(e) => setSurveyData({...surveyData, pitDepth: e.target.value})}
+                  />
+                </div>
+                <div>
+                  <label className="text-xs font-bold uppercase text-muted-foreground mb-1 block">Chiều cao OH (mm)</label>
+                  <Input 
+                    type="number" 
+                    placeholder="VD: 4200" 
+                    value={surveyData.overheadHeight}
+                    onChange={(e) => setSurveyData({...surveyData, overheadHeight: e.target.value})}
+                  />
+                </div>
+                <div className="sm:col-span-2">
+                  <label className="text-xs font-bold uppercase text-muted-foreground mb-1 block">Kích thước thông thủy hố thang (RxS mm)</label>
+                  <Input 
+                    placeholder="VD: 1600 x 1800" 
+                    value={surveyData.shaftDimensions}
+                    onChange={(e) => setSurveyData({...surveyData, shaftDimensions: e.target.value})}
+                  />
+                </div>
+                <div className="sm:col-span-2">
+                  <label className="text-xs font-bold uppercase text-muted-foreground mb-1 block">Nguồn điện sẵn có</label>
+                  <Select 
+                    value={surveyData.powerSupply} 
+                    onValueChange={(v) => setSurveyData({...surveyData, powerSupply: v})}
+                  >
+                    <SelectTrigger>
+                      <SelectValue placeholder="Chọn loại nguồn điện..." />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="1phase">1 Pha (220V)</SelectItem>
+                      <SelectItem value="3phase">3 Pha (380V)</SelectItem>
+                      <SelectItem value="none">Chưa có nguồn điện</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+                <div className="sm:col-span-2">
+                  <label className="text-xs font-bold uppercase text-muted-foreground mb-1 block">Ghi chú đặc biệt</label>
+                  <Textarea 
+                    placeholder="Các vấn đề vướng mắc, lưu ý khi thi công..." 
+                    value={surveyData.specialNotes}
+                    onChange={(e) => setSurveyData({...surveyData, specialNotes: e.target.value})}
+                  />
+                </div>
+              </div>
+            </Card>
+          )}
         </div>
 
         <div className="space-y-4">

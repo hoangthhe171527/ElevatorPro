@@ -18,7 +18,7 @@ import {
   TrendingUp,
 } from "lucide-react";
 import { mockRequests, getUser, getProject, formatVND, formatDate } from "@/lib/mock-data";
-import { useAppStore } from "@/lib/store";
+import { useAppStore, useIsSmallCompany } from "@/lib/store";
 import { useState } from "react";
 import { toast } from "sonner";
 import { DataPagination } from "@/components/common/DataPagination";
@@ -56,6 +56,7 @@ const URGENCY_STYLES = {
 
 function ApprovalsPage() {
   const activeTenantId = useAppStore((s) => s.activeTenantId);
+  const isSmall = useIsSmallCompany();
   const [page, setPage] = useState(1);
   const [requests, setRequests] = useState(mockRequests);
 
@@ -83,7 +84,21 @@ function ApprovalsPage() {
           <div className="text-muted-foreground px-1 cursor-pointer">Lịch sử</div>
         </div>
 
-        {paged.length === 0 ? (
+        {isSmall ? (
+          <Card className="bg-primary/5 border-primary/20 p-8 text-center">
+            <div className="max-w-md mx-auto">
+              <ShieldCheck className="h-12 w-12 text-primary mx-auto mb-4" />
+              <h3 className="text-lg font-bold">Mô hình Công ty Nhỏ</h3>
+              <p className="text-sm text-muted-foreground mt-2">
+                Hệ thống đang vận hành theo cơ chế <strong>"Tự động hóa & Tin tưởng"</strong>. 
+                Các yêu cầu từ kỹ thuật được phê duyệt ngay lập tức dựa trên bằng chứng ảnh và log.
+              </p>
+              <p className="text-xs text-muted-foreground mt-4 italic">
+                Cấu hình này giúp tăng tốc độ thực thi tại hiện trường. CEO có thể kiểm tra lại qua Nhật ký hệ thống bất cứ lúc nào.
+              </p>
+            </div>
+          </Card>
+        ) : paged.length === 0 ? (
           <Card className="flex items-center justify-center p-12 border-dashed">
             <div className="text-center text-muted-foreground">
               <Clock className="h-12 w-12 mx-auto mb-4 opacity-20" />

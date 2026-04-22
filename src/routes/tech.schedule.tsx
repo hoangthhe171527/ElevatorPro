@@ -1,4 +1,4 @@
-import { createFileRoute, Link } from "@tanstack/react-router";
+import { createFileRoute, Link, useLocation } from "@tanstack/react-router";
 import { AppShell } from "@/components/layout/AppShell";
 import { PageHeader } from "@/components/common/PageHeader";
 import { Card } from "@/components/ui/card";
@@ -18,8 +18,14 @@ export const Route = createFileRoute("/tech/schedule")({
   component: TechSchedule,
 });
 
-function TechSchedule() {
+function useAppPrefix() {
+  const { pathname } = useLocation();
+  return pathname.startsWith("/app") ? "/app" : "";
+}
+
+export function TechSchedule() {
   const userId = useAppStore((s) => s.userId);
+  const prefix = useAppPrefix();
   const myJobs = mockJobs
     .filter((j) => j.assignedTo === userId && j.status !== "completed" && j.status !== "cancelled")
     .sort((a, b) => a.scheduledFor.localeCompare(b.scheduledFor));
@@ -51,8 +57,8 @@ function TechSchedule() {
                 return (
                   <Link
                     key={j.id}
-                    to="/tech/jobs/$jobId"
-                    params={{ jobId: j.id }}
+                    to={`${prefix}/tech/jobs/$jobId` as any}
+                    params={{ jobId: j.id } as any}
                     className="block p-4 hover:bg-muted/30"
                   >
                     <div className="flex items-start gap-3">

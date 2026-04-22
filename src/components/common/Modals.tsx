@@ -9,6 +9,7 @@ import {
   DialogHeader,
   DialogTitle,
   DialogFooter,
+  DialogDescription,
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -31,13 +32,26 @@ import {
   mockProjects,
   getProject,
   formatVND,
+  mockLeads,
   type JobType,
   type JobPriority,
   type ContractType,
   type LeadStatus,
   type Job,
   type User,
+  getUser,
+  getElevator,
 } from "@/lib/mock-data";
+import { useAppStore, useIsSmallCompany } from "@/lib/store";
+import { 
+  handleLeadConversion, 
+  handleMaintenanceLeadConversion, 
+  getTechnicianWorkload,
+  handleContractActivation,
+  initiateWarrantyFlow,
+  handleEquipmentArrival,
+  handleFinalVerification
+} from "@/lib/workflow-utils";
 import {
   CheckCircle2,
   AlertTriangle,
@@ -51,6 +65,26 @@ import {
   Wallet,
   RefreshCw,
   ArrowRightLeft,
+  Upload,
+  ShieldCheck,
+  AlertCircle,
+  ExternalLink,
+  Package,
+  Calendar,
+  ArrowLeft,
+  Camera,
+  MapPin,
+  Phone,
+  Plus,
+  Map as MapIcon,
+  Navigation,
+  Trash2,
+  ClipboardCheck,
+  Hammer,
+  Check,
+  Activity,
+  Wrench,
+  Send,
 } from "lucide-react";
 
 // ─────────────────────────────────────────────
@@ -61,9 +95,12 @@ interface CreateJobModalProps {
   onClose: () => void;
   defaultCustomerId?: string;
   defaultElevatorId?: string;
-  defaultContractId?: string;
-  defaultProjectId?: string;
-}
+   defaultContractId?: string;
+   defaultProjectId?: string;
+   defaultTitle?: string;
+   defaultType?: JobType;
+   defaultDescription?: string;
+ }
 
 const typeOptions: { value: JobType; label: string }[] = [
   { value: "maintenance", label: "Bảo trì định kỳ" },
@@ -84,11 +121,14 @@ export function CreateJobModal({
   onClose,
   defaultCustomerId = "",
   defaultElevatorId = "",
-  defaultContractId = "",
-  defaultProjectId = "",
-}: CreateJobModalProps) {
-  const [title, setTitle] = useState("");
-  const [type, setType] = useState<JobType>("maintenance");
+   defaultContractId = "",
+   defaultProjectId = "",
+   defaultTitle = "",
+   defaultType = "maintenance",
+   defaultDescription = "",
+ }: CreateJobModalProps) {
+   const [title, setTitle] = useState(defaultTitle || "");
+   const [type, setType] = useState<JobType>(defaultType || "maintenance");
   const [customerId, setCustomerId] = useState(defaultCustomerId || "");
   const [projectId, setProjectId] = useState(defaultProjectId || "");
   const [elevatorId, setElevatorId] = useState(defaultElevatorId || "");
@@ -100,8 +140,8 @@ export function CreateJobModal({
     d.setHours(8, 0, 0, 0);
     return d.toISOString().slice(0, 16);
   });
-  const [priority, setPriority] = useState<JobPriority>("normal");
-  const [description, setDescription] = useState("");
+   const [priority, setPriority] = useState<JobPriority>("normal");
+   const [description, setDescription] = useState(defaultDescription || "");
   const [loading, setLoading] = useState(false);
 
   const technicians = mockUsers.filter((u) =>
@@ -610,6 +650,7 @@ export function ConvertLeadModal({ open, onClose, lead }: ConvertLeadModalProps)
   const [email, setEmail] = useState(lead.email);
   const [address, setAddress] = useState(lead.address);
   const [type, setType] = useState<"business" | "individual">("business");
+  const [conversionType, setConversionType] = useState<"install" | "maintenance">("install");
   const [loading, setLoading] = useState(false);
 
   const handle = async () => {
@@ -620,7 +661,32 @@ export function ConvertLeadModal({ open, onClose, lead }: ConvertLeadModalProps)
     setLoading(true);
     await new Promise((r) => setTimeout(r, 700));
     setLoading(false);
-    toast.success(`Đã chuyển lead thành khách hàng: "${name}" — có thể tạo hợp đồng ngay`);
+
+    // Call the automated logic
+    const { customer, contract } = conversionType === 'maintenance' 
+      ? handleMaintenanceLeadConversion(lead as any)
+      : handleLeadConversion(lead as any);
+
+    const isSmall = useAppStore.getState().activeTenantId === 't-2';
+    
+    if (isSmall) {
+      toast.success(`Đã chuyển đổi thành công!`, {
+        description: `Khách hàng "${customer.name}" đã được tạo.`,
+      });
+      toast.info(`Tự động khởi tạo Hợp đồng: ${contract.code}`);
+      
+      if (customer.referredById) {
+        toast.success("Hệ thống Referral: Đã cộng 100 điểm cho người giới thiệu.");
+      }
+
+      setTimeout(() => {
+        toast.info("Giai đoạn tiếp theo: Phê duyệt hợp đồng để bắt đầu thi công dự án.");
+      }, 1500);
+    } else {
+      toast.success(`Đã chuyển lead thành khách hàng: "${customer.name}"`);
+      toast.info(`Đã tạo bản thảo hợp đồng ${contract.code} - Chờ phòng ban Sales xử lý tiếp.`);
+    }
+    
     onClose();
   };
 
@@ -637,17 +703,31 @@ export function ConvertLeadModal({ open, onClose, lead }: ConvertLeadModalProps)
             Lead "<span className="font-medium">{lead.name}</span>" sẽ được chuyển sang danh sách
             Khách hàng. Kiểm tra và bổ sung thông tin bên dưới.
           </div>
-          <div>
-            <label className="text-sm font-medium">Loại khách hàng</label>
-            <Select value={type} onValueChange={(v) => setType(v as "business" | "individual")}>
-              <SelectTrigger className="mt-1">
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="business">Doanh nghiệp / Tòa nhà</SelectItem>
-                <SelectItem value="individual">Cá nhân / Hộ gia đình</SelectItem>
-              </SelectContent>
-            </Select>
+          <div className="grid grid-cols-2 gap-3">
+            <div>
+              <label className="text-sm font-medium">Loại khách hàng</label>
+              <Select value={type} onValueChange={(v) => setType(v as "business" | "individual")}>
+                <SelectTrigger className="mt-1">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="business">Doanh nghiệp</SelectItem>
+                  <SelectItem value="individual">Cá nhân</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+            <div>
+              <label className="text-sm font-medium">Mục tiêu HĐ</label>
+              <Select value={conversionType} onValueChange={(v) => setConversionType(v as "install" | "maintenance")}>
+                <SelectTrigger className="mt-1">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="install">Lắp mới</SelectItem>
+                  <SelectItem value="maintenance">Bảo trì</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
           </div>
           <div>
             <label className="text-sm font-medium">
@@ -727,6 +807,8 @@ export function CreateContractModal({
 
   const autoCode = `HD-${new Date().getFullYear()}-${String(mockContracts.length + 1).padStart(4, "0")}`;
 
+  const isSmall = useIsSmallCompany();
+
   const handle = async () => {
     if (!customerId || !value || !items.trim()) {
       toast.error("Vui lòng điền đầy đủ các trường bắt buộc");
@@ -735,7 +817,20 @@ export function CreateContractModal({
     setLoading(true);
     await new Promise((r) => setTimeout(r, 600));
     setLoading(false);
-    toast.success(`Đã tạo hợp đồng ${autoCode} — Hệ thống sẽ tự sinh công việc theo lịch hợp đồng`);
+    
+    if (isSmall) {
+      toast.success(`Hợp đồng ${autoCode} đã được tạo!`);
+      
+      if (type === "install") {
+        toast.info("Chế độ Công ty nhỏ: Đang chờ khách hàng ký xác nhận bản cứng/Zalo...");
+        setTimeout(() => {
+          toast.success("Hợp đồng đã chuyển sang trạng thái: Chờ ký (Contract Pending)");
+        }, 1000);
+      }
+    } else {
+      toast.success(`Đã tạo hợp đồng ${autoCode} — Hệ thống sẽ tự sinh công việc theo lịch hợp đồng`);
+    }
+    
     onClose();
   };
 
@@ -1195,6 +1290,15 @@ export function ReceiveInventoryModal({
     await new Promise((r) => setTimeout(r, 400));
     setLoading(false);
     toast.success(`Đã nhập ${qty} ${itemName} vào kho`);
+    
+    // Simulate checking for jobs waiting for this material
+    const waitingJobsCount = Math.floor(Math.random() * 2); 
+    if (waitingJobsCount > 0) {
+      setTimeout(() => {
+        toast.info(`Hệ thống: Đã tự động báo cho kỹ thuật viên công việc đang chờ vật tư "${itemName}" nay đã có hàng.`);
+      }, 1500);
+    }
+
     setQty("1");
     setSupplier("");
     setInvoiceNo("");
@@ -1483,9 +1587,15 @@ export function DispatchJobModal({ open, onClose, job, onDispatch }: DispatchJob
   const [techId, setTechId] = useState("");
   const [loading, setLoading] = useState(false);
 
-  const technicians = mockUsers.filter((u) =>
-    u.memberships?.some((m) => m.permissions.includes("field_tech")),
-  );
+  const technicians = mockUsers
+    .filter((u) => u.memberships?.some((m) => m.permissions.includes("field_tech")))
+    .map((u) => ({
+      ...u,
+      workload: getTechnicianWorkload(u.id),
+    }))
+    .sort((a, b) => a.workload - b.workload);
+
+  const suggestedTechId = technicians.length > 0 ? technicians[0].id : "";
 
   const handle = async () => {
     if (!techId) {
@@ -1531,7 +1641,7 @@ export function DispatchJobModal({ open, onClose, job, onDispatch }: DispatchJob
               <SelectContent>
                 {technicians.map((u) => (
                   <SelectItem key={u.id} value={u.id}>
-                    {u.name}
+                    {u.name} {u.id === suggestedTechId && "(Đề xuất: Rảnh nhất)"} — {u.workload} việc đang xử lý
                   </SelectItem>
                 ))}
               </SelectContent>
@@ -1620,76 +1730,6 @@ export function PaySalaryModal({ open, onClose, users }: PaySalaryModalProps) {
   );
 }
 
-// ─────────────────────────────────────────────
-// 13. MODAL TÁI KÝ HỢP ĐỒNG
-// ─────────────────────────────────────────────
-interface RenewContractModalProps {
-  open: boolean;
-  onClose: () => void;
-  contractCode: string;
-}
-
-export function RenewContractModal({ open, onClose, contractCode }: RenewContractModalProps) {
-  const [loading, setLoading] = useState(false);
-  const [newTotal, setNewTotal] = useState("");
-  const [message, setMessage] = useState("Kính gửi Quý khách, hợp đồng của Quý khách sắp hết hạn. Chúng tôi xin đề xuất tái ký để tiếp tục duy trì dịch vụ tốt nhất.");
-
-  const handle = async () => {
-    setLoading(true);
-    await new Promise((r) => setTimeout(r, 600));
-    setLoading(false);
-    toast.success(`Đã gửi yêu cầu tái ký tới khách hàng cho HĐ ${contractCode}`);
-    onClose();
-  };
-
-  return (
-    <Dialog open={open} onOpenChange={onClose}>
-      <DialogContent className="max-w-md">
-        <DialogHeader>
-          <DialogTitle className="flex items-center gap-2">
-            <RefreshCw className="h-5 w-5 text-primary" /> Yêu cầu khách hàng tái ký
-          </DialogTitle>
-        </DialogHeader>
-        <div className="space-y-4 py-4">
-          <div className="text-sm text-muted-foreground">
-            Hợp đồng: <span className="font-bold text-foreground">{contractCode}</span>
-          </div>
-          <div>
-            <label className="text-sm font-medium">Giá trị dự kiến cho kỳ mới (VND)</label>
-            <Input
-              type="number"
-              className="mt-1"
-              placeholder="Nhập giá trị đề xuất..."
-              value={newTotal}
-              onChange={(e) => setNewTotal(e.target.value)}
-            />
-          </div>
-          <div>
-            <label className="text-sm font-medium">Thông điệp gửi khách hàng</label>
-            <Textarea
-              className="mt-1"
-              rows={4}
-              value={message}
-              onChange={(e) => setMessage(e.target.value)}
-            />
-          </div>
-          <div className="p-3 bg-primary/5 rounded-lg border border-primary/10 text-[11px] text-primary flex gap-2">
-            <RefreshCw className="h-4 w-4 shrink-0" />
-            <p>Hợp đồng sẽ được chuyển sang trạng thái <b>"Đang chờ tái ký"</b> và gửi thông báo tới ứng dụng của Khách hàng.</p>
-          </div>
-        </div>
-        <DialogFooter>
-          <Button variant="outline" onClick={onClose} disabled={loading}>
-            Hủy
-          </Button>
-          <Button onClick={handle} disabled={loading}>
-            {loading ? "Đang gửi..." : "Gửi yêu cầu xác nhận"}
-          </Button>
-        </DialogFooter>
-      </DialogContent>
-    </Dialog>
-  );
-}
 
 // ─────────────────────────────────────────────
 // 14. MODAL CHUYỂN KHO
@@ -1728,7 +1768,7 @@ export function TransferInventoryModal({ open, onClose }: { open: boolean; onClo
               <SelectContent>
                 <SelectItem value="Kho B - Hà Đông">Kho B - Hà Đông</SelectItem>
                 <SelectItem value="Kho C - Gia Lâm">Kho C - Gia Lâm</SelectItem>
-                <SelectItem value="Kho Mobile - Kỹ thuật">Kho Mobile - Xe kỹ thuật 01</SelectItem>
+                <SelectItem value="Kho Xe Kỹ thuật">Kho Xe kỹ thuật 01</SelectItem>
               </SelectContent>
             </Select>
           </div>
@@ -1747,6 +1787,364 @@ export function TransferInventoryModal({ open, onClose }: { open: boolean; onClo
           </Button>
           <Button onClick={handle} disabled={loading}>
             {loading ? "Đang xử lý..." : "Xác nhận chuyển"}
+          </Button>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
+  );
+}
+
+// ─────────────────────────────────────────────
+// 10. MODAL TẢI LÊN TÀI LIỆU (CEO)
+// ─────────────────────────────────────────────
+export function UploadDocumentModal({ 
+  open, 
+  onClose, 
+  title, 
+  onUploadSuccess 
+}: { 
+  open: boolean; 
+  onClose: () => void; 
+  title: string;
+  onUploadSuccess: (url: string) => void;
+}) {
+  const [loading, setLoading] = useState(false);
+  const [file, setFile] = useState<File | null>(null);
+
+  const handleUpload = async () => {
+    if (!file) {
+      toast.error("Vui lòng chọn file trước");
+      return;
+    }
+    setLoading(true);
+    await new Promise(r => setTimeout(r, 1000));
+    setLoading(false);
+    toast.success(`Đã tải lên ${title} thành công!`);
+    onUploadSuccess(`https://example.com/mock-upload-${Date.now()}.pdf`);
+    onClose();
+  };
+
+  return (
+    <Dialog open={open} onOpenChange={onClose}>
+      <DialogContent className="max-w-md">
+        <DialogHeader>
+          <DialogTitle className="flex items-center gap-2">
+            <Upload className="h-5 w-5 text-primary" /> {title}
+          </DialogTitle>
+        </DialogHeader>
+        <div className="py-6 flex flex-col items-center justify-center border-2 border-dashed rounded-xl border-muted-foreground/20 bg-muted/5">
+          <input 
+            type="file" 
+            className="hidden" 
+            id="file-upload" 
+            onChange={(e) => setFile(e.target.files?.[0] || null)}
+          />
+          <label htmlFor="file-upload" className="cursor-pointer flex flex-col items-center gap-2">
+            <div className="h-12 w-12 rounded-full bg-primary/10 flex items-center justify-center text-primary">
+              <Upload className="h-6 w-6" />
+            </div>
+            <span className="text-sm font-medium">{file ? file.name : "Chọn file từ máy tính (PDF, DOCX)"}</span>
+            <span className="text-xs text-muted-foreground">Dung lượng tối đa 10MB</span>
+          </label>
+        </div>
+        <DialogFooter>
+          <Button variant="outline" onClick={onClose}>Hủy</Button>
+          <Button onClick={handleUpload} disabled={loading || !file}>
+            {loading ? "Đang tải lên..." : "Tải lên ngay"}
+          </Button>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
+  );
+}
+
+// ─────────────────────────────────────────────
+// 11. MODAL KẾ TOÁN NHẬP TIỀN
+// ─────────────────────────────────────────────
+export function AccountantPaymentModal({
+  open,
+  onClose,
+  contract,
+  stage, // 1 | 2 | 3
+  onSuccess
+}: {
+  open: boolean;
+  onClose: () => void;
+  contract: any;
+  stage: 1 | 2 | 3;
+  onSuccess: (amount: number) => void;
+}) {
+  const [amount, setAmount] = useState<string>("");
+  const [loading, setLoading] = useState(false);
+  const lead = mockLeads.find(l => l.customerId === contract.customerId);
+
+  const handle = async () => {
+    const numValue = parseFloat(amount);
+    if (isNaN(numValue) || numValue <= 0) {
+      toast.error("Vui lòng nhập số tiền hợp lệ");
+      return;
+    }
+    setLoading(true);
+    await new Promise(r => setTimeout(r, 800));
+    setLoading(false);
+    toast.success(`Đã cập nhận thanh toán giai đoạn ${stage}`);
+    onSuccess(numValue);
+    onClose();
+  };
+
+  return (
+    <Dialog open={open} onOpenChange={onClose}>
+      <DialogContent>
+        <DialogHeader>
+          <DialogTitle>Kế toán: Nhập tiền thanh toán - Giai đoạn {stage}</DialogTitle>
+        </DialogHeader>
+        <div className="space-y-4 py-4">
+          <div className="p-3 bg-primary/5 rounded-lg text-sm flex flex-col gap-1">
+            <span className="text-muted-foreground uppercase font-black text-[10px]">Đang kiểm tra HĐ</span>
+            <span className="font-bold">{contract.code}</span>
+            <span className="text-xs">Tổng giá trị: {new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(contract.value)}</span>
+          </div>
+
+          <div className="space-y-2">
+            <label className="text-[10px] font-black uppercase text-muted-foreground">Hồ sơ đính kèm (CEO đã tải lên)</label>
+            <div className="grid grid-cols-2 gap-2">
+              <Button 
+                variant="outline" 
+                size="sm" 
+                className="justify-start text-xs h-8"
+                disabled={!lead?.quoteFileUrl}
+                onClick={() => window.open(lead?.quoteFileUrl, '_blank')}
+              >
+                <FileText className="h-3.5 w-3.5 mr-1.5 text-orange-500" />
+                {lead?.quoteFileUrl ? "Xem Báo giá" : "Chưa có Báo giá"}
+                {lead?.quoteFileUrl && <ExternalLink className="h-3 w-3 ml-auto opacity-50" />}
+              </Button>
+              <Button 
+                variant="outline" 
+                size="sm" 
+                className="justify-start text-xs h-8"
+                disabled={!contract.contractFileUrl}
+                onClick={() => window.open(contract.contractFileUrl, '_blank')}
+              >
+                <FileText className="h-3.5 w-3.5 mr-1.5 text-blue-500" />
+                {contract.contractFileUrl ? "Xem Hợp đồng" : "Chưa có Hợp đồng"}
+                {contract.contractFileUrl && <ExternalLink className="h-3 w-3 ml-auto opacity-50" />}
+              </Button>
+            </div>
+          </div>
+
+          <div>
+            <label className="text-sm font-medium">Số tiền thu thực tế (VNĐ)</label>
+            <input 
+              type="number" 
+              placeholder="Ví dụ: 100000000" 
+              value={amount} 
+              onChange={(e) => setAmount(e.target.value)}
+              className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 mt-1"
+            />
+          </div>
+          <div className="flex items-center gap-2 p-3 bg-yellow-50 border border-yellow-100 rounded text-yellow-800 text-[11px]">
+            <AlertCircle className="h-4 w-4 shrink-0" />
+            Vui lòng kiểm tra kỹ file báo giá và hợp đồng CEO đã tải lên trước khi nhập số tiền.
+          </div>
+        </div>
+        <DialogFooter>
+          <Button variant="outline" onClick={onClose}>Hủy</Button>
+          <Button onClick={handle}>Xác nhận & Cập nhật</Button>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
+  );
+}
+
+// ─────────────────────────────────────────────
+// 12. MODAL CEO PHÊ DUYỆT TỔNG TIỀN CUỐI
+// ─────────────────────────────────────────────
+export function CEOFinalApprovalModal({
+  open,
+  onClose,
+  contract,
+  enteredTotal,
+  onApproved
+}: {
+  open: boolean;
+  onClose: () => void;
+  contract: any;
+  enteredTotal: number;
+  onApproved: () => void;
+}) {
+  const [loading, setLoading] = useState(false);
+  const result = handleFinalVerification(contract, enteredTotal);
+  const lead = mockLeads.find(l => l.customerId === contract.customerId);
+
+  const handleApprove = async () => {
+    if (!result.success) {
+      toast.error(result.message);
+      return;
+    }
+    setLoading(true);
+    await new Promise(r => setTimeout(r, 1200));
+    setLoading(false);
+    onApproved();
+    onClose();
+  };
+
+  return (
+    <Dialog open={open} onOpenChange={onClose}>
+      <DialogContent>
+        <DialogHeader>
+          <DialogTitle className="flex items-center gap-2">
+            <ShieldCheck className="h-5 w-5 text-primary" /> CEO Đối soát & Phê duyệt quyết toán
+          </DialogTitle>
+        </DialogHeader>
+        <div className="space-y-4 py-4">
+          <div className="grid grid-cols-2 gap-4">
+            <div className="p-3 bg-muted rounded-lg">
+              <div className="text-[10px] font-black uppercase text-muted-foreground mb-1">Giá trị Hợp đồng</div>
+              <div className="text-sm font-bold">{new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(contract.value)}</div>
+            </div>
+            <div className="p-3 bg-primary/10 rounded-lg border border-primary/20">
+              <div className="text-[10px] font-black uppercase text-primary mb-1">Kế toán đã nhập</div>
+              <div className="text-sm font-bold text-primary">{new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(enteredTotal)}</div>
+            </div>
+          </div>
+
+          <div className="p-3 border rounded-lg bg-muted/30">
+            <div className="text-[10px] font-black uppercase text-muted-foreground mb-2">Hồ sơ đối soát</div>
+            <div className="flex gap-4">
+              <a 
+                href={lead?.quoteFileUrl} 
+                target="_blank" 
+                className={`text-xs flex items-center gap-1.5 ${lead?.quoteFileUrl ? 'text-primary hover:underline' : 'text-muted-foreground pointer-events-none'}`}
+              >
+                <FileText className="h-3.5 w-3.5" /> File Báo giá
+              </a>
+              <a 
+                href={contract.contractFileUrl} 
+                target="_blank" 
+                className={`text-xs flex items-center gap-1.5 ${contract.contractFileUrl ? 'text-primary hover:underline' : 'text-muted-foreground pointer-events-none'}`}
+              >
+                <FileText className="h-3.5 w-3.5" /> File Hợp đồng đã ký
+              </a>
+            </div>
+          </div>
+
+          <div className={`p-4 rounded-xl border flex gap-3 ${result.success ? 'bg-success/5 border-success/20 text-success' : 'bg-destructive/5 border-destructive/20 text-destructive'}`}>
+            {result.success ? <CheckCircle2 className="h-5 w-5 shrink-0" /> : <AlertCircle className="h-5 w-5 shrink-0" />}
+            <div className="text-sm">
+              <div className="font-bold mb-0.5">{result.success ? "Khớp số liệu" : "Lệch số liệu"}</div>
+              <div className="opacity-80">{result.message}</div>
+            </div>
+          </div>
+        </div>
+        <DialogFooter>
+          <Button variant="outline" onClick={onClose}>Hủy</Button>
+          {!result.success ? (
+            <Button variant="destructive" onClick={() => toast.info("Đã gửi yêu cầu Kế toán kiểm tra lại hồ sơ.")}>
+              Yêu cầu Kế toán sửa lại
+            </Button>
+          ) : (
+            <Button className="bg-success hover:bg-success/90" onClick={handleApprove}>
+              Phê duyệt & Chuyển Bảo hành
+            </Button>
+          )}
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
+  );
+}
+
+export function CreateHotlineIncidentModal({
+  open,
+  onOpenChange,
+}: {
+  open: boolean;
+  onOpenChange: (open: boolean) => void;
+}) {
+  const activeTenantId = useAppStore((s) => s.activeTenantId);
+  const [loading, setLoading] = useState(false);
+  const [selectedElevatorId, setSelectedElevatorId] = useState("");
+  const [techId, setTechId] = useState("");
+  const [issue, setIssue] = useState("");
+
+  const filteredElevators = mockElevators.filter((e) => e.tenantId === activeTenantId);
+  const technicians = mockUsers.filter((u) => u.memberships.some(m => m.tenantId === activeTenantId && m.permissions.includes('field_tech')));
+
+  const handleCreate = async () => {
+    if (!selectedElevatorId || !techId || !issue) {
+      toast.error("Vui lòng nhập đầy đủ thông tin");
+      return;
+    }
+    setLoading(true);
+    await new Promise((r) => setTimeout(r, 800));
+    const elev = getElevator(selectedElevatorId);
+    
+    toast.success(`Đã tạo sự cố khẩn cấp ${elev?.code} và điều động kỹ thuật!`);
+    setLoading(false);
+    onOpenChange(false);
+  };
+
+  return (
+    <Dialog open={open} onOpenChange={onOpenChange}>
+      <DialogContent className="max-w-md">
+        <DialogHeader>
+          <DialogTitle className="flex items-center gap-2 text-destructive">
+            <Phone className="h-5 w-5 animate-pulse" /> TIẾP NHẬN SỰ CỐ HOTLINE
+          </DialogTitle>
+          <DialogDescription>
+            CEO tạo nhanh phiếu sửa chữa khẩn cấp và bàn giao thợ ngay.
+          </DialogDescription>
+        </DialogHeader>
+
+        <div className="space-y-4 py-4">
+          <div className="space-y-2">
+            <label className="text-sm font-bold uppercase tracking-tight">Chọn Thang máy báo lỗi</label>
+            <Select value={selectedElevatorId} onValueChange={setSelectedElevatorId}>
+              <SelectTrigger>
+                <SelectValue placeholder="-- Chọn thang máy --" />
+              </SelectTrigger>
+              <SelectContent>
+                {filteredElevators.map((e) => (
+                  <SelectItem key={e.id} value={e.id}>
+                    {e.code} - {e.building}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
+
+          <div className="space-y-2">
+            <label className="text-sm font-bold uppercase tracking-tight">Mô tả sự cố (HOTLINE)</label>
+            <Textarea 
+              placeholder="Khách báo kẹt thang, thang rung lắc mạnh..." 
+              value={issue}
+              onChange={(e) => setIssue(e.target.value)}
+              className="min-h-[100px]"
+            />
+          </div>
+
+          <div className="space-y-2">
+            <label className="text-sm font-bold uppercase tracking-tight">Điều phối thợ xử lý</label>
+            <Select value={techId} onValueChange={setTechId}>
+              <SelectTrigger>
+                <SelectValue placeholder="-- Chọn kỹ thuật viên --" />
+              </SelectTrigger>
+              <SelectContent>
+                {technicians.map((u) => (
+                  <SelectItem key={u.id} value={u.id}>
+                    {u.name} (Sẵn sàng)
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
+        </div>
+
+        <DialogFooter>
+          <Button variant="outline" onClick={() => onOpenChange(false)}>Hủy</Button>
+          <Button variant="destructive" onClick={handleCreate} disabled={loading} className="gap-2">
+            {loading ? <RefreshCw className="h-4 w-4 animate-spin" /> : <Send className="h-4 w-4" />}
+            XÁC NHẬN & ĐIỀU PHỐI GẤP
           </Button>
         </DialogFooter>
       </DialogContent>

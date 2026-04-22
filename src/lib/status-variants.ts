@@ -4,22 +4,26 @@ export type StatusVariant = "success" | "warning" | "destructive" | "info" | "mu
 export const jobStatusVariant: Record<string, StatusVariant> = {
   pending: "muted",
   scheduled: "info",
+  appointment_confirmed: "primary",
   in_progress: "warning",
   completed: "success",
   manager_approved: "info",
-  customer_confirmed: "success",
   payment_pending: "warning",
+  waiting_for_materials: "warning",
+  waiting_approval: "warning",
   cancelled: "destructive",
 };
 
 export const jobStatusLabel: Record<string, string> = {
   pending: "Chờ xử lý",
   scheduled: "Đã lên lịch",
+  appointment_confirmed: "Đã hẹn lịch",
   in_progress: "Đang thực hiện",
   completed: "Hoàn thành",
   manager_approved: "Chờ khách xác nhận",
-  customer_confirmed: "Khách đã xác nhận",
   payment_pending: "Chờ thanh toán",
+  waiting_for_materials: "Chờ vật tư về",
+  waiting_approval: "Chờ khách duyệt",
   cancelled: "Đã hủy",
 };
 
@@ -28,7 +32,6 @@ export const contractStatusVariant: Record<string, StatusVariant> = {
   expiring: "warning",
   expired: "destructive",
   draft: "muted",
-  renewal_pending: "info",
 };
 
 export const contractStatusLabel: Record<string, string> = {
@@ -36,7 +39,6 @@ export const contractStatusLabel: Record<string, string> = {
   expiring: "Sắp hết hạn",
   expired: "Hết hạn",
   draft: "Bản nháp",
-  renewal_pending: "Đang chờ tái ký",
 };
 
 export const leadStatusVariant: Record<string, StatusVariant> = {
@@ -45,6 +47,7 @@ export const leadStatusVariant: Record<string, StatusVariant> = {
   quoted: "warning",
   negotiating: "warning",
   quote_pending: "warning",
+  contract_pending: "primary",
   won: "success",
   lost: "destructive",
 };
@@ -55,6 +58,7 @@ export const leadStatusLabel: Record<string, string> = {
   quoted: "Đã báo giá",
   negotiating: "Đang đàm phán",
   quote_pending: "Chờ sếp duyệt",
+  contract_pending: "Chờ ký HĐ",
   won: "Chốt",
   lost: "Mất",
 };
@@ -85,4 +89,12 @@ export const priorityLabel: Record<string, string> = {
   normal: "Bình thường",
   high: "Cao",
   urgent: "Khẩn cấp",
+};
+
+export const jobTypeLabel: Record<string, string> = {
+  install: "Lắp đặt",
+  maintenance: "Bảo trì",
+  repair: "Sửa chữa",
+  warranty: "Bảo hành",
+  inspection: "Khảo sát",
 };
