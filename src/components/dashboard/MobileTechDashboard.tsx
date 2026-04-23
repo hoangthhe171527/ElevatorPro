@@ -13,7 +13,7 @@ import {
 } from "@/lib/status-variants";
 import { Briefcase, CheckCircle2, Clock, AlertTriangle, MapPin, Hammer } from "lucide-react";
 import { mockProjects, mockJobs, getCustomer, formatDateTime, Job } from "@/lib/mock-data";
-import { useAppStore } from "@/lib/store";
+import { useDashboardMetrics } from "@/hooks/useDashboardMetrics";
 import { cn } from "@/lib/utils";
 
 function useAppPrefix() {
@@ -22,15 +22,14 @@ function useAppPrefix() {
 }
 
 export function MobileTechDashboard() {
-  const userId = useAppStore((s) => s.userId);
   const prefix = useAppPrefix();
-  const myJobs = mockJobs.filter((j: Job) => j.assignedTo === userId);
-  const today = myJobs.filter((j: Job) => j.status === "scheduled" || j.status === "in_progress");
-  const completed = myJobs.filter((j: Job) => j.status === "completed").length;
-  const urgent = myJobs.filter((j: Job) => j.priority === "urgent" && j.status !== "completed").length;
-
-  const myProjectIds = Array.from(new Set(myJobs.map((j: Job) => j.projectId).filter(Boolean)));
-  const myProjects = mockProjects.filter(p => myProjectIds.includes(p.id));
+  const {
+    myJobsToday: today,
+    myCompletedCount: completed,
+    myUrgentCount: urgent,
+    myProjects,
+    isTechInstallation
+  } = useDashboardMetrics();
 
   return (
     <AppShell>
@@ -68,44 +67,46 @@ export function MobileTechDashboard() {
         })}
       </div>
 
-      {/* NEW: My Active Projects Section */}
-      <div className="mb-6">
-        <div className="flex items-center justify-between mb-3">
-          <h3 className="font-bold text-lg flex items-center gap-2">
-            <Hammer className="h-5 w-5 text-primary" />
-            Dự án đang triển khai
-          </h3>
-          <Link to={`${prefix}/tech/jobs` as any} search={{ tab: 'install' } as any} className="text-xs text-primary font-bold hover:underline">Xem tất cả</Link>
-        </div>
-        <div className="grid gap-4 sm:grid-cols-2">
-          {myProjects.map(p => (
-            <Link key={p.id} to={`${prefix}/tech/projects/$projectId` as any} params={{ projectId: p.id } as any}>
-              <Card className="p-4 hover:shadow-md transition-all group border-l-4 border-l-primary">
-                <div className="flex justify-between items-start mb-2">
-                  <h4 className="font-bold group-hover:text-primary transition-colors">{p.name}</h4>
-                  <Badge variant="outline" className="text-[10px] uppercase font-bold">Giai đoạn: {p.stage}</Badge>
-                </div>
-                <div className="text-xs text-muted-foreground flex items-center gap-1.5 mb-3">
-                  <MapPin className="h-3 w-3" /> {p.address}
-                </div>
-                <div className="flex items-center justify-between text-[10px] font-bold uppercase tracking-tight text-primary">
-                  <span>Xem 8 giai đoạn lắp đặt</span>
-                  <div className="flex gap-1">
-                    {Array.from({ length: 8 }).map((_, i) => (
-                      <div key={i} className={`h-1.5 w-3 rounded-full ${i === 1 ? 'bg-primary' : i < 1 ? 'bg-success' : 'bg-muted'}`} />
-                    ))}
+      {/* NEW: My Active Projects Section - Only for Installation Techs */}
+      {isTechInstallation && (
+        <div className="mb-6">
+          <div className="flex items-center justify-between mb-3">
+            <h3 className="font-bold text-lg flex items-center gap-2">
+              <Hammer className="h-5 w-5 text-primary" />
+              Dự án đang triển khai
+            </h3>
+            <Link to={`${prefix}/tech/jobs` as any} search={{ tab: 'install' } as any} className="text-xs text-primary font-bold hover:underline">Xem tất cả</Link>
+          </div>
+          <div className="grid gap-4 sm:grid-cols-2">
+            {myProjects.map(p => (
+              <Link key={p.id} to={`${prefix}/tech/projects/$projectId` as any} params={{ projectId: p.id } as any}>
+                <Card className="p-4 hover:shadow-md transition-all group border-l-4 border-l-primary">
+                  <div className="flex justify-between items-start mb-2">
+                    <h4 className="font-bold group-hover:text-primary transition-colors">{p.name}</h4>
+                    <Badge variant="outline" className="text-[10px] uppercase font-bold">Giai đoạn: {p.stage}</Badge>
                   </div>
-                </div>
-              </Card>
-            </Link>
-          ))}
-          {myProjects.length === 0 && (
-            <div className="sm:col-span-2 p-6 text-center bg-muted/20 rounded-xl border-2 border-dashed">
-              <p className="text-sm text-muted-foreground">Bạn chưa có dự án lắp đặt nào được gán.</p>
-            </div>
-          )}
+                  <div className="text-xs text-muted-foreground flex items-center gap-1.5 mb-3">
+                    <MapPin className="h-3 w-3" /> {p.address}
+                  </div>
+                  <div className="flex items-center justify-between text-[10px] font-bold uppercase tracking-tight text-primary">
+                    <span>Xem 8 giai đoạn lắp đặt</span>
+                    <div className="flex gap-1">
+                      {Array.from({ length: 8 }).map((_, i) => (
+                        <div key={i} className={`h-1.5 w-3 rounded-full ${i === 1 ? 'bg-primary' : i < 1 ? 'bg-success' : 'bg-muted'}`} />
+                      ))}
+                    </div>
+                  </div>
+                </Card>
+              </Link>
+            ))}
+            {myProjects.length === 0 && (
+              <div className="sm:col-span-2 p-6 text-center bg-muted/20 rounded-xl border-2 border-dashed">
+                <p className="text-sm text-muted-foreground">Bạn chưa có dự án lắp đặt nào được gán.</p>
+              </div>
+            )}
+          </div>
         </div>
-      </div>
+      )}
 
       {/* Native-style Task List */}
       <h3 className="font-bold mb-3 text-sm text-slate-500 uppercase tracking-widest ml-1">

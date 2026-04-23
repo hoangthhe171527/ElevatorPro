@@ -22,15 +22,12 @@ interface ApprovalGateCardProps {
 }
 
 const PERMISSION_LABELS: Record<Permission, string> = {
-  director: "Ban Giám đốc",
-  sales: "Phòng Kinh doanh",
-  sales_maintenance: "Kinh doanh bảo trì",
-  tech_survey: "Kỹ thuật khảo sát",
-  install_mgmt: "Quản lý lắp đặt",
-  maintenance_mgmt: "Quản lý bảo trì",
-  accounting: "Phòng Kế toán",
-  hr_admin: "Hành chính & Pháp chế",
-  field_tech: "Kỹ thuật viên",
+  sales_admin: "Sale Admin",
+  intake_operator: "Tiếp nhận & nhập liệu",
+  ceo: "CEO",
+  tech_maintenance: "Kỹ thuật bảo trì",
+  tech_installation: "Kỹ thuật lắp đặt",
+  accountant: "Kế toán",
 };
 
 export function ApprovalGateCard({ 

@@ -20,6 +20,8 @@ import {
   mockContracts, 
   mockElevators, 
   mockCustomers,
+  mockInvoices,
+  mockIssues,
   formatVND,
   formatDate,
   formatDateTime,
@@ -30,7 +32,7 @@ import {
   type Job,
   type User,
 } from "@/lib/mock-data";
-import { useAppStore } from "@/lib/store";
+import { useAppStore, useCurrentPermissions, useCurrentUser } from "@/lib/store";
 import {
   Briefcase,
   Users,
@@ -47,69 +49,46 @@ import {
   PhoneCall,
   CheckCircle2,
   CircleDollarSign,
+  ShieldCheck,
 } from "lucide-react";
 import { CreateJobModal } from "@/components/common/Modals";
 import { useState } from "react";
+import { useDashboardMetrics } from "@/hooks/useDashboardMetrics";
 
 export function MobileAdminDashboard() {
   const navigate = useNavigate();
   const activeTenantId = useAppStore((s) => s.activeTenantId);
+  const currentUser = useCurrentUser();
+  const permissions = useCurrentPermissions();
   const [createJobOpen, setCreateJobOpen] = useState(false);
 
-  // Filter all data by activeTenantId
-  const tenantContracts = mockContracts.filter((c) => c.tenantId === activeTenantId);
-  const tenantElevators = mockElevators.filter((e) => e.tenantId === activeTenantId);
-  const tenantJobs = mockJobs.filter((j) => j.tenantId === activeTenantId);
-  const tenantCustomers = mockCustomers.filter((c) => c.tenantId === activeTenantId);
-  const tenantLeads = mockLeads.filter((l) => l.tenantId === activeTenantId);
-
-  const totalRevenue = tenantContracts.reduce((s, c) => s + c.paid, 0);
-  const expiringContracts = tenantContracts.filter((c) => c.status === "expiring").length;
-  const overdueElevators = tenantElevators.filter(
-    (e) => e.status === "maintenance_due" || e.status === "out_of_order",
-  ).length;
-
-  const upcomingJobs = [...tenantJobs]
-    .filter((j) => j.status === "scheduled" || j.status === "in_progress")
-    .sort((a, b) => a.scheduledFor.localeCompare(b.scheduledFor))
-    .slice(0, 6);
-
-  const recentContracts = [...tenantContracts]
-    .sort((a, b) => b.signedAt.localeCompare(a.signedAt))
-    .slice(0, 5);
-
-  // --- PERFORMANCE METRICS CALCULATIONS ---
-  const now = new Date();
-  const currentMonth = now.getMonth();
-  const currentYear = now.getFullYear();
-
-  const monthlyJobs = tenantJobs.filter(j => {
-    const d = new Date(j.scheduledFor);
-    return d.getMonth() === currentMonth && d.getFullYear() === currentYear;
-  });
-
-  const completedJobsThisMonth = monthlyJobs.filter(j => j.status === "completed").length;
-  const pendingJobsThisMonth = monthlyJobs.filter(j => j.status !== "completed").length;
-  const completionRate = monthlyJobs.length > 0 
-    ? Math.round((completedJobsThisMonth / monthlyJobs.length) * 100) 
-    : 0;
-
-  // Technician Performance Leaderboard
-  const techPerformance = mockUsers
-    .filter((u: User) => u.memberships.some(m => m.permissions.includes("field_tech")))
-    .map((tech: User) => {
-      const completed = tenantJobs.filter((j: Job) => j.assignedTo === tech.id && j.status === "completed").length;
-      const inProgress = tenantJobs.filter((j: Job) => j.assignedTo === tech.id && j.status === "in_progress").length;
-      return { ...tech, completed, inProgress };
-    })
-    .sort((a, b) => b.completed - a.completed)
-    .slice(0, 5);
+  const {
+    isCEO,
+    currentMonth,
+    tenantJobs,
+    tenantCustomers,
+    totalRevenue,
+    expiringContracts,
+    overdueElevators,
+    upcomingJobs,
+    recentContracts,
+    monthlyJobs,
+    completedJobsThisMonth,
+    pendingJobsThisMonth,
+    completionRate,
+    techPerformance,
+    headerTitle,
+    focusMetrics,
+    personalQueue,
+    personalLinks,
+    expiringWarranties
+  } = useDashboardMetrics();
 
   return (
     <AppShell>
       <PageHeader
-        title="Bảng điều khiển CEO"
-        description="Theo dõi hiệu suất vận hành và tiến độ công việc trong tháng"
+        title={headerTitle}
+        description="Những việc quan trọng bạn cần xử lý trong hôm nay"
         actions={
           <Button onClick={() => setCreateJobOpen(true)}>
             <Plus className="h-4 w-4 mr-1.5" /> Tạo công việc
@@ -117,11 +96,83 @@ export function MobileAdminDashboard() {
         }
       />
 
-      {/* KPI Cards Section - M thuần */}
-      <div className="flex overflow-x-auto hide-scrollbar gap-3 mb-6 pb-2 -mx-4 px-4 snap-x">
+      {isCEO && expiringWarranties?.length > 0 && (
+        <div className="mb-6 p-4 rounded-[2rem] bg-orange-50 border-2 border-orange-100 flex flex-col items-start gap-4 animate-in fade-in slide-in-from-top-4 duration-1000 shadow-sm mx-1">
+           <div className="flex items-center gap-4">
+              <div className="h-12 w-12 rounded-2xl bg-orange-500 text-white flex items-center justify-center shadow-lg shadow-orange-500/30">
+                 <ShieldCheck className="h-6 w-6" />
+              </div>
+              <div>
+                 <h4 className="font-black text-orange-800 uppercase tracking-tight text-[13px]">Nhắc nhở: {expiringWarranties.length} thang sắp hết hạn bảo hành</h4>
+                 <p className="text-[11px] text-orange-700/70 font-medium">Cần liên hệ khách hàng để tư vấn ký HĐ bảo trì.</p>
+              </div>
+           </div>
+           <Link to="/app/admin/leads" className="w-full">
+              <Button className="w-full bg-orange-500 hover:bg-orange-600 text-white font-black text-xs rounded-2xl h-12 shadow-lg shadow-orange-500/20">
+                 MỞ LEADS ĐỂ LIÊN HỆ
+              </Button>
+           </Link>
+        </div>
+      )}
+
+      <Card className="border-none bg-white p-4 rounded-[2rem] shadow-[0_2px_10px_rgba(0,0,0,0.03)] mb-6">
+        <div className="flex items-center justify-between mb-4">
+          <h3 className="text-[11px] font-black uppercase tracking-widest text-slate-700">Ưu tiên hôm nay</h3>
+          <Badge variant="secondary" className="text-[10px]">{currentUser.name}</Badge>
+        </div>
+        <div className="grid grid-cols-3 gap-2">
+          {focusMetrics.map((item) => (
+            <div key={item.label} className="rounded-2xl bg-slate-50 p-3 text-center border border-slate-100">
+              <div className="text-[9px] font-bold uppercase text-slate-500 tracking-tight">{item.label}</div>
+              <div className="text-xl font-black text-slate-800 mt-1">{item.value}</div>
+            </div>
+          ))}
+        </div>
+      </Card>
+
+      {!isCEO && (
+        <div className="space-y-4 mb-6">
+          <Card className="border-none bg-white p-4 rounded-[2rem] shadow-[0_2px_10px_rgba(0,0,0,0.03)]">
+            <div className="flex items-center justify-between mb-3">
+              <h3 className="text-[11px] font-black uppercase tracking-widest text-slate-700">Việc của bạn hôm nay</h3>
+              <Badge variant="secondary" className="text-[10px]">{personalQueue.length}</Badge>
+            </div>
+            <div className="space-y-2">
+              {personalQueue.length === 0 ? (
+                <div className="text-xs text-muted-foreground text-center py-6 border border-dashed rounded-xl">
+                  Hiện chưa có đầu việc cần xử lý.
+                </div>
+              ) : (
+                personalQueue.map((item) => (
+                  <div key={item.id} className="p-3 rounded-xl border border-slate-100 bg-slate-50/60">
+                    <div className="text-sm font-semibold text-slate-800">{item.title}</div>
+                    <div className="text-xs text-slate-500 mt-1">{item.subtitle}</div>
+                  </div>
+                ))
+              )}
+            </div>
+          </Card>
+
+          <Card className="border-none bg-white p-4 rounded-[2rem] shadow-[0_2px_10px_rgba(0,0,0,0.03)]">
+            <h3 className="text-[11px] font-black uppercase tracking-widest text-slate-700 mb-3">Hành động nhanh</h3>
+            <div className="grid grid-cols-2 gap-2">
+              {personalLinks.map((link) => (
+                <Link key={link.label} to={link.to} className="rounded-xl border border-slate-200 p-3 text-xs font-bold text-center hover:bg-slate-50">
+                  {link.label}
+                </Link>
+              ))}
+            </div>
+          </Card>
+        </div>
+      )}
+
+      {isCEO && (
+        <>
+          {/* KPI Cards Section - M thuần */}
+          <div className="flex overflow-x-auto hide-scrollbar gap-3 mb-6 pb-2 -mx-4 px-4 snap-x">
          {[
-            { label: "Sự cố gấp", value: tenantJobs.filter(j => j.priority === "urgent" && j.status !== "completed").length, icon: AlertTriangle, color: "bg-rose-500", to: "/app/admin/jobs" },
-            { label: "HĐ hết hạn", value: expiringContracts, icon: FileText, color: "bg-amber-500", to: "/app/admin/contracts" },
+            { label: "Sự cố gấp", value: tenantJobs.filter(j => j.priority === "urgent" && j.status !== "completed").length, icon: AlertTriangle, color: "bg-rose-500", to: "/admin/jobs" },
+            { label: "HĐ hết hạn", value: expiringContracts, icon: FileText, color: "bg-amber-500", to: "/admin/contracts" },
             { label: "Hoàn thiện", value: `${completionRate}%`, icon: CheckCircle2, color: "bg-emerald-500", to: undefined },
             { label: "Doanh thu", value: formatVND(totalRevenue * 0.4), icon: CircleDollarSign, color: "bg-blue-500", to: undefined },
          ].map((item, idx) => {
@@ -255,7 +306,7 @@ export function MobileAdminDashboard() {
                 icon: Calendar,
                 label: "Hết hạn bảo trì",
                 count: overdueElevators,
-                href: "/app/admin/elevators",
+                href: "/admin/elevators",
                 color: "bg-amber-50 text-amber-700 border-transparent shadow-[0_1px_3px_rgba(0,0,0,0.02)]",
                 desc: "Cần kiểm tra định kỳ"
               },
@@ -263,7 +314,7 @@ export function MobileAdminDashboard() {
                 icon: FileText,
                 label: "Hết hạn hợp đồng",
                 count: expiringContracts,
-                href: "/app/admin/contracts",
+                href: "/admin/contracts",
                 color: "bg-rose-50 text-rose-700 border-transparent shadow-[0_1px_3px_rgba(0,0,0,0.02)]",
                 desc: "Thủ tục tái ký khách"
               },
@@ -271,7 +322,7 @@ export function MobileAdminDashboard() {
                 icon: AlertTriangle,
                 label: "Sửa chữa chờ xử lý",
                 count: tenantJobs.filter(j => j.type === 'repair' && j.status !== 'completed').length,
-                href: "/app/admin/jobs",
+                href: "/admin/jobs",
                 color: "bg-blue-50 text-blue-700 border-transparent shadow-[0_1px_3px_rgba(0,0,0,0.02)]",
                 desc: "Ca sửa chữa kỹ thuật"
               },
@@ -333,6 +384,8 @@ export function MobileAdminDashboard() {
             </Button>
         </Card>
       </div>
+        </>
+      )}
 
       <CreateJobModal open={createJobOpen} onClose={() => setCreateJobOpen(false)} />
     </AppShell>

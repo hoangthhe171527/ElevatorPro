@@ -9,6 +9,12 @@ export const Route = createFileRoute("/admin/jobs/")({
 });
 
 function AdminJobsRouter() {
-  const { tab } = Route.useSearch();
-  return <WebJobsMonitor tab={tab || "install"} />;
+  const { tab, priority, status } = Route.useSearch();
+  return (
+    <WebJobsMonitor 
+      tab={tab} 
+      initialPriority={priority} 
+      initialStatus={status} 
+    />
+  );
 }

@@ -85,6 +85,26 @@ export function WebJobDetail({
         )}
       />
       
+      {job.status === "pending" && (
+        <div className="mb-6 p-6 rounded-3xl bg-amber-500 text-white flex flex-col md:flex-row items-center justify-between gap-6 shadow-xl shadow-amber-500/20 animate-in fade-in slide-in-from-top-4 duration-500">
+           <div className="flex items-center gap-5">
+              <div className="h-14 w-14 rounded-2xl bg-white/20 flex items-center justify-center backdrop-blur-md">
+                 <UserCheck className="h-8 w-8" />
+              </div>
+              <div>
+                 <h4 className="font-black text-xl uppercase tracking-tight">Cần phân công ngay</h4>
+                 <p className="text-sm font-medium opacity-90 mt-0.5">Công việc này chưa có kỹ thuật viên phụ trách. Vui lòng chọn thợ phù hợp để bắt đầu.</p>
+              </div>
+           </div>
+           <Button 
+            className="bg-white text-amber-600 hover:bg-amber-50 font-black text-sm rounded-xl px-8 h-12 shadow-lg shrink-0"
+            onClick={() => setTechOpen(true)}
+           >
+              CHỌN KỸ THUẬT VIÊN
+           </Button>
+        </div>
+      )}
+
       {readonly && (
         <div className="mb-6 p-4 bg-blue-50/50 border border-blue-100 rounded-xl flex items-center gap-3 text-blue-700 shadow-sm">
           <div className="h-8 w-8 bg-blue-100 rounded-lg flex items-center justify-center shrink-0">

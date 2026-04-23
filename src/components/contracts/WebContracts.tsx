@@ -15,7 +15,7 @@ import { DataPagination } from "@/components/common/DataPagination";
 import { StatusBadge } from "@/components/common/StatusBadge";
 import { contractStatusLabel, contractStatusVariant } from "@/lib/status-variants";
 import { Progress } from "@/components/ui/progress";
-import { mockContracts, formatVND, formatDate, getCustomer, type Contract } from "@/lib/mock-data";
+import { mockContracts, formatVND, formatDate, getCustomer, mockProjects, mockJobs, type Contract } from "@/lib/mock-data";
 import { Plus, Search, FileText, Calendar, User, Banknote, AlertCircle } from "lucide-react";
 import {
   RecordPaymentModal,
@@ -37,8 +37,8 @@ const typeLabel: Record<string, string> = {
 
 export function WebContracts() {
   const permissions = useCurrentPermissions();
-  const isDirector = permissions.includes("director");
-  const isAccountant = permissions.includes("accounting");
+  const isDirector = permissions.includes("ceo");
+  const isAccountant = permissions.includes("accountant");
   const canCreate = useCanWrite("contracts");
   
   const [page, setPage] = useState(1);
@@ -305,7 +305,10 @@ export function WebContracts() {
         onConfirm={() => {
           const c = mockContracts.find((contract) => contract.id === confirmSignId);
           if (c) {
-            handleContractActivation(c);
+            const { project, jobs } = handleContractActivation(c);
+            if (project) mockProjects.push(project);
+            if (jobs && jobs.length > 0) mockJobs.push(...jobs);
+            
             toast.success(`Hợp đồng ${c.code} đã chính thức có hiệu lực!`);
             c.status = "active";
           }

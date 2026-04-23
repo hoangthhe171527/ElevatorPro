@@ -7,7 +7,7 @@ import { Input } from "@/components/ui/input";
 import { DataPagination } from "@/components/common/DataPagination";
 import { StatusBadge } from "@/components/common/StatusBadge";
 import { contractStatusLabel, contractStatusVariant } from "@/lib/status-variants";
-import { mockContracts, formatVND, formatDate, getCustomer, type Contract } from "@/lib/mock-data";
+import { mockContracts, formatVND, formatDate, getCustomer, mockProjects, mockJobs, type Contract } from "@/lib/mock-data";
 import { Plus, Search, FileText, User, Banknote, AlertCircle, ChevronRight, X } from "lucide-react";
 import {
   RecordPaymentModal,
@@ -30,8 +30,8 @@ const typeLabel: Record<string, string> = {
 
 export function MobileContracts() {
   const permissions = useCurrentPermissions();
-  const isDirector = permissions.includes("director");
-  const isAccountant = permissions.includes("accounting");
+  const isDirector = permissions.includes("ceo");
+  const isAccountant = permissions.includes("accountant");
   const canCreate = useCanWrite("contracts");
   
   const [search, setSearch] = useState("");
@@ -116,7 +116,7 @@ export function MobileContracts() {
              { id: "all", label: "Tất cả trạng thái" },
              { id: "draft", label: "Bản nháp" },
              { id: "active", label: "Đang hiệu lực" },
-             { id: "completed", label: "Hoàn tất" },
+             { id: "expired", label: "Hết hạn" },
            ].map((t) => (
              <button
                key={t.id}
@@ -162,7 +162,7 @@ export function MobileContracts() {
                       "absolute left-0 top-6 bottom-6 w-1 rounded-r-lg",
                       c.status === 'draft' ? "bg-slate-200" :
                       c.status === 'active' ? "bg-blue-500" :
-                      c.status === 'completed' ? "bg-emerald-500" : "bg-orange-500"
+                      c.status === 'expired' ? "bg-slate-500" : "bg-orange-500"
                    )} />
 
                    <div className="flex justify-between items-start mb-3">
@@ -287,7 +287,10 @@ export function MobileContracts() {
         onConfirm={() => {
           const c = mockContracts.find((contract) => contract.id === confirmSignId);
           if (c) {
-            handleContractActivation(c);
+            const { project, jobs } = handleContractActivation(c);
+            if (project) mockProjects.push(project);
+            if (jobs && jobs.length > 0) mockJobs.push(...jobs);
+            
             toast.success(`Đã kích hoạt hợp đồng ${c.code}`);
             c.status = "active";
           }

@@ -19,6 +19,8 @@ import {
   mockContracts, 
   mockElevators, 
   mockCustomers,
+  mockInvoices,
+  mockIssues,
   formatVND,
   formatDate,
   formatDateTime,
@@ -29,7 +31,7 @@ import {
   type Job,
   type User,
 } from "@/lib/mock-data";
-import { useAppStore } from "@/lib/store";
+import { useAppStore, useCurrentPermissions, useCurrentUser } from "@/lib/store";
 import {
   Briefcase,
   Users,
@@ -46,69 +48,49 @@ import {
   PhoneCall,
   CheckCircle2,
   CircleDollarSign,
+  ShieldCheck,
+  MapPin,
 } from "lucide-react";
 import { CreateJobModal } from "@/components/common/Modals";
 import { useState } from "react";
+import { useDashboardMetrics } from "@/hooks/useDashboardMetrics";
 
 export function WebAdminDashboard() {
   const navigate = useNavigate();
   const activeTenantId = useAppStore((s) => s.activeTenantId);
+  const currentUser = useCurrentUser();
+  const permissions = useCurrentPermissions();
   const [createJobOpen, setCreateJobOpen] = useState(false);
 
-  // Filter all data by activeTenantId
-  const tenantContracts = mockContracts.filter((c) => c.tenantId === activeTenantId);
-  const tenantElevators = mockElevators.filter((e) => e.tenantId === activeTenantId);
-  const tenantJobs = mockJobs.filter((j) => j.tenantId === activeTenantId);
-  const tenantCustomers = mockCustomers.filter((c) => c.tenantId === activeTenantId);
-  const tenantLeads = mockLeads.filter((l) => l.tenantId === activeTenantId);
-
-  const totalRevenue = tenantContracts.reduce((s, c) => s + c.paid, 0);
-  const expiringContracts = tenantContracts.filter((c) => c.status === "expiring").length;
-  const overdueElevators = tenantElevators.filter(
-    (e) => e.status === "maintenance_due" || e.status === "out_of_order",
-  ).length;
-
-  const upcomingJobs = [...tenantJobs]
-    .filter((j) => j.status === "scheduled" || j.status === "in_progress")
-    .sort((a, b) => a.scheduledFor.localeCompare(b.scheduledFor))
-    .slice(0, 6);
-
-  const recentContracts = [...tenantContracts]
-    .sort((a, b) => b.signedAt.localeCompare(a.signedAt))
-    .slice(0, 5);
-
-  // --- PERFORMANCE METRICS CALCULATIONS ---
-  const now = new Date();
-  const currentMonth = now.getMonth();
-  const currentYear = now.getFullYear();
-
-  const monthlyJobs = tenantJobs.filter(j => {
-    const d = new Date(j.scheduledFor);
-    return d.getMonth() === currentMonth && d.getFullYear() === currentYear;
-  });
-
-  const completedJobsThisMonth = monthlyJobs.filter(j => j.status === "completed").length;
-  const pendingJobsThisMonth = monthlyJobs.filter(j => j.status !== "completed").length;
-  const completionRate = monthlyJobs.length > 0 
-    ? Math.round((completedJobsThisMonth / monthlyJobs.length) * 100) 
-    : 0;
-
-  // Technician Performance Leaderboard
-  const techPerformance = mockUsers
-    .filter((u: User) => u.memberships.some(m => m.permissions.includes("field_tech")))
-    .map((tech: User) => {
-      const completed = tenantJobs.filter((j: Job) => j.assignedTo === tech.id && j.status === "completed").length;
-      const inProgress = tenantJobs.filter((j: Job) => j.assignedTo === tech.id && j.status === "in_progress").length;
-      return { ...tech, completed, inProgress };
-    })
-    .sort((a, b) => b.completed - a.completed)
-    .slice(0, 5);
+  const {
+    isCEO,
+    currentMonth,
+    tenantJobs,
+    tenantCustomers,
+    totalRevenue,
+    expiringContracts,
+    overdueElevators,
+    upcomingJobs,
+    recentContracts,
+    monthlyJobs,
+    completedJobsThisMonth,
+    pendingJobsThisMonth,
+    completionRate,
+    techPerformance,
+    headerTitle,
+    headerDescription,
+    focusMetrics,
+    actionList,
+    personalQueue,
+    personalLinks,
+    expiringWarranties
+  } = useDashboardMetrics();
 
   return (
     <AppShell>
       <PageHeader
-        title="Bảng điều khiển CEO"
-        description="Theo dõi hiệu suất vận hành và tiến độ công việc trong tháng"
+        title={headerTitle}
+        description={headerDescription}
         actions={
           <Button onClick={() => setCreateJobOpen(true)}>
             <Plus className="h-4 w-4 mr-1.5" /> Tạo công việc
@@ -116,39 +98,89 @@ export function WebAdminDashboard() {
         }
       />
 
+      {isCEO && expiringWarranties?.length > 0 && (
+        <div className="mb-6 p-4 rounded-3xl bg-orange-50 border-2 border-orange-100 flex flex-col md:flex-row items-center justify-between gap-4 animate-in fade-in slide-in-from-top-4 duration-1000 shadow-sm">
+           <div className="flex items-center gap-4">
+              <div className="h-12 w-12 rounded-2xl bg-orange-500 text-white flex items-center justify-center shadow-lg shadow-orange-500/30">
+                 <ShieldCheck className="h-6 w-6" />
+              </div>
+              <div>
+                 <h4 className="font-black text-orange-800 uppercase tracking-tight text-sm">Nhắc nhở: {expiringWarranties.length} thang sắp hết hạn bảo hành</h4>
+                 <p className="text-xs text-orange-700/70 font-medium">Cần liên hệ khách hàng để tư vấn chuyển sang hợp đồng bảo trì định kỳ.</p>
+              </div>
+           </div>
+           <Link to="/admin/customers">
+              <Button className="bg-orange-500 hover:bg-orange-600 text-white font-black text-xs rounded-xl px-6 h-10 shadow-lg shadow-orange-500/20">
+                 XEM DANH SÁCH & LIÊN HỆ
+              </Button>
+           </Link>
+        </div>
+      )}
+
+      <Card className="p-5 mb-6 border-none shadow-sm bg-white">
+        <div className="flex items-center justify-between mb-4">
+          <h3 className="text-sm font-black uppercase tracking-tight text-slate-800">Ưu tiên hôm nay của bạn</h3>
+          <Badge variant="secondary" className="text-[10px]">{currentUser.name}</Badge>
+        </div>
+        <div className="grid gap-3 sm:grid-cols-3 mb-4">
+          {focusMetrics.map((item) => (
+            <div key={item.label} className="rounded-2xl border border-slate-100 bg-slate-50/60 p-3">
+              <div className="text-[10px] font-bold uppercase tracking-wider text-slate-500">{item.label}</div>
+              <div className="text-2xl font-black text-slate-800 mt-1">{item.value}</div>
+              <div className="text-[10px] text-slate-500 mt-1">{item.hint}</div>
+            </div>
+          ))}
+        </div>
+        <div className="space-y-2">
+          {actionList.map((task) => (
+            <div key={task} className="text-sm text-slate-700 flex items-start gap-2">
+              <span className="mt-1.5 h-1.5 w-1.5 rounded-full bg-primary shrink-0" />
+              <span>{task}</span>
+            </div>
+          ))}
+        </div>
+      </Card>
+
+      {isCEO ? (
+      <>
       {/* KPI Cards Section */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 lg:gap-6 mb-6">
-        <div className="cursor-pointer" onClick={() => navigate({ to: "/admin/contracts" })}>
+        <div className="cursor-pointer" onClick={() => navigate({ to: "/admin/jobs", search: { tab: "pending" } })}>
           <StatCard
-            label="HĐ sắp hết hạn"
-            value={expiringContracts}
-            icon={FileText}
+            label="Việc chưa phân công"
+            value={tenantJobs.filter(j => j.status === "pending").length}
+            icon={Briefcase}
             accent="warning"
-            hint="Cần liên hệ tái ký"
+            hint="Từ hợp đồng tự động sinh"
           />
         </div>
-        <div className="cursor-pointer" onClick={() => navigate({ to: "/admin/jobs" })}>
+        <div className="cursor-pointer" onClick={() => navigate({ to: "/admin/jobs", search: { priority: "urgent" } })}>
           <StatCard
             label="Sự cố khẩn cấp"
             value={tenantJobs.filter(j => j.priority === "urgent" && j.status !== "completed").length}
             icon={AlertTriangle}
             accent="destructive"
-            hint="Đang chờ xử lý ngay"
+            hint="Cần xử lý ngay"
           />
         </div>
-        <StatCard
-          label="Sản lượng tháng"
-          value={`${completionRate}%`}
-          icon={CheckCircle2}
-          accent="success"
-          trend={{ value: "4.2%", positive: true }}
-        />
-        <StatCard
-          label="Doanh thu HĐ mới"
-          value={formatVND(totalRevenue * 0.4)}
-          icon={CircleDollarSign}
-          accent="info"
-        />
+        <div className="cursor-pointer" onClick={() => navigate({ to: "/admin/contracts" })}>
+          <StatCard
+            label="Chờ duyệt tiền"
+            value={mockContracts.filter(c => c.accountantVerified && !c.ceoVerified).length}
+            icon={CircleDollarSign}
+            accent="success"
+            hint="Kế toán đã nộp đối soát"
+          />
+        </div>
+        <div className="cursor-pointer" onClick={() => navigate({ to: "/admin/leads" })}>
+          <StatCard
+            label="Cơ hội (Leads)"
+            value={mockLeads.filter(l => l.status === "new").length}
+            icon={Navigation}
+            accent="info"
+            hint="Khách hàng tiềm năng mới"
+          />
+        </div>
       </div>
 
       <div className="grid gap-6 lg:grid-cols-3 mb-6">
@@ -197,46 +229,104 @@ export function WebAdminDashboard() {
                   className="h-full bg-gradient-to-r from-primary to-blue-400 rounded-full transition-all duration-1000 shadow-sm"
                   style={{ width: `${completionRate}%` }}
                 />
-             </div>
-          </div>
-        </Card>
+              </div>
+            </div>
+          </Card>
 
-        <Card className="p-6 shadow-xl shadow-slate-200/50 border-none bg-white">
-           <div className="flex items-center gap-3 mb-6">
+          <Card className="p-6 shadow-xl shadow-slate-200/50 border-none bg-white lg:col-span-1">
+            <div className="flex items-center gap-3 mb-6">
                 <div className="h-10 w-10 rounded-2xl bg-orange-500/10 flex items-center justify-center text-orange-600">
                     <UserCheck className="h-5 w-5" />
                 </div>
                 <div>
-                    <h3 className="text-sm font-black text-slate-800 tracking-tight uppercase">Xếp hạng nhân sự</h3>
-                    <p className="text-[10px] text-slate-400 font-bold uppercase tracking-widest mt-0.5">Top thợ hoàn thiện đơn nhiều nhất</p>
+                    <h3 className="text-sm font-black text-slate-800 tracking-tight uppercase">Điều phối thợ</h3>
+                    <p className="text-[10px] text-slate-400 font-bold uppercase tracking-widest mt-0.5">Tải trọng công việc</p>
                 </div>
             </div>
 
             <div className="space-y-3">
-               {techPerformance.map((tech, idx) => (
-                 <div key={tech.id} className="flex items-center justify-between p-3 rounded-2xl bg-slate-50/50 border border-transparent hover:border-primary/20 hover:bg-white transition-all group">
-                    <div className="flex items-center gap-3">
-                       <div className="h-8 w-8 rounded-full bg-white border shadow-sm flex items-center justify-center text-[10px] font-black text-slate-400">
-                          {idx + 1}
-                       </div>
-                       <div>
-                          <div className="text-[11px] font-black text-slate-800 uppercase group-hover:text-primary transition-colors">{tech.name}</div>
-                          <div className="text-[9px] text-slate-400 font-bold uppercase">{tech.inProgress} việc đang làm</div>
-                       </div>
-                    </div>
-                    <div className="text-right">
-                       <div className="text-sm font-black text-slate-800">{tech.completed}</div>
-                       <div className="text-[8px] font-bold text-slate-400 uppercase">Hoàn thành</div>
-                    </div>
-                 </div>
-               ))}
-            </div>
+               {techPerformance.map((tech, idx) => {
+                 const minInProgress = Math.min(...techPerformance.map(t => t.inProgress));
+                 const isRecommended = tech.inProgress === minInProgress;
 
+                 return (
+                   <div key={tech.id} className={`flex items-center justify-between p-3 rounded-2xl bg-slate-50/50 border ${isRecommended ? 'border-primary/40 bg-primary/[0.02]' : 'border-transparent'} hover:border-primary/20 hover:bg-white transition-all group`}>
+                      <div className="flex items-center gap-3">
+                         <div className={`h-8 w-8 rounded-full border shadow-sm flex items-center justify-center text-[10px] font-black ${isRecommended ? 'bg-primary text-white' : 'bg-white text-slate-400'}`}>
+                            {isRecommended ? <CheckCircle2 className="h-4 w-4" /> : idx + 1}
+                         </div>
+                         <div>
+                            <div className="text-[11px] font-black text-slate-800 uppercase group-hover:text-primary transition-colors flex items-center gap-1.5">
+                               {tech.name}
+                            </div>
+                            <div className="text-[9px] text-slate-400 font-bold uppercase">{tech.inProgress} việc đang làm</div>
+                         </div>
+                      </div>
+                      <div className="text-right">
+                         <div className="text-sm font-black text-slate-800">{tech.completed}</div>
+                         <div className="text-[8px] font-bold text-slate-400 uppercase">Xong</div>
+                      </div>
+                   </div>
+                 );
+               })}
+            </div>
+            
             <Button variant="ghost" className="w-full mt-4 text-[10px] font-black uppercase text-primary hover:bg-primary/5">
-               Xem bảng lương & thưởng →
+               Quản lý lịch thợ →
             </Button>
-        </Card>
-      </div>
+          </Card>
+        </div>
+
+        {/* Projects Overview Section for CEO */}
+        <div className="mb-6">
+          <div className="flex items-center justify-between mb-4">
+            <h3 className="text-sm font-black uppercase tracking-tight text-slate-800">Tiến độ Dự án lắp đặt trọn gói</h3>
+            <Link to="/admin/projects" className="text-xs text-primary font-bold hover:underline">Tất cả dự án →</Link>
+          </div>
+          <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+            {mockProjects.filter(p => p.status === "in_progress" && p.tenantId === activeTenantId).slice(0, 3).map(p => {
+               const projJobs = mockJobs.filter(j => j.projectId === p.id);
+               const doneJobs = projJobs.filter(j => j.status === "completed").length;
+               const progress = projJobs.length > 0 ? Math.round((doneJobs / projJobs.length) * 100) : 0;
+               
+               return (
+                 <Link key={p.id} to="/admin/projects/$projectId" params={{ projectId: p.id }}>
+                   <Card className="p-5 hover:shadow-xl transition-all group border-none shadow-md bg-white">
+                      <div className="flex justify-between items-start mb-3">
+                         <h4 className="font-black text-slate-800 group-hover:text-primary transition-colors line-clamp-1">{p.name}</h4>
+                         <Badge variant="outline" className="text-[10px] uppercase font-bold shrink-0">{p.stage}</Badge>
+                      </div>
+                      <div className="text-[10px] text-slate-400 font-bold flex items-center gap-1 mb-4 uppercase tracking-widest">
+                         <MapPin className="h-3 w-3" /> {p.address}
+                      </div>
+                      
+                      <div className="space-y-2">
+                         <div className="flex justify-between items-end">
+                            <span className="text-[9px] font-black text-slate-400 uppercase">Tiến độ thực thi</span>
+                            <span className="text-xs font-black text-primary">{progress}%</span>
+                         </div>
+                         <div className="h-1.5 w-full bg-slate-100 rounded-full overflow-hidden">
+                            <div 
+                              className="h-full bg-primary transition-all duration-500"
+                              style={{ width: `${progress}%` }}
+                            />
+                         </div>
+                      </div>
+                      
+                      <div className="mt-4 pt-4 border-t border-slate-50 flex items-center justify-between">
+                         <div className="flex -space-x-2">
+                            {Array.from({ length: 3 }).map((_, i) => (
+                              <div key={i} className="h-6 w-6 rounded-full border-2 border-white bg-slate-200 flex items-center justify-center text-[8px] font-black text-slate-500 uppercase">NV</div>
+                            ))}
+                         </div>
+                         <div className="text-[9px] font-black text-slate-400 uppercase">8 giai đoạn · {doneJobs}/8</div>
+                      </div>
+                   </Card>
+                 </Link>
+               );
+            })}
+          </div>
+        </div>
 
       <div className="grid gap-6 lg:grid-cols-3 mb-6">
         <Card className="p-6 shadow-xl shadow-slate-200/50 lg:col-span-2 border-none bg-white">
@@ -269,12 +359,12 @@ export function WebAdminDashboard() {
                 desc: "Thủ tục tái ký khách"
               },
               {
-                icon: AlertTriangle,
-                label: "Sửa chữa chờ xử lý",
-                count: tenantJobs.filter(j => j.type === 'repair' && j.status !== 'completed').length,
-                href: "/admin/jobs",
-                color: "bg-info/10 text-info border-info/20",
-                desc: "Ca sửa chữa kỹ thuật"
+                icon: CircleDollarSign,
+                label: "Duyệt thu tiền",
+                count: mockContracts.filter(c => c.accountantVerified && !c.ceoVerified).length,
+                href: "/admin/accounting",
+                color: "bg-emerald-50 text-emerald-600 border-emerald-100",
+                desc: "Kế toán chờ xác nhận"
               },
             ].map((a) => {
               const Icon = a.icon;
@@ -282,8 +372,11 @@ export function WebAdminDashboard() {
                 <Link
                   key={a.label}
                   to={a.href}
-                  className={`group flex flex-col justify-center items-center text-center transition-all hover:shadow-lg p-4 rounded-3xl border ${a.color}`}
+                  className={`group flex flex-col justify-center items-center text-center transition-all hover:shadow-lg p-4 rounded-3xl border ${a.color} relative overflow-hidden`}
                 >
+                  {a.count > 0 && (
+                    <div className="absolute top-1 right-1 h-2 w-2 rounded-full bg-current animate-ping" />
+                  )}
                   <div className="flex flex-col items-center justify-center mb-1">
                      <div className="text-xl font-black">{a.count}</div>
                   </div>
@@ -335,42 +428,55 @@ export function WebAdminDashboard() {
                     <Calendar className="h-5 w-5" />
                 </div>
                 <div>
-                    <h3 className="text-sm font-black text-slate-800 tracking-tight uppercase">Công việc sắp tới</h3>
-                    <p className="text-[10px] text-slate-400 font-bold uppercase tracking-widest mt-0.5">Tiến độ thực hiện hôm nay</p>
+                    <h3 className="text-sm font-black text-slate-800 tracking-tight uppercase">Trung tâm điều hành</h3>
+                    <p className="text-[10px] text-slate-400 font-bold uppercase tracking-widest mt-0.5">Vận hành hiện trường thời gian thực</p>
                 </div>
             </div>
             <Link to="/admin/jobs">
               <Button variant="outline" size="sm" className="h-9 px-4 rounded-xl text-[10px] font-black uppercase">Xem tất cả</Button>
             </Link>
           </div>
-          <div className="space-y-2">
-            {upcomingJobs.map((j) => {
-              const cus = getCustomer(j.customerId);
+          
+          <div className="space-y-6">
+            {['install', 'maintenance', 'repair'].map(type => {
+              const typeJobs = upcomingJobs.filter(j => j.type === type);
+              if (typeJobs.length === 0) return null;
+              
               return (
-                <Link
-                  key={j.id}
-                  to="/admin/jobs/$jobId"
-                  params={{ jobId: j.id }}
-                  className="flex items-center gap-4 p-4 rounded-2xl border border-slate-50 hover:bg-slate-50/50 hover:border-slate-100 transition-all group"
-                >
-                  <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-2xl bg-slate-100 text-slate-600 group-hover:bg-primary group-hover:text-white transition-colors">
-                    <Briefcase className="h-5 w-5" />
+                <div key={type} className="space-y-3">
+                  <h4 className="text-[10px] font-black text-slate-400 uppercase tracking-widest flex items-center gap-2">
+                    {type === 'install' ? 'Lắp đặt mới' : type === 'maintenance' ? 'Bảo trì định kỳ' : 'Xử lý sự cố'}
+                    <span className="h-1 flex-1 bg-slate-100 rounded-full" />
+                  </h4>
+                  <div className="grid gap-2 sm:grid-cols-2">
+                    {typeJobs.map((j) => {
+                      const cus = getCustomer(j.customerId);
+                      return (
+                        <Link
+                          key={j.id}
+                          to="/admin/jobs/$jobId"
+                          params={{ jobId: j.id }}
+                          className="flex items-center gap-3 p-3 rounded-2xl border border-slate-50 hover:bg-slate-50/50 hover:border-slate-100 transition-all group"
+                        >
+                          <div className={`flex h-8 w-8 shrink-0 items-center justify-center rounded-xl transition-colors ${
+                            j.priority === 'urgent' ? 'bg-destructive/10 text-destructive' : 'bg-slate-100 text-slate-600'
+                          }`}>
+                            <Briefcase className="h-4 w-4" />
+                          </div>
+                          <div className="flex-1 min-w-0">
+                            <div className="font-black text-[10px] uppercase text-slate-800 truncate">{j.title}</div>
+                            <div className="text-[9px] font-bold text-slate-400 uppercase truncate mt-0.5">
+                              {cus?.name}
+                            </div>
+                          </div>
+                          <StatusBadge variant={jobStatusVariant[j.status]} className="px-1.5 py-0 text-[8px]">
+                            {jobStatusLabel[j.status]}
+                          </StatusBadge>
+                        </Link>
+                      );
+                    })}
                   </div>
-                  <div className="flex-1 min-w-0">
-                    <div className="flex items-center gap-2">
-                      <span className="font-black text-[11px] uppercase text-slate-800 truncate">{j.title}</span>
-                      <StatusBadge variant={priorityVariant[j.priority]} className="text-[8px] px-1.5 py-0">
-                        {priorityLabel[j.priority]}
-                      </StatusBadge>
-                    </div>
-                    <div className="text-[10px] font-bold text-slate-400 uppercase truncate mt-0.5">
-                      {cus?.name} · {formatDateTime(j.scheduledFor)}
-                    </div>
-                  </div>
-                  <StatusBadge variant={jobStatusVariant[j.status]}>
-                    {jobStatusLabel[j.status]}
-                  </StatusBadge>
-                </Link>
+                </div>
               );
             })}
           </div>
@@ -409,6 +515,46 @@ export function WebAdminDashboard() {
           </div>
         </Card>
       </div>
+
+      </>
+      ) : (
+      <div className="grid gap-6 lg:grid-cols-3 mb-6">
+        <Card className="lg:col-span-2 p-6 border-none shadow-sm bg-white">
+          <div className="flex items-center justify-between mb-4">
+            <h3 className="text-sm font-black uppercase tracking-tight text-slate-800">Việc bạn cần xử lý hôm nay</h3>
+            <Badge variant="secondary" className="text-[10px]">{personalQueue.length} mục</Badge>
+          </div>
+          <div className="space-y-2">
+            {personalQueue.length === 0 ? (
+              <div className="text-sm text-muted-foreground py-8 text-center border border-dashed rounded-xl">
+                Hôm nay bạn chưa có đầu việc cần xử lý.
+              </div>
+            ) : (
+              personalQueue.map((item) => (
+                <div key={item.id} className="p-3 rounded-xl border border-slate-100 bg-slate-50/60">
+                  <div className="text-sm font-semibold text-slate-800">{item.title}</div>
+                  <div className="text-xs text-slate-500 mt-1">{item.subtitle}</div>
+                </div>
+              ))
+            )}
+          </div>
+        </Card>
+
+        <Card className="p-6 border-none shadow-sm bg-white">
+          <h3 className="text-sm font-black uppercase tracking-tight text-slate-800 mb-4">Hành động nhanh</h3>
+          <div className="space-y-3">
+            {personalLinks.map((item) => (
+              <Link key={item.label} to={item.to}>
+                <Button variant="outline" className="w-full justify-between">
+                  <span>{item.label}</span>
+                  <ArrowUpRight className="h-4 w-4" />
+                </Button>
+              </Link>
+            ))}
+          </div>
+        </Card>
+      </div>
+      )}
 
       <CreateJobModal open={createJobOpen} onClose={() => setCreateJobOpen(false)} />
     </AppShell>

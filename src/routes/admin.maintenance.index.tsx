@@ -202,7 +202,11 @@ function MaintenanceOversightPage() {
                     <Plus className="h-3.5 w-3.5 mr-1.5" /> Lên lịch
                   </Button>
                 ) : (
-                  <Link to="/admin/jobs" search={{ tab: 'maintenance' }} className="flex-1 lg:w-32">
+                  <Link 
+                    to="/admin/jobs/$jobId" 
+                    params={{ jobId: c.latestJob.id }} 
+                    className="flex-1 lg:w-32"
+                  >
                     <Button size="sm" variant="secondary" className="w-full">
                        Chi tiết <ChevronRight className="h-3.5 w-3.5 ml-1" />
                     </Button>

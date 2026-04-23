@@ -4,17 +4,21 @@ import { PageHeader } from "@/components/common/PageHeader";
 import { Card, CardContent, CardHeader, CardTitle, CardFooter } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Check, ChevronRight, Building, AlertCircle } from "lucide-react";
+import { Check, ChevronRight, Building, AlertCircle, MapPin } from "lucide-react";
 import {
   mockProjects,
   PROJECT_STAGES,
   PROJECT_STAGE_LABELS,
   advanceProjectStage,
+  mockJobs,
 } from "@/lib/mock-data";
 import { useState } from "react";
 import { useAppStore, useCanWrite } from "@/lib/store";
 import { DataPagination } from "@/components/common/DataPagination";
 import { ConfirmationDialog } from "@/components/common/ConfirmationDialog";
+import { handleEquipmentArrival } from "@/lib/workflow-utils";
+import { toast } from "sonner";
+import { cn } from "@/lib/utils";
 
 export function WebProjects() {
   const activeTenantId = useAppStore((s) => s.activeTenantId);
@@ -32,6 +36,21 @@ export function WebProjects() {
 
   const handleAdvance = () => {
     if (!confirmId) return;
+    
+    const proj = projects.find(p => p.id === confirmId);
+    if (proj?.stage === "waiting_for_equipment") {
+      const { jobs } = handleEquipmentArrival(proj, mockJobs);
+      jobs.forEach(updatedJob => {
+        const idx = mockJobs.findIndex(j => j.id === updatedJob.id);
+        if (idx !== -1) mockJobs[idx] = updatedJob;
+      });
+      toast.success("Thiết bị đã về công trình. Kích hoạt công việc lắp đặt!");
+    } else if (proj?.stage === "installation") {
+      toast.success("Đã xác nhận hoàn thành lắp đặt!");
+    } else if (proj?.stage === "completion") {
+      toast.success("Đã nghiệm thu, chuẩn bị chuyển sang bảo hành.");
+    }
+    
     advanceProjectStage(confirmId);
     setProjects([...mockProjects]);
     setConfirmId(null);
@@ -46,118 +65,58 @@ export function WebProjects() {
         />
       </div>
 
-      <div className="space-y-6">
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
         {paginatedProjects.map((proj) => {
-          const currentStageIndex = PROJECT_STAGES.indexOf(proj.stage);
           const isCompleted = proj.status === "completed";
 
           return (
-            <Card key={proj.id} className="overflow-hidden shadow-sm border-slate-200">
-              <CardHeader className="bg-slate-50/80 pb-4 border-b border-slate-100">
-                <div className="flex justify-between items-start">
-                  <div>
-                    <CardTitle className="text-lg">
-                      <Link
-                        to="/admin/projects/$projectId"
-                        params={{ projectId: proj.id }}
-                        className="flex items-center gap-2 hover:text-primary transition-colors text-slate-800 font-bold"
-                      >
-                        <Building className="h-5 w-5 text-primary" />
-                        {proj.name}
-                        {isCompleted && (
-                          <Badge
-                            variant="outline"
-                            className="ml-2 bg-success/10 text-success border-success/20 font-bold uppercase tracking-widest text-[10px]"
-                          >
-                            Hoàn thành
-                          </Badge>
-                        )}
-                      </Link>
-                    </CardTitle>
-                    <p className="text-sm text-slate-500 font-medium mt-1">{proj.address}</p>
-                  </div>
-                  <div className="flex gap-2">
-                    <Link to="/admin/projects/$projectId" params={{ projectId: proj.id }}>
-                      <Button variant="outline" size="sm" className="h-9 px-3 gap-1.5 focus-visible:ring-primary/20 hover:bg-slate-100">
-                        <ChevronRight className="h-4 w-4" /> Chi tiết
-                      </Button>
-                    </Link>
-                    {!isCompleted && canModify && (
-                      <Button onClick={() => confirmAdvance(proj.id)} className="h-9 gap-2 shadow-sm focus-visible:ring-primary/20">
-                        <Check className="h-4 w-4" />
-                        Hoàn tất: {PROJECT_STAGE_LABELS[proj.stage]}
-                      </Button>
-                    )}
-                  </div>
+            <Card key={proj.id} className="overflow-hidden shadow-xl shadow-slate-200/50 border-none rounded-[2rem] hover:scale-[1.02] transition-all group bg-white">
+              <CardHeader className="pb-4">
+                <div className="flex justify-between items-start mb-4">
+                   <div className="h-12 w-12 rounded-2xl bg-primary/10 flex items-center justify-center text-primary shadow-inner">
+                      <Building className="h-6 w-6" />
+                   </div>
+                   <Badge variant="outline" className={cn(
+                     "font-black uppercase tracking-widest text-[10px] px-3 py-1 rounded-lg border-none",
+                     isCompleted ? "bg-emerald-500/10 text-emerald-600" : "bg-primary/10 text-primary"
+                   )}>
+                     {PROJECT_STAGE_LABELS[proj.stage] || proj.stage}
+                   </Badge>
+                </div>
+                <CardTitle className="text-xl font-black text-slate-800 tracking-tight group-hover:text-primary transition-colors">
+                  {proj.name}
+                </CardTitle>
+                <div className="flex items-center gap-1.5 text-xs text-muted-foreground font-medium mt-2">
+                  <MapPin className="h-3.5 w-3.5 text-slate-400" /> {proj.address}
                 </div>
               </CardHeader>
 
-              <CardContent className="pt-8 pb-8">
-                <div className="relative">
-                  {/* Stepper background line */}
-                  <div className="absolute top-1/2 left-0 w-full h-1.5 bg-slate-100 -translate-y-1/2 rounded-full" />
-
-                  {/* Stepper progress line */}
-                  <div
-                    className="absolute top-1/2 left-0 h-1.5 bg-primary -translate-y-1/2 rounded-full transition-all duration-500"
-                    style={{ width: `${(currentStageIndex / (PROJECT_STAGES.length - 1)) * 100}%` }}
-                  />
-
-                  {/* Stepper nodes */}
-                  <div className="relative flex justify-between">
-                    {PROJECT_STAGES.map((stage, idx) => {
-                      const isPast = idx < currentStageIndex;
-                      const isCurrent = idx === currentStageIndex;
-                      return (
-                        <div key={stage} className="flex flex-col items-center gap-3 w-16 group">
-                          <div
-                            className={`
-                            z-10 flex h-8 w-8 items-center justify-center rounded-full text-sm font-bold border-[3px] transition-all duration-300
-                            ${
-                              isPast
-                                ? "bg-primary border-primary text-primary-foreground shadow-sm shadow-primary/30"
-                                : isCurrent
-                                  ? "bg-white border-primary text-primary shadow-md shadow-primary/20 scale-110"
-                                  : "bg-white border-slate-200 text-slate-400 group-hover:border-slate-300"
-                            }
-                          `}
-                          >
-                            {isPast ? <Check className="h-4 w-4" /> : idx + 1}
-                          </div>
-                          <div
-                            className={`text-[11px] text-center font-bold leading-tight ${isCurrent ? "text-primary" : isPast ? "text-slate-700" : "text-slate-400"}`}
-                          >
-                            {PROJECT_STAGE_LABELS[stage]}
-                          </div>
-                        </div>
-                      );
-                    })}
-                  </div>
-                </div>
+              <CardContent className="pb-6">
+                 <div className="flex flex-col gap-2">
+                    <div className="flex justify-between items-center text-[10px] font-black uppercase tracking-widest text-slate-400">
+                       <span>Tiến độ tổng quát</span>
+                       <span>{proj.stage === 'completion' ? '95%' : proj.stage === 'installation' ? '60%' : '20%'}</span>
+                    </div>
+                    <div className="h-2 bg-slate-100 rounded-full overflow-hidden p-0.5 border border-slate-200/50">
+                       <div 
+                         className="h-full bg-primary rounded-full transition-all duration-1000"
+                         style={{ width: proj.stage === 'completion' ? '95%' : proj.stage === 'installation' ? '60%' : '20%' }}
+                       />
+                    </div>
+                 </div>
               </CardContent>
 
-              {/* Suggestions / Next Actions Panel */}
-              {!isCompleted && (
-                <CardFooter className="bg-primary/5 border-t border-primary/10 py-4">
-                  <div className="flex items-start gap-3 text-sm">
-                    <div className="mt-0.5 rounded-full bg-white p-1.5 text-primary shadow-sm">
-                      <AlertCircle className="h-4 w-4" />
-                    </div>
-                    <div className="pt-0.5">
-                      <span className="font-bold text-primary uppercase tracking-tight text-[11px] block mb-1">Việc cần làm hiện tại</span>
-                      <span className="text-slate-700 font-medium">
-                        {proj.stage === "lead" && "Liên hệ khách hàng, thu thập thông tin và khảo sát nhu cầu ban đầu."}
-                        {proj.stage === "contract" && "Đàm phán chi tiết và hoàn tất ký kết hợp đồng theo báo giá đã duyệt."}
-                        {proj.stage === "technical" && "Cử kỹ thuật khảo sát chi tiết hố thang và phát hành bản vẽ thiết kế."}
-                        {proj.stage === "procurement" && "Xử lý đơn đặt hàng với nhà máy sản xuất (PO) và theo dõi tiến độ."}
-                        {proj.stage === "warehouse" && "Kiểm tra hàng về kho, thực hiện QC và chuẩn bị vật tư lắp đặt."}
-                        {proj.stage === "installation" && "Điều phối đội lắp đặt cơ khí và điện vào công trình thi công."}
-                        {proj.stage === "completion" && "Đăng ký kiểm định an toàn, nghiệm thu bàn giao và quyết toán hợp đồng."}
-                      </span>
-                    </div>
-                  </div>
-                </CardFooter>
-              )}
+              <CardFooter className="pt-0 pb-6 px-6">
+                <Link 
+                  to="/admin/projects/$projectId" 
+                  params={{ projectId: proj.id }}
+                  className="w-full"
+                >
+                  <Button className="w-full h-12 rounded-2xl font-black uppercase tracking-widest text-[11px] shadow-lg shadow-primary/20 gap-2">
+                    Xem chi tiết giai đoạn <ChevronRight className="h-4 w-4" />
+                  </Button>
+                </Link>
+              </CardFooter>
             </Card>
           );
         })}

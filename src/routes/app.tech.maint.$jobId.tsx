@@ -1,6 +1,6 @@
-import { createFileRoute, notFound } from "@tanstack/react-router";
+import { createFileRoute, notFound } from '@tanstack/react-router'
+import { WebMaintenanceJobDetail } from "@/components/tech/web/WebTechMaintenanceDetail";
 import { mockJobs } from "@/lib/mock-data";
-import { MaintenanceWizard } from "./tech.maint.$jobId";
 
 export const Route = createFileRoute("/app/tech/maint/$jobId")({
   loader: ({ params }) => {
@@ -11,10 +11,8 @@ export const Route = createFileRoute("/app/tech/maint/$jobId")({
   head: ({ loaderData }) => ({
     meta: [{ title: `App — Bảo trì — ${(loaderData as any)?.job.code ?? "Công việc"}` }],
   }),
-  component: AppTechMaintWizardContainer,
+  component: () => {
+    const { job } = Route.useLoaderData();
+    return <WebMaintenanceJobDetail job={job} />;
+  },
 });
-
-function AppTechMaintWizardContainer() {
-  const { job } = Route.useLoaderData();
-  return <MaintenanceWizard job={job} />;
-}

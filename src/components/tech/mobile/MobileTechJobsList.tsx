@@ -27,7 +27,7 @@ import {
   priorityVariant,
 } from "@/lib/status-variants";
 import { mockJobs, formatDateTime, getCustomer, mockProjects } from "@/lib/mock-data";
-import { useAppStore } from "@/lib/store";
+import { useAppStore, useCurrentPermissions } from "@/lib/store";
 import {
   Briefcase,
   Search,
@@ -42,7 +42,12 @@ import {
 import { cn } from "@/lib/utils";
 
 export function MobileTechJobsList({ search }: { search: { tab?: string } }) {
-  const tab = search.tab || "install";
+  const permissions = useCurrentPermissions();
+  const isInstallTech = permissions.includes("tech_installation");
+  const isMaintTech = permissions.includes("tech_maintenance");
+  const isCEO = permissions.includes("ceo");
+
+  const tab = search.tab || (isInstallTech ? "install" : (isMaintTech ? "maintenance" : "install"));
   const userId = useAppStore((s) => s.userId);
   const [searchQuery, setSearchQuery] = useState("");
   const [statusFilter, setStatusFilter] = useState("all");
@@ -64,19 +69,34 @@ export function MobileTechJobsList({ search }: { search: { tab?: string } }) {
     return baseFiltered.filter(j => j.type === tab);
   }, [baseFiltered, tab]);
 
+  const isIsolated = !!search.tab;
+  const tabLabels: Record<string, string> = {
+    maintenance: "Danh sách Bảo trì",
+    warranty: "Danh sách Bảo hành",
+    repair: "Danh sách Sửa chữa",
+    inspection: "Danh sách Khảo sát",
+    install: "Dự án Lắp đặt"
+  };
+
   return (
-    <AppShell secondaryNav={
+    <AppShell secondaryNav={!isIsolated && (
       <div className="px-4 py-2 bg-white border-b overflow-x-auto hide-scrollbar">
         <div className="flex items-center gap-4 text-xs font-bold uppercase tracking-widest">
-           <Link to="/app/tech/jobs" search={{ tab: 'install' } as any} className={cn("pb-2 border-b-2 transition-all whitespace-nowrap", tab === 'install' ? "border-primary text-primary" : "border-transparent text-muted-foreground")}>Lắp đặt</Link>
-           <Link to="/app/tech/jobs" search={{ tab: 'inspection' } as any} className={cn("pb-2 border-b-2 transition-all whitespace-nowrap", tab === 'inspection' ? "border-primary text-primary" : "border-transparent text-muted-foreground")}>Khảo sát</Link>
-           <Link to="/app/tech/jobs" search={{ tab: 'maintenance' } as any} className={cn("pb-2 border-b-2 transition-all whitespace-nowrap", tab === 'maintenance' ? "border-primary text-primary" : "border-transparent text-muted-foreground")}>Bảo trì</Link>
-           <Link to="/app/tech/jobs" search={{ tab: 'repair' } as any} className={cn("pb-2 border-b-2 transition-all whitespace-nowrap", tab === 'repair' ? "border-primary text-primary" : "border-transparent text-muted-foreground")}>Sửa chữa</Link>
-           <Link to="/app/tech/jobs" search={{ tab: 'warranty' } as any} className={cn("pb-2 border-b-2 transition-all whitespace-nowrap", tab === 'warranty' ? "border-primary text-primary" : "border-transparent text-muted-foreground")}>Bảo hành</Link>
+           {(isInstallTech || isCEO) && <Link to="/app/tech/jobs" search={{ tab: 'install' } as any} className={cn("pb-2 border-b-2 transition-all whitespace-nowrap", tab === 'install' ? "border-primary text-primary" : "border-transparent text-muted-foreground")}>Lắp đặt</Link>}
+           {(isInstallTech || isCEO) && <Link to="/app/tech/jobs" search={{ tab: 'inspection' } as any} className={cn("pb-2 border-b-2 transition-all whitespace-nowrap", tab === 'inspection' ? "border-primary text-primary" : "border-transparent text-muted-foreground")}>Khảo sát</Link>}
+           {(isMaintTech || isCEO) && <Link to="/app/tech/jobs" search={{ tab: 'maintenance' } as any} className={cn("pb-2 border-b-2 transition-all whitespace-nowrap", tab === 'maintenance' ? "border-primary text-primary" : "border-transparent text-muted-foreground")}>Bảo trì</Link>}
+           {(isMaintTech || isCEO) && <Link to="/app/tech/jobs" search={{ tab: 'repair' } as any} className={cn("pb-2 border-b-2 transition-all whitespace-nowrap", tab === 'repair' ? "border-primary text-primary" : "border-transparent text-muted-foreground")}>Sửa chữa</Link>}
+           {(isMaintTech || isCEO) && <Link to="/app/tech/jobs" search={{ tab: 'warranty' } as any} className={cn("pb-2 border-b-2 transition-all whitespace-nowrap", tab === 'warranty' ? "border-primary text-primary" : "border-transparent text-muted-foreground")}>Bảo hành</Link>}
         </div>
       </div>
-    }>
+    )}>
       <div className="p-4 space-y-4">
+        {isIsolated && (
+          <PageHeader 
+            title={tabLabels[tab] || "Danh sách Công việc"} 
+            description={`Theo dõi và báo cáo tiến độ thực hiện mảng ${(tabLabels[tab] || "Công việc").replace('Danh sách ', '')}`}
+          />
+        )}
         {/* Search & Filter Bar */}
         <div className="flex gap-2">
             <div className="relative flex-1">
@@ -151,8 +171,8 @@ export function MobileTechJobsList({ search }: { search: { tab?: string } }) {
                 return (
                   <Link 
                     key={job.id} 
-                    to="/app/tech/jobs/$jobId" 
-                    params={{ jobId: job.id }}
+                    to={(job.type === 'inspection' ? '/app/tech/survey/$jobId' : '/app/tech/jobs/$jobId') as any}
+                    params={{ jobId: job.id } as any}
                     className="block"
                   >
                     <Card className="p-4 rounded-[24px] border-none shadow-lg shadow-slate-900/5 items-center flex gap-4 hover:bg-slate-50 transition-colors">

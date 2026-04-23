@@ -13,13 +13,23 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
-import { useCurrentUser } from "@/lib/store";
+import { useAppStore, useCurrentUser } from "@/lib/store";
 import { User, Mail, Phone, ShieldCheck, Key, Save } from "lucide-react";
 import { ConfirmationDialog } from "@/components/common/ConfirmationDialog";
 import { toast } from "sonner";
 
+const ROLE_LABELS: Record<string, string> = {
+  ceo: "CEO",
+  sales_admin: "Sale Admin",
+  intake_operator: "Tiếp nhận & nhập liệu",
+  accountant: "Kế toán",
+  tech_maintenance: "Kỹ thuật bảo trì",
+  tech_installation: "Kỹ thuật lắp đặt",
+};
+
 export function WebProfile() {
   const user = useCurrentUser();
+  const activeTenantId = useAppStore((s) => s.activeTenantId);
   const [name, setName] = useState(user.name.split(" (")[0]);
   const [email, setEmail] = useState(user.email);
   const [phone, setPhone] = useState(user.phone);
@@ -32,6 +42,8 @@ export function WebProfile() {
     .slice(-2)
     .map((n) => n[0])
     .join("");
+
+  const activePermissions = user.memberships.find((m) => m.tenantId === activeTenantId)?.permissions || [];
 
   return (
     <AppShell>
@@ -53,12 +65,12 @@ export function WebProfile() {
               <h2 className="text-2xl font-black text-slate-800">{user.name}</h2>
               <p className="text-sm font-bold text-slate-400 mt-1 uppercase tracking-widest">Mã NV: {user.id}</p>
               <div className="flex flex-wrap justify-center gap-2 mt-6">
-                {user.memberships[0]?.permissions.map((p) => (
+                {activePermissions.map((p) => (
                   <span
                     key={p}
                     className="text-[11px] bg-white border border-slate-200 text-slate-600 px-3 py-1 rounded-full font-bold uppercase tracking-wider shadow-sm"
                   >
-                    {p}
+                    {ROLE_LABELS[p] || p}
                   </span>
                 ))}
               </div>

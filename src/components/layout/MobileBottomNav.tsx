@@ -22,10 +22,14 @@ export function MobileBottomNav() {
   const isAppPreviewStored = useAppStore(s => s.isAppPreview);
   const isAppPreview = location.pathname.startsWith("/app");
   
-  const isCEO = permissions.includes("director");
-  const isTech = permissions.includes("field_tech");
+  const isCEO = permissions.includes("ceo");
+  const isSalesAdmin = permissions.includes("sales_admin");
+  const isIntake = permissions.includes("intake_operator");
+  const isAccountant = permissions.includes("accountant");
+  const isTech = permissions.includes("tech_maintenance") || permissions.includes("tech_installation");
 
-  if (!isCEO && !isTech) return null;
+  // Show bottom nav for all roles except those with no dashboard
+  if (!isCEO && !isTech && !isSalesAdmin && !isIntake && !isAccountant) return null;
 
   const isRouteActive = (to: string) => {
     const currentPath = location.pathname.startsWith("/app") 
@@ -63,10 +67,10 @@ export function MobileBottomNav() {
         : "lg:hidden fixed bottom-0 left-0 right-0"
     )}>
       <div className="flex items-center justify-around h-16 max-w-md mx-auto px-2">
-        {isCEO && (
+        {(isCEO || isSalesAdmin || isIntake || isAccountant) && (
           <>
             <NavItem to="/admin" label="Home" icon={LayoutDashboard} />
-            <NavItem to="/admin/jobs" label="Việc" icon={Briefcase} />
+            {(isCEO || isSalesAdmin || isIntake) && <NavItem to="/admin/leads" label="Leads" icon={List} />}
             <div className="relative -top-4">
                <button 
                 onClick={() => setQuickIncidentOpen(true)}
@@ -75,12 +79,16 @@ export function MobileBottomNav() {
                   <Plus className="h-6 w-6" />
                </button>
             </div>
-            <NavItem to="/admin/approvals" label="Duyệt" icon={CheckCircle2} />
+            {(isCEO || isAccountant) ? (
+              <NavItem to="/admin/approvals" label="Duyệt" icon={CheckCircle2} />
+            ) : (
+              <NavItem to="/admin/customers" label="Khách" icon={User} />
+            )}
             <NavItem to="/admin/profile" label="Tôi" icon={User} />
           </>
         )}
         
-        {isTech && !isCEO && (
+        {isTech && !isCEO && !isSalesAdmin && !isIntake && !isAccountant && (
           <>
             <NavItem to="/tech" label="Hôm nay" icon={Activity} />
             <NavItem to="/tech/jobs" label="Danh sách" icon={List} />

@@ -224,18 +224,18 @@ export function MobileProjectDetail({ initialProject, readonly = false }: { init
       </div>
 
       <CreateJobModal open={createJobOpen} onClose={() => setCreateJobOpen(false)} defaultProjectId={project.id} defaultCustomerId={project.customerId} />
-      <ConfirmationDialog open={confirmEquipmentArrival} onOpenChange={setConfirmEquipmentArrival} title="Hàng về công trình" description="Tạo lịch làm việc cơ khí?" onConfirm={() => {
-            const contract = mockContracts.find((c: Contract) => c.id === project.contractId || c.projectId === project.id);
-            if (contract) {
-              const { jobs: newJobs } = handleEquipmentArrival(project, contract);
-              mockJobs.push(...newJobs);
-              setShowAccountantPayment(2);
-              project.stage = "installation";
-              const p = mockProjects.find(x => x.id === project.id);
-              if (p) p.stage = "installation";
-              setProject({ ...project, stage: "installation" });
-              toast.success("Bắt đầu lắp đặt cơ khí.");
-            }
+      <ConfirmationDialog open={confirmEquipmentArrival} onOpenChange={setConfirmEquipmentArrival} title="Hàng về công trình" description="Kích hoạt các công việc lắp đặt cơ khí." onConfirm={() => {
+            const { jobs: activatedJobs } = handleEquipmentArrival(project, mockJobs);
+            activatedJobs.forEach(updatedJob => {
+                const idx = mockJobs.findIndex(j => j.id === updatedJob.id);
+                if (idx !== -1) mockJobs[idx] = updatedJob;
+            });
+            setShowAccountantPayment(2);
+            project.stage = "installation";
+            const p = mockProjects.find(x => x.id === project.id);
+            if (p) p.stage = "installation";
+            setProject({ ...project, stage: "installation" });
+            toast.success("Đã kích hoạt các công việc lắp đặt.");
             setConfirmEquipmentArrival(false);
          }}
       />

@@ -14,17 +14,16 @@ import {
 } from "@/lib/status-variants";
 import { Briefcase, CheckCircle2, Clock, AlertTriangle, MapPin, Hammer } from "lucide-react";
 import { mockProjects, mockJobs, getCustomer, formatDateTime, Job } from "@/lib/mock-data";
-import { useAppStore } from "@/lib/store";
+import { useDashboardMetrics } from "@/hooks/useDashboardMetrics";
 
 export function WebTechDashboard() {
-  const userId = useAppStore((s) => s.userId);
-  const myJobs = mockJobs.filter((j: Job) => j.assignedTo === userId);
-  const today = myJobs.filter((j: Job) => j.status === "scheduled" || j.status === "in_progress");
-  const completed = myJobs.filter((j: Job) => j.status === "completed").length;
-  const urgent = myJobs.filter((j: Job) => j.priority === "urgent" && j.status !== "completed").length;
-
-  const myProjectIds = Array.from(new Set(myJobs.map((j: Job) => j.projectId).filter(Boolean)));
-  const myProjects = mockProjects.filter(p => myProjectIds.includes(p.id));
+  const {
+    myJobsToday: today,
+    myCompletedCount: completed,
+    myUrgentCount: urgent,
+    myProjects,
+    isTechInstallation
+  } = useDashboardMetrics();
 
   return (
     <AppShell>
@@ -46,7 +45,8 @@ export function WebTechDashboard() {
         <StatCard label="Khẩn cấp" value={urgent} icon={AlertTriangle} accent="destructive" />
       </div>
 
-      <div className="mb-6">
+      {isTechInstallation && (
+        <div className="mb-6">
         <div className="flex items-center justify-between mb-3">
           <h3 className="font-bold text-lg flex items-center gap-2">
             <Hammer className="h-5 w-5 text-primary" />
@@ -83,6 +83,7 @@ export function WebTechDashboard() {
           )}
         </div>
       </div>
+    )}
 
       <h3 className="font-bold mb-3 text-lg">
         Công việc tiếp theo

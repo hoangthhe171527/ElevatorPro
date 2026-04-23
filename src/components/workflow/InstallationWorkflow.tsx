@@ -43,9 +43,6 @@ interface InstallationWorkflowProps {
 const STAGE_ICONS: Record<ProjectStage, any> = {
   lead: Users,
   contract: FileSignature,
-  technical: ClipboardCheck,
-  procurement: PackageSearch,
-  warehouse: Truck,
   waiting_for_equipment: Timer,
   installation: Hammer,
   completion: Check,
@@ -74,15 +71,13 @@ export function InstallationWorkflow({
        return INSTALL_STAGES_TEMPLATE.map(s => ({
          id: s.id,
          label: s.label,
-         requiredRole: 'field_tech' as any
+         requiredRole: 'tech_installation' as any
        }));
      }
      return STAGE_SUB_TASKS[currentStage] || [];
    }, [tenantId, currentStage]);
 
-  const isDirector = permissions.includes("director");
-  const isAccounting = permissions.includes("accounting");
-  const isSales = permissions.includes("sales");
+  const isDirector = permissions.includes("ceo");
 
   const allTasksDone = useMemo(() => {
     return subTasks.every(t => completedTasks.includes(t.id));
@@ -250,7 +245,7 @@ export function InstallationWorkflow({
               setConfirmAction("bypass");
               setConfirmOpen(true);
             }}
-            disabled={!allTasksDone && !isDirector} // Only director can bypass if tasks not done
+            disabled={!allTasksDone && !isDirector} // Only CEO can bypass if tasks not done
           />
         </div>
 

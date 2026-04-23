@@ -1,6 +1,7 @@
 import { createFileRoute, notFound } from "@tanstack/react-router";
 import { mockJobs } from "@/lib/mock-data";
 import { MobileTechJobDetail } from "@/components/tech/mobile/MobileTechJobDetail";
+import { WebMaintenanceJobDetail } from "@/components/tech/web/WebTechMaintenanceDetail";
 
 export const Route = createFileRoute("/app/tech/jobs/$jobId")({
   loader: ({ params }) => {
@@ -16,5 +17,10 @@ export const Route = createFileRoute("/app/tech/jobs/$jobId")({
 
 function AppTechJobDetailContainer() {
   const { job } = Route.useLoaderData();
+  
+  if (job.type === "maintenance") {
+    return <WebMaintenanceJobDetail job={job} />;
+  }
+
   return <MobileTechJobDetail job={job} />;
 }

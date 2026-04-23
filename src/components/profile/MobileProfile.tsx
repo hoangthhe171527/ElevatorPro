@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { AppShell } from "@/components/layout/AppShell";
 import { PageHeader } from "@/components/common/PageHeader";
-import { useCurrentUser } from "@/lib/store";
+import { useAppStore, useCurrentUser } from "@/lib/store";
 import { 
    User, 
    Mail, 
@@ -18,8 +18,18 @@ import { toast } from "sonner";
 import { ConfirmationDialog } from "@/components/common/ConfirmationDialog";
 import { cn } from "@/lib/utils";
 
+const ROLE_LABELS: Record<string, string> = {
+   ceo: "CEO",
+   sales_admin: "Sale Admin",
+   intake_operator: "Tiếp nhận & nhập liệu",
+   accountant: "Kế toán",
+   tech_maintenance: "Kỹ thuật bảo trì",
+   tech_installation: "Kỹ thuật lắp đặt",
+};
+
 export function MobileProfile() {
   const user = useCurrentUser();
+   const activeTenantId = useAppStore((s) => s.activeTenantId);
   const [confirmPassword, setConfirmPassword] = useState(false);
   const [confirmLogout, setConfirmLogout] = useState(false);
 
@@ -28,6 +38,11 @@ export function MobileProfile() {
     .slice(-2)
     .map((n) => n[0])
     .join("");
+
+   const activePermissions = user.memberships.find((m) => m.tenantId === activeTenantId)?.permissions || [];
+   const roleLabel = activePermissions.length
+      ? activePermissions.map((p) => ROLE_LABELS[p] || p).join(" • ")
+      : "Unknown";
 
   return (
     <AppShell>
@@ -46,7 +61,7 @@ export function MobileProfile() {
                <h2 className="text-lg font-black text-slate-800 line-clamp-1">{user.name}</h2>
                <p className="text-[11px] font-bold text-slate-400 mt-1 uppercase tracking-widest flex flex-wrap gap-1">
                   ID: {user.id} 
-                  <span className="bg-slate-100 text-slate-500 px-1.5 rounded">{user.memberships[0]?.permissions[0] || 'Unknown'}</span>
+                  <span className="bg-slate-100 text-slate-500 px-1.5 rounded">{roleLabel}</span>
                </p>
             </div>
             <div className="h-8 w-8 bg-slate-50 rounded-full flex items-center justify-center text-slate-400 cursor-pointer">

@@ -7,6 +7,7 @@ import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
 import { 
   mockJobs, 
+  mockContracts,
   getCustomer, 
   getElevator, 
   mockInventory, 
@@ -26,7 +27,8 @@ import {
   Settings,
   ShieldCheck,
   Zap,
-  Trash2
+  Trash2,
+  Camera
 } from "lucide-react";
 import { toast } from "sonner";
 import {
@@ -37,6 +39,8 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 
+import { WebMaintenanceJobDetail } from "@/components/tech/web/WebTechMaintenanceDetail";
+
 export const Route = createFileRoute("/tech/maint/$jobId")({
   loader: ({ params }) => {
     const job = mockJobs.find((j) => j.id === params.jobId);
@@ -46,13 +50,11 @@ export const Route = createFileRoute("/tech/maint/$jobId")({
   head: ({ loaderData }) => ({
     meta: [{ title: `Bảo trì - ${loaderData?.job.code}` }],
   }),
-  component: MaintenanceWizardContainer,
+  component: () => {
+    const { job } = Route.useLoaderData();
+    return <WebMaintenanceJobDetail job={job} />;
+  },
 });
-
-function MaintenanceWizardContainer() {
-  const { job } = Route.useLoaderData();
-  return <MaintenanceWizard job={job} />;
-}
 
 export function MaintenanceWizard({ job }: { job: Job }) {
   const navigate = useNavigate();
@@ -60,10 +62,13 @@ export function MaintenanceWizard({ job }: { job: Job }) {
 
   const [currentStepIdx, setCurrentStepIdx] = useState(0);
   const [steps, setSteps] = useState<NonNullable<Job['maintenanceSteps']>>(job.maintenanceSteps || [
-    { id: "step-1", label: "Kiểm tra sơ bộ", description: "Kiểm tra tổng quát vận hành, tiếng động lạ, rung lắc.", result: "pending", resolved: false },
-    { id: "step-2", label: "Kiểm tra phòng máy", description: "Kiểm tra động cơ, tủ điều khiển, phanh và cáp tải.", result: "pending", resolved: false },
-    { id: "step-3", label: "Kiểm tra Cabin", description: "Bảng điều khiển, nút bấm, đèn chiếu sáng, quạt thông gió.", result: "pending", resolved: false },
-    { id: "step-4", label: "An toàn & Vệ sinh", description: "Cảm biến cửa, cứu hộ tự động, vệ sinh rãnh dẫn hướng.", result: "pending", resolved: false },
+    { id: "step-1", label: "Kiểm tra sơ bộ", description: "Vận hành tổng quát, kiểm tra tiếng động lạ, độ rung lắc của Cabin.", result: "pending", resolved: false },
+    { id: "step-2", label: "Kiểm tra phòng máy", description: "Kiểm tra động cơ, tủ điều khiển, hệ thống phanh, cáp tải và bộ hạn chế tốc độ.", result: "pending", resolved: false },
+    { id: "step-3", label: "Kiểm tra Cabin", description: "Bảng điều khiển, nút bấm, đèn chiếu sáng, quạt thông gió và điện thoại cứu hộ.", result: "pending", resolved: false },
+    { id: "step-4", label: "Kiểm tra hố thang", description: "Kiểm tra đối trọng, hệ thống rail dẫn hướng, cáp tín hiệu và các công tắc giới hạn.", result: "pending", resolved: false },
+    { id: "step-5", label: "Hệ thống cửa tầng", description: "Kiểm tra khóa cửa tầng, khe hở cửa, độ nhạy của cảm biến và ray dẫn hướng cửa.", result: "pending", resolved: false },
+    { id: "step-6", label: "PIT hố thang", description: "Vệ sinh đáy hố, kiểm tra giảm chấn (buffer), hệ thống thoát nước và công tắc an toàn đáy hố.", result: "pending", resolved: false },
+    { id: "step-7", label: "Hệ thống an toàn", description: "Thử nghiệm bộ cứu hộ tự động (ARD), thắng cơ, switch an toàn và liên lạc khẩn cấp.", result: "pending", resolved: false },
   ]);
 
   const [usedParts, setUsedParts] = useState<{ id: string; qty: number }[]>([]);
@@ -97,22 +102,53 @@ export function MaintenanceWizard({ job }: { job: Job }) {
   };
 
   const handleFinish = () => {
+    // 1. Cập nhật trạng thái Job
+    job.status = "completed";
+    job.maintenanceSteps = steps.map(s => ({
+      ...s,
+      result: s.result as "ok" | "repair" | "replace" | "pending"
+    }));
+    job.completedAt = new Date().toISOString();
+
     toast.success("Đã hoàn thành toàn bộ quy trình bảo trì!");
     
-    // B5: Thông báo kế toán sau bảo trì
-    setTimeout(() => {
-      toast.info("📋 Hệ thống đã gửi thông báo đến Kế toán để liên hệ khách hàng nhắc thanh toán.", { duration: 5000 });
-    }, 1200);
-    
+    // 2. Xử lý vật tư và hóa đơn tức thì
     if (usedParts.length > 0) {
       const totalPartsValue = usedParts.reduce((sum, up) => {
         const part = mockInventory.find(i => i.id === up.id);
         return sum + (part?.unitPrice || 0) * up.qty;
       }, 0);
+      
+      // Ghi nhận báo giá phát sinh ngay trên job để Kế toán xuất hóa đơn thu tiền ngay
+      job.repairQuote = {
+        total: totalPartsValue,
+        items: usedParts.map(up => {
+          const p = mockInventory.find(i => i.id === up.id);
+          return { 
+            id: up.id, 
+            name: p?.name || 'Vật tư', 
+            price: p?.unitPrice || 0, 
+            quantity: up.qty 
+          };
+        }),
+        isApproved: true, // Auto-approved for small company demo
+      };
+
+      const contract = mockContracts.find(c => c.id === job.contractId);
+      if (contract) {
+        // Lưu vết vào giá trị hợp đồng nhưng đánh dấu là khoản thu lẻ
+        contract.totalMaintenanceValue = (contract.totalMaintenanceValue || 0) + totalPartsValue;
+      }
+
       setTimeout(() => {
-        toast.info(`💰 Giá trị vật tư thay thế: ${formatVND(totalPartsValue)} — đã cập nhật vào giá trị hợp đồng bảo trì.`, { duration: 5000 });
+        toast.info(`💰 Phát sinh vật tư: ${formatVND(totalPartsValue)} — Đã chuyển thông tin sang Kế toán để xuất hóa đơn thu tiền ngay.`, { duration: 6000 });
       }, 2400);
     }
+
+    // B5: Thông báo kế toán sau bảo trì
+    setTimeout(() => {
+      toast.info("📋 Hệ thống đã gửi thông báo đến Kế toán để liên hệ khách hàng nhắc thanh toán.", { duration: 5000 });
+    }, 1200);
     
     navigate({ to: "/tech/jobs", search: { tab: 'maintenance' } });
   };
@@ -178,6 +214,44 @@ export function MaintenanceWizard({ job }: { job: Job }) {
             <div className="mb-8">
               <h2 className="text-3xl font-black mb-2 leading-tight">{currentStepIdx + 1}. {currentStep.label}</h2>
               <p className="text-muted-foreground leading-relaxed">{currentStep.description}</p>
+            </div>
+
+            {/* Photo Capture for step */}
+            <div className="mb-6">
+               <div className="text-[10px] font-black text-muted-foreground uppercase tracking-widest mb-2 flex items-center gap-1.5">
+                  <Camera className="h-3 w-3" /> Ảnh minh chứng hiện trường
+               </div>
+               {currentStep.photo ? (
+                 <div className="relative group/img aspect-video rounded-2xl overflow-hidden border bg-muted">
+                    <img src={currentStep.photo} className="w-full h-full object-cover" alt="Step proof" />
+                    <Button 
+                      variant="destructive" 
+                      size="icon" 
+                      className="absolute top-2 right-2 h-8 w-8 opacity-0 group-hover/img:opacity-100 transition-opacity"
+                      onClick={() => {
+                        const newSteps = [...steps];
+                        newSteps[currentStepIdx].photo = undefined;
+                        setSteps(newSteps);
+                      }}
+                    >
+                       <Trash2 className="h-4 w-4" />
+                    </Button>
+                 </div>
+               ) : (
+                 <Button 
+                   variant="outline" 
+                   className="w-full h-24 rounded-2xl border-dashed border-2 flex flex-col gap-2 hover:bg-primary/5 hover:border-primary/50 transition-all"
+                   onClick={() => {
+                      const newSteps = [...steps];
+                      newSteps[currentStepIdx].photo = "https://images.unsplash.com/photo-1581092160562-40aa08e78837?q=80&w=400"; // Mock photo
+                      setSteps(newSteps);
+                      toast.success("Đã chụp ảnh hiện trường!");
+                   }}
+                 >
+                    <Camera className="h-6 w-6 text-muted-foreground" />
+                    <span className="text-[10px] font-black uppercase text-muted-foreground">Chụp ảnh ngay</span>
+                 </Button>
+               )}
             </div>
 
             {/* ACTION BUTTONS */}

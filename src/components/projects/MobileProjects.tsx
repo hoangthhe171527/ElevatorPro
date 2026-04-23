@@ -94,11 +94,10 @@ export function MobileProjects() {
                         <span className="text-[10px] font-medium leading-relaxed">
                           {proj.stage === "lead" && "Cần khảo sát nhu cầu ban đầu."}
                           {proj.stage === "contract" && "Cần hoàn tất đàm phán hợp đồng."}
-                          {proj.stage === "technical" && "Chờ bản vẽ thiết kế hố thang."}
-                          {proj.stage === "procurement" && "Chờ đặt sản xuất thiết bị."}
-                          {proj.stage === "warehouse" && "QC linh kiện nhập kho."}
+                          {proj.stage === "waiting_for_equipment" && "Chờ xác nhận thiết bị đã về công trình."}
                           {proj.stage === "installation" && "Thi công cơ & điện ngoài công trình."}
                           {proj.stage === "completion" && "Chờ nghiệm thu và kiểm định an toàn."}
+                          {proj.stage === "transition" && "Chuyển giao cho đội bảo trì."}
                         </span>
                      </div>
                   )}

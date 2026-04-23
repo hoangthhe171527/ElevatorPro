@@ -43,24 +43,22 @@ export const contractStatusLabel: Record<string, string> = {
 
 export const leadStatusVariant: Record<string, StatusVariant> = {
   new: "info",
-  contacted: "primary",
+  surveying: "primary",
+  surveyed: "warning",
   quoted: "warning",
   negotiating: "warning",
-  quote_pending: "warning",
-  contract_pending: "primary",
-  won: "success",
+  signed: "success",
   lost: "destructive",
 };
 
 export const leadStatusLabel: Record<string, string> = {
-  new: "Mới",
-  contacted: "Đã liên hệ",
+  new: "Mới tạo",
+  surveying: "Đang chờ khảo sát",
+  surveyed: "Đã khảo sát",
   quoted: "Đã báo giá",
-  negotiating: "Đang đàm phán",
-  quote_pending: "Chờ sếp duyệt",
-  contract_pending: "Chờ ký HĐ",
-  won: "Chốt",
-  lost: "Mất",
+  negotiating: "Đang thương thảo",
+  signed: "Đã ký",
+  lost: "Thất bại",
 };
 
 export const elevatorStatusVariant: Record<string, StatusVariant> = {

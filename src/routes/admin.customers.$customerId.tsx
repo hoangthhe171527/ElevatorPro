@@ -43,6 +43,7 @@ import {
   Briefcase,
   Plus,
   QrCode,
+  Clock,
 } from "lucide-react";
 
 export const Route = createFileRoute("/admin/customers/$customerId")({
@@ -69,226 +70,220 @@ export const Route = createFileRoute("/admin/customers/$customerId")({
 
 function CustomerDetail() {
   const { customer } = Route.useLoaderData();
-  const [jobOpen, setJobOpen] = useState(false);
+  const [selectedElevatorId, setSelectedElevatorId] = useState<string | null>(null);
   const [contractOpen, setContractOpen] = useState(false);
   const [elevatorOpen, setElevatorOpen] = useState(false);
 
-  const contracts = mockContracts.filter((c) => c.customerId === customer.id);
+  // Data fetching
   const customerProjects = mockProjects.filter((p) => p.customerId === customer.id);
   const projectIds = customerProjects.map((p) => p.id);
   const elevators = mockElevators.filter((e) => projectIds.includes(e.projectId));
-  const jobs = mockJobs.filter((j) => j.customerId === customer.id).slice(0, 6);
-  const totalRevenue = contracts.reduce((s, c) => s + c.paid, 0);
-  const totalContractValue = contracts.reduce((s, c) => s + c.value, 0);
+  
+  const selectedElevator = elevators.find(e => e.id === selectedElevatorId);
+  const elevatorContracts = selectedElevator 
+    ? mockContracts.filter(c => c.elevatorId === selectedElevator.id || c.projectId === selectedElevator.projectId)
+    : [];
 
-  const typeLabel: Record<string, string> = {
-    install: "Lắp đặt",
-    maintenance: "Bảo trì",
-    repair: "Sửa chữa",
+  const expiringContract = elevatorContracts.find(c => c.status === 'expiring');
+
+  const handleBack = () => {
+    if (selectedElevatorId) {
+      setSelectedElevatorId(null);
+    }
   };
 
   return (
     <AppShell>
-      <Link
-        to="/admin/customers"
-        className="inline-flex items-center gap-1 text-sm text-muted-foreground hover:text-foreground mb-4"
-      >
-        <ArrowLeft className="h-4 w-4" /> Quay lại danh sách
-      </Link>
+      <div className="mb-6">
+        <Link
+          to="/admin/customers"
+          className="inline-flex items-center gap-1 text-sm text-muted-foreground hover:text-foreground mb-4"
+        >
+          <ArrowLeft className="h-4 w-4" /> Quay lại danh sách khách hàng
+        </Link>
 
-      <PageHeader
-        title={customer.name}
-        description={`${customer.type === "business" ? "Doanh nghiệp" : "Cá nhân"} · Khách hàng từ ${formatDate(customer.createdAt)}`}
-        actions={
-          <div className="flex gap-2 flex-wrap">
-            <Button variant="outline" size="sm" onClick={() => setElevatorOpen(true)}>
-              <Plus className="h-3.5 w-3.5 mr-1" /> Thêm thang
-            </Button>
-            <Button variant="outline" size="sm" onClick={() => setContractOpen(true)}>
-              <Plus className="h-3.5 w-3.5 mr-1" /> Tạo HĐ
-            </Button>
-            <Button size="sm" onClick={() => setJobOpen(true)}>
-              <Plus className="h-3.5 w-3.5 mr-1" /> Tạo công việc
-            </Button>
+        <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+          <div>
+            <h1 className="text-3xl font-black text-slate-900 tracking-tight flex items-center gap-3">
+              {customer.name}
+              <Badge variant="secondary" className="bg-blue-50 text-blue-700 hover:bg-blue-50 border-blue-100 uppercase text-[10px] font-bold">
+                {customer.type === 'business' ? 'Doanh nghiệp' : 'Cá nhân'}
+              </Badge>
+            </h1>
+            <p className="text-slate-500 font-medium mt-1">
+              {selectedElevatorId ? `Chi tiết thang máy: ${selectedElevator?.code}` : `Quản lý danh sách thang máy và hợp đồng của khách hàng`}
+            </p>
           </div>
-        }
-      />
-
-      {/* Stats */}
-      <div className="grid gap-4 sm:grid-cols-4 mb-6">
-        <Card className="p-4">
-          <div className="text-xs text-muted-foreground">Thang máy</div>
-          <div className="mt-1 text-2xl font-bold">{elevators.length}</div>
-        </Card>
-        <Card className="p-4">
-          <div className="text-xs text-muted-foreground">Hợp đồng</div>
-          <div className="mt-1 text-2xl font-bold">{contracts.length}</div>
-        </Card>
-        <Card className="p-4">
-          <div className="text-xs text-muted-foreground">Doanh thu đã thu</div>
-          <div className="mt-1 text-xl font-bold text-success">{formatVND(totalRevenue)}</div>
-        </Card>
-        <Card className="p-4">
-          <div className="text-xs text-muted-foreground">Tổng giá trị HĐ</div>
-          <div className="mt-1 text-xl font-bold text-primary">{formatVND(totalContractValue)}</div>
-        </Card>
+          
+          {!selectedElevatorId && (
+            <Button 
+              className="rounded-xl px-6 h-11 bg-primary hover:bg-primary/90 shadow-lg shadow-primary/20 font-bold"
+              onClick={() => setElevatorOpen(true)}
+            >
+              <Plus className="h-5 w-5 mr-2" /> THÊM THANG MÁY
+            </Button>
+          )}
+        </div>
       </div>
 
-      <div className="grid gap-4 lg:grid-cols-3">
-        {/* Left: info + elevators */}
-        <div className="space-y-4">
-          {/* Contact info */}
-          <Card className="p-5">
-            <h3 className="font-semibold mb-3 flex items-center gap-2">
-              {customer.type === "business" ? (
-                <Building2 className="h-4 w-4" />
-              ) : (
-                <User className="h-4 w-4" />
-              )}
-              Thông tin liên hệ
-            </h3>
-            <div className="space-y-2 text-sm">
-              <div className="text-muted-foreground text-xs">Người liên hệ</div>
-              <div className="font-medium">{customer.contactPerson}</div>
-              <a
-                href={`tel:${customer.phone}`}
-                className="flex items-center gap-1.5 text-primary text-sm"
-              >
-                <Phone className="h-3.5 w-3.5" /> {customer.phone}
-              </a>
-              <a
-                href={`mailto:${customer.email}`}
-                className="flex items-center gap-1.5 text-primary text-sm"
-              >
-                <Mail className="h-3.5 w-3.5" /> {customer.email}
-              </a>
-              <div className="flex items-start gap-1.5 text-xs text-muted-foreground">
-                <MapPin className="h-3.5 w-3.5 mt-0.5 shrink-0" /> {customer.address}
+      {!selectedElevatorId ? (
+        /* LIST OF ELEVATORS */
+        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+          {elevators.map((e) => (
+            <Card 
+              key={e.id} 
+              className="p-5 hover:border-primary/50 cursor-pointer transition-all hover:shadow-md group relative overflow-hidden"
+              onClick={() => setSelectedElevatorId(e.id)}
+            >
+              <div className="absolute top-0 right-0 p-3">
+                <StatusBadge variant={elevatorStatusVariant[e.status]}>
+                  {elevatorStatusLabel[e.status]}
+                </StatusBadge>
               </div>
-            </div>
-          </Card>
+              <div className="h-12 w-12 rounded-2xl bg-slate-50 flex items-center justify-center text-slate-400 group-hover:bg-primary/10 group-hover:text-primary transition-colors mb-4">
+                <Building2 className="h-6 w-6" />
+              </div>
+              <h3 className="font-black text-slate-800 text-lg mb-1">{e.code}</h3>
+              <p className="text-sm text-slate-500 font-medium mb-4">{e.brand} · {e.model} · {e.floors} Tầng</p>
+              
+              <div className="flex items-center justify-between pt-4 border-t border-slate-50">
+                <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Xem chi tiết & Hợp đồng</span>
+                <QrCode className="h-4 w-4 text-slate-300" />
+              </div>
+            </Card>
+          ))}
+          {elevators.length === 0 && (
+            <Card className="col-span-full p-12 flex flex-col items-center justify-center text-center bg-slate-50/50 border-dashed">
+              <div className="h-16 w-16 rounded-full bg-slate-100 flex items-center justify-center text-slate-400 mb-4">
+                <Building2 className="h-8 w-8" />
+              </div>
+              <h3 className="font-bold text-slate-900">Chưa có thang máy nào</h3>
+              <p className="text-slate-500 text-sm max-w-[250px] mt-2">
+                Bắt đầu bằng cách thêm thang máy đầu tiên cho khách hàng này.
+              </p>
+              <Button variant="outline" className="mt-6 rounded-xl" onClick={() => setElevatorOpen(true)}>
+                Thêm ngay
+              </Button>
+            </Card>
+          )}
+        </div>
+      ) : (
+        /* ELEVATOR DETAIL VIEW */
+        <div className="space-y-6 animate-in fade-in slide-in-from-bottom-4 duration-500">
+          <Button variant="ghost" size="sm" onClick={handleBack} className="font-bold text-primary hover:bg-primary/5">
+            <ArrowLeft className="h-4 w-4 mr-2" /> Quay lại danh sách thang
+          </Button>
 
-          {/* Elevators */}
-          <Card className="p-5">
-            <div className="flex items-center justify-between mb-3">
-              <h3 className="font-semibold flex items-center gap-2">
-                <Building2 className="h-4 w-4" /> Thang máy ({elevators.length})
-              </h3>
-            </div>
-            <div className="space-y-2">
-              {elevators.map((e) => (
-                <div
-                  key={e.id}
-                  className="flex items-center justify-between p-3 rounded-lg border hover:bg-muted/30 text-sm"
+          <div className="grid gap-6 lg:grid-cols-3">
+            {/* Elevator Info Summary */}
+            <Card className="p-6 h-fit bg-slate-900 text-white border-none shadow-xl">
+              <div className="flex items-center justify-between mb-6">
+                <div className="h-14 w-14 rounded-2xl bg-white/10 flex items-center justify-center">
+                  <Building2 className="h-7 w-7 text-white" />
+                </div>
+                <StatusBadge variant={elevatorStatusVariant[selectedElevator!.status]}>
+                  {elevatorStatusLabel[selectedElevator!.status]}
+                </StatusBadge>
+              </div>
+              <h2 className="text-2xl font-black mb-1">{selectedElevator?.code}</h2>
+              <p className="text-white/60 text-sm font-medium mb-6">{selectedElevator?.brand} {selectedElevator?.model}</p>
+              
+              <div className="space-y-4 pt-6 border-t border-white/10">
+                <div className="flex items-center justify-between text-sm">
+                  <span className="text-white/40">Vị trí</span>
+                  <span className="font-bold text-right">{selectedElevator?.building}</span>
+                </div>
+                <div className="flex items-center justify-between text-sm">
+                  <span className="text-white/40">Bảo hành đến</span>
+                  <span className="font-bold">{formatDate(selectedElevator!.warrantyUntil)}</span>
+                </div>
+              </div>
+
+              {/* ACTION: CREATE CONTRACT (Logic: Multi-elevator + New) */}
+              {(elevators.length >= 2) && (
+                <Button 
+                  className="w-full mt-8 bg-white text-slate-900 hover:bg-white/90 rounded-xl font-black py-6 h-auto"
+                  onClick={() => setContractOpen(true)}
                 >
-                  <div className="min-w-0">
-                    <div className="font-mono font-semibold">{e.code}</div>
-                    <div className="text-xs text-muted-foreground truncate">
-                      {e.brand} {e.model} · {e.building}
-                    </div>
-                  </div>
-                  <div className="flex items-center gap-2 ml-2 shrink-0">
-                    <StatusBadge variant={elevatorStatusVariant[e.status]}>
-                      {elevatorStatusLabel[e.status]}
-                    </StatusBadge>
-                    <Link to="/admin/elevators/$elevatorId/qr" params={{ elevatorId: e.id }}>
-                      <Button variant="ghost" size="icon" className="h-7 w-7">
-                        <QrCode className="h-3.5 w-3.5" />
-                      </Button>
-                    </Link>
+                  <FileText className="h-5 w-5 mr-2" /> TẠO HỢP ĐỒNG MỚI
+                </Button>
+              )}
+            </Card>
+
+            {/* Contracts List */}
+            <div className="lg:col-span-2 space-y-4">
+              <h3 className="font-black text-slate-800 flex items-center gap-2 px-1">
+                <FileText className="h-5 w-5 text-primary" /> DANH SÁCH HỢP ĐỒNG
+              </h3>
+
+              {/* EXPIRING ALERT */}
+              {expiringContract && (
+                <div className="bg-amber-50 border border-amber-200 p-4 rounded-2xl flex items-start gap-3 animate-pulse">
+                  <Clock className="h-5 w-5 text-amber-600 mt-0.5" />
+                  <div>
+                    <h4 className="font-bold text-amber-900 text-sm">Hợp đồng sắp hết hạn!</h4>
+                    <p className="text-amber-700 text-xs mt-1">
+                      Hợp đồng {expiringContract.code} sẽ hết hạn vào {formatDate(expiringContract.endDate)}. 
+                      Cần liên hệ khách hàng để tư vấn tái ký ngay.
+                    </p>
                   </div>
                 </div>
-              ))}
-              {elevators.length === 0 && (
-                <p className="text-sm text-muted-foreground text-center py-4">Chưa có thang máy</p>
               )}
-            </div>
-          </Card>
-        </div>
 
-        {/* Right: contracts + jobs */}
-        <div className="lg:col-span-2 space-y-4">
-          {/* Contracts */}
-          <Card className="p-5">
-            <div className="flex items-center justify-between mb-3">
-              <h3 className="font-semibold flex items-center gap-2">
-                <FileText className="h-4 w-4" /> Hợp đồng ({contracts.length})
-              </h3>
-            </div>
-            <div className="space-y-3">
-              {contracts.map((c) => {
-                const percent = c.value > 0 ? Math.round((c.paid / c.value) * 100) : 0;
-                return (
-                  <div key={c.id} className="p-3 rounded-lg border">
-                    <div className="flex items-center gap-2 flex-wrap mb-2">
-                      <span className="font-semibold text-sm">{c.code}</span>
-                      <StatusBadge variant={contractStatusVariant[c.status]}>
-                        {contractStatusLabel[c.status]}
-                      </StatusBadge>
-                      <Badge variant="outline" className="text-[10px]">
-                        {typeLabel[c.type]}
-                      </Badge>
-                    </div>
-                    <div className="text-xs text-muted-foreground mb-2">
-                      {formatDate(c.startDate)} → {formatDate(c.endDate)}
-                    </div>
-                    <div className="flex items-center justify-between text-xs mb-1">
-                      <span className="text-muted-foreground">
-                        {formatVND(c.paid)} / {formatVND(c.value)}
-                      </span>
-                      <span className="font-medium">{percent}%</span>
-                    </div>
-                    <Progress value={percent} className="h-1" />
+              <div className="grid gap-4">
+                {elevatorContracts.map((c) => {
+                  const percent = c.value > 0 ? Math.round((c.paid / c.value) * 100) : 0;
+                  return (
+                    <Card key={c.id} className="p-5 hover:border-slate-300 transition-colors">
+                      <div className="flex items-center justify-between mb-4">
+                        <div className="flex items-center gap-2">
+                          <span className="font-black text-slate-800">{c.code}</span>
+                          <Badge variant="secondary" className="text-[9px] uppercase font-bold">
+                            {c.type === 'install' ? 'Lắp đặt' : c.type === 'maintenance' ? 'Bảo trì' : 'Sửa chữa'}
+                          </Badge>
+                        </div>
+                        <StatusBadge variant={contractStatusVariant[c.status]}>
+                          {contractStatusLabel[c.status]}
+                        </StatusBadge>
+                      </div>
+
+                      <div className="flex items-center gap-6 text-sm mb-6">
+                        <div>
+                          <div className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1">Thời hạn</div>
+                          <div className="font-bold text-slate-700">{formatDate(c.startDate)} — {formatDate(c.endDate)}</div>
+                        </div>
+                        <div>
+                          <div className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1">Giá trị</div>
+                          <div className="font-bold text-primary">{formatVND(c.value)}</div>
+                        </div>
+                      </div>
+
+                      <div className="space-y-2">
+                        <div className="flex items-center justify-between text-xs font-bold uppercase tracking-tight">
+                          <span className="text-slate-400">Tiến độ thanh toán</span>
+                          <span className="text-slate-900">{percent}%</span>
+                        </div>
+                        <Progress value={percent} className="h-2 bg-slate-100" />
+                      </div>
+                    </Card>
+                  );
+                })}
+                {elevatorContracts.length === 0 && (
+                  <div className="p-12 text-center bg-slate-50 rounded-2xl border border-dashed border-slate-200">
+                    <p className="text-slate-500 font-medium">Thang máy này chưa có hợp đồng dịch vụ.</p>
                   </div>
-                );
-              })}
-              {contracts.length === 0 && (
-                <p className="text-sm text-muted-foreground text-center py-4">Chưa có hợp đồng</p>
-              )}
+                )}
+              </div>
             </div>
-          </Card>
-
-          {/* Recent jobs */}
-          <Card className="p-5">
-            <h3 className="font-semibold mb-3 flex items-center gap-2">
-              <Briefcase className="h-4 w-4" /> Công việc gần đây
-            </h3>
-            <div className="space-y-2">
-              {jobs.map((j) => (
-                <Link
-                  key={j.id}
-                  to="/admin/jobs/$jobId"
-                  params={{ jobId: j.id }}
-                  className="flex items-center justify-between p-3 rounded-lg border hover:bg-muted/30 text-sm"
-                >
-                  <div className="min-w-0">
-                    <div className="font-medium truncate">{j.title}</div>
-                    <div className="text-xs text-muted-foreground">
-                      {formatDateTime(j.scheduledFor)}
-                    </div>
-                  </div>
-                  <StatusBadge variant={jobStatusVariant[j.status]}>
-                    {jobStatusLabel[j.status]}
-                  </StatusBadge>
-                </Link>
-              ))}
-              {jobs.length === 0 && (
-                <p className="text-sm text-muted-foreground text-center py-4">Chưa có công việc</p>
-              )}
-            </div>
-          </Card>
+          </div>
         </div>
-      </div>
+      )}
 
-      <CreateJobModal
-        open={jobOpen}
-        onClose={() => setJobOpen(false)}
-        defaultCustomerId={customer.id}
-      />
       <CreateContractModal
         open={contractOpen}
         onClose={() => setContractOpen(false)}
         defaultCustomerId={customer.id}
+        defaultElevatorId={selectedElevatorId || undefined}
       />
       <CreateElevatorModal
         open={elevatorOpen}

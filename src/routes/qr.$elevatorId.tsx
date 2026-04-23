@@ -115,7 +115,7 @@ function QRPage() {
   const permissions = useCurrentPermissions();
   const isStaff = permissions.length > 0;
   const isAdmin = permissions.some((p) =>
-    ["director", "maintenance_mgmt", "install_mgmt", "accounting", "hr_admin", "sales"].includes(p),
+    ["ceo", "tech_maintenance", "tech_installation", "accountant", "sales_admin", "intake_operator"].includes(p),
   );
 
   // Report form state
@@ -140,7 +140,7 @@ function QRPage() {
     await new Promise((r) => setTimeout(r, 600));
     setVerifying(false);
     
-    const correctDigits = customer?.phone.replace(/\D/g, "").slice(-6);
+    const correctDigits = (customer?.phone || "").replace(/\D/g, "").slice(-6);
     if (last6Digits === correctDigits) {
       setIsVerified(true);
       toast.success("Xác thực chủ thang thành công!");

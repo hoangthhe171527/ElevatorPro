@@ -6,16 +6,13 @@ import { mockUsers } from "./mock-data";
 type AppRole = "admin" | "tech";
 
 const ADMIN_PERMISSIONS: Permission[] = [
-  "director",
-  "sales",
-  "sales_maintenance",
-  "accounting",
-  "hr_admin",
-  "install_mgmt",
-  "maintenance_mgmt",
+  "ceo",
+  "sales_admin",
+  "intake_operator",
+  "accountant",
 ];
 
-const TECH_PERMISSIONS: Permission[] = ["field_tech", "tech_survey"];
+const TECH_PERMISSIONS: Permission[] = ["tech_maintenance", "tech_installation"];
 
 function getPermissionsForTenant(userId: string, tenantId: string): Permission[] {
   const user = mockUsers.find((u) => u.id === userId);
@@ -82,11 +79,11 @@ interface AppState {
 export const useAppStore = create<AppState>()(
   persist(
     (set, get) => ({
-      userId: "u-director-1",
-      activeTenantId: "t-1",
+      userId: "u-director-2",
+      activeTenantId: "t-2",
       activeJobCheckIn: null,
       hasHydrated: false,
-      companySize: "large",
+      companySize: "small",
       mainRole: "admin",
       quickIncidentOpen: false,
       isAppPreview: false,
@@ -117,7 +114,7 @@ export const useAppStore = create<AppState>()(
 
         set({
           activeTenantId: tenantId,
-          companySize: tenantId === "t-1" ? "large" : "small",
+          companySize: "small",
           userId: finalUserId,
           mainRole: finalRole,
           activeJobCheckIn: null,
@@ -127,8 +124,8 @@ export const useAppStore = create<AppState>()(
       setJobCheckIn: (jobId) => set({ activeJobCheckIn: jobId }),
       setHasHydrated: (val) => set({ hasHydrated: val }),
       setCompanySize: (size) => {
-        const tenantId = size === "large" ? "t-1" : "t-2";
-        get().setTenantId(tenantId);
+        void size;
+        get().setTenantId("t-2");
       },
       setMainRole: (role) => {
         const tenantId = get().activeTenantId;
@@ -188,16 +185,16 @@ export function useIsSmallCompany() {
 
 export function useCanWrite(module: "projects" | "hr" | "accounting" | "inventory" | "jobs" | "leads" | "contracts") {
   const permissions = useCurrentPermissions();
-  const isDirector = permissions.includes("director");
+  const isCEO = permissions.includes("ceo");
   
   switch (module) {
-    case "projects": return isDirector || permissions.includes("install_mgmt") || permissions.includes("tech_survey");
-    case "hr": return isDirector || permissions.includes("hr_admin");
-    case "accounting": return isDirector || permissions.includes("accounting");
-    case "inventory": return isDirector || permissions.includes("maintenance_mgmt") || permissions.includes("install_mgmt") || permissions.includes("field_tech");
-    case "jobs": return isDirector || permissions.includes("maintenance_mgmt") || permissions.includes("install_mgmt") || permissions.includes("field_tech");
-    case "leads": return isDirector || permissions.includes("sales") || permissions.includes("sales_maintenance");
-    case "contracts": return permissions.includes("accounting"); // Chỉ kế toán mới được tạo hợp đồng
+    case "projects": return isCEO || permissions.includes("tech_installation");
+    case "hr": return isCEO;
+    case "accounting": return isCEO || permissions.includes("accountant");
+    case "inventory": return isCEO || permissions.includes("tech_maintenance") || permissions.includes("tech_installation");
+    case "jobs": return isCEO || permissions.includes("intake_operator") || permissions.includes("tech_maintenance") || permissions.includes("tech_installation");
+    case "leads": return isCEO || permissions.includes("sales_admin") || permissions.includes("intake_operator");
+    case "contracts": return isCEO || permissions.includes("accountant") || permissions.includes("sales_admin");
     default: return false;
   }
 }

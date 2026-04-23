@@ -60,8 +60,8 @@ export function MobileTechSchedule() {
                 return (
                   <Link
                     key={j.id}
-                    to="/app/tech/jobs/$jobId"
-                    params={{ jobId: j.id }}
+                    to={(j.type === 'inspection' ? '/app/tech/survey/$jobId' : '/app/tech/jobs/$jobId') as any}
+                    params={{ jobId: j.id } as any}
                     className="block"
                   >
                     <Card className="p-4 rounded-[24px] border-none shadow-lg shadow-slate-900/5 bg-white relative overflow-hidden group hover:scale-[1.01] transition-all">

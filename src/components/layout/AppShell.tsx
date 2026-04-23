@@ -54,9 +54,24 @@ interface NavItem {
   to: string;
   label: string;
   icon: any;
-  permissions: string[];
+  permissions: Permission[];
   search?: Record<string, any>;
-  children?: { to: string; label: string; search?: Record<string, any> }[];
+  children?: { to: string; label: string; search?: Record<string, any>; permissions?: Permission[] }[];
+}
+
+const ROLE_LABELS: Record<string, string> = {
+  ceo: "CEO",
+  sales_admin: "Sale Admin",
+  intake_operator: "Tiếp nhận & nhập liệu",
+  accountant: "Kế toán",
+  tech_maintenance: "Kỹ thuật bảo trì",
+  tech_installation: "Kỹ thuật lắp đặt",
+};
+
+function getUserRoleLabel(user: { memberships?: Array<{ tenantId: string; permissions: string[] }> }, tenantId: string) {
+  const perms = user.memberships?.find((m) => m.tenantId === tenantId)?.permissions || [];
+  if (!perms.length) return "Chuyên viên";
+  return perms.map((p) => ROLE_LABELS[p] || p).join(" • ");
 }
 
 const navConfig: { group: string; items: NavItem[] }[] = [
@@ -67,78 +82,103 @@ const navConfig: { group: string; items: NavItem[] }[] = [
         to: "/admin", 
         label: "Dashboard", 
         icon: LayoutDashboard, 
-        permissions: ["director", "sales", "sales_maintenance", "hr_admin", "accounting", "install_mgmt", "maintenance_mgmt"] 
+        permissions: ["ceo", "sales_admin", "intake_operator", "accountant"] 
       },
-      { to: "/admin/approvals", label: "Phê duyệt", icon: CheckSquare, permissions: ["director", "accounting", "install_mgmt", "maintenance_mgmt"] },
-      { to: "/admin/reports", label: "Báo cáo", icon: History, permissions: ["director", "accounting"] },
+      { to: "/admin/approvals", label: "Phê duyệt", icon: CheckSquare, permissions: ["ceo", "accountant"] },
+      { to: "/admin/reports", label: "Báo cáo", icon: History, permissions: ["ceo", "accountant"] },
     ],
   },
   {
     group: "Quản lý kinh doanh",
     items: [
-      { to: "/admin/customers", label: "Khách hàng", icon: Users, permissions: ["director", "sales", "sales_maintenance", "accounting"] },
-      { to: "/admin/leads", label: "Cơ hội (Leads)", icon: Inbox, permissions: ["director", "sales", "sales_maintenance"] },
-      { to: "/admin/contracts", label: "Hợp đồng", icon: FileText, permissions: ["director", "sales", "sales_maintenance", "accounting"] },
+      { to: "/admin/customers", label: "Khách hàng", icon: Users, permissions: ["ceo", "sales_admin", "intake_operator", "accountant"] },
+      { to: "/admin/leads", label: "Cơ hội (Leads)", icon: Inbox, permissions: ["ceo", "sales_admin", "intake_operator"] },
+      { to: "/admin/contracts", label: "Hợp đồng", icon: FileText, permissions: ["ceo", "sales_admin", "accountant"] },
     ],
   },
   {
     group: "Vận hành kỹ thuật",
     items: [
-      { to: "/admin/elevators", label: "Thang máy", icon: Layers, permissions: ["director", "install_mgmt", "maintenance_mgmt", "sales_maintenance"] },
-      {
-        to: "/admin/projects",
-        label: "Dự án lắp đặt",
-        icon: Construction,
-        permissions: ["director", "install_mgmt"],
-      },
+      { to: "/admin/elevators", label: "Thang máy", icon: Layers, permissions: ["ceo", "sales_admin", "intake_operator", "tech_installation", "tech_maintenance"] },
       {
         to: "/admin/jobs",
-        label: "Việc bảo trì/sửa",
+        label: "Công việc",
         icon: Briefcase,
-        permissions: ["director", "maintenance_mgmt"],
+        permissions: ["ceo", "intake_operator"],
         children: [
-          { to: "/admin/jobs", label: "Đang xử lý", search: { status: "open" } },
-          { to: "/admin/jobs", label: "Lịch bảo trì", search: { type: "maintenance" } },
-          { to: "/admin/maintenance", label: "Kế hoạch năm" },
+          { to: "/admin/projects", label: "Tiến độ Lắp đặt" },
+          { to: "/admin/unassigned-jobs", label: "Việc chưa phân công" },
+          { to: "/admin/jobs", label: "Bảo trì", search: { tab: "maintenance" } },
+          { to: "/admin/warranty", label: "Bảo hành" },
+          { to: "/admin/repairs", label: "Sửa chữa & Sự cố" },
+          { to: "/admin/jobs", label: "Khảo sát", search: { tab: "inspection" } },
         ],
       },
-      { to: "/admin/inventory", label: "Kho vật tư", icon: Layers, permissions: ["director", "install_mgmt", "maintenance_mgmt"] },
+      { to: "/admin/inventory", label: "Kho vật tư", icon: Package, permissions: ["ceo", "tech_installation", "tech_maintenance"] },
     ],
   },
   {
     group: "Nhân sự & Kế toán",
     items: [
-      { to: "/admin/hr", label: "Cán bộ nhân viên", icon: User, permissions: ["director", "hr_admin"] },
-      { to: "/admin/accounting", label: "Kế toán/Thu tiền", icon: CircleDollarSign, permissions: ["director", "accounting"] },
+      { to: "/admin/hr", label: "Cán bộ nhân viên", icon: User, permissions: ["ceo"] },
+      { to: "/admin/accounting", label: "Kế toán/Thu tiền", icon: CircleDollarSign, permissions: ["ceo", "accountant"] },
     ],
   },
   {
     group: "App Hiện trường (Field App)",
     items: [
-      { to: "/tech", label: "Hôm nay", icon: LayoutDashboard, permissions: ["field_tech"] },
-      { to: "/tech/route-plan", label: "Lộ trình tối ưu", icon: RouteIcon, permissions: ["field_tech"] },
-      { to: "/tech/jobs", label: "Công việc của tôi", icon: ClipboardList, permissions: ["field_tech"] },
-      { to: "/tech/schedule", label: "Lịch", icon: Calendar, permissions: ["field_tech"] },
+      { to: "/tech", label: "Hôm nay", icon: LayoutDashboard, permissions: ["tech_maintenance", "tech_installation"] },
+      { to: "/tech/route-plan", label: "Lộ trình tối ưu", icon: RouteIcon, permissions: ["tech_maintenance", "tech_installation"] },
+      { 
+        to: "/tech/jobs", 
+        label: "Công việc", 
+        icon: ClipboardList, 
+        permissions: ["tech_maintenance", "tech_installation"],
+        children: [
+          { to: "/tech/jobs", label: "Bảo trì", search: { tab: "maintenance" }, permissions: ["tech_maintenance"] },
+          { to: "/tech/warranty", label: "Bảo hành", permissions: ["tech_maintenance"] },
+          { to: "/tech/repairs", label: "Sửa chữa", permissions: ["tech_maintenance"] },
+          { to: "/tech/jobs", label: "Lắp đặt", search: { tab: "install" }, permissions: ["tech_installation"] },
+          { to: "/tech/jobs", label: "Khảo sát", search: { tab: "inspection" }, permissions: ["tech_installation"] },
+        ]
+      },
+      { to: "/tech/schedule", label: "Lịch", icon: Calendar, permissions: ["tech_maintenance", "tech_installation"] },
     ],
   },
 ];
 
 function SidebarItem({ 
   item, 
-  isRouteActive,
-  onClick
+  isRouteActive, 
+  onClick 
 }: { 
   item: NavItem; 
-  isRouteActive: (to: string, search?: Record<string, any>) => boolean;
+  isRouteActive: (to: string, search?: Record<string, any>) => boolean; 
   onClick?: () => void;
 }) {
-  const active = isRouteActive(item.to, item.search);
+  const permissions = useCurrentPermissions();
+  const location = useLocation();
+  const isApp = location.pathname.startsWith("/app");
+  
+  const visibleChildren = item.children?.filter(child => 
+    !child.permissions || child.permissions.some(p => (permissions as any[]).includes(p))
+  );
+
+  const isChildActive = visibleChildren?.some(child => isRouteActive(child.to, child.search));
+  const active = isRouteActive(item.to, item.search) || isChildActive;
   const [open, setOpen] = useState(active);
-  const Icon = item.icon;
+
+  // Sync open state when navigation happens
+  useEffect(() => {
+    if (active) setOpen(true);
+  }, [active]);
+  const targetTo = isApp ? `/app${item.to}` : item.to;
 
   const handleClick = () => {
     if (onClick) onClick();
   };
+
+  const Icon = item.icon;
 
   if (item.children) {
     return (
@@ -156,24 +196,27 @@ function SidebarItem({
           <span className="flex-1 text-left">{item.label}</span>
           <ChevronDown className={cn("h-3 w-3 transition-transform", open && "rotate-180")} />
         </button>
-        {open && (
+        {open && visibleChildren && (
           <div className="ml-4 space-y-1 border-l border-sidebar-border pl-4">
-            {item.children.map((child) => (
-              <Link
-                key={child.label}
-                to={child.to as any}
-                search={child.search as any}
-                onClick={handleClick}
-                className={cn(
-                  "block rounded-lg px-3 py-1.5 text-xs font-medium transition-all",
-                  isRouteActive(child.to, child.search)
-                    ? "text-sidebar-primary font-bold"
-                    : "text-sidebar-foreground/60 hover:text-sidebar-foreground hover:bg-sidebar-accent/30"
-                )}
-              >
-                {child.label}
-              </Link>
-            ))}
+            {visibleChildren.map((child) => {
+              const childTargetTo = isApp ? `/app${child.to}` : child.to;
+              return (
+                <Link
+                  key={child.label}
+                  to={childTargetTo as any}
+                  search={child.search as any}
+                  onClick={handleClick}
+                  className={cn(
+                    "block rounded-lg px-3 py-1.5 text-xs font-medium transition-all",
+                    isRouteActive(child.to, child.search)
+                      ? "text-sidebar-primary font-bold"
+                      : "text-sidebar-foreground/60 hover:text-sidebar-foreground hover:bg-sidebar-accent/30"
+                  )}
+                >
+                  {child.label}
+                </Link>
+              );
+            })}
           </div>
         )}
       </div>
@@ -182,7 +225,7 @@ function SidebarItem({
 
   return (
     <Link
-      to={item.to as any}
+      to={targetTo as any}
       search={item.search as any}
       onClick={handleClick}
       className={cn(
@@ -283,7 +326,7 @@ export function AppShell({
   const visibleGroups = navConfig
         .map((g) => ({
           ...g,
-          items: g.items.filter((item) => item.permissions.some((p) => permissions.includes(p))),
+          items: g.items.filter((item) => item.permissions.some((p) => permissions.includes(p as Permission))),
         }))
         .filter((g) => g.items.length > 0);
 
@@ -387,8 +430,7 @@ export function AppShell({
                       key={t.id}
                       onClick={() => {
                         setTenantId(t.id);
-                        const directorId = t.id === "t-1" ? "u-director-1" : "u-director-2";
-                        setUserId(directorId);
+                        setUserId("u-director-2");
                         window.location.href = "/admin";
                       }}
                     >
@@ -422,7 +464,7 @@ export function AppShell({
                 <Button variant="outline" size="sm" className="gap-2 shrink-0 max-w-[200px] truncate">
                   <Wrench className="h-3.5 w-3.5 shrink-0" />
                   <span className="hidden sm:inline truncate">
-                    {user.name.split("(")[1] ? user.name.split("(")[1].replace(")", "") : user.name}
+                    {getUserRoleLabel(user, activeTenantId)}
                   </span>
                   <ChevronDown className="h-3 w-3 shrink-0" />
                 </Button>
@@ -437,7 +479,7 @@ export function AppShell({
                       key={u.id}
                       onClick={() => {
                         setUserId(u.id);
-                        const isTech = u.memberships[0]?.permissions.includes("field_tech");
+                        const isTech = u.memberships[0]?.permissions.some((p) => p === "tech_maintenance" || p === "tech_installation");
                         let target = isTech ? "/tech" : "/admin";
                         // If we are in app mode, stay in app mode
                         if (isAppPreview) target = `/app${target}`;
@@ -447,7 +489,7 @@ export function AppShell({
                     >
                       <div className="font-semibold">{u.name.split("(")[0]}</div>
                       <div className="text-xs font-semibold text-primary/80">
-                        Vai: {u.name.split("(")[1] ? u.name.split("(")[1].replace(")", "") : "Chuyên viên"}
+                        Vai: {getUserRoleLabel(u, activeTenantId)}
                       </div>
                     </DropdownMenuItem>
                   ))}

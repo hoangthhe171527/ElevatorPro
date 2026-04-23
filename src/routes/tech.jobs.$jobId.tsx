@@ -30,6 +30,7 @@ import {
   formatDateTime,
   optimizeRoute,
   mockInventory,
+  mockLeads,
   formatVND,
   INSTALL_STAGES_TEMPLATE,
   type Job,
@@ -55,6 +56,10 @@ import {
 } from "lucide-react";
 import { toast } from "sonner";
 
+import { WebMaintenanceJobDetail } from "@/components/tech/web/WebTechMaintenanceDetail";
+import { WebTechRepairDetail } from "@/components/tech/web/WebTechRepairDetail";
+import { WebTechWarrantyDetail } from "@/components/tech/web/WebTechWarrantyDetail";
+
 export const Route = createFileRoute("/tech/jobs/$jobId")({
   loader: ({ params }) => {
     const job = mockJobs.find((j) => j.id === params.jobId);
@@ -79,6 +84,19 @@ export const Route = createFileRoute("/tech/jobs/$jobId")({
 
 function TechJobDetailContainer() {
   const { job } = Route.useLoaderData();
+  
+  if (job.type === "maintenance") {
+    return <WebMaintenanceJobDetail job={job} />;
+  }
+  
+  if (job.type === "repair" || job.type === "incident") {
+    return <WebTechRepairDetail job={job} />;
+  }
+  
+  if (job.type === "warranty") {
+    return <WebTechWarrantyDetail job={job} />;
+  }
+
   return <TechJobDetail job={job} />;
 }
 
@@ -213,6 +231,29 @@ export function TechJobDetail({ job }: { job: Job }) {
               <span className="font-medium">{formatDateTime(job.scheduledFor)}</span>
             </div>
           </Card>
+          
+          {/* Maintenance Wizard Link */}
+          {job.type === "maintenance" && (
+            <Card className="p-5 border-2 border-primary/20 bg-primary/[0.02]">
+              <div className="flex items-center justify-between mb-4">
+                <div className="flex items-center gap-2">
+                  <div className="p-2 rounded-lg bg-primary/10 text-primary">
+                    <CheckCircle2 className="h-4 w-4" />
+                  </div>
+                  <h3 className="font-bold text-sm uppercase tracking-wide">Quy trình bảo trì định kỳ</h3>
+                </div>
+                <Badge variant="outline" className="text-[10px]">Chuyên sâu</Badge>
+              </div>
+              <p className="text-xs text-muted-foreground mb-4">
+                Công việc bảo trì định kỳ yêu cầu thực hiện theo checklist 7 bước tiêu chuẩn (Phòng máy, Cabin, Hố thang, PIT...) để đảm bảo an toàn vận hành.
+              </p>
+              <Link to={`${prefix}/tech/maint/${job.id}` as any}>
+                <Button className="w-full h-12 rounded-xl font-black shadow-lg shadow-primary/20">
+                  MỞ WIZARD BẢO TRÌ →
+                </Button>
+              </Link>
+            </Card>
+          )}
 
           {/* Installation Progress for Tech */}
           {job.type === "install" && (
@@ -255,6 +296,77 @@ export function TechJobDetail({ job }: { job: Job }) {
                  <Link to={`${prefix}/tech/jobs` as any} search={{ tab: 'install' } as any} className="text-[10px] font-bold text-primary hover:underline">
                    Chi tiết dự án →
                  </Link>
+              </div>
+            </Card>
+          )}
+
+          {/* Survey Workflow (Sales Support) */}
+          {job.type === "inspection" && (
+            <Card className="p-5 border-l-4 border-l-indigo-500 bg-indigo-50/30">
+              <div className="flex items-center gap-2 mb-4">
+                <ClipboardCheck className="h-5 w-5 text-indigo-600" />
+                <h3 className="font-black text-sm uppercase tracking-widest text-indigo-900">Thông số khảo sát hiện trường</h3>
+              </div>
+              
+              <div className="space-y-4">
+                <div className="grid grid-cols-2 gap-3">
+                  <div className="space-y-1.5">
+                    <label className="text-[10px] font-black uppercase text-indigo-700/60">Hố PIT (mm)</label>
+                    <Input 
+                      placeholder="VD: 1200" 
+                      className="bg-white rounded-xl"
+                      value={surveyData.pitDepth}
+                      onChange={(e) => setSurveyData({...surveyData, pitDepth: e.target.value})}
+                    />
+                  </div>
+                  <div className="space-y-1.5">
+                    <label className="text-[10px] font-black uppercase text-indigo-700/60">Overhead (mm)</label>
+                    <Input 
+                      placeholder="VD: 4200" 
+                      className="bg-white rounded-xl"
+                      value={surveyData.overheadHeight}
+                      onChange={(e) => setSurveyData({...surveyData, overheadHeight: e.target.value})}
+                    />
+                  </div>
+                </div>
+
+                <div className="space-y-1.5">
+                  <label className="text-[10px] font-black uppercase text-indigo-700/60">Kích thước thông thủy hố thang (mm)</label>
+                  <Input 
+                    placeholder="VD: 1500 x 1500" 
+                    className="bg-white rounded-xl"
+                    value={surveyData.shaftDimensions}
+                    onChange={(e) => setSurveyData({...surveyData, shaftDimensions: e.target.value})}
+                  />
+                </div>
+
+                <div className="space-y-1.5">
+                  <label className="text-[10px] font-black uppercase text-indigo-700/60">Nguồn điện (Pha/Volts)</label>
+                  <Select value={surveyData.powerSupply} onValueChange={(v) => setSurveyData({...surveyData, powerSupply: v})}>
+                    <SelectTrigger className="bg-white rounded-xl">
+                      <SelectValue placeholder="Chọn loại nguồn điện..." />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="3phase">3 Pha - 380V</SelectItem>
+                      <SelectItem value="1phase">1 Pha - 220V</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+
+                <div className="space-y-1.5">
+                  <label className="text-[10px] font-black uppercase text-indigo-700/60">Ghi chú hiện trường</label>
+                  <Textarea 
+                    placeholder="VD: Lối vào công trình hẹp, cần xe cẩu nhỏ..." 
+                    className="bg-white rounded-xl min-h-[80px]"
+                    value={surveyData.specialNotes}
+                    onChange={(e) => setSurveyData({...surveyData, specialNotes: e.target.value})}
+                  />
+                </div>
+
+                <div className="p-3 bg-indigo-600/10 rounded-xl border border-indigo-200 flex items-center gap-2">
+                   <Camera className="h-4 w-4 text-indigo-600" />
+                   <span className="text-[10px] font-bold text-indigo-900 uppercase">Yêu cầu ít nhất 4 ảnh hiện trường</span>
+                </div>
               </div>
             </Card>
           )}
@@ -309,7 +421,9 @@ export function TechJobDetail({ job }: { job: Job }) {
                   ))}
                   <button
                     onClick={() => {
-                      setBeforeCount((c) => c + 1);
+                      const mockPhoto = "https://images.unsplash.com/photo-1581092160562-40aa08e78837?q=80&w=400";
+                      job.beforePhotos.push(mockPhoto);
+                      setBeforeCount(job.beforePhotos.length);
                       toast.success("Đã thêm ảnh trước");
                     }}
                     className="aspect-square rounded-lg border-2 border-dashed flex items-center justify-center hover:bg-muted transition-colors"
@@ -331,7 +445,9 @@ export function TechJobDetail({ job }: { job: Job }) {
                   ))}
                   <button
                     onClick={() => {
-                      setAfterCount((c) => c + 1);
+                      const mockPhoto = "https://images.unsplash.com/photo-1581092160562-40aa08e78837?q=80&w=400";
+                      job.afterPhotos.push(mockPhoto);
+                      setAfterCount(job.afterPhotos.length);
                       toast.success("Đã thêm ảnh sau");
                     }}
                     className="aspect-square rounded-lg border-2 border-dashed flex items-center justify-center hover:bg-muted transition-colors"
@@ -343,8 +459,8 @@ export function TechJobDetail({ job }: { job: Job }) {
             </div>
           </Card>
 
-          {/* Parts Used - Hide for Installation jobs as they don't replace parts on the fly */}
-          {job.type !== "install" && (
+          {/* Parts Used - Hide for Installation and Inspection jobs */}
+          {job.type !== "install" && job.type !== "inspection" && (
             <Card className="p-5">
               <div className="flex items-center justify-between mb-4">
                 <div className="flex items-center gap-2">
@@ -601,13 +717,18 @@ export function TechJobDetail({ job }: { job: Job }) {
 
               {status === "appointment_confirmed" && (
                 <Button
-                  variant="outline"
+                  className="flex-1 bg-success hover:bg-success/90 text-white font-bold h-12 rounded-xl shadow-lg shadow-success/20"
                   onClick={() => {
-                    setStatus("in_progress");
-                    toast.success("Bắt đầu khảo sát thực tế");
+                    if (job.type === "inspection" && (beforeCount + afterCount) < 1) {
+                      toast.error("Vui lòng chụp ít nhất 1 ảnh hiện trường trước khi hoàn thành khảo sát.");
+                      return;
+                    }
+                    setStatus("completed");
+                    toast.success(job.type === "inspection" ? "Đã hoàn thành khảo sát! Dữ liệu đã được chuyển cho bộ phận Sales." : "Đã cập nhật trạng thái Hoàn thành.");
                   }}
                 >
-                  Bắt đầu khảo sát
+                  <CheckCircle2 className="h-4 w-4 mr-2" />
+                  {job.type === "inspection" ? "HOÀN THÀNH KHẢO SÁT" : "XÁC NHẬN HOÀN THÀNH"}
                 </Button>
               )}
 
@@ -616,6 +737,7 @@ export function TechJobDetail({ job }: { job: Job }) {
                   variant="outline"
                   onClick={() => {
                     setStatus("in_progress");
+                    job.status = "in_progress";
                     toast.success("Đã bắt đầu công việc");
                   }}
                 >
@@ -636,12 +758,26 @@ export function TechJobDetail({ job }: { job: Job }) {
                       return;
                     }
                     
-                    if (useIsSmallCompany() && (beforeCount === 0 || afterCount === 0)) {
-                      toast.error("Thiếu ảnh hiện trường! Vui lòng chụp ít nhất 1 ảnh Trước và 1 ảnh Sau.");
+                    if (job.type === "install" && (beforeCount === 0 || afterCount === 0)) {
+                      toast.error("BẮT BUỘC: Chụp ảnh hiện trường lắp đặt trước khi hoàn thành!");
                       return;
                     }
 
                     setStatus("completed");
+                    job.status = "completed";
+                    job.report = report;
+                    job.surveyReport = surveyData;
+                    job.completedAt = new Date().toISOString();
+                    
+                    // Automatically update Lead status if this was a survey job
+                    if (job.type === "inspection" && job.leadId) {
+                      const lead = mockLeads.find(l => l.id === job.leadId);
+                      if (lead) {
+                        lead.status = 'surveyed';
+                        toast.success(`Đã cập nhật trạng thái Lead: ${lead.name} -> Đã khảo sát`);
+                      }
+                    }
+
                     toast.success("Đã hoàn thành công việc. Kết quả đã được ghi nhận vào hệ thống.");
                     if (useIsSmallCompany()) {
                       toast.info("Ghi chú: Kết quả khảo sát đã được gửi cho CEO để chuẩn bị báo giá.");

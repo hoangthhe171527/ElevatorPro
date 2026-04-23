@@ -28,6 +28,7 @@ import {
 } from "@/lib/status-variants";
 import { mockJobs, formatDateTime, getCustomer, mockProjects, getUser, mockIssues, mockElevators, type Job, type IssueReport } from "@/lib/mock-data";
 import { useAppStore } from "@/lib/store";
+import { cn } from "@/lib/utils";
 import { toast } from "sonner";
 import {
   Search,
@@ -45,21 +46,26 @@ import {
   ClipboardCheck,
   QrCode,
   Phone,
+  Building2,
 } from "lucide-react";
 import { DispatchJobModal } from "@/components/common/Modals";
 import { Button } from "@/components/ui/button";
 
 const PAGE_SIZE = 8;
 
-export function WebJobsMonitor({ tab: routeTab }: { tab: string }) {
-  const tab = routeTab || "install";
+export function WebJobsMonitor({ tab: routeTab, initialPriority, initialStatus }: { tab?: string; initialPriority?: string; initialStatus?: string }) {
+  const tab = routeTab || "maintenance";
   const setQuickIncidentOpen = useAppStore(s => s.setQuickIncidentOpen);
-  const [dispatchOpen, setDispatchOpen] = useState(false);
-  const [selectedJob, setSelectedJob] = useState<Job | null>(null);
   const activeTenantId = useAppStore((s) => s.activeTenantId);
   const [page, setPage] = useState(1);
   const [search, setSearch] = useState("");
-  const [statusFilter, setStatusFilter] = useState("all");
+  const [statusFilter, setStatusFilter] = useState(initialStatus || "all");
+  const [priorityFilter, setPriorityFilter] = useState(initialPriority || "all");
+  const [expandedGroups, setExpandedGroups] = useState<Record<string, boolean>>({});
+
+  const toggleGroup = (key: string) => {
+    setExpandedGroups(prev => ({ ...prev, [key]: !prev[key] }));
+  };
 
   const allTenantJobs = useMemo(() => mockJobs.filter((j) => j.tenantId === activeTenantId), [activeTenantId]);
   const allProjects = useMemo(() => mockProjects.filter((p) => p.tenantId === activeTenantId), [activeTenantId]);
@@ -68,20 +74,32 @@ export function WebJobsMonitor({ tab: routeTab }: { tab: string }) {
     return allTenantJobs.filter((j) => {
       const m1 = !search || j.title.toLowerCase().includes(search.toLowerCase()) || j.code.toLowerCase().includes(search.toLowerCase());
       const m2 = statusFilter === "all" || j.status === statusFilter;
-      return m1 && m2;
-    }).sort((a, b) => b.scheduledFor.localeCompare(a.scheduledFor));
-  }, [allTenantJobs, search, statusFilter]);
+      const m3 = priorityFilter === "all" || j.priority === priorityFilter;
+      return m1 && m2 && m3;
+    }).sort((a, b) => {
+      if (a.priority === 'urgent' && b.priority !== 'urgent') return -1;
+      if (a.priority !== 'urgent' && b.priority === 'urgent') return 1;
+      return a.scheduledFor.localeCompare(b.scheduledFor);
+    });
+  }, [allTenantJobs, search, statusFilter, priorityFilter]);
 
   const tabFiltered = useMemo(() => {
-    if (tab === 'install') return []; 
-    return baseFiltered.filter(j => j.type === tab);
+    if (tab === "pending") return baseFiltered.filter((j) => j.status === "pending" && j.type !== 'install');
+    // For specific types
+    if (tab === "install") return baseFiltered.filter(j => j.type === 'install');
+    if (tab === "maintenance") return baseFiltered.filter(j => j.type === 'maintenance');
+    if (tab === "warranty") return baseFiltered.filter(j => j.type === 'warranty');
+    if (tab === "repair") return baseFiltered.filter(j => j.type === 'repair');
+    if (tab === "inspection") return baseFiltered.filter(j => j.type === 'inspection');
+    if (tab === "incident") return baseFiltered.filter(j => j.type === 'incident' || j.title.toLowerCase().includes('sự cố'));
+    return [];
   }, [baseFiltered, tab]);
 
   const paged = useMemo(() => {
     return tabFiltered.slice((page - 1) * PAGE_SIZE, page * PAGE_SIZE);
   }, [tabFiltered, page]);
 
-  const renderJobList = (jobs: typeof mockJobs) => {
+  const renderJobList = (jobs: typeof mockJobs, hideActions = false) => {
     if (jobs.length === 0) {
       return (
         <div className="p-12 text-center">
@@ -92,19 +110,50 @@ export function WebJobsMonitor({ tab: routeTab }: { tab: string }) {
         </div>
       );
     }
+
+    const getTabColor = (type: string) => {
+      switch (type) {
+        case "pending": return "border-l-amber-500 bg-amber-50/30";
+        case "install": return "border-l-orange-500 bg-orange-50/30";
+        case "maintenance": return "border-l-blue-500 bg-blue-50/30";
+        case "warranty": return "border-l-green-600 bg-green-50/30";
+        case "repair": return "border-l-red-500 bg-red-50/30";
+        case "inspection": return "border-l-indigo-500 bg-indigo-50/30";
+        default: return "border-l-slate-300";
+      }
+    };
+
+    const getIconColor = (type: string, priority: string) => {
+      if (priority === 'urgent') return 'bg-destructive text-white shadow-lg shadow-destructive/20';
+      switch (type) {
+        case "maintenance": return "bg-blue-500 text-white shadow-lg shadow-blue-500/20";
+        case "warranty": return "bg-green-600 text-white shadow-lg shadow-green-600/20";
+        case "install": return "bg-orange-500 text-white shadow-lg shadow-orange-500/20";
+        case "repair": return "bg-red-500 text-white shadow-lg shadow-red-500/20";
+        case "inspection": return "bg-indigo-500 text-white shadow-lg shadow-indigo-500/20";
+        default: return "bg-primary text-white shadow-lg shadow-primary/20";
+      }
+    };
+
     return (
-      <div className="divide-y border-t">
+      <div className="divide-y border-t bg-slate-50/20">
         {jobs.map((j) => {
           const cus = getCustomer(j.customerId);
           const tech = getUser(j.assignedTo);
           const Icon = j.type === 'maintenance' ? Activity : j.type === 'warranty' ? ShieldCheck : j.type === 'install' ? Hammer : Wrench;
+          const isUrgent = j.priority === 'urgent';
+          
           return (
-            <div key={j.id} className="p-4 hover:bg-muted/10 transition-colors group">
+            <div key={j.id} className={cn(
+              "p-4 border-l-4 transition-all group relative",
+              isUrgent ? "border-l-destructive bg-destructive/[0.03]" : getTabColor(j.type)
+            )}>
               <div className="flex items-center gap-4">
-                <div className={`h-10 w-10 shrink-0 rounded-lg flex items-center justify-center ${
-                  j.priority === 'urgent' ? 'bg-destructive/10 text-destructive' : 'bg-primary/10 text-primary'
-                }`}>
-                  <Icon className="h-5 w-5" />
+                <div className={cn(
+                  "h-12 w-12 shrink-0 rounded-2xl flex items-center justify-center transition-transform group-hover:scale-110 duration-300",
+                  getIconColor(j.type, j.priority)
+                )}>
+                  <Icon className="h-6 w-6" />
                 </div>
 
                 <div className="flex-1 min-w-0">
@@ -142,12 +191,6 @@ export function WebJobsMonitor({ tab: routeTab }: { tab: string }) {
                 </div>
 
                 <div className="flex items-center gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
-                  <Button variant="ghost" size="icon" className="h-8 w-8 text-primary" onClick={() => {
-                    setSelectedJob(j);
-                    setDispatchOpen(true);
-                  }}>
-                    <Send className="h-4 w-4" />
-                  </Button>
                   <Link 
                     to="/admin/jobs/$jobId" 
                     params={{ jobId: j.id }}
@@ -165,11 +208,109 @@ export function WebJobsMonitor({ tab: routeTab }: { tab: string }) {
     );
   };
 
+  const renderGroupedJobs = (jobs: typeof mockJobs) => {
+    if (jobs.length === 0) return renderJobList([]);
+
+    const groups = jobs.reduce((acc, j) => {
+      const key = j.projectId || j.customerId || "other";
+      if (!acc[key]) acc[key] = [];
+      acc[key].push(j);
+      return acc;
+    }, {} as Record<string, typeof mockJobs>);
+
+    return (
+      <div className="bg-slate-50/20">
+        {Object.entries(groups).map(([key, groupJobs]) => {
+          const project = allProjects.find(p => p.id === key);
+          const customer = getCustomer(groupJobs[0].customerId);
+          const groupTitle = project ? `Dự án: ${project.name}` : `Khách hàng: ${customer?.name || "Khác"}`;
+          const address = project?.address || customer?.address || "";
+          const isExpanded = !!expandedGroups[key] && tab !== 'pending';
+          const canExpand = tab !== 'pending';
+
+          return (
+            <div key={key} className="p-3">
+              <div className={cn(
+                "bg-white border shadow-sm transition-all rounded-[2rem] overflow-hidden",
+                isExpanded ? "border-primary/20 shadow-md" : "border-slate-100",
+                canExpand && "hover:shadow-md"
+              )}>
+                <div 
+                  className={cn(
+                    "px-5 py-5 flex items-center justify-between group/header relative select-none",
+                    canExpand ? "cursor-pointer" : "cursor-default"
+                  )}
+                  onClick={() => canExpand && toggleGroup(key)}
+                >
+                  <div className="flex items-center gap-5">
+                    <div className={cn(
+                      "h-12 w-12 rounded-2xl flex items-center justify-center shadow-inner border transition-colors",
+                      isExpanded ? "bg-primary/5 text-primary border-primary/10" : "bg-slate-50 text-slate-600 border-slate-100"
+                    )}>
+                        <Building2 className="h-6 w-6" />
+                    </div>
+                    <div>
+                        <div className="flex items-center gap-2 mb-0.5">
+                          <span className="text-sm font-black uppercase tracking-tight text-slate-800">{groupTitle}</span>
+                          <Badge variant="secondary" className="text-[9px] font-black px-1.5 h-4 bg-slate-100 text-slate-600">
+                            {groupJobs.length} {tab === 'pending' ? 'VIỆC CHỜ' : 'GIAI ĐOẠN'}
+                          </Badge>
+                        </div>
+                        <div className="text-xs text-muted-foreground font-medium flex items-center gap-1">
+                          <MapPin className="h-3 w-3" /> {address}
+                        </div>
+                    </div>
+                  </div>
+                  <div className="flex items-center gap-3">
+                    <div className="flex items-center gap-6 mr-4">
+                       {tab === 'pending' && (
+                          <div className="flex items-center gap-2 pr-2">
+                             <Link 
+                               to="/admin/projects/$projectId" 
+                               params={{ projectId: key }}
+                               className="text-[11px] font-black text-primary hover:underline px-3"
+                               onClick={(e) => e.stopPropagation()}
+                             >
+                               XEM CHI TIẾT
+                             </Link>
+                          </div>
+                       )}
+                       {canExpand && (
+                         <div className={cn("transition-transform duration-300", isExpanded ? "rotate-180" : "rotate-0")}>
+                            <ChevronRight className="h-6 w-6 text-slate-400" />
+                         </div>
+                       )}
+                    </div>
+                  </div>
+                </div>
+
+                {isExpanded && (
+                  <div className="border-t border-slate-50 bg-slate-50/20 animate-in fade-in slide-in-from-top-1 duration-200">
+                     {renderJobList(groupJobs, tab === 'pending')}
+                  </div>
+                )}
+              </div>
+            </div>
+          );
+        })}
+      </div>
+    );
+  };
+
+  const isIsolated = !!routeTab;
+  const tabLabels: Record<string, string> = {
+    maintenance: "Theo dõi Bảo trì",
+    warranty: "Theo dõi Bảo hành",
+    repair: "Theo dõi Sửa chữa",
+    inspection: "Theo dõi Khảo sát",
+    incident: "Sự cố QR & Hotline"
+  };
+
   return (
     <AppShell>
       <PageHeader
-        title="Theo dõi công việc"
-        description="CEO giám sát tiến độ thực hiện của các đội nhóm hiện trường"
+        title={isIsolated ? (tabLabels[tab] || "Theo dõi Công việc") : "Tổng quan Công việc"}
+        description={isIsolated ? `Giám sát tiến độ thực hiện mảng ${(tabLabels[tab] || "Công việc").replace('Theo dõi ', '')}` : "CEO giám sát tiến độ thực hiện của các đội nhóm hiện trường"}
         actions={
           <Button onClick={() => setQuickIncidentOpen(true)}>
             <Plus className="mr-2 h-4 w-4" /> Tạo sự cố nhanh
@@ -178,28 +319,23 @@ export function WebJobsMonitor({ tab: routeTab }: { tab: string }) {
       />
 
       <Card className="overflow-hidden sm:border-solid sm:shadow-sm">
-        <Tabs value={tab} className="w-full" onValueChange={(v) => {
-          window.history.pushState(null, "", `?tab=${v}`);
-          setPage(1);
-        }}>
+        <Tabs value={tab} className="w-full">
+          {!isIsolated && (
           <div className="border-b bg-muted/20 px-4 pt-4">
-            <TabsList className="grid w-full grid-cols-6 h-12 bg-transparent gap-2 p-0">
-              <TabsTrigger value="install" className="data-[state=active]:bg-background data-[state=active]:shadow-none data-[state=active]:border-b-2 data-[state=active]:border-orange-500 rounded-none h-full border-b-2 border-transparent font-bold text-xs">
-                Lắp đặt
-              </TabsTrigger>
-              <TabsTrigger value="maintenance" className="data-[state=active]:bg-background data-[state=active]:shadow-none data-[state=active]:border-b-2 data-[state=active]:border-blue-500 rounded-none h-full border-b-2 border-transparent font-bold text-xs">
+            <TabsList className="grid w-full grid-cols-5 h-12 bg-transparent gap-2 p-0">
+              <TabsTrigger value="maintenance" className="data-[state=active]:bg-background data-[state=active]:shadow-none data-[state=active]:border-b-2 data-[state=active]:border-blue-500 rounded-none h-full border-b-2 border-transparent font-bold text-[10px] uppercase">
                 Bảo trì
               </TabsTrigger>
-              <TabsTrigger value="warranty" className="data-[state=active]:bg-background data-[state=active]:shadow-none data-[state=active]:border-b-2 data-[state=active]:border-green-600 rounded-none h-full border-b-2 border-transparent font-bold text-xs">
+              <TabsTrigger value="warranty" className="data-[state=active]:bg-background data-[state=active]:shadow-none data-[state=active]:border-b-2 data-[state=active]:border-green-600 rounded-none h-full border-b-2 border-transparent font-bold text-[10px] uppercase">
                 Bảo hành
               </TabsTrigger>
-              <TabsTrigger value="repair" className="data-[state=active]:bg-background data-[state=active]:shadow-none data-[state=active]:border-b-2 data-[state=active]:border-red-500 rounded-none h-full border-b-2 border-transparent font-bold text-xs">
+              <TabsTrigger value="repair" className="data-[state=active]:bg-background data-[state=active]:shadow-none data-[state=active]:border-b-2 data-[state=active]:border-red-500 rounded-none h-full border-b-2 border-transparent font-bold text-[10px] uppercase">
                 Sửa chữa
               </TabsTrigger>
-              <TabsTrigger value="inspection" className="data-[state=active]:bg-background data-[state=active]:shadow-none data-[state=active]:border-b-2 data-[state=active]:border-indigo-500 rounded-none h-full border-b-2 border-transparent font-bold text-xs">
+              <TabsTrigger value="inspection" className="data-[state=active]:bg-background data-[state=active]:shadow-none data-[state=active]:border-b-2 data-[state=active]:border-indigo-500 rounded-none h-full border-b-2 border-transparent font-bold text-[10px] uppercase">
                 Khảo sát
               </TabsTrigger>
-              <TabsTrigger value="incident" className="data-[state=active]:bg-background data-[state=active]:shadow-none data-[state=active]:border-b-2 data-[state=active]:border-rose-500 rounded-none h-full border-b-2 border-transparent font-bold text-xs relative">
+              <TabsTrigger value="incident" className="data-[state=active]:bg-background data-[state=active]:shadow-none data-[state=active]:border-b-2 data-[state=active]:border-rose-500 rounded-none h-full border-b-2 border-transparent font-bold text-[10px] uppercase relative">
                 Sự cố QR
                 {mockIssues.filter(i => i.status === 'open').length > 0 && (
                   <span className="absolute -top-1 -right-1 h-4 w-4 bg-destructive text-white text-[9px] font-black rounded-full flex items-center justify-center animate-pulse">
@@ -209,6 +345,7 @@ export function WebJobsMonitor({ tab: routeTab }: { tab: string }) {
               </TabsTrigger>
             </TabsList>
           </div>
+          )}
 
           <div className="flex flex-col sm:flex-row gap-3 p-4 bg-background">
             <div className="flex-1 relative">
@@ -230,7 +367,7 @@ export function WebJobsMonitor({ tab: routeTab }: { tab: string }) {
                 setPage(1);
               }}
             >
-              <SelectTrigger className="w-full sm:w-44 h-10 border-muted-foreground/20">
+              <SelectTrigger className="w-full sm:w-40 h-10 border-muted-foreground/20">
                 <SelectValue placeholder="Trạng thái" />
               </SelectTrigger>
               <SelectContent>
@@ -242,60 +379,50 @@ export function WebJobsMonitor({ tab: routeTab }: { tab: string }) {
                 ))}
               </SelectContent>
             </Select>
+
+            <Select
+              value={priorityFilter}
+              onValueChange={(v) => {
+                setPriorityFilter(v);
+                setPage(1);
+              }}
+            >
+              <SelectTrigger className="w-full sm:w-40 h-10 border-muted-foreground/20">
+                <SelectValue placeholder="Độ ưu tiên" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">Tất cả độ ưu tiên</SelectItem>
+                {Object.entries(priorityLabel).map(([k, v]) => (
+                  <SelectItem key={k} value={k}>
+                    {v}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
           </div>
 
+          <TabsContent value="pending" className="mt-0">
+             {renderGroupedJobs(paged)}
+          </TabsContent>
+          
           <TabsContent value="install" className="mt-0">
-             <div className="flex flex-col p-4 gap-3 border-t">
-                {allProjects.map(p => (
-                  <Link 
-                    key={p.id} 
-                    to="/admin/projects/$projectId" 
-                    params={{ projectId: p.id }}
-                    search={{ readonly: "true" }}
-                    className="block"
-                  >
-                    <Card className="p-4 hover:bg-muted/10 transition-all group border-l-4 border-l-orange-500 overflow-hidden flex items-center gap-4">
-                       <div className="h-10 w-10 shrink-0 rounded-lg bg-orange-500/10 flex items-center justify-center text-orange-600">
-                          <Hammer className="h-5 w-5" />
-                       </div>
-                       <div className="flex-1 min-w-0">
-                         <div className="flex justify-between items-start">
-                            <h4 className="font-bold text-sm truncate group-hover:text-primary transition-colors">{p.name}</h4>
-                            <Badge variant="secondary" className="text-[10px] tracking-tight shrink-0">KỲ: {p.stage}</Badge>
-                         </div>
-                         <div className="text-[11px] text-muted-foreground flex items-center gap-1.5 mt-1">
-                           <MapPin className="h-3 w-3" /> {p.address}
-                         </div>
-                         <div className="flex items-center justify-between text-[9px] font-bold uppercase tracking-tight text-orange-600 mt-2">
-                            <span>Theo dõi 8 giai đoạn thi công</span>
-                            <div className="flex gap-0.5">
-                              {Array.from({ length: 8 }).map((_, i) => (
-                                <div key={i} className={`h-1 w-2.5 rounded-full ${i === 1 ? 'bg-orange-500' : i < 1 ? 'bg-success' : 'bg-muted'}`} />
-                              ))}
-                            </div>
-                          </div>
-                       </div>
-                       <ChevronRight className="h-4 w-4 text-muted-foreground opacity-0 group-hover:opacity-100 transition-opacity" />
-                    </Card>
-                  </Link>
-                ))}
-             </div>
+             {renderGroupedJobs(paged)}
           </TabsContent>
 
           <TabsContent value="maintenance" className="mt-0">
-             {renderJobList(paged)}
+             {renderGroupedJobs(paged)}
           </TabsContent>
 
           <TabsContent value="warranty" className="mt-0">
-             {renderJobList(paged)}
+             {renderGroupedJobs(paged)}
           </TabsContent>
 
           <TabsContent value="repair" className="mt-0">
-             {renderJobList(paged)}
+             {renderGroupedJobs(paged)}
           </TabsContent>
 
           <TabsContent value="inspection" className="mt-0">
-             {renderJobList(paged)}
+             {renderGroupedJobs(paged)}
           </TabsContent>
 
           {/* B6: Sự cố từ QR — CEO Inbox */}
@@ -342,19 +469,9 @@ export function WebJobsMonitor({ tab: routeTab }: { tab: string }) {
                         </div>
                       </div>
                       <div className="flex items-center gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
-                        {issue.status === 'open' && (
-                          <Button 
-                            size="sm" 
-                            className="gap-1.5"
-                            onClick={() => {
-                              setSelectedJob(allTenantJobs[0]);
-                              setDispatchOpen(true);
-                              toast.info('Tạo công việc sửa chữa từ sự cố QR — chọn KTV phù hợp.');
-                            }}
-                          >
-                            <Send className="h-3.5 w-3.5" /> Phân công
-                          </Button>
-                        )}
+                         <Button variant="ghost" size="icon" className="h-8 w-8 text-primary">
+                            <ChevronRight className="h-5 w-5 text-muted-foreground" />
+                         </Button>
                       </div>
                     </div>
                   </div>
@@ -379,18 +496,6 @@ export function WebJobsMonitor({ tab: routeTab }: { tab: string }) {
           />
         </div>
       </Card>
-      <DispatchJobModal 
-        open={dispatchOpen} 
-        onClose={() => {
-          setDispatchOpen(false);
-          setSelectedJob(null);
-        }}
-        job={selectedJob || allTenantJobs[0]}
-        onDispatch={(jobId, userId) => {
-          toast.success("Đã điều phối công việc thành công!");
-          setDispatchOpen(false);
-        }}
-      />
     </AppShell>
   );
 }

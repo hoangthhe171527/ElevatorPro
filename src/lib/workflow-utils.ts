@@ -1,5 +1,6 @@
 import { 
   INSTALL_STAGES_TEMPLATE, 
+  MAINTENANCE_STEPS_TEMPLATE,
   type Project, 
   type Job, 
   type Contract,
@@ -27,7 +28,7 @@ export function handleLeadConversion(
     name: lead.name,
     contactPerson: lead.name,
     phone: lead.phone,
-    email: lead.email,
+    email: lead.email || "",
     address: lead.address,
     type: "business",
     elevatorCount: 0,
@@ -86,7 +87,7 @@ export function handleMaintenanceLeadConversion(
     name: lead.name,
     contactPerson: lead.name,
     phone: lead.phone,
-    email: lead.email,
+    email: lead.email || "",
     address: lead.address,
     type: "business",
     elevatorCount: 1, // Assume 1 for maintenance lead
@@ -121,12 +122,43 @@ export function handleMaintenanceLeadConversion(
 
 /**
  * PHASE 2: Activation -> Waiting for Equipment
- * After Contract is signed + Contract File Uploaded, move Project to 'waiting_for_equipment'.
+ * After Contract is signed + Contract File Uploaded, move Project to 'waiting_for_equipment'
+ * and generate all installation jobs in 'pending' state.
  */
 export function handleContractActivation(
   contract: Contract,
   projectName?: string
-): { project: Project } {
+): { project?: Project; jobs: Job[] } {
+  if (contract.type === "maintenance") {
+    const jobs: Job[] = Array.from({ length: 12 }).map((_, index) => {
+      const scheduledDate = new Date(contract.startDate);
+      scheduledDate.setMonth(scheduledDate.getMonth() + index);
+      
+      return {
+        tenantId: contract.tenantId,
+        id: `j-maint-${contract.id}-${index + 1}`,
+        code: `JOB-MAINT-${index + 1}`,
+        type: "maintenance",
+        title: `Bảo trì định kỳ tháng ${index + 1}`,
+        description: `Bảo trì định kỳ tháng thứ ${index + 1} cho hợp đồng ${contract.code}`,
+        customerId: contract.customerId,
+        contractId: contract.id,
+        assignedTo: "u-tech-maint-1", // Default assignee, CEO can change
+        priority: "normal",
+        status: "pending",
+        scheduledFor: scheduledDate.toISOString().slice(0, 16),
+        beforePhotos: [],
+        afterPhotos: [],
+        createdAt: new Date().toISOString(),
+        maintenanceSteps: MAINTENANCE_STEPS_TEMPLATE.map(step => ({
+          ...step,
+          result: step.result as "pending" | "ok" | "repair" | "replace"
+        })),
+      };
+    });
+    return { jobs };
+  }
+
   const projectId = `p-auto-${contract.id}`;
   
   const project: Project = {
@@ -137,20 +169,9 @@ export function handleContractActivation(
     customerId: contract.customerId,
     startDate: new Date().toISOString().split('T')[0],
     status: "in_progress",
-    stage: "waiting_for_equipment", // Jump straight to this as per user request
+    stage: "waiting_for_equipment", 
   };
 
-  return { project };
-}
-
-/**
- * PHASE 3: Equipment Arrival -> Installation Jobs
- * When CEO confirms equipment arrival, system generates the 8 install jobs.
- */
-export function handleEquipmentArrival(
-  project: Project,
-  contract: Contract
-): { jobs: Job[] } {
   const jobs: Job[] = INSTALL_STAGES_TEMPLATE.map((stage, index) => {
     const scheduledDate = new Date();
     scheduledDate.setDate(scheduledDate.getDate() + (index * 7) + 7);
@@ -165,9 +186,9 @@ export function handleEquipmentArrival(
       customerId: project.customerId,
       projectId: project.id,
       contractId: contract.id,
-      assignedTo: "u-tech-all-2",
+      assignedTo: "u-tech-install-2",
       priority: "normal",
-      status: index === 0 ? "scheduled" : "pending",
+      status: "pending", // Create them all as pending
       scheduledFor: scheduledDate.toISOString().slice(0, 16),
       beforePhotos: [],
       afterPhotos: [],
@@ -175,7 +196,32 @@ export function handleEquipmentArrival(
     };
   });
 
-  return { jobs };
+  return { project, jobs };
+}
+
+/**
+ * PHASE 3: Equipment Arrival -> Installation Jobs Activation
+ * When CEO confirms equipment arrival, system activates the installation jobs (sets first one to scheduled).
+ */
+export function handleEquipmentArrival(
+  project: Project,
+  existingJobs: Job[]
+): { jobs: Job[] } {
+  const projectJobs = existingJobs.filter(j => j.projectId === project.id);
+  
+  // Activate ALL installation jobs for this project
+  const activatedJobs = projectJobs.map(j => {
+    if (j.type === "install" && j.status === "pending") {
+      // Set the first one to scheduled, others stay pending but visible
+      if (j.code === "JOB-INSTALL-1") {
+        return { ...j, status: "scheduled" as const };
+      }
+      return { ...j, status: "pending" as const }; // They are already pending, but we explicitly return them
+    }
+    return j;
+  });
+
+  return { jobs: activatedJobs };
 }
 
 /**

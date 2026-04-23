@@ -17,6 +17,7 @@ import {
   Wrench,
   Wallet,
   Building,
+  Smartphone,
 } from "lucide-react";
 import { useAppStore } from "@/lib/store";
 import { mockUsers } from "@/lib/mock-data";
@@ -37,35 +38,51 @@ export const Route = createFileRoute("/")({
 
 const personas = [
   {
-    id: "u-director",
-    title: "Giám đốc (Full Quyền)",
-    desc: "Trải nghiệm tính năng của tất cả các phòng ban, tổng quan vận hành, báo cáo dòng tiền.",
+    id: "u-director-2",
+    title: "CEO (Phân việc)",
+    desc: "Phân công công việc, duyệt tiến độ và theo dõi vận hành tổng thể.",
     href: "/admin",
     color: "bg-primary",
     icon: ShieldCheck,
   },
   {
-    id: "u-sm-biz",
-    title: "Sales & QL Kỹ thuật (Cty Nhỏ)",
-    desc: "Nhân sự đa nhiệm: Vừa kiểm soát kinh doanh hợp đồng, vừa phân công thợ lắp đặt bảo trì.",
+    id: "u-sales-admin-2",
+    title: "Sale Admin",
+    desc: "Quản lý lead, khách hàng và theo dõi pipeline hợp đồng.",
     href: "/admin",
     color: "bg-orange-500",
     icon: Users,
   },
   {
-    id: "u-accounting",
-    title: "Phòng Kế Toán (Cty Lớn)",
-    desc: "Môi trường chuyên biệt hóa: Chỉ xem hóa đơn, hợp đồng và phê duyệt công tác phí.",
+    id: "u-intake-2",
+    title: "Tiếp nhận & nhập liệu",
+    desc: "Nhận thông tin từ hotline, phân loại yêu cầu và nhập liệu vào hệ thống.",
+    href: "/admin/leads",
+    color: "bg-cyan-500",
+    icon: FileText,
+  },
+  {
+    id: "u-accounting-2",
+    title: "Kế toán",
+    desc: "Quản lý tài chính, hóa đơn và theo dõi công nợ thanh toán.",
     href: "/admin/accounting",
     color: "bg-emerald-500",
     icon: Wallet,
   },
   {
-    id: "u-tech-1",
-    title: "Kỹ thuật viên",
-    desc: "Kỹ thuật viên thực hiện công việc tại công trình, báo cáo biên bản kỹ thuật online.",
+    id: "u-tech-maint-2",
+    title: "Kỹ thuật bảo trì",
+    desc: "Nhận việc bảo trì, sửa chữa, bảo hành và cập nhật biên bản online.",
     href: "/tech",
     color: "bg-info",
+    icon: Wrench,
+  },
+  {
+    id: "u-tech-install-2",
+    title: "Kỹ thuật lắp đặt",
+    desc: "Nhận các giai đoạn lắp đặt tại công trình và cập nhật tiến độ triển khai.",
+    href: "/tech",
+    color: "bg-indigo-500",
     icon: Wrench,
   },
   {
@@ -118,7 +135,7 @@ const features = [
 ];
 
 function LandingPage() {
-  const setUserId = useAppStore((s) => s.setUserId);
+  const { setUserId, setAppPreview } = useAppStore();
 
   return (
     <div className="min-h-screen bg-background">
@@ -146,9 +163,14 @@ function LandingPage() {
             </a>
           </div>
           <div className="flex items-center gap-2">
-            <Link to="/admin">
+            <Link to="/app/admin" onClick={() => { setUserId("u-director-2"); setAppPreview(true); }}>
+              <Button size="sm" variant="outline" className="hidden sm:flex gap-2">
+                <Smartphone className="h-3.5 w-3.5" /> Mobile App
+              </Button>
+            </Link>
+            <Link to="/admin" onClick={() => { setUserId("u-director-2"); setAppPreview(false); }}>
               <Button size="sm" className="gap-2">
-                Vào hệ thống <ArrowRight className="h-3.5 w-3.5" />
+                Bản Web <ArrowRight className="h-3.5 w-3.5" />
               </Button>
             </Link>
           </div>
@@ -169,14 +191,25 @@ function LandingPage() {
           Quản lý từ một tập thể vài người "đa nhiệm" (Multi-role) đến các tổng công ty chia tách
           độc lập các phòng Kế toán, Kinh doanh, Điều phối Kỹ thuật.
         </p>
-          <Link to="/admin" onClick={() => setUserId("u-director")}>
-            <Button
-              size="lg"
-              className="gap-2 bg-primary hover:bg-primary/90 text-white border-2 border-primary shadow-lg shadow-primary/20"
-            >
-              Vào hệ thống Admin <Zap className="h-4 w-4" />
-            </Button>
-          </Link>
+          <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
+            <Link to="/admin" onClick={() => { setUserId("u-director-2"); setAppPreview(false); }}>
+              <Button
+                size="lg"
+                className="gap-2 bg-primary hover:bg-primary/90 text-white border-2 border-primary shadow-lg shadow-primary/20 w-full sm:w-auto"
+              >
+                Vào hệ thống Web <Zap className="h-4 w-4" />
+              </Button>
+            </Link>
+            <Link to="/app/admin" onClick={() => { setUserId("u-director-2"); setAppPreview(true); }}>
+              <Button
+                size="lg"
+                variant="outline"
+                className="gap-2 border-2 shadow-lg w-full sm:w-auto"
+              >
+                Trải nghiệm Mobile App <Smartphone className="h-4 w-4" />
+              </Button>
+            </Link>
+          </div>
       </section>
 
       {/* Roles */}
@@ -301,9 +334,9 @@ function LandingPage() {
             Vào thẳng giao diện — không cần đăng nhập
           </p>
           <div className="mt-6 flex flex-wrap items-center justify-center gap-3">
-            <Link to="/admin" onClick={() => setUserId("u-director")}>
+            <Link to="/admin" onClick={() => setUserId("u-director-2")}>
               <Button size="lg" variant="default">
-                Login Giám đốc
+                Login CEO
               </Button>
             </Link>
             <Link to="/admin" onClick={() => setUserId("u-sm-biz")}>

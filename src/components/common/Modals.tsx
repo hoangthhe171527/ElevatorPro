@@ -2,7 +2,7 @@
 // =====================================================================
 // TẤT CẢ CÁC MODAL DÙNG CHUNG — thêm vào project
 // =====================================================================
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import {
   Dialog,
   DialogContent,
@@ -41,6 +41,7 @@ import {
   type User,
   getUser,
   getElevator,
+  type Lead,
 } from "@/lib/mock-data";
 import { useAppStore, useIsSmallCompany } from "@/lib/store";
 import { 
@@ -95,12 +96,13 @@ interface CreateJobModalProps {
   onClose: () => void;
   defaultCustomerId?: string;
   defaultElevatorId?: string;
-   defaultContractId?: string;
-   defaultProjectId?: string;
-   defaultTitle?: string;
-   defaultType?: JobType;
-   defaultDescription?: string;
- }
+  defaultContractId?: string;
+  defaultProjectId?: string;
+  defaultTitle?: string;
+  defaultType?: JobType;
+  defaultDescription?: string;
+  defaultLeadId?: string;
+}
 
 const typeOptions: { value: JobType; label: string }[] = [
   { value: "maintenance", label: "Bảo trì định kỳ" },
@@ -121,18 +123,20 @@ export function CreateJobModal({
   onClose,
   defaultCustomerId = "",
   defaultElevatorId = "",
-   defaultContractId = "",
-   defaultProjectId = "",
-   defaultTitle = "",
-   defaultType = "maintenance",
-   defaultDescription = "",
- }: CreateJobModalProps) {
-   const [title, setTitle] = useState(defaultTitle || "");
-   const [type, setType] = useState<JobType>(defaultType || "maintenance");
+  defaultContractId = "",
+  defaultProjectId = "",
+  defaultTitle = "",
+  defaultType = "maintenance",
+  defaultDescription = "",
+  defaultLeadId = "",
+}: CreateJobModalProps) {
+  const [title, setTitle] = useState(defaultTitle || "");
+  const [type, setType] = useState<JobType>(defaultType || "maintenance");
   const [customerId, setCustomerId] = useState(defaultCustomerId || "");
   const [projectId, setProjectId] = useState(defaultProjectId || "");
   const [elevatorId, setElevatorId] = useState(defaultElevatorId || "");
   const [contractId, setContractId] = useState(defaultContractId || "");
+  const [leadId] = useState(defaultLeadId || "");
   const [techId, setTechId] = useState("");
   const [scheduledFor, setScheduledFor] = useState(() => {
     const d = new Date();
@@ -145,7 +149,7 @@ export function CreateJobModal({
   const [loading, setLoading] = useState(false);
 
   const technicians = mockUsers.filter((u) =>
-    u.memberships?.some((m) => m.permissions.includes("field_tech")),
+    u.memberships?.some((m) => m.permissions.includes("tech_maintenance") || m.permissions.includes("tech_installation")),
   );
   // Filter elevators belonging to customer's projects
   const customerProjects = mockProjects.filter((p) => p.customerId === customerId);
@@ -156,12 +160,33 @@ export function CreateJobModal({
   const customerContracts = mockContracts.filter((c) => c.customerId === customerId);
 
   const handleSubmit = async () => {
-    if (!title.trim() || !customerId || !techId || !scheduledFor) {
+    if (!title.trim() || (!customerId && !defaultLeadId) || !techId || !scheduledFor) {
       toast.error("Vui lòng điền đầy đủ thông tin bắt buộc");
       return;
     }
     setLoading(true);
     await new Promise((r) => setTimeout(r, 600));
+    
+    const newJob: Job = {
+      tenantId: useAppStore.getState().activeTenantId || 't-2',
+      id: `job-${Date.now()}`,
+      code: `JOB-${Math.floor(Math.random() * 10000)}`,
+      title,
+      type,
+      description,
+      customerId: customerId || "unknown",
+      leadId: defaultLeadId,
+      assignedTo: techId,
+      priority,
+      status: "scheduled",
+      scheduledFor,
+      beforePhotos: [],
+      afterPhotos: [],
+      createdAt: new Date().toISOString(),
+    };
+    
+    mockJobs.push(newJob);
+
     setLoading(false);
     toast.success(
       `Đã tạo công việc "${title}" — giao cho ${mockUsers.find((u) => u.id === techId)?.name}`,
@@ -647,20 +672,14 @@ export function RecordPaymentModal({
 interface ConvertLeadModalProps {
   open: boolean;
   onClose: () => void;
-  lead: {
-    id: string;
-    name: string;
-    phone: string;
-    email: string;
-    address: string;
-  };
+  lead: Lead;
 }
 
 export function ConvertLeadModal({ open, onClose, lead }: ConvertLeadModalProps) {
   const [name, setName] = useState(lead.name);
   const [contactPerson, setContactPerson] = useState(lead.name);
   const [phone, setPhone] = useState(lead.phone);
-  const [email, setEmail] = useState(lead.email);
+  const [email, setEmail] = useState(lead.email || "");
   const [address, setAddress] = useState(lead.address);
   const [type, setType] = useState<"business" | "individual">("business");
   const [conversionType, setConversionType] = useState<"install" | "maintenance">("install");
@@ -686,15 +705,28 @@ export function ConvertLeadModal({ open, onClose, lead }: ConvertLeadModalProps)
       toast.success(`Đã chuyển đổi thành công!`, {
         description: `Khách hàng "${customer.name}" đã được tạo.`,
       });
-      toast.info(`Tự động khởi tạo Hợp đồng: ${contract.code}`);
+      
+      if (conversionType === 'install') {
+        const { project, jobs } = handleContractActivation(contract);
+        if (project) mockProjects.push(project);
+        if (jobs) mockJobs.push(...jobs);
+        
+        toast.info(`Tự động khởi tạo Hợp đồng: ${contract.code} và Dự án Lắp đặt: ${project?.name}`);
+        setTimeout(() => {
+          toast.success("Đã sinh ra toàn bộ các giai đoạn công việc (Trạng thái: Chờ thiết bị).");
+        }, 1500);
+      } else {
+        const { jobs } = handleContractActivation(contract);
+        if (jobs) mockJobs.push(...jobs);
+        toast.info(`Tự động khởi tạo Hợp đồng Bảo trì: ${contract.code}`);
+        setTimeout(() => {
+          toast.success("Đã sinh ra các kỳ bảo trì theo hợp đồng.");
+        }, 1500);
+      }
       
       if (customer.referredById) {
         toast.success("Hệ thống Referral: Đã cộng 100 điểm cho người giới thiệu.");
       }
-
-      setTimeout(() => {
-        toast.info("Giai đoạn tiếp theo: Phê duyệt hợp đồng để bắt đầu thi công dự án.");
-      }, 1500);
     } else {
       toast.success(`Đã chuyển lead thành khách hàng: "${customer.name}"`);
       toast.info(`Đã tạo bản thảo hợp đồng ${contract.code} - Chờ phòng ban Sales xử lý tiếp.`);
@@ -799,14 +831,17 @@ interface CreateContractModalProps {
   open: boolean;
   onClose: () => void;
   defaultCustomerId?: string;
+  defaultElevatorId?: string;
 }
 
 export function CreateContractModal({
   open,
   onClose,
   defaultCustomerId = "",
+  defaultElevatorId = "",
 }: CreateContractModalProps) {
   const [customerId, setCustomerId] = useState(defaultCustomerId);
+  const [elevatorId, setElevatorId] = useState(defaultElevatorId);
   const [type, setType] = useState<ContractType>("maintenance");
   const [value, setValue] = useState("");
   const [startDate, setStartDate] = useState(new Date().toISOString().split("T")[0]);
@@ -817,6 +852,14 @@ export function CreateContractModal({
   });
   const [items, setItems] = useState("");
   const [loading, setLoading] = useState(false);
+
+  // Sync state when props change (if modal is reused)
+  useEffect(() => {
+    if (open) {
+      setCustomerId(defaultCustomerId || "");
+      setElevatorId(defaultElevatorId || "");
+    }
+  }, [open, defaultCustomerId, defaultElevatorId]);
 
   const autoCode = `HD-${new Date().getFullYear()}-${String(mockContracts.length + 1).padStart(4, "0")}`;
 
@@ -880,6 +923,27 @@ export function CreateContractModal({
                     {c.name}
                   </SelectItem>
                 ))}
+              </SelectContent>
+            </Select>
+          </div>
+          <div>
+            <label className="text-sm font-medium">Thang máy áp dụng</label>
+            <Select value={elevatorId} onValueChange={setElevatorId}>
+              <SelectTrigger className="mt-1">
+                <SelectValue placeholder="Tất cả thang máy / Chọn thang..." />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">Tất cả thang máy của khách hàng</SelectItem>
+                {mockElevators
+                  .filter((e) => {
+                    const project = mockProjects.find((p) => p.id === e.projectId);
+                    return project?.customerId === customerId;
+                  })
+                  .map((e) => (
+                    <SelectItem key={e.id} value={e.id}>
+                      {e.code} ({e.brand})
+                    </SelectItem>
+                  ))}
               </SelectContent>
             </Select>
           </div>
@@ -1471,6 +1535,7 @@ interface CreateLeadModalProps {
 
 export function CreateLeadModal({ open, onClose }: CreateLeadModalProps) {
   const [name, setName] = useState("");
+  const [type, setType] = useState<"install" | "maintenance">("install");
   const [phone, setPhone] = useState("");
   const [email, setEmail] = useState("");
   const [address, setAddress] = useState("");
@@ -1486,8 +1551,25 @@ export function CreateLeadModal({ open, onClose }: CreateLeadModalProps) {
     setLoading(true);
     await new Promise((r) => setTimeout(r, 500));
     setLoading(false);
-    toast.success(`Đã thêm lead mới: "${name}"`);
+    const newLead: Lead = {
+      id: `lead-${Date.now()}`,
+      tenantId: useAppStore.getState().activeTenantId || "t-2",
+      name,
+      type,
+      phone,
+      email,
+      address,
+      source,
+      status: "new",
+      estimatedValue: 0,
+      note,
+      createdAt: new Date().toISOString(),
+    };
+
+    mockLeads.push(newLead);
+    toast.success(`Đã thêm lead mới: "${name}" (${type === 'install' ? 'Lắp đặt' : 'Bảo trì'})`);
     setName("");
+    setType("install");
     setPhone("");
     setEmail("");
     setAddress("");
@@ -1505,16 +1587,30 @@ export function CreateLeadModal({ open, onClose }: CreateLeadModalProps) {
           </DialogTitle>
         </DialogHeader>
         <div className="space-y-3 py-2">
-          <div>
-            <label className="text-sm font-medium">
-              Tên khách hàng / Tổ chức <span className="text-destructive">*</span>
-            </label>
-            <Input
-              className="mt-1"
-              placeholder="VD: Tòa nhà Sunshine"
-              value={name}
-              onChange={(e) => setName(e.target.value)}
-            />
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+            <div>
+              <label className="text-sm font-medium">
+                Tên khách hàng / Tổ chức <span className="text-destructive">*</span>
+              </label>
+              <Input
+                className="mt-1"
+                placeholder="VD: Tòa nhà Sunshine"
+                value={name}
+                onChange={(e) => setName(e.target.value)}
+              />
+            </div>
+            <div>
+              <label className="text-sm font-medium">Loại Lead</label>
+              <Select value={type} onValueChange={(v) => setType(v as "install" | "maintenance")}>
+                <SelectTrigger className="mt-1">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="install">Lắp mới (Dự án)</SelectItem>
+                  <SelectItem value="maintenance">Bảo trì (Dịch vụ)</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
           </div>
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
             <div>
@@ -1601,7 +1697,14 @@ export function DispatchJobModal({ open, onClose, job, onDispatch }: DispatchJob
   const [loading, setLoading] = useState(false);
 
   const technicians = mockUsers
-    .filter((u) => u.memberships?.some((m) => m.permissions.includes("field_tech")))
+    .filter((u) => {
+      const perms = u.memberships?.flatMap((m) => m.permissions) || [];
+      if (job.type === "install") {
+        return perms.includes("tech_installation");
+      }
+      // For maintenance, repair, warranty, inspection, etc.
+      return perms.includes("tech_maintenance");
+    })
     .map((u) => ({
       ...u,
       workload: getTechnicianWorkload(u.id),
@@ -1897,6 +2000,10 @@ export function AccountantPaymentModal({
       toast.error("Vui lòng nhập số tiền hợp lệ");
       return;
     }
+    if (!contract) {
+      toast.error("Không tìm thấy dữ liệu hợp đồng");
+      return;
+    }
     setLoading(true);
     await new Promise(r => setTimeout(r, 800));
     setLoading(false);
@@ -1911,7 +2018,10 @@ export function AccountantPaymentModal({
         <DialogHeader>
           <DialogTitle>Kế toán: Nhập tiền thanh toán - Giai đoạn {stage}</DialogTitle>
         </DialogHeader>
-        <div className="space-y-4 py-4">
+        {!contract ? (
+          <div className="p-8 text-center text-muted-foreground">Không tìm thấy hợp đồng</div>
+        ) : (
+          <div className="space-y-4 py-4">
           <div className="p-3 bg-primary/5 rounded-lg text-sm flex flex-col gap-1">
             <span className="text-muted-foreground uppercase font-black text-[10px]">Đang kiểm tra HĐ</span>
             <span className="font-bold">{contract.code}</span>
@@ -1961,9 +2071,10 @@ export function AccountantPaymentModal({
             Vui lòng kiểm tra kỹ file báo giá và hợp đồng CEO đã tải lên trước khi nhập số tiền.
           </div>
         </div>
+        )}
         <DialogFooter>
           <Button variant="outline" onClick={onClose}>Hủy</Button>
-          <Button onClick={handle}>Xác nhận & Cập nhật</Button>
+          <Button onClick={handle} disabled={!contract}>Xác nhận & Cập nhật</Button>
         </DialogFooter>
       </DialogContent>
     </Dialog>
@@ -1987,8 +2098,8 @@ export function CEOFinalApprovalModal({
   onApproved: () => void;
 }) {
   const [loading, setLoading] = useState(false);
-  const result = handleFinalVerification(contract, enteredTotal);
-  const lead = mockLeads.find(l => l.customerId === contract.customerId);
+  const result = contract ? handleFinalVerification(contract, enteredTotal) : { success: false, message: "Dữ liệu hợp đồng không hợp lệ" };
+  const lead = contract ? mockLeads.find(l => l.customerId === contract.customerId) : null;
 
   const handleApprove = async () => {
     if (!result.success) {
@@ -2010,7 +2121,10 @@ export function CEOFinalApprovalModal({
             <ShieldCheck className="h-5 w-5 text-primary" /> CEO Đối soát & Phê duyệt quyết toán
           </DialogTitle>
         </DialogHeader>
-        <div className="space-y-4 py-4">
+        {!contract ? (
+           <div className="p-8 text-center text-muted-foreground">Không tìm thấy hồ sơ hợp đồng</div>
+        ) : (
+          <div className="space-y-4 py-4">
           <div className="grid grid-cols-2 gap-4">
             <div className="p-3 bg-muted rounded-lg">
               <div className="text-[10px] font-black uppercase text-muted-foreground mb-1">Giá trị Hợp đồng</div>
@@ -2050,9 +2164,10 @@ export function CEOFinalApprovalModal({
             </div>
           </div>
         </div>
+        )}
         <DialogFooter>
           <Button variant="outline" onClick={onClose}>Hủy</Button>
-          {!result.success ? (
+          {contract && (!result.success ? (
             <Button variant="destructive" onClick={() => toast.info("Đã gửi yêu cầu Kế toán kiểm tra lại hồ sơ.")}>
               Yêu cầu Kế toán sửa lại
             </Button>
@@ -2060,7 +2175,7 @@ export function CEOFinalApprovalModal({
             <Button className="bg-success hover:bg-success/90" onClick={handleApprove}>
               Phê duyệt & Chuyển Bảo hành
             </Button>
-          )}
+          ))}
         </DialogFooter>
       </DialogContent>
     </Dialog>
@@ -2081,7 +2196,7 @@ export function CreateHotlineIncidentModal({
   const [issue, setIssue] = useState("");
 
   const filteredElevators = mockElevators.filter((e) => e.tenantId === activeTenantId);
-  const technicians = mockUsers.filter((u) => u.memberships.some(m => m.tenantId === activeTenantId && m.permissions.includes('field_tech')));
+  const technicians = mockUsers.filter((u) => u.memberships.some(m => m.tenantId === activeTenantId && (m.permissions.includes('tech_maintenance') || m.permissions.includes('tech_installation'))));
 
   const handleCreate = async () => {
     if (!selectedElevatorId || !techId || !issue) {

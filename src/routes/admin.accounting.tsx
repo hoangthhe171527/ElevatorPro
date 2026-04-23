@@ -23,6 +23,7 @@ import { useState } from "react";
 import { useAppStore, useCanWrite } from "@/lib/store";
 import { toast } from "sonner";
 import { DataPagination } from "@/components/common/DataPagination";
+import { cn } from "@/lib/utils";
 import {
   Dialog,
   DialogContent,
@@ -54,10 +55,16 @@ function AccountingPage() {
     )
     .filter((m) => m.status !== "paid");
 
-  // Những cái overdue hoặc gần đến hạn
-  const sortedMilestones = pendingMilestones.sort(
-    (a, b) => new Date(a.dueDate).getTime() - new Date(b.dueDate).getTime(),
-  );
+  // Những cái overdue hoặc gần đến hạn - Ưu tiên quá hạn lên đầu
+  const sortedMilestones = pendingMilestones.sort((a, b) => {
+    const isOverdueA = new Date(a.dueDate) < new Date();
+    const isOverdueB = new Date(b.dueDate) < new Date();
+    
+    if (isOverdueA && !isOverdueB) return -1;
+    if (!isOverdueA && isOverdueB) return 1;
+    
+    return new Date(a.dueDate).getTime() - new Date(b.dueDate).getTime();
+  });
 
   // Pagination & Modal State
   const activeTenantId = useAppStore((s) => s.activeTenantId);
@@ -159,11 +166,15 @@ function AccountingPage() {
         <CardContent className="p-0">
           <div className="divide-y">
             {paginatedMilestones.map((ms) => {
-              const isOverdue = new Date(ms.dueDate) < new Date("2026-04-19"); // Mock current date logic
+              const isOverdue = new Date(ms.dueDate) < new Date();
+              const isUrgent = isOverdue || (new Date(ms.dueDate).getTime() - new Date().getTime() < 3 * 24 * 60 * 60 * 1000); // Overdue or within 3 days
               return (
                 <div
                   key={ms.id}
-                  className="p-4 flex items-center justify-between hover:bg-muted/50 transition-colors"
+                  className={cn(
+                    "p-4 flex items-center justify-between hover:bg-muted/50 transition-colors",
+                    isOverdue ? "bg-destructive/5" : ""
+                  )}
                 >
                   <div className="flex gap-4">
                     <div
@@ -179,11 +190,16 @@ function AccountingPage() {
                       <div className="flex items-center gap-2">
                         <div className="font-semibold">{ms.name}</div>
                         {isOverdue && (
-                          <Badge variant="destructive" className="h-5 text-[10px]">
-                            Quá hạn
+                          <Badge variant="destructive" className="h-5 text-[10px] animate-pulse">
+                            QUÁ HẠN - CẦN THU NGAY
                           </Badge>
                         )}
-                        {ms.status === "pending" && !isOverdue && (
+                        {!isOverdue && isUrgent && (
+                          <Badge className="h-5 text-[10px] bg-orange-500 text-white border-none">
+                            CẦN THU TRONG 3 NGÀY
+                          </Badge>
+                        )}
+                        {ms.status === "pending" && !isUrgent && (
                           <Badge
                             variant="outline"
                             className="h-5 text-[10px] text-warning-foreground border-warning-foreground bg-warning-foreground/10"
@@ -196,6 +212,14 @@ function AccountingPage() {
                         Hợp đồng:{" "}
                         <span className="font-medium text-foreground mx-1">{ms.contractCode}</span>•
                         Hạn chót: {formatDate(ms.dueDate)}
+                      </div>
+                      <div className="flex gap-3 mt-2">
+                        <button className="text-[10px] font-bold text-primary flex items-center gap-1 hover:underline" onClick={() => toast.info("Đang mở file Báo giá...")}>
+                          <FileText className="h-3 w-3" /> XEM BÁO GIÁ
+                        </button>
+                        <button className="text-[10px] font-bold text-primary flex items-center gap-1 hover:underline" onClick={() => toast.info("Đang mở file Hợp đồng...")}>
+                          <ShieldCheck className="h-3 w-3" /> XEM HỢP ĐỒNG
+                        </button>
                       </div>
                     </div>
                   </div>
@@ -236,6 +260,58 @@ function AccountingPage() {
         </CardContent>
       </Card>
 
+      {/* ── A2: Accountant Submission Section ── */}
+      <Card className="mt-6">
+        <CardHeader>
+          <CardTitle className="text-lg flex items-center gap-2">
+            <Send className="h-5 w-5 text-primary" />
+            Kế toán — Báo cáo dòng thu cho CEO
+          </CardTitle>
+        </CardHeader>
+        <CardContent>
+          <div className="divide-y">
+            {contracts.filter(c => c.paid > 0 && !c.accountantVerified && !c.ceoVerified).map(c => {
+               const totalStages = (c.paymentStages.stage1Paid || 0) + (c.paymentStages.stage2Paid || 0) + (c.paymentStages.stage3Paid || 0);
+               return (
+                 <div key={c.id} className="p-4 flex items-center justify-between hover:bg-muted/50 transition-colors">
+                    <div className="flex gap-4">
+                      <div className="mt-1 flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-primary/10 text-primary">
+                        <FileText className="h-5 w-5" />
+                      </div>
+                      <div>
+                        <div className="font-semibold">{c.code}</div>
+                        <div className="text-sm text-muted-foreground mt-1">
+                          Tổng thực thu kế toán đã nhập: <span className="font-bold text-foreground">{formatVND(totalStages)}</span> / {formatVND(c.value)}
+                        </div>
+                        <div className="text-xs text-muted-foreground mt-0.5">
+                          Click để chốt số liệu và gửi CEO kiểm tra đối soát.
+                        </div>
+                      </div>
+                    </div>
+                    <Button 
+                      size="sm"
+                      className="gap-1.5"
+                      onClick={() => {
+                        const updated = contracts.map(item => item.id === c.id ? { ...item, accountantVerified: true } : item);
+                        setContracts(updated);
+                        // In a real app, this would update the backend
+                        toast.success(`Đã gửi báo cáo HĐ ${c.code} lên CEO.`);
+                      }}
+                    >
+                      <Send className="h-4 w-4" /> Gửi CEO duyệt
+                    </Button>
+                 </div>
+               );
+            })}
+            {contracts.filter(c => c.paid > 0 && !c.accountantVerified && !c.ceoVerified).length === 0 && (
+              <div className="p-8 text-center text-muted-foreground">
+                <p className="text-sm italic">Tất cả số liệu đã được gửi hoặc CEO đã duyệt.</p>
+              </div>
+            )}
+          </div>
+        </CardContent>
+      </Card>
+
       {/* ── B1: CEO Đối soát & Duyệt tổng thanh toán ── */}
       <Card className="mt-6">
         <CardHeader>
@@ -266,7 +342,7 @@ function AccountingPage() {
                         Còn lại: <span className="text-warning-foreground font-medium">{formatVND(remaining)}</span>
                       </div>
                       <div className="text-xs text-muted-foreground mt-0.5">
-                        Đợt 1: {formatVND(c.paymentStages.stage1Paid)} • Đợt 2: {formatVND(c.paymentStages.stage2Paid)} • Đợt 3: {formatVND(c.paymentStages.stage3Paid)}
+                        Thiết bị về: {formatVND(c.paymentStages.stage1Paid)} • Hoàn thành lắp: {formatVND(c.paymentStages.stage2Paid)} • Quyết toán: {formatVND(c.paymentStages.stage3Paid)}
                       </div>
                     </div>
                   </div>

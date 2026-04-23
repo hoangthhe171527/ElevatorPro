@@ -18,6 +18,6 @@ export default defineConfig({
     },
   },
   ssr: {
-    noExternal: ["tslib", "zustand", "sonner"],
+    noExternal: ["tslib", "zustand", "sonner", "lucide-react"],
   },
 });

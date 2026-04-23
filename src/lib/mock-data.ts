@@ -3,17 +3,153 @@
 // a real backend later without changing UI code.
 
 export type Permission =
-  | "director" // Ban Giám đốc (Full quyền)
-  | "sales" // Kinh doanh (Thang mới)
-  | "sales_maintenance" // Kinh doanh bảo trì
-  | "tech_survey" // Kỹ thuật - Khảo sát
-  | "install_mgmt" // Kỹ thuật - Quản lý lắp đặt
-  | "maintenance_mgmt" // Kỹ thuật - Quản lý bảo trì
-  | "accounting" // Kế toán
-  | "hr_admin" // Hành chính nhân sự
-  | "field_tech"; // Kỹ thuật viên hiện trường
+  | "sales_admin" // Sale Admin (Lead/Khách hàng)
+  | "intake_operator" // Tiếp nhận thông tin/Phân loại/Nhập liệu
+  | "ceo" // CEO (Phân việc/Điều phối)
+  | "tech_maintenance" // Kỹ thuật bảo trì
+  | "tech_installation" // Kỹ thuật lắp đặt
+  | "accountant"; // Kế toán (Tài chính/Hóa đơn)
 
-export type LeadStatus = "new" | "contacted" | "quote_pending" | "quoted" | "negotiating" | "contract_pending" | "won" | "lost";
+export type LeadType = "install" | "maintenance";
+
+export type LeadStatus =
+  | "new" // Mới tạo
+  | "surveying" // Đang chờ khảo sát
+  | "surveyed" // Đã khảo sát (Chưa báo giá)
+  | "quoted" // Đã báo giá (Chờ phản hồi)
+  | "signed" // Đã ký hợp đồng
+  | "lost"; // Thất bại
+
+export interface Lead {
+  id: string;
+  tenantId: string;
+  name: string;
+  type: LeadType;
+  phone: string;
+  address: string;
+  email?: string;
+  source: string;
+  estimatedValue: number;
+  status: LeadStatus;
+  note?: string;
+  createdAt: string;
+  assignedTo?: string;
+  nextFollowUp?: string;
+  quoteFileUrl?: string;
+  contractFileUrl?: string;
+  customerId?: string;
+}
+
+const _mockLeads_t2: Lead[] = [
+  {
+    id: "lead-1",
+    tenantId: "t-2",
+    name: "Khách sạn Sài Gòn Central",
+    type: "install",
+    phone: "0901234567",
+    address: "123 Lê Lợi, Quận 1, TP.HCM",
+    source: "Hotline",
+    estimatedValue: 1200000000,
+    status: "new",
+    note: "Dự án khách sạn 4 sao, cần 2 thang máy tải khách 1000kg. Khách yêu cầu cabin trang trí gỗ và gương vàng.",
+    createdAt: "2024-04-10T10:00:00Z",
+  },
+  {
+    id: "lead-2",
+    tenantId: "t-2",
+    name: "Biệt thự Linh Đàm",
+    type: "install",
+    phone: "0912345678",
+    address: "Bán đảo Linh Đàm, Hoàng Mai, Hà Nội",
+    source: "Facebook Ads",
+    estimatedValue: 450000000,
+    status: "surveying",
+    note: "Kỹ thuật Dũng đang trên đường tới khảo sát hố thang. Chủ nhà yêu cầu thang máy kính quan sát hướng hồ.",
+    createdAt: "2024-04-12T14:30:00Z",
+  },
+  {
+    id: "lead-3",
+    tenantId: "t-2",
+    name: "Tòa nhà 88 Láng Hạ",
+    type: "install",
+    phone: "0988776655",
+    address: "88 Láng Hạ, Đống Đa, Hà Nội",
+    source: "Website",
+    estimatedValue: 850000000,
+    status: "surveyed",
+    note: "Đã có thông số khảo sát chi tiết (Pit 1.4m, OH 4.0m). Hố thang hơi nghiêng, cần CEO xử lý phương án ray đặc biệt.",
+    createdAt: "2024-04-05T09:15:00Z",
+  },
+  {
+    id: "lead-4",
+    tenantId: "t-2",
+    name: "Villa Ciputra - Khu K",
+    type: "install",
+    phone: "0977665544",
+    address: "Khu đô thị Ciputra, Tây Hồ, Hà Nội",
+    source: "Giới thiệu",
+    estimatedValue: 650000000,
+    status: "quoted",
+    quoteFileUrl: "https://example.com/quote-ciputra.pdf",
+    note: "Đã gửi báo giá 650tr (thang Fuji nhập khẩu). Khách đang xin thêm chiết khấu 5% cho gói bảo hành 2 năm.",
+    createdAt: "2024-04-01T11:20:00Z",
+  },
+  {
+    id: "lead-5",
+    tenantId: "t-2",
+    name: "Penhouse West Lake",
+    type: "install",
+    phone: "0966554433",
+    address: "Lạc Long Quân, Tây Hồ, Hà Nội",
+    source: "Hotline",
+    estimatedValue: 700000000,
+    status: "signed",
+    quoteFileUrl: "https://example.com/quote-westlake.pdf",
+    contractFileUrl: "https://example.com/contract-westlake.pdf",
+    note: "HĐ đã ký. Khách đã thanh toán đợt 1 (30%). Chờ Kế toán và CEO kích hoạt dự án thi công.",
+    createdAt: "2024-03-25T15:00:00Z",
+  },
+  {
+    id: "lead-6",
+    tenantId: "t-2",
+    name: "Chung cư mini Bà Triệu",
+    type: "maintenance",
+    phone: "0909112233",
+    address: "120 Bà Triệu, Hoàn Kiếm, Hà Nội",
+    source: "Website",
+    estimatedValue: 45000000,
+    status: "new",
+    note: "Nhu cầu bảo trì cho 2 thang máy gia đình. Khách ưu tiên gói bảo trì trọn gói có kèm vật tư tiêu hao.",
+    createdAt: "2024-04-14T08:00:00Z",
+  },
+  {
+    id: "lead-7",
+    tenantId: "t-2",
+    name: "Văn phòng Hạng A - Duy Tân",
+    type: "maintenance",
+    phone: "0911002299",
+    address: "Số 5 Duy Tân, Cầu Giấy, Hà Nội",
+    source: "Facebook Ads",
+    estimatedValue: 120000000,
+    status: "quoted",
+    note: "Đã gửi báo giá bảo trì 120tr/năm. Đang cạnh tranh về thời gian phản hồi sự cố (cam kết < 30p).",
+    createdAt: "2024-04-10T11:00:00Z",
+  },
+  {
+    id: "lead-8",
+    tenantId: "t-2",
+    name: "Dự án Shophouse Vinhomes",
+    type: "install",
+    phone: "0933445566",
+    address: "Vinhomes Grand Park, Quận 9, TP.HCM",
+    source: "Website",
+    estimatedValue: 500000000,
+    status: "lost",
+    note: "Khách chốt với bên khác do họ có sẵn hàng trong kho, giao ngay được trong 15 ngày.",
+    createdAt: "2024-03-20T10:00:00Z",
+  }
+];
+
 export type ContractStatus = "active" | "expiring" | "expired" | "draft";
 export type ContractType = "install" | "maintenance" | "repair";
 export type JobStatus =
@@ -26,7 +162,7 @@ export type JobStatus =
   | "waiting_for_materials"
   | "completed"
   | "cancelled";
-export type JobType = "install" | "maintenance" | "repair" | "warranty" | "inspection";
+export type JobType = "install" | "maintenance" | "repair" | "warranty" | "inspection" | "incident";
 export type JobPriority = "low" | "normal" | "high" | "urgent";
 export type ElevatorStatus = "operational" | "maintenance_due" | "out_of_order" | "under_install";
 
@@ -87,15 +223,12 @@ export interface Invoice {
 
 // New model: Project (Công trình)
 export type ProjectStage =
-  | "lead" // GĐ1: Lead -> Sales
-  | "contract" // GĐ2: Chốt deal -> Hợp đồng
-  | "technical" // GĐ3: Kỹ thuật & bản vẽ
-  | "procurement" // GĐ4: Đặt hàng
-  | "warehouse" // GĐ5: Nhận hàng + thanh toán
-  | "installation" // GĐ6: Lắp đặt
-  | "waiting_for_equipment" // GĐ: Chờ thiết bị về công trình
-  | "completion" // GĐ7: Hoàn thiện
-  | "transition"; // GĐ8: Chuyển bảo trì
+  | "lead" // GĐ1: Lead + Khảo sát ban đầu
+  | "contract" // GĐ2: Báo giá + Hợp đồng ký
+  | "waiting_for_equipment" // GĐ3: Chờ thiết bị về công trình
+  | "installation" // GĐ4: Lắp đặt theo 8 giai đoạn
+  | "completion" // GĐ5: Nghiệm thu hoàn thành
+  | "transition"; // GĐ6: Chuyển sang bảo hành
 
 export type RequestType = "material" | "budget" | "project_advance" | "completion" | "lead_quote" | "contract_approval";
 export type RequestStatus = "pending" | "approved" | "rejected";
@@ -117,25 +250,19 @@ export interface ApprovalRequest {
 export const PROJECT_STAGES: ProjectStage[] = [
   "lead",
   "contract",
-  "technical",
-  "procurement",
-  "warehouse",
-  "installation",
   "waiting_for_equipment",
+  "installation",
   "completion",
   "transition",
 ];
 
 export const PROJECT_STAGE_LABELS: Record<ProjectStage, string> = {
-  lead: "Lead → Báo giá",
-  contract: "Ký hợp đồng",
-  technical: "Kỹ thuật & Bản vẽ",
-  procurement: "Đặt hàng",
-  warehouse: "Nhận hàng & Thanh toán",
-  installation: "Lắp đặt",
+  lead: "Lead & Khảo sát",
+  contract: "Báo giá & Hợp đồng",
   waiting_for_equipment: "Chờ thiết bị",
-  completion: "Hoàn thiện",
-  transition: "Chuyển bảo trì",
+  installation: "Lắp đặt",
+  completion: "Nghiệm thu",
+  transition: "Chuyển bảo hành",
 };
 
 // Workflow Gate Configuration
@@ -146,34 +273,20 @@ export interface WorkflowGate {
 }
 
 export const STRATEGIC_WORKFLOW: Record<string, Record<ProjectStage, WorkflowGate>> = {
-  "t-1": { // LARGE COMPANY (Complex - Structured)
-    lead: { approvers: ["director"], label: "Director duyệt giá" },
-    contract: { approvers: ["director", "accounting"], label: "Director duyệt HĐ + Accounting xác nhận tiền" },
-    waiting_for_equipment: { approvers: ["director", "accounting"], label: "CEO confirm thiết bị + Accounting thu tiền đợt 2" },
-    technical: { approvers: ["install_mgmt"], label: "Install Manager xác nhận kỹ thuật" },
-    procurement: { approvers: ["director", "accounting"], label: "Director duyệt chi + Accounting check ngân sách" },
-    warehouse: { approvers: ["accounting", "install_mgmt"], label: "Accounting + Install xác nhận nhận hàng" },
-    installation: { approvers: ["install_mgmt"], label: "Install Manager quản lý thi công" },
-    completion: { approvers: ["install_mgmt", "accounting", "director"], label: "Install xác nhận KT + Accounting xác nhận tiền + Director duyệt đóng" },
-    transition: { approvers: ["maintenance_mgmt"], label: "Maintenance Manager tiếp nhận vận hành" },
-  },
   "t-2": { // SMALL COMPANY (Simplified - Flexible)
-    lead: { approvers: ["director"], label: "Sếp tự báo giá", isFlexible: true },
-    contract: { approvers: ["director", "accounting"], label: "Sếp ký + Kế toán ghi nhận", isFlexible: true },
-    waiting_for_equipment: { approvers: ["director", "accounting"], label: "Kiểm hàng về + Thu tiền đợt 2", isFlexible: true },
-    technical: { approvers: ["install_mgmt"], label: "Kỹ sư triển khai", isFlexible: true },
-    procurement: { approvers: ["director"], label: "Sếp duyệt mua", isFlexible: true },
-    warehouse: { approvers: ["accounting"], label: "Kế toán check tiền", isFlexible: true },
-    installation: { approvers: ["install_mgmt"], label: "Kỹ sư lắp đặt", isFlexible: true },
-    completion: { approvers: ["director", "accounting"], label: "Sếp nghiệm thu", isFlexible: true },
-    transition: { approvers: ["maintenance_mgmt"], label: "Tiếp nhận bảo trì", isFlexible: true },
+    lead: { approvers: ["ceo", "sales_admin"], label: "CEO/Sale Admin mở Lead và phát lệnh khảo sát", isFlexible: true },
+    contract: { approvers: ["ceo"], label: "CEO tải báo giá + hợp đồng đã ký", isFlexible: true },
+    waiting_for_equipment: { approvers: ["ceo"], label: "CEO xác nhận thiết bị đã về công trình", isFlexible: true },
+    installation: { approvers: ["tech_installation", "ceo"], label: "Kỹ thuật thi công, CEO giám sát tiến độ", isFlexible: true },
+    completion: { approvers: ["ceo"], label: "CEO xác nhận hoàn tất và chốt bàn giao", isFlexible: true },
+    transition: { approvers: ["ceo", "tech_maintenance"], label: "Chuyển sang bảo hành cho đội bảo trì", isFlexible: true },
   }
 };
 
 export interface StageTask {
   id: string;
   label: string;
-  requiredRole: Permission;
+  requiredRole: Permission | Permission[];
 }
 
 export const INSTALL_STAGES_TEMPLATE = [
@@ -187,46 +300,40 @@ export const INSTALL_STAGES_TEMPLATE = [
   { id: "step-8", label: "Giai đoạn 8: Bàn giao (Handover)", order: 8 },
 ];
 
+export const MAINTENANCE_STEPS_TEMPLATE: MaintenanceStep[] = [
+  { id: "m-step-1", label: "Kiểm tra sơ bộ", description: "Kiểm tra tổng quát vận hành, tiếng động lạ, rung lắc.", result: "pending", resolved: false },
+  { id: "m-step-2", label: "Kiểm tra phòng máy", description: "Kiểm tra động cơ, tủ điều khiển, phanh và cáp tải.", result: "pending", resolved: false },
+  { id: "m-step-3", label: "Kiểm tra Cabin", description: "Bảng điều khiển, nút bấm, đèn chiếu sáng, quạt thông gió.", result: "pending", resolved: false },
+  { id: "m-step-4", label: "An toàn & Vệ sinh", description: "Cảm biến cửa, cứu hộ tự động, vệ sinh rãnh dẫn hướng.", result: "pending", resolved: false },
+];
+
 export const STAGE_SUB_TASKS: Record<ProjectStage, StageTask[]> = {
   lead: [
-    { id: "lead_survey", label: "Sales khảo sát nhu cầu", requiredRole: "sales" },
-    { id: "proposal_sent", label: "Sales lên phương án & Báo giá", requiredRole: "sales" },
+    { id: "lead_create", label: "CEO hoặc Sale Admin tạo Lead và nhập thông tin khách hàng", requiredRole: ["ceo", "sales_admin"] },
+    { id: "survey_job_create", label: "CEO hoặc Sale Admin tạo công việc khảo sát", requiredRole: ["ceo", "sales_admin"] },
+    { id: "survey_schedule_confirm", label: "Kỹ thuật liên hệ khách và xác nhận lịch khảo sát", requiredRole: "tech_installation" },
+    { id: "survey_done_report", label: "Kỹ thuật khảo sát thực tế, hoàn thành job và gửi báo cáo", requiredRole: "tech_installation" },
   ],
   contract: [
-    { id: "contract_sent", label: "Sales gửi hợp đồng", requiredRole: "sales" },
-    { id: "customer_signed", label: "CEO check HĐ đã ký (Upload file)", requiredRole: "director" },
-    { id: "payment_advance", label: "Accounting xác nhận tạm ứng", requiredRole: "accounting" },
-  ],
-  technical: [
-    { id: "site_survey_detailed", label: "Install khảo sát chi tiết", requiredRole: "install_mgmt" },
-    { id: "drawings_created", label: "Install lên bản vẽ kỹ thuật", requiredRole: "install_mgmt" },
-    { id: "customer_confirm_drawings", label: "Sales check khách chuyển mẫu", requiredRole: "sales" },
-  ],
-  procurement: [
-    { id: "purchase_request", label: "Install tạo yêu cầu mua hàng", requiredRole: "install_mgmt" },
-    { id: "budget_check", label: "Accounting check ngân sách", requiredRole: "accounting" },
-  ],
-  warehouse: [
-    { id: "goods_received", label: "Nhận hàng & Kiểm định (QC)", requiredRole: "install_mgmt" },
-    { id: "accounts_payable", label: "Accounting ghi nhận công nợ", requiredRole: "accounting" },
-    { id: "payment_stage_2", label: "Thu tiền đợt 2", requiredRole: "accounting" },
-  ],
-  installation: [
-    { id: "work_assignment", label: "Install phân công nhân sự", requiredRole: "install_mgmt" },
-    { id: "field_installation", label: "Field Tech thi công lắp đặt", requiredRole: "field_tech" },
-    { id: "progress_update", label: "Update tiến độ lắp đặt", requiredRole: "field_tech" },
-  ],
-  completion: [
-    { id: "safety_inspection", label: "Kiểm định an toàn & Bàn giao", requiredRole: "install_mgmt" },
-    { id: "final_settlement", label: "Quyết toán & Thu tiền đợt cuối", requiredRole: "accounting" },
+    { id: "quote_upload", label: "CEO tạo báo giá ngoài hệ thống và upload file báo giá", requiredRole: "ceo" },
+    { id: "contract_upload", label: "CEO tạo và upload hợp đồng đã ký", requiredRole: "ceo" },
+    { id: "contract_confirm", label: "CEO xác nhận hợp đồng để hệ thống tự tạo project lắp đặt", requiredRole: "ceo" },
   ],
   waiting_for_equipment: [
-    { id: "eq_arrival_check", label: "CEO check hàng về công trình", requiredRole: "director" },
-    { id: "eq_payment_stage2", label: "Kế toán thu tiền đợt 2", requiredRole: "accounting" },
+    { id: "eq_arrival_confirm", label: "CEO xác nhận thiết bị về công trình để kích hoạt việc lắp đặt", requiredRole: "ceo" },
+  ],
+  installation: [
+    { id: "work_assignment", label: "CEO phân công/kích hoạt các giai đoạn công việc", requiredRole: "ceo" },
+    { id: "field_installation", label: "Kỹ thuật lắp đặt thực hiện từng giai đoạn", requiredRole: "tech_installation" },
+    { id: "progress_update", label: "Kỹ thuật chụp ảnh hiện trường và cập nhật tiến độ", requiredRole: "tech_installation" },
+  ],
+  completion: [
+    { id: "installation_done", label: "Kỹ thuật xác nhận đã hoàn tất toàn bộ các giai đoạn lắp đặt", requiredRole: "tech_installation" },
+    { id: "ceo_acceptance", label: "CEO xác nhận hoàn thành để chuyển sang bảo hành", requiredRole: "ceo" },
   ],
   transition: [
-    { id: "maintenance_contract", label: "Tạo hợp đồng bảo trì", requiredRole: "sales_maintenance" },
-    { id: "handover_maintenance", label: "Chuyển giao bộ phận Bảo trì", requiredRole: "maintenance_mgmt" },
+    { id: "handover_maintenance", label: "Bàn giao hồ sơ cho đội kỹ thuật bảo trì", requiredRole: "tech_maintenance" },
+    { id: "warranty_start", label: "CEO xác nhận khởi động giai đoạn bảo hành", requiredRole: "ceo" },
   ],
 };
 
@@ -243,69 +350,18 @@ export interface Project {
   contractId?: string;
 }
 
-export const mockProjects: Project[] = [
+const _mockProjects: Omit<Project, "tenantId">[] = [
   {
-    tenantId: "t-1",
-    id: "p-1",
-    name: "Dự án Vinhomes Ocean Park",
-    address: "Đa Tốn, Gia Lâm, Hà Nội",
-    customerId: "c-1",
-    startDate: "2024-01-01",
-    status: "in_progress",
-    stage: "installation",
-  },
-  {
-    tenantId: "t-1",
-    id: "p-2",
-    name: "Dự án Sunshine Tower",
-    address: "16 Phạm Hùng, Nam Từ Liêm, Hà Nội",
-    customerId: "c-2",
-    startDate: "2023-11-01",
-    status: "completed",
-    stage: "transition",
-  },
-  {
-    tenantId: "t-1",
-    id: "p-3",
-    name: "Dự án Mường Thanh Hà Đông",
-    address: "78 Trần Phú, Hà Đông, Hà Nội",
-    customerId: "c-3",
-    startDate: "2024-06-01",
-    status: "in_progress",
-    stage: "completion",
-  },
-  {
-    tenantId: "t-1",
-    id: "p-4",
-    name: "Nhà phố Nguyễn Văn An",
-    address: "Số 12, ngõ 45 Đào Tấn, Ba Đình",
-    customerId: "c-4",
-    startDate: "2025-01-10",
-    status: "in_progress",
-    stage: "warehouse",
-  },
-  {
-    tenantId: "t-1",
-    id: "p-5",
-    name: "Dự án Goldmark City Block C",
-    address: "136 Hồ Tùng Mậu",
-    customerId: "c-1",
-    startDate: "2026-04-15",
-    status: "in_progress",
-    stage: "lead",
-  },
-  {
-    tenantId: "t-2",
     id: "p-sample",
     name: "Dự án Lắp đặt - Nhà Phố Anh Hoàng",
     address: "Khu đô thị Sala, Quận 2, TP.HCM",
-    customerId: "c-1",
+    customerId: "c-11",
     startDate: "2026-04-09",
     status: "in_progress",
     stage: "installation",
+    contractId: "ct-sample-sala",
   },
   {
-    tenantId: "t-2",
     id: "p-new-1",
     name: "Lắp đặt Thang máy Biệt thự Gamuda",
     address: "Trần Phú, Hoàng Mai, Hà Nội",
@@ -315,7 +371,6 @@ export const mockProjects: Project[] = [
     stage: "installation",
   },
   {
-    tenantId: "t-2",
     id: "p-new-2",
     name: "Dự án Shophouse Sun Group",
     address: "Bãi Cháy, Hạ Long",
@@ -324,26 +379,35 @@ export const mockProjects: Project[] = [
     status: "in_progress",
     stage: "installation",
   },
+  {
+    id: "p-1",
+    name: "Vinhomes Ocean Park - GĐ1",
+    address: "Gia Lâm, Hà Nội",
+    customerId: "c-1",
+    startDate: "2022-01-01",
+    status: "completed",
+    stage: "transition",
+  },
+  {
+    id: "p-2",
+    name: "Sunshine Tower Project",
+    address: "16 Phạm Hùng, Cầu Giấy",
+    customerId: "c-2",
+    startDate: "2023-05-10",
+    status: "completed",
+    stage: "transition",
+  },
+  {
+    id: "p-3",
+    name: "Mường Thanh Grand",
+    address: "Hà Đông, Hà Nội",
+    customerId: "c-3",
+    startDate: "2023-06-15",
+    status: "completed",
+    stage: "transition",
+  },
 ];
 
-export interface Lead {
-  tenantId: string;
-  id: string;
-  name: string;
-  phone: string;
-  email: string;
-  source: string;
-  address: string;
-  note: string;
-  status: LeadStatus;
-  assignedTo: string;
-  estimatedValue: number;
-  nextFollowUp: string;
-  createdAt: string;
-  customerId?: string; // optional link to existing Customer
-  quoteFileUrl?: string; // Mandatory for moving to Contract
-  contractFileUrl?: string; // Mandatory for Won status
-}
 
 export interface PaymentMilestone {
   id: string;
@@ -379,6 +443,8 @@ export interface Contract {
   };
   accountantVerified: boolean;
   ceoVerified: boolean;
+  totalMaintenanceValue?: number; // Accumulated maintenance service value
+  totalMaterialCost?: number; // Accumulated cost of replaced parts
 }
 
 export type LifecyclePhase =
@@ -412,6 +478,15 @@ export interface Elevator {
   lifecyclePhase: LifecyclePhase;
 }
 
+export interface MaintenanceStep {
+  id: string;
+  label: string;
+  description?: string;
+  result: "ok" | "repair" | "replace" | "pending";
+  photo?: string;
+  resolved: boolean;
+}
+
 export interface Job {
   tenantId: string;
   id: string;
@@ -421,9 +496,10 @@ export interface Job {
   description: string;
   customerId: string;
   elevatorId?: string;
-  projectId?: string; // new link to Project
+  projectId?: string;
   contractId?: string;
-  assignedTo: string; // technician id
+  leadId?: string;
+  assignedTo: string;
   priority: JobPriority;
   status: JobStatus;
   scheduledFor: string;
@@ -441,15 +517,8 @@ export interface Job {
   appointmentConfirmed?: boolean;
   isManagerApproved?: boolean;
   hasIssues?: boolean;
-  cost?: number; // For repairs
-  maintenanceSteps?: {
-    id: string;
-    label: string;
-    description?: string;
-    result: "ok" | "repair" | "replace" | "pending";
-    photo?: string;
-    resolved: boolean;
-  }[];
+  cost?: number;
+  maintenanceSteps?: MaintenanceStep[];
   partsUsed?: {
     partId: string;
     quantity: number;
@@ -499,91 +568,58 @@ export interface IssueReport {
 // ---------- USERS ----------
 // ---------- TENANTS ----------
 export const mockTenants: Tenant[] = [
-  { id: "t-1", name: "CÔNG TY LỚN (Chuyên môn hóa)" },
   { id: "t-2", name: "CÔNG TY NHỎ (Kiêm nhiệm)" },
 ];
 
 // ---------- USERS ----------
 export const mockUsers: User[] = [
-  // --- T-1: CÔNG TY LỚN (Phân quyền chi tiết, chuyên môn hóa) ---
-  {
-    id: "u-director-1",
-    name: "Nguyễn Tổng (Giám đốc)",
-    email: "director@bigco.vn",
-    phone: "0901 111 111",
-    memberships: [{ tenantId: "t-1", permissions: ["director"] }],
-  },
-  {
-    id: "u-sales-1",
-    name: "Trần Trưởng Phòng Sales",
-    email: "sales@bigco.vn",
-    phone: "0901 222 222",
-    memberships: [{ tenantId: "t-1", permissions: ["sales", "sales_maintenance"] }],
-  },
-  {
-    id: "u-mgmt-install-1",
-    name: "Lê Quản Lý Lắp Đặt",
-    email: "install@bigco.vn",
-    phone: "0901 333 333",
-    memberships: [{ tenantId: "t-1", permissions: ["install_mgmt"] }],
-  },
-  {
-    id: "u-mgmt-maint-1",
-    name: "Phạm Quản Lý Bảo Trì",
-    email: "maintenance@bigco.vn",
-    phone: "0901 444 444",
-    memberships: [{ tenantId: "t-1", permissions: ["maintenance_mgmt"] }],
-  },
-  {
-    id: "u-accounting-1",
-    name: "Lý Kế Toán Trưởng",
-    email: "account@bigco.vn",
-    phone: "0901 555 555",
-    memberships: [{ tenantId: "t-1", permissions: ["accounting"] }],
-  },
-  {
-    id: "u-hr-1",
-    name: "Võ Hành Chính Nhân Sự",
-    email: "hr@bigco.vn",
-    phone: "0901 666 666",
-    memberships: [{ tenantId: "t-1", permissions: ["hr_admin"] }],
-  },
-  {
-    id: "u-tech-1",
-    name: "Đinh Thợ Bảo Trì Hiện Trường",
-    email: "tech1@bigco.vn",
-    phone: "0901 777 777",
-    memberships: [{ tenantId: "t-1", permissions: ["field_tech"] }],
-  },
-
   // --- T-2: CÔNG TY NHỎ (Một người ôm nhiều việc) ---
   {
     id: "u-director-2",
-    name: "Lâm Sếp Đa Năng",
+    name: "Lâm CEO",
     email: "boss@smallco.vn",
     phone: "0902 111 111",
     memberships: [
       {
         tenantId: "t-2",
-        permissions: ["director", "sales", "hr_admin", "install_mgmt", "accounting"],
+        permissions: ["ceo"],
       },
     ],
   },
   {
-    id: "u-tech-all-2",
-    name: "Hoàng Kỹ Sư Đa Năng",
-    email: "tech@smallco.vn",
+    id: "u-sales-admin-2",
+    name: "Trang Sale Admin",
+    email: "sales-admin@smallco.vn",
+    phone: "0902 119 119",
+    memberships: [{ tenantId: "t-2", permissions: ["sales_admin"] }],
+  },
+  {
+    id: "u-intake-2",
+    name: "Minh Điều phối nhập liệu",
+    email: "intake@smallco.vn",
+    phone: "0902 118 118",
+    memberships: [{ tenantId: "t-2", permissions: ["intake_operator"] }],
+  },
+  {
+    id: "u-tech-maint-2",
+    name: "Hoàng Kỹ thuật bảo trì",
+    email: "tech-maint@smallco.vn",
     phone: "0902 222 222",
-    memberships: [
-      { tenantId: "t-2", permissions: ["maintenance_mgmt", "tech_survey", "field_tech"] },
-    ],
+    memberships: [{ tenantId: "t-2", permissions: ["tech_maintenance"] }],
+  },
+  {
+    id: "u-tech-install-2",
+    name: "Dũng Kỹ thuật lắp đặt",
+    email: "tech-install@smallco.vn",
+    phone: "0902 224 224",
+    memberships: [{ tenantId: "t-2", permissions: ["tech_installation"] }],
   },
   {
     id: "u-accounting-2",
     name: "Chị Lan Kế Toán kiêm HC",
     email: "lan@smallco.vn",
     phone: "0902 333 333",
-    memberships: [{ tenantId: "t-2", permissions: ["accounting", "hr_admin"] }],
+    memberships: [{ tenantId: "t-2", permissions: ["accountant"] }],
   },
 
   // --- Khách hàng đã bỏ ---
@@ -806,19 +842,6 @@ const _mockCustomers: Omit<Customer, "tenantId">[] = [
 
 export const mockInvoices: Invoice[] = [
   {
-    tenantId: "t-1",
-    id: "inv-1",
-    code: "INV-2026-0001",
-    customerId: "c-1",
-    targetType: "project",
-    targetId: "p-1",
-    amount: 1920000000, // 80% of 2.4B
-    dueDate: "2026-04-30",
-    status: "paid",
-    description: "Thanh toán đợt 1 (80%) - Dự án Vinhomes",
-    createdAt: "2026-04-01",
-  },
-  {
     tenantId: "t-2",
     id: "inv-2",
     code: "INV-2026-0002",
@@ -836,15 +859,62 @@ export const mockInvoices: Invoice[] = [
 // ---------- LEADS ----------
 const _mockLeads: Omit<Lead, "tenantId">[] = [
   {
+    id: "l-demo-1",
+    name: "Biệt thự Harmony (Chị Thảo)",
+    type: "install",
+    phone: "0912 888 999",
+    email: "thao.harmony@gmail.com",
+    source: "Website",
+    address: "Bằng Lăng 3, Vinhomes Harmony",
+    note: "Khách cần lắp thang máy gia đình kính 450kg",
+    status: "new",
+    assignedTo: "u-director-2",
+    estimatedValue: 480000000,
+    nextFollowUp: "2026-04-24",
+    createdAt: "2026-04-22",
+  },
+  {
+    id: "l-demo-2",
+    name: "Shophouse Sala (Anh Minh)",
+    type: "install",
+    phone: "0909 777 666",
+    email: "minh.sala@sunshine.vn",
+    source: "Giới thiệu",
+    address: "B2-01 Saritown, KĐT Sala, Quận 2",
+    note: "Đã khảo sát hiện trạng hố thang, cần báo giá gấp",
+    status: "surveyed",
+    assignedTo: "u-director-2",
+    estimatedValue: 650000000,
+    nextFollowUp: "2026-04-23",
+    createdAt: "2026-04-20",
+  },
+  {
+    id: "l-demo-3",
+    name: "Penthouse Sky City (Chị Hằng)",
+    type: "install",
+    phone: "0988 555 444",
+    email: "hang.sky@vantage.vn",
+    source: "Facebook Ads",
+    address: "88 Láng Hạ, Đống Đa, Hà Nội",
+    note: "Đã gửi báo giá, khách đang cân nhắc ký HĐ trong tuần",
+    status: "quoted",
+    assignedTo: "u-director-2",
+    estimatedValue: 1200000000,
+    nextFollowUp: "2026-04-24",
+    createdAt: "2026-04-18",
+    quoteFileUrl: "https://example.com/quote-demo3.pdf",
+  },
+  {
     id: "l-1",
     name: "Tòa nhà Goldmark City",
+    type: "install",
     phone: "0901 111 222",
     email: "info@goldmark.vn",
     source: "Giới thiệu",
     address: "136 Hồ Tùng Mậu, Bắc Từ Liêm",
     note: "Cần lắp 4 thang máy mới cho block C",
-    status: "negotiating",
-    assignedTo: "u-admin",
+    status: "surveyed",
+    assignedTo: "u-director-2",
     estimatedValue: 2400000000,
     nextFollowUp: "2026-04-25",
     createdAt: "2026-03-12",
@@ -853,13 +923,14 @@ const _mockLeads: Omit<Lead, "tenantId">[] = [
   {
     id: "l-2",
     name: "Văn phòng Capital Tower",
+    type: "maintenance",
     phone: "0922 333 444",
     email: "lan.nguyen@capital.vn",
     source: "Website",
     address: "109 Trần Hưng Đạo, Hoàn Kiếm",
     note: "Quan tâm dịch vụ bảo trì 6 thang",
     status: "quoted",
-    assignedTo: "u-admin",
+    assignedTo: "u-director-2",
     estimatedValue: 540000000,
     nextFollowUp: "2026-04-22",
     createdAt: "2026-03-28",
@@ -867,13 +938,14 @@ const _mockLeads: Omit<Lead, "tenantId">[] = [
   {
     id: "l-3",
     name: "Anh Hoàng - nhà phố",
+    type: "install",
     phone: "0966 222 111",
     email: "",
     source: "Facebook Ads",
     address: "Mỹ Đình, Nam Từ Liêm",
     note: "Lắp 1 thang gia đình 5 tầng",
-    status: "contacted",
-    assignedTo: "u-admin",
+    status: "surveying",
+    assignedTo: "u-director-2",
     estimatedValue: 380000000,
     nextFollowUp: "2026-04-20",
     createdAt: "2026-04-05",
@@ -881,13 +953,14 @@ const _mockLeads: Omit<Lead, "tenantId">[] = [
   {
     id: "l-4",
     name: "Bệnh viện An Việt",
+    type: "install",
     phone: "0944 222 333",
     email: "lh@anviet.vn",
     source: "Khách cũ giới thiệu",
     address: "1E Trường Chinh, Thanh Xuân",
     note: "Cải tạo 3 thang cũ",
     status: "new",
-    assignedTo: "u-admin",
+    assignedTo: "u-director-2",
     estimatedValue: 720000000,
     nextFollowUp: "2026-04-19",
     createdAt: "2026-04-15",
@@ -895,13 +968,14 @@ const _mockLeads: Omit<Lead, "tenantId">[] = [
   {
     id: "l-5",
     name: "Khách sạn Hanoi Pearl",
+    type: "maintenance",
     phone: "0988 444 555",
     email: "info@hanoipearl.vn",
     source: "Cold call",
     address: "6 Bảo Khánh, Hoàn Kiếm",
     note: "Cần báo giá bảo trì",
-    status: "won",
-    assignedTo: "u-admin",
+    status: "signed",
+    assignedTo: "u-director-2",
     estimatedValue: 180000000,
     nextFollowUp: "2026-04-30",
     createdAt: "2026-02-20",
@@ -909,13 +983,14 @@ const _mockLeads: Omit<Lead, "tenantId">[] = [
   {
     id: "l-6",
     name: "Văn phòng MB Bank chi nhánh",
+    type: "install",
     phone: "0977 555 666",
     email: "",
     source: "Triển lãm",
     address: "21 Cát Linh, Đống Đa",
     note: "Đang khảo sát",
     status: "lost",
-    assignedTo: "u-admin",
+    assignedTo: "u-director-2",
     estimatedValue: 290000000,
     nextFollowUp: "",
     createdAt: "2026-01-15",
@@ -923,13 +998,14 @@ const _mockLeads: Omit<Lead, "tenantId">[] = [
   {
     id: "l-7",
     name: "Chung cư Mipec Riverside",
+    type: "maintenance",
     phone: "0913 666 777",
     email: "bql@mipec.vn",
     source: "Giới thiệu",
     address: "Long Biên, Hà Nội",
     note: "Bảo trì 6 thang",
-    status: "negotiating",
-    assignedTo: "u-admin",
+    status: "surveyed",
+    assignedTo: "u-director-2",
     estimatedValue: 432000000,
     nextFollowUp: "2026-04-23",
     createdAt: "2026-03-30",
@@ -937,13 +1013,14 @@ const _mockLeads: Omit<Lead, "tenantId">[] = [
   {
     id: "l-8",
     name: "Resort FLC Sầm Sơn",
+    type: "install",
     phone: "0902 777 888",
     email: "kt@flc.vn",
     source: "Website",
     address: "Sầm Sơn, Thanh Hóa",
     note: "Lắp mới 8 thang",
     status: "quoted",
-    assignedTo: "u-admin",
+    assignedTo: "u-director-2",
     estimatedValue: 5600000000,
     nextFollowUp: "2026-04-28",
     createdAt: "2026-02-10",
@@ -951,13 +1028,14 @@ const _mockLeads: Omit<Lead, "tenantId">[] = [
   {
     id: "l-9",
     name: "Anh Vinh - biệt thự",
+    type: "install",
     phone: "0934 888 999",
     email: "",
     source: "Facebook Ads",
     address: "Vinhomes Riverside, Long Biên",
     note: "Thang gia đình 4 tầng",
-    status: "contacted",
-    assignedTo: "u-admin",
+    status: "surveying",
+    assignedTo: "u-director-2",
     estimatedValue: 320000000,
     nextFollowUp: "2026-04-21",
     createdAt: "2026-04-08",
@@ -965,13 +1043,14 @@ const _mockLeads: Omit<Lead, "tenantId">[] = [
   {
     id: "l-10",
     name: "Trường Quốc tế UNIS",
+    type: "maintenance",
     phone: "0945 999 000",
     email: "facility@unishanoi.org",
     source: "Khách cũ giới thiệu",
     address: "Tây Hồ, Hà Nội",
     note: "Cải tạo + bảo trì",
     status: "new",
-    assignedTo: "u-admin",
+    assignedTo: "u-director-2",
     estimatedValue: 980000000,
     nextFollowUp: "2026-04-24",
     createdAt: "2026-04-14",
@@ -979,13 +1058,14 @@ const _mockLeads: Omit<Lead, "tenantId">[] = [
   {
     id: "l-11",
     name: "Showroom Mercedes",
+    type: "install",
     phone: "0918 000 111",
     email: "",
     source: "Cold call",
     address: "Phạm Hùng, Cầu Giấy",
     note: "1 thang chở hàng",
     status: "new",
-    assignedTo: "u-admin",
+    assignedTo: "u-director-2",
     estimatedValue: 450000000,
     nextFollowUp: "2026-04-26",
     createdAt: "2026-04-16",
@@ -993,13 +1073,14 @@ const _mockLeads: Omit<Lead, "tenantId">[] = [
   {
     id: "l-12",
     name: "Khu nhà ở xã hội ECO",
+    type: "install",
     phone: "0967 111 222",
     email: "ql@ecoxa.vn",
     source: "Triển lãm",
     address: "Hoài Đức, Hà Nội",
     note: "12 thang block A,B,C",
     status: "quoted",
-    assignedTo: "u-admin",
+    assignedTo: "u-director-2",
     estimatedValue: 7200000000,
     nextFollowUp: "2026-05-02",
     createdAt: "2026-04-03",
@@ -1012,6 +1093,7 @@ const _mockContracts: Omit<Contract, "tenantId">[] = [
     id: "ct-1",
     code: "HD-2024-0142",
     customerId: "c-1",
+    projectId: "p-1",
     type: "maintenance",
     value: 240000000,
     paid: 240000000,
@@ -1030,6 +1112,7 @@ const _mockContracts: Omit<Contract, "tenantId">[] = [
     id: "ct-2",
     code: "HD-2023-0218",
     customerId: "c-2",
+    projectId: "p-2",
     type: "install",
     value: 3600000000,
     paid: 3600000000,
@@ -1041,6 +1124,25 @@ const _mockContracts: Omit<Contract, "tenantId">[] = [
     milestones: [],
     contractFileUrl: "https://example.com/contract-ct2.pdf",
     paymentStages: { stage1Paid: 1000000000, stage2Paid: 2000000000, stage3Paid: 600000000 },
+    accountantVerified: true,
+    ceoVerified: true,
+  },
+  {
+    id: "ct-3",
+    code: "HD-2023-0912",
+    customerId: "c-3",
+    projectId: "p-3",
+    type: "maintenance",
+    value: 180000000,
+    paid: 180000000,
+    startDate: "2023-06-15",
+    endDate: "2025-06-15",
+    status: "active",
+    items: ["Bảo trì 3 thang máy Hyundai"],
+    signedAt: "2023-06-10",
+    milestones: [],
+    contractFileUrl: "https://example.com/contract-ct3.pdf",
+    paymentStages: { stage1Paid: 180000000, stage2Paid: 0, stage3Paid: 0 },
     accountantVerified: true,
     ceoVerified: true,
   },
@@ -1134,6 +1236,24 @@ const _mockContracts: Omit<Contract, "tenantId">[] = [
     milestones: [],
     contractFileUrl: "https://example.com/contract-ct10.pdf",
     paymentStages: { stage1Paid: 45000000, stage2Paid: 0, stage3Paid: 0 },
+    accountantVerified: true,
+    ceoVerified: true,
+  },
+  {
+    id: "ct-sample-sala",
+    code: "HD-2026-0088",
+    customerId: "c-11",
+    projectId: "p-sample",
+    type: "maintenance",
+    value: 120000000,
+    paid: 60000000,
+    startDate: "2026-04-01",
+    endDate: "2027-04-01",
+    status: "active",
+    items: ["Bảo trì trọn gói 2 thang Homelift"],
+    signedAt: "2026-03-25",
+    milestones: [],
+    paymentStages: { stage1Paid: 60000000, stage2Paid: 0, stage3Paid: 0 },
     accountantVerified: true,
     ceoVerified: true,
   },
@@ -1413,6 +1533,54 @@ const _mockElevators: Omit<Elevator, "tenantId">[] = [
     status: "under_install",
     lifecyclePhase: "electric_install",
   },
+  {
+    id: "e-sample-1",
+    code: "SALA-01",
+    projectId: "p-sample",
+    building: "Nhà phố Sala",
+    address: "KĐT Sala, Quận 2",
+    brand: "Fuji",
+    model: "Homelift",
+    floors: 5,
+    installedAt: "2026-01-10",
+    warrantyUntil: "2028-01-10",
+    lastMaintenance: "2026-03-10",
+    nextMaintenance: "2026-04-10",
+    status: "operational",
+    lifecyclePhase: "maintenance",
+  },
+  {
+    id: "e-sample-2",
+    code: "SALA-02",
+    projectId: "p-sample",
+    building: "Nhà phố Sala",
+    address: "KĐT Sala, Quận 2",
+    brand: "Fuji",
+    model: "Homelift",
+    floors: 5,
+    installedAt: "2026-04-15",
+    warrantyUntil: "2028-04-15",
+    lastMaintenance: "",
+    nextMaintenance: "2026-05-15",
+    status: "operational",
+    lifecyclePhase: "handover",
+  },
+  {
+    id: "e-sun-1",
+    code: "SUN-BC-01",
+    projectId: "p-new-2",
+    building: "Shophouse Sun Group",
+    address: "Bãi Cháy, Hạ Long",
+    brand: "Schindler",
+    model: "3300",
+    floors: 4,
+    installedAt: "2026-04-01",
+    warrantyUntil: "2028-04-01",
+    lastMaintenance: "",
+    nextMaintenance: "2026-05-01",
+    status: "operational",
+    lifecyclePhase: "maintenance",
+  },
 ];
 
 // ---------- JOBS ----------
@@ -1427,7 +1595,7 @@ const _mockJobs: Omit<Job, "tenantId">[] = [
     elevatorId: "e-1",
     projectId: "p-1",
     contractId: "ct-1",
-    assignedTo: "u-tech-1",
+    assignedTo: "u-tech-maint-2",
     priority: "normal",
     status: "scheduled",
     scheduledFor: "2026-04-19T08:00:00",
@@ -1443,7 +1611,7 @@ const _mockJobs: Omit<Job, "tenantId">[] = [
     description: "Cửa thang đóng mở chậm, cần kiểm tra cảm biến",
     customerId: "c-2",
     elevatorId: "e-6",
-    assignedTo: "u-tech-1",
+    assignedTo: "u-tech-maint-2",
     priority: "urgent",
     status: "in_progress",
     scheduledFor: "2026-04-18T09:30:00",
@@ -1460,7 +1628,7 @@ const _mockJobs: Omit<Job, "tenantId">[] = [
     customerId: "c-3",
     elevatorId: "e-8",
     contractId: "ct-3",
-    assignedTo: "u-tech-2",
+    assignedTo: "u-tech-maint-2",
     priority: "normal",
     status: "scheduled",
     scheduledFor: "2026-04-20T08:00:00",
@@ -1477,7 +1645,7 @@ const _mockJobs: Omit<Job, "tenantId">[] = [
     customerId: "c-5",
     elevatorId: "e-10",
     contractId: "ct-5",
-    assignedTo: "u-tech-2",
+    assignedTo: "u-tech-maint-2",
     priority: "normal",
     status: "completed",
     scheduledFor: "2026-04-11T08:00:00",
@@ -1497,7 +1665,7 @@ const _mockJobs: Omit<Job, "tenantId">[] = [
     customerId: "c-7",
     projectId: "p-4",
     contractId: "ct-7",
-    assignedTo: "u-tech-1",
+    assignedTo: "u-tech-install-2",
     priority: "high",
     status: "in_progress",
     scheduledFor: "2026-04-15T07:30:00",
@@ -1512,7 +1680,7 @@ const _mockJobs: Omit<Job, "tenantId">[] = [
     title: "Khảo sát thang Goldmark City",
     description: "Khảo sát hiện trạng để báo giá lắp mới",
     customerId: "c-1",
-    assignedTo: "u-tech-2",
+    assignedTo: "u-tech-install-2",
     priority: "normal",
     status: "pending",
     scheduledFor: "2026-04-22T14:00:00",
@@ -1529,7 +1697,7 @@ const _mockJobs: Omit<Job, "tenantId">[] = [
     customerId: "c-8",
     elevatorId: "e-13",
     contractId: "ct-8",
-    assignedTo: "u-tech-1",
+    assignedTo: "u-tech-maint-2",
     priority: "high",
     status: "completed",
     scheduledFor: "2026-04-05T06:00:00",
@@ -1548,7 +1716,7 @@ const _mockJobs: Omit<Job, "tenantId">[] = [
     customerId: "c-6",
     elevatorId: "e-11",
     contractId: "ct-6",
-    assignedTo: "u-tech-2",
+    assignedTo: "u-tech-maint-2",
     priority: "normal",
     status: "scheduled",
     scheduledFor: "2026-04-25T07:00:00",
@@ -1565,7 +1733,7 @@ const _mockJobs: Omit<Job, "tenantId">[] = [
     customerId: "c-2",
     elevatorId: "e-7",
     contractId: "ct-13",
-    assignedTo: "u-tech-1",
+    assignedTo: "u-tech-maint-2",
     priority: "high",
     status: "scheduled",
     scheduledFor: "2026-04-23T08:00:00",
@@ -1582,7 +1750,7 @@ const _mockJobs: Omit<Job, "tenantId">[] = [
     customerId: "c-10",
     elevatorId: "e-14",
     contractId: "ct-10",
-    assignedTo: "u-tech-2",
+    assignedTo: "u-tech-maint-2",
     priority: "high",
     status: "scheduled",
     scheduledFor: "2026-04-26T05:00:00",
@@ -1597,7 +1765,7 @@ const _mockJobs: Omit<Job, "tenantId">[] = [
     title: "Khắc phục thang kẹt Ecopark",
     description: "Khách báo thang T2 không di chuyển",
     customerId: "c-12",
-    assignedTo: "u-tech-1",
+    assignedTo: "u-tech-maint-2",
     priority: "urgent",
     status: "completed",
     scheduledFor: "2026-04-03T15:00:00",
@@ -1614,7 +1782,7 @@ const _mockJobs: Omit<Job, "tenantId">[] = [
     title: "Khảo sát BV An Việt",
     description: "Khảo sát cải tạo 3 thang cũ",
     customerId: "c-3",
-    assignedTo: "u-tech-2",
+    assignedTo: "u-tech-install-2",
     priority: "normal",
     status: "pending",
     scheduledFor: "2026-04-24T14:00:00",
@@ -1630,7 +1798,7 @@ const _mockJobs: Omit<Job, "tenantId">[] = [
     description: "Bảo trì tháng 4 cho Block C",
     customerId: "c-1",
     elevatorId: "e-1",
-    assignedTo: "u-tech-1",
+    assignedTo: "u-tech-maint-2",
     priority: "normal",
     status: "manager_approved",
     scheduledFor: "2026-04-20T09:00:00",
@@ -1649,7 +1817,7 @@ const _mockJobs: Omit<Job, "tenantId">[] = [
     description: "Bộ hiển thị tầng 1 bị lỗi sọc",
     customerId: "c-3",
     elevatorId: "e-8",
-    assignedTo: "u-tech-2",
+    assignedTo: "u-tech-maint-2",
     priority: "high",
     status: "payment_pending",
     scheduledFor: "2026-04-21T14:00:00",
@@ -1661,7 +1829,7 @@ const _mockJobs: Omit<Job, "tenantId">[] = [
     cost: 1250000,
     createdAt: "2026-04-20",
   },
-  // Sample Installation project stages for u-tech-all-2 (Hoàng Kỹ Sư)
+  // Sample Installation project stages for u-tech-install-2 (Kỹ thuật lắp đặt)
   {
     id: "j-auto-p-sample-step-1",
     code: "JOB-INSTALL-1",
@@ -1670,7 +1838,7 @@ const _mockJobs: Omit<Job, "tenantId">[] = [
     description: "Khảo sát và thả dây chì định vị hố thang máy.",
     customerId: "c-1",
     projectId: "p-sample",
-    assignedTo: "u-tech-all-2",
+    assignedTo: "u-tech-install-2",
     priority: "normal",
     status: "completed",
     scheduledFor: "2026-04-10T08:00:00",
@@ -1686,7 +1854,7 @@ const _mockJobs: Omit<Job, "tenantId">[] = [
     description: "Lắp đặt hệ thống ray dẫn hướng cabin và đối trọng.",
     customerId: "c-1",
     projectId: "p-sample",
-    assignedTo: "u-tech-all-2",
+    assignedTo: "u-tech-install-2",
     priority: "normal",
     status: "in_progress",
     scheduledFor: "2026-04-22T09:00:00",
@@ -1702,7 +1870,7 @@ const _mockJobs: Omit<Job, "tenantId">[] = [
     description: "Lắp đặt máy kéo và hệ thống cáp tải.",
     customerId: "c-1",
     projectId: "p-sample",
-    assignedTo: "u-tech-all-2",
+    assignedTo: "u-tech-install-2",
     priority: "normal",
     status: "scheduled",
     scheduledFor: "2026-04-29T08:00:00",
@@ -1718,7 +1886,7 @@ const _mockJobs: Omit<Job, "tenantId">[] = [
     description: "Lắp đặt hệ thống cửa tầng cho các tầng.",
     customerId: "c-1",
     projectId: "p-sample",
-    assignedTo: "u-tech-all-2",
+    assignedTo: "u-tech-install-2",
     priority: "normal",
     status: "pending",
     scheduledFor: "2026-05-06T08:00:00",
@@ -1734,7 +1902,7 @@ const _mockJobs: Omit<Job, "tenantId">[] = [
     description: "Lắp khung cabin và vách cabin.",
     customerId: "c-1",
     projectId: "p-sample",
-    assignedTo: "u-tech-all-2",
+    assignedTo: "u-tech-install-2",
     priority: "normal",
     status: "pending",
     scheduledFor: "2026-05-13T08:00:00",
@@ -1750,7 +1918,7 @@ const _mockJobs: Omit<Job, "tenantId">[] = [
     description: "Đấu nối tủ điều khiển và chạy thử hiệu chỉnh.",
     customerId: "c-1",
     projectId: "p-sample",
-    assignedTo: "u-tech-all-2",
+    assignedTo: "u-tech-install-2",
     priority: "normal",
     status: "pending",
     scheduledFor: "2026-05-20T08:00:00",
@@ -1766,7 +1934,7 @@ const _mockJobs: Omit<Job, "tenantId">[] = [
     description: "Thực hiện kiểm định an toàn cấp phép vận hành.",
     customerId: "c-1",
     projectId: "p-sample",
-    assignedTo: "u-tech-all-2",
+    assignedTo: "u-tech-install-2",
     priority: "normal",
     status: "pending",
     scheduledFor: "2026-05-27T08:00:00",
@@ -1782,7 +1950,7 @@ const _mockJobs: Omit<Job, "tenantId">[] = [
     description: "Bàn giao chìa khóa và hướng dẫn sử dụng cho khách hàng.",
     customerId: "c-1",
     projectId: "p-sample",
-    assignedTo: "u-tech-all-2",
+    assignedTo: "u-tech-install-2",
     priority: "normal",
     status: "pending",
     scheduledFor: "2026-06-03T08:00:00",
@@ -1798,7 +1966,7 @@ const _mockJobs: Omit<Job, "tenantId">[] = [
     description: "Sếp yêu cầu kiểm tra kỹ thuật sau khi có phản ánh chất lượng.",
     customerId: "c-custom-3",
     elevatorId: "e-1",
-    assignedTo: "u-tech-all-2",
+    assignedTo: "u-tech-install-2",
     priority: "normal",
     status: "appointment_confirmed",
     scheduledFor: "2026-04-22T14:30:00",
@@ -1816,7 +1984,7 @@ const _mockJobs: Omit<Job, "tenantId">[] = [
     description: "Thả dây dọi và kiểm tra hố thang.",
     customerId: "c-11",
     projectId: "p-new-1",
-    assignedTo: "u-tech-all-2",
+    assignedTo: "u-tech-install-2",
     priority: "normal",
     status: "completed",
     scheduledFor: "2026-04-01T08:00:00",
@@ -1832,7 +2000,7 @@ const _mockJobs: Omit<Job, "tenantId">[] = [
     description: "Lắp đặt hệ thống ray dẫn hướng.",
     customerId: "c-11",
     projectId: "p-new-1",
-    assignedTo: "u-tech-all-2",
+    assignedTo: "u-tech-maint-2",
     priority: "high",
     status: "in_progress",
     scheduledFor: "2026-04-22T08:00:00",
@@ -1849,7 +2017,7 @@ const _mockJobs: Omit<Job, "tenantId">[] = [
     description: "Bảo trì định kỳ tháng 4.",
     customerId: "c-10",
     elevatorId: "e-15",
-    assignedTo: "u-tech-all-2",
+    assignedTo: "u-tech-maint-2",
     priority: "normal",
     status: "scheduled",
     scheduledFor: "2026-04-25T08:00:00",
@@ -1865,7 +2033,7 @@ const _mockJobs: Omit<Job, "tenantId">[] = [
     description: "Kiểm tra hệ thống cứu hộ tự động.",
     customerId: "c-9",
     elevatorId: "e-16",
-    assignedTo: "u-tech-all-2",
+    assignedTo: "u-tech-maint-2",
     priority: "normal",
     status: "pending",
     scheduledFor: "2026-04-28T14:00:00",
@@ -1881,7 +2049,7 @@ const _mockJobs: Omit<Job, "tenantId">[] = [
     description: "Vệ sinh hố thang và châm dầu.",
     customerId: "c-5",
     elevatorId: "e-10",
-    assignedTo: "u-tech-all-2",
+    assignedTo: "u-tech-maint-2",
     priority: "low",
     status: "scheduled",
     scheduledFor: "2026-04-26T10:00:00",
@@ -1898,7 +2066,7 @@ const _mockJobs: Omit<Job, "tenantId">[] = [
     description: "Bảng gọi tầng G không sáng đèn.",
     customerId: "c-12",
     elevatorId: "e-11",
-    assignedTo: "u-tech-all-2",
+    assignedTo: "u-tech-maint-2",
     priority: "high",
     status: "scheduled",
     scheduledFor: "2026-04-24T09:00:00",
@@ -1914,7 +2082,7 @@ const _mockJobs: Omit<Job, "tenantId">[] = [
     description: "Cabin rung nhẹ khi qua tầng 15.",
     customerId: "c-6",
     elevatorId: "e-11",
-    assignedTo: "u-tech-all-2",
+    assignedTo: "u-tech-maint-2",
     priority: "normal",
     status: "pending",
     scheduledFor: "2026-04-27T15:00:00",
@@ -1931,7 +2099,7 @@ const _mockJobs: Omit<Job, "tenantId">[] = [
     description: "Biến tần cũ bị cháy do sụt áp.",
     customerId: "c-1",
     elevatorId: "e-1",
-    assignedTo: "u-tech-all-2",
+    assignedTo: "u-tech-maint-2",
     priority: "urgent",
     status: "scheduled",
     scheduledFor: "2026-04-23T08:30:00",
@@ -1947,7 +2115,7 @@ const _mockJobs: Omit<Job, "tenantId">[] = [
     description: "Cáp tải bị tẽ sợi, cần thay thế cụm 4 sợi.",
     customerId: "c-2",
     elevatorId: "e-6",
-    assignedTo: "u-tech-all-2",
+    assignedTo: "u-tech-maint-2",
     priority: "high",
     status: "pending",
     scheduledFor: "2026-04-29T08:00:00",
@@ -1963,7 +2131,7 @@ const _mockJobs: Omit<Job, "tenantId">[] = [
     description: "Nút bấm tầng 5 không ăn, cần kiểm tra cáp tín hiệu.",
     customerId: "c-1",
     elevatorId: "e-1",
-    assignedTo: "u-tech-all-2",
+    assignedTo: "u-tech-maint-2",
     priority: "high",
     status: "scheduled",
     scheduledFor: "2026-04-22T08:00:00",
@@ -1979,7 +2147,7 @@ const _mockJobs: Omit<Job, "tenantId">[] = [
     description: "Kiểm tra hố thang, cabin, bộ cứu hộ và châm dầu ray.",
     customerId: "c-custom-2",
     elevatorId: "e-1",
-    assignedTo: "u-tech-all-2",
+    assignedTo: "u-tech-maint-2",
     priority: "normal",
     status: "scheduled",
     scheduledFor: "2026-04-22T09:30:00",
@@ -1995,7 +2163,7 @@ const _mockJobs: Omit<Job, "tenantId">[] = [
     description: "Cửa không đóng được, nghi hỏng Photocell.",
     customerId: "c-custom-1",
     elevatorId: "e-1",
-    assignedTo: "u-tech-all-2",
+    assignedTo: "u-tech-maint-2",
     priority: "urgent",
     status: "in_progress",
     scheduledFor: "2026-04-22T11:00:00",
@@ -2011,13 +2179,83 @@ const _mockJobs: Omit<Job, "tenantId">[] = [
     description: "Sếp yêu cầu kiểm tra kỹ thuật sau khi có phản ánh chất lượng.",
     customerId: "c-custom-3",
     elevatorId: "e-1",
-    assignedTo: "u-tech-all-2",
+    assignedTo: "u-tech-maint-2",
     priority: "normal",
     status: "appointment_confirmed",
     scheduledFor: "2026-04-22T14:30:00",
     beforePhotos: [],
     afterPhotos: [],
     createdAt: "2026-04-20",
+  },
+  {
+    id: "j-unassigned-maint-1",
+    code: "BT-AUTO-001",
+    type: "maintenance",
+    title: "Bảo trì định kỳ: Anh Hoàng - SALA-01",
+    description: "Công việc tự động sinh theo Hợp đồng HD-2026-0088. Cần phân công kỹ thuật viên.",
+    customerId: "c-11",
+    elevatorId: "e-sample-1",
+    projectId: "p-sample",
+    contractId: "ct-sample-sala",
+    assignedTo: "",
+    priority: "normal",
+    status: "pending",
+    scheduledFor: "2026-05-10T08:00:00",
+    beforePhotos: [],
+    afterPhotos: [],
+    createdAt: "2026-04-20",
+  },
+  {
+    id: "j-unassigned-maint-2",
+    code: "BT-AUTO-002",
+    type: "maintenance",
+    title: "Bảo trì định kỳ: Vinhomes - VHOP-A1-01",
+    description: "Công việc tự động sinh theo Hợp đồng HD-2024-0142. Cần phân công kỹ thuật viên.",
+    customerId: "c-1",
+    elevatorId: "e-1",
+    projectId: "p-1",
+    contractId: "ct-1",
+    assignedTo: "",
+    priority: "normal",
+    status: "pending",
+    scheduledFor: "2026-05-15T08:00:00",
+    beforePhotos: [],
+    afterPhotos: [],
+    createdAt: "2026-04-20",
+  },
+  {
+    id: "j-unassigned-repair-1",
+    code: "SC-AUTO-001",
+    type: "repair",
+    title: "Sửa chữa: Thay cáp tải - Sunshine Tower",
+    description: "Theo đề xuất từ biên bản bảo trì số 245. Cần phê duyệt và phân công.",
+    customerId: "c-2",
+    elevatorId: "e-5",
+    projectId: "p-2",
+    assignedTo: "",
+    priority: "high",
+    status: "pending",
+    scheduledFor: "2026-04-25T09:00:00",
+    beforePhotos: [],
+    afterPhotos: [],
+    createdAt: "2026-04-22",
+  },
+  {
+    id: "j-unassigned-install-1",
+    code: "LD-AUTO-001",
+    type: "install",
+    title: "Lắp đặt: Cơ khí hố thang - Golden Park",
+    description: "Giai đoạn 2: Lắp đặt hệ thống ray dẫn hướng và khung đối trọng. Cần thợ lắp đặt chuyên nghiệp.",
+    customerId: "c-3",
+    elevatorId: "e-8",
+    projectId: "p-3",
+    assignedTo: "",
+    priority: "normal",
+    status: "pending",
+    scheduledFor: "2026-04-30T08:00:00",
+    beforePhotos: [],
+    afterPhotos: [],
+    createdAt: "2026-04-23",
   },
 ];
 
@@ -2200,110 +2438,39 @@ const _mockIssues: Omit<IssueReport, "tenantId">[] = [
 ];
 
 export const mockCustomers = _mockCustomers.map(
-  (x, i) => ({ ...x, tenantId: i < 8 ? "t-1" : "t-2" }) as Customer,
+  (x) => ({ ...x, tenantId: "t-2" }) as Customer,
 );
-export const mockLeads = _mockLeads.map(
-  (x, i) => ({ ...x, tenantId: i < 8 ? "t-1" : "t-2" }) as Lead,
-);
+export const mockLeads: Lead[] = [
+  ..._mockLeads_t2,
+  ..._mockLeads.map((x) => ({ ...x, tenantId: "t-2" }) as Lead),
+];
 export const mockContracts = _mockContracts.map(
-  (x, i) => ({ ...x, tenantId: i < 3 ? "t-1" : "t-2" }) as Contract,
+  (x) => ({ ...x, tenantId: "t-2" }) as Contract,
+);
+export const mockProjects = _mockProjects.map(
+  (x) => ({ ...x, tenantId: "t-2" }) as Project,
 );
 export const mockElevators = _mockElevators.map(
-  (x, i) => ({ ...x, tenantId: i < 10 ? "t-1" : "t-2" }) as Elevator,
+  (x) => ({ ...x, tenantId: "t-2" }) as Elevator,
 );
-export const mockJobs = _mockJobs.map((x, i) => ({ ...x, tenantId: i < 8 ? "t-1" : "t-2" }) as Job);
+export const mockJobs = _mockJobs.map((x) => ({ ...x, tenantId: "t-2" }) as Job);
 export const mockInventory = _mockInventory.map(
-  (x, i) => ({ ...x, tenantId: i < 8 ? "t-1" : "t-2" }) as InventoryItem,
+  (x) => ({ ...x, tenantId: "t-2" }) as InventoryItem,
 );
-export const mockIssues = _mockIssues.map((x, i) => ({ ...x, tenantId: "t-1" }) as IssueReport);
+export const mockIssues = _mockIssues.map((x) => ({ ...x, tenantId: "t-2" }) as IssueReport);
 
 export const mockRequests: ApprovalRequest[] = [
-  {
-    tenantId: "t-1",
-    id: "req-1",
-    type: "material",
-    title: "Yêu cầu tủ điện Mitsubishi",
-    description: "Cần gấp cho dự án Vinhomes block A1",
-    requestedBy: "u-tech-1",
-    requestedAt: "2026-04-18T10:00:00",
-    status: "approved",
-    urgency: "high",
-    targetId: "p-1",
-  },
-  {
-    tenantId: "t-1",
-    id: "req-2",
-    type: "budget",
-    title: "Chi phí thuê cẩu 20 tấn",
-    description: "Vận chuyển máy kéo lên sân thượng tòa SST",
-    requestedBy: "u-mgmt-install-1",
-    requestedAt: "2026-04-20T08:30:00",
-    status: "pending",
-    urgency: "critical",
-    amount: 15000000,
-    targetId: "p-2",
-  },
-  {
-    tenantId: "t-1",
-    id: "req-3",
-    type: "completion",
-    title: "Báo cáo hoàn tất electric_install",
-    description: "Đã đấu nối xong 4 tủ điện",
-    requestedBy: "u-tech-1",
-    requestedAt: "2026-04-20T14:20:00",
-    status: "pending",
-    urgency: "normal",
-    targetId: "p-1",
-  },
   {
     tenantId: "t-2",
     id: "req-4",
     type: "project_advance",
     title: "Xin duyệt giai đoạn Ray",
     description: "Cơ khí đã xong ray cho anh An",
-    requestedBy: "u-tech-all-2",
+    requestedBy: "u-tech-install-2",
     requestedAt: "2026-04-19T11:00:00",
     status: "pending",
     urgency: "normal",
-    targetId: "p-4",
-  },
-  {
-    tenantId: "t-1",
-    id: "req-5",
-    type: "lead_quote",
-    title: "Duyệt báo giá: Tòa nhà Goldmark City",
-    description: "Báo giá lắp mới 4 thang máy block C - Giá đề xuất 2.4 tỷ",
-    requestedBy: "u-sales-1",
-    requestedAt: "2026-04-21T09:00:00",
-    status: "pending",
-    urgency: "high",
-    targetId: "l-1",
-    amount: 2400000000,
-  },
-  {
-    tenantId: "t-1",
-    id: "req-6",
-    type: "contract_approval",
-    title: "Duyệt hợp đồng: Vinhomes Block C",
-    description: "Hợp đồng lắp mới 4 thang máy - Cần Director duyệt ký.",
-    requestedBy: "u-sales-1",
-    requestedAt: "2026-04-21T10:15:00",
-    status: "pending",
-    urgency: "critical",
-    targetId: "p-5",
-  },
-  {
-    tenantId: "t-1",
-    id: "req-7",
-    type: "budget",
-    title: "Tạm ứng mua thiết bị đợt 1",
-    description: "Tạm ứng 800 triệu nhập khẩu máy kéo Mitsubishi.",
-    requestedBy: "u-mgmt-install-1",
-    requestedAt: "2026-04-21T11:00:00",
-    status: "pending",
-    urgency: "high",
-    amount: 800000000,
-    targetId: "p-4",
+    targetId: "p-sample",
   },
 ];
 
@@ -2338,7 +2505,7 @@ export function createIssueReport(elevatorId: string, description: string) {
   const project = getProject(elevator.projectId);
   const customerId = project?.customerId ?? "";
   const newReport: IssueReport = {
-    tenantId: "t-1",
+    tenantId: "t-2",
     id: `ir-${Date.now()}`,
     elevatorId,
     customerId,
@@ -2349,7 +2516,7 @@ export function createIssueReport(elevatorId: string, description: string) {
   mockIssues.push(newReport);
   // Auto‑create repair job linked to this issue
   const newJob: Job = {
-    tenantId: "t-1",
+    tenantId: "t-2",
     id: `j-${Date.now()}`,
     code: `JOB-${Math.random().toString(36).substr(2, 5).toUpperCase()}`,
     type: "repair",
@@ -2377,7 +2544,7 @@ export function advanceProjectStage(projectId: string) {
   const currentIndex = PROJECT_STAGES.indexOf(proj.stage);
   if (currentIndex < PROJECT_STAGES.length - 1) {
     proj.stage = PROJECT_STAGES[currentIndex + 1];
-    if (proj.stage === "completion") proj.status = "completed";
+    if (proj.stage === "transition") proj.status = "completed";
   }
 }
 
@@ -2420,9 +2587,8 @@ export function formatDateTime(value: string) {
 
 // ---------- GEO / DISPATCH ----------
 export const techBases: Record<string, { name: string; lat: number; lng: number }> = {
-  "u-tech-1": { name: "Kho A - Cầu Giấy", lat: 21.0285, lng: 105.8 },
-  "u-tech-2": { name: "Kho B - Hà Đông", lat: 20.98, lng: 105.79 },
-  "u-tech-all-2": { name: "Trung tâm dịch vụ Cầu Giấy", lat: 21.0285, lng: 105.8 },
+  "u-tech-maint-2": { name: "Trung tâm bảo trì Cầu Giấy", lat: 21.0285, lng: 105.8 },
+  "u-tech-install-2": { name: "Trung tâm lắp đặt Hà Đông", lat: 20.98, lng: 105.79 },
 };
 
 export const mapBounds = {
@@ -2436,6 +2602,10 @@ export function projectLatLng(lat: number, lng: number, width: number, height: n
   const x = ((lng - mapBounds.minLng) / (mapBounds.maxLng - mapBounds.minLng)) * width;
   const y = ((mapBounds.maxLat - lat) / (mapBounds.maxLat - mapBounds.minLat)) * height;
   return { x, y };
+}
+
+export function getTechnicianWorkload(userId: string): number {
+  return mockJobs.filter(j => j.assignedTo === userId && j.status !== "completed").length;
 }
 
 export function haversineKm(a: { lat: number; lng: number }, b: { lat: number; lng: number }) {

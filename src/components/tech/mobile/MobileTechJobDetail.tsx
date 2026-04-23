@@ -111,9 +111,16 @@ export function MobileTechJobDetail({ job }: { job: Job }) {
                      <Button 
                        className="h-12 rounded-xl bg-white text-primary font-black text-xs uppercase shadow-lg hover:bg-white/90 col-span-2"
                        onClick={() => {
-                          if (!report.trim()) { toast.error("Vui lòng nhập báo cáo"); return; }
+                          if (!report.trim()) { 
+                            toast.error("Vui lòng nhập báo cáo chi tiết!"); 
+                            return; 
+                          }
+                          if (afterCount === 0) {
+                            toast.error("BẮT BUỘC: Bạn phải chụp ảnh hiện trường sau khi hoàn thành!");
+                            return;
+                          }
                           setStatus("completed");
-                          toast.success("Đã hoàn thành!");
+                          toast.success("Đã hoàn thành công việc!");
                        }}
                      >
                         HOÀN THÀNH & GỬI BÁO CÁO
