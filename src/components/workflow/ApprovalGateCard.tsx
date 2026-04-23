@@ -1,15 +1,16 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { 
-  ShieldCheck, 
-  UserCheck, 
-  AlertCircle, 
-  FastForward, 
+import {
+  ShieldCheck,
+  UserCheck,
+  AlertCircle,
+  FastForward,
   Clock,
-  CheckCircle2
+  CheckCircle2,
 } from "lucide-react";
-import { Permission, WorkflowGate, formatVND } from "@/lib/mock-data";
+import { WorkflowGate } from "@/lib/mock-data";
+import { ROLE_LABELS } from "@/lib/roles";
 
 interface ApprovalGateCardProps {
   gate: WorkflowGate;
@@ -21,23 +22,14 @@ interface ApprovalGateCardProps {
   disabled?: boolean;
 }
 
-const PERMISSION_LABELS: Record<Permission, string> = {
-  sales_admin: "Sale Admin",
-  intake_operator: "Tiếp nhận & nhập liệu",
-  ceo: "CEO",
-  tech_maintenance: "Kỹ thuật bảo trì",
-  tech_installation: "Kỹ thuật lắp đặt",
-  accountant: "Kế toán",
-};
-
-export function ApprovalGateCard({ 
-  gate, 
-  isCurrent, 
-  isPast, 
-  onBypass, 
+export function ApprovalGateCard({
+  gate,
+  isCurrent,
+  isPast,
+  onBypass,
   onAdvance,
   tenantId,
-  disabled 
+  disabled,
 }: ApprovalGateCardProps) {
   if (isPast) {
     return (
@@ -74,7 +66,7 @@ export function ApprovalGateCard({
             {gate.approvers.map((p) => (
               <Badge key={p} variant="secondary" className="bg-background border font-medium">
                 <UserCheck className="h-3 w-3 mr-1 opacity-60" />
-                {PERMISSION_LABELS[p]}
+                {ROLE_LABELS[p]}
               </Badge>
             ))}
           </div>
@@ -85,9 +77,9 @@ export function ApprovalGateCard({
             {gate.isFlexible ? "Xác nhận & Tiếp tục" : "Gửi yêu cầu & Tiếp tục"}
           </Button>
           {!gate.isFlexible && (
-            <Button 
-              size="sm" 
-              variant="outline" 
+            <Button
+              size="sm"
+              variant="outline"
               onClick={onBypass}
               className="text-orange-600 border-orange-200 hover:bg-orange-50 hover:text-orange-700 h-9"
               title="Break Flow: Bỏ qua phê duyệt"
@@ -104,10 +96,13 @@ export function ApprovalGateCard({
             Chế độ Công ty nhỏ: Sếp tự quyết định, không cần quy trình phê duyệt đa tầng.
           </div>
         )}
-        
+
         <div className="flex items-start gap-2 text-[10px] text-muted-foreground bg-background/50 p-2 rounded">
           <AlertCircle className="h-3 w-3 mt-0.5 shrink-0" />
-          <p>Hệ thống hỗ trợ "Break Flow". Bạn có thể bỏ qua bước này nếu cần triển khai gấp (yêu cầu quyền Giám đốc).</p>
+          <p>
+            Hệ thống hỗ trợ "Break Flow". Bạn có thể bỏ qua bước này nếu cần triển khai gấp (yêu cầu
+            quyền Giám đốc).
+          </p>
         </div>
       </CardContent>
     </Card>

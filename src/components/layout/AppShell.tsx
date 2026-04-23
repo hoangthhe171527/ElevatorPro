@@ -4,6 +4,14 @@ import { useAppStore, useCurrentUser, useCurrentPermissions } from "@/lib/store"
 import type { Permission } from "@/lib/mock-data";
 import { mockTenants, mockUsers } from "@/lib/mock-data";
 import {
+  ADMIN_PERMISSIONS,
+  ROLE_LABELS,
+  TECH_INSTALLATION_PERMISSIONS,
+  TECH_MAINTENANCE_PERMISSIONS,
+  TECH_PERMISSIONS,
+  TECH_SURVEY_PERMISSIONS,
+} from "@/lib/roles";
+import {
   LayoutDashboard,
   Users,
   FileText,
@@ -56,55 +64,108 @@ interface NavItem {
   icon: any;
   permissions: Permission[];
   search?: Record<string, any>;
-  children?: { to: string; label: string; search?: Record<string, any>; permissions?: Permission[] }[];
+  children?: {
+    to: string;
+    label: string;
+    search?: Record<string, any>;
+    permissions?: Permission[];
+  }[];
 }
 
-const ROLE_LABELS: Record<string, string> = {
-  ceo: "CEO",
-  sales_admin: "Sale Admin",
-  intake_operator: "Tiếp nhận & nhập liệu",
-  accountant: "Kế toán",
-  tech_maintenance: "Kỹ thuật bảo trì",
-  tech_installation: "Kỹ thuật lắp đặt",
-};
-
-function getUserRoleLabel(user: { memberships?: Array<{ tenantId: string; permissions: string[] }> }, tenantId: string) {
+function getUserRoleLabel(
+  user: { memberships?: Array<{ tenantId: string; permissions: string[] }> },
+  tenantId: string,
+) {
   const perms = user.memberships?.find((m) => m.tenantId === tenantId)?.permissions || [];
   if (!perms.length) return "Chuyên viên";
-  return perms.map((p) => ROLE_LABELS[p] || p).join(" • ");
+  return perms.map((p) => ROLE_LABELS[p as Permission] || p).join(" • ");
 }
 
 const navConfig: { group: string; items: NavItem[] }[] = [
   {
     group: "Bảng điều khiển (Admin)",
     items: [
-      { 
-        to: "/admin", 
-        label: "Dashboard", 
-        icon: LayoutDashboard, 
-        permissions: ["ceo", "sales_admin", "intake_operator", "accountant"] 
+      {
+        to: "/admin",
+        label: "Dashboard",
+        icon: LayoutDashboard,
+        permissions: [...ADMIN_PERMISSIONS],
       },
-      { to: "/admin/approvals", label: "Phê duyệt", icon: CheckSquare, permissions: ["ceo", "accountant"] },
-      { to: "/admin/reports", label: "Báo cáo", icon: History, permissions: ["ceo", "accountant"] },
+      {
+        to: "/admin/approvals",
+        label: "Phê duyệt",
+        icon: CheckSquare,
+        permissions: ["tech_manager", "tech_manager", "tech_manager", "accountant"],
+      },
+      {
+        to: "/admin/reports",
+        label: "Báo cáo",
+        icon: History,
+        permissions: ["tech_manager", "tech_manager", "tech_manager", "accountant"],
+      },
     ],
   },
   {
     group: "Quản lý kinh doanh",
     items: [
-      { to: "/admin/customers", label: "Khách hàng", icon: Users, permissions: ["ceo", "sales_admin", "intake_operator", "accountant"] },
-      { to: "/admin/leads", label: "Cơ hội (Leads)", icon: Inbox, permissions: ["ceo", "sales_admin", "intake_operator"] },
-      { to: "/admin/contracts", label: "Hợp đồng", icon: FileText, permissions: ["ceo", "sales_admin", "accountant"] },
+      {
+        to: "/admin/customers",
+        label: "Khách hàng",
+        icon: Users,
+        permissions: [
+          "tech_manager",
+          "tech_manager",
+          "sales",
+          "sales_admin",
+          "service_dispatcher",
+          "service_dispatcher",
+          "accountant",
+        ],
+      },
+      {
+        to: "/admin/leads",
+        label: "Cơ hội (Leads)",
+        icon: Inbox,
+        permissions: ["tech_manager", "tech_manager", "sales", "sales_admin", "service_dispatcher", "service_dispatcher"],
+      },
+      {
+        to: "/admin/contracts",
+        label: "Hợp đồng",
+        icon: FileText,
+        permissions: ["tech_manager", "tech_manager", "sales", "sales_admin", "accountant"],
+      },
     ],
   },
   {
     group: "Vận hành kỹ thuật",
     items: [
-      { to: "/admin/elevators", label: "Thang máy", icon: Layers, permissions: ["ceo", "sales_admin", "intake_operator", "tech_installation", "tech_maintenance"] },
+      {
+        to: "/admin/elevators",
+        label: "Thang máy",
+        icon: Layers,
+        permissions: [
+          "tech_manager",
+          "tech_manager",
+          "sales",
+          "sales_admin",
+          "service_dispatcher",
+          "service_dispatcher",
+          "tech_manager",
+          ...TECH_PERMISSIONS,
+        ],
+      },
       {
         to: "/admin/jobs",
         label: "Công việc",
         icon: Briefcase,
-        permissions: ["ceo", "intake_operator"],
+        permissions: [
+          "tech_manager",
+          "tech_manager",
+          "tech_manager",
+          "sales_admin",
+          "service_dispatcher",
+          "service_dispatcher",
+        ],
         children: [
           { to: "/admin/projects", label: "Tiến độ Lắp đặt" },
           { to: "/admin/unassigned-jobs", label: "Việc chưa phân công" },
@@ -114,57 +175,101 @@ const navConfig: { group: string; items: NavItem[] }[] = [
           { to: "/admin/jobs", label: "Khảo sát", search: { tab: "inspection" } },
         ],
       },
-      { to: "/admin/inventory", label: "Kho vật tư", icon: Package, permissions: ["ceo", "tech_installation", "tech_maintenance"] },
+      {
+        to: "/admin/inventory",
+        label: "Kho vật tư",
+        icon: Package,
+        permissions: ["tech_manager", "tech_manager", "tech_manager", ...TECH_PERMISSIONS],
+      },
     ],
   },
   {
     group: "Nhân sự & Kế toán",
     items: [
-      { to: "/admin/hr", label: "Cán bộ nhân viên", icon: User, permissions: ["ceo"] },
-      { to: "/admin/accounting", label: "Kế toán/Thu tiền", icon: CircleDollarSign, permissions: ["ceo", "accountant"] },
+      {
+        to: "/admin/hr",
+        label: "Cán bộ nhân viên",
+        icon: User,
+        permissions: ["tech_manager", "tech_manager", "tech_manager"],
+      },
+      {
+        to: "/admin/accounting",
+        label: "Kế toán/Thu tiền",
+        icon: CircleDollarSign,
+        permissions: ["tech_manager", "tech_manager", "accountant"],
+      },
     ],
   },
   {
     group: "App Hiện trường (Field App)",
     items: [
-      { to: "/tech", label: "Hôm nay", icon: LayoutDashboard, permissions: ["tech_maintenance", "tech_installation"] },
-      { to: "/tech/route-plan", label: "Lộ trình tối ưu", icon: RouteIcon, permissions: ["tech_maintenance", "tech_installation"] },
-      { 
-        to: "/tech/jobs", 
-        label: "Công việc", 
-        icon: ClipboardList, 
-        permissions: ["tech_maintenance", "tech_installation"],
-        children: [
-          { to: "/tech/jobs", label: "Bảo trì", search: { tab: "maintenance" }, permissions: ["tech_maintenance"] },
-          { to: "/tech/warranty", label: "Bảo hành", permissions: ["tech_maintenance"] },
-          { to: "/tech/repairs", label: "Sửa chữa", permissions: ["tech_maintenance"] },
-          { to: "/tech/jobs", label: "Lắp đặt", search: { tab: "install" }, permissions: ["tech_installation"] },
-          { to: "/tech/jobs", label: "Khảo sát", search: { tab: "inspection" }, permissions: ["tech_installation"] },
-        ]
+      { to: "/tech", label: "Hôm nay", icon: LayoutDashboard, permissions: [...TECH_PERMISSIONS] },
+      {
+        to: "/tech/route-plan",
+        label: "Lộ trình tối ưu",
+        icon: RouteIcon,
+        permissions: [...TECH_PERMISSIONS],
       },
-      { to: "/tech/schedule", label: "Lịch", icon: Calendar, permissions: ["tech_maintenance", "tech_installation"] },
+      {
+        to: "/tech/jobs",
+        label: "Công việc",
+        icon: ClipboardList,
+        permissions: [...TECH_PERMISSIONS],
+        children: [
+          {
+            to: "/tech/jobs",
+            label: "Bảo trì",
+            search: { tab: "maintenance" },
+            permissions: [...TECH_MAINTENANCE_PERMISSIONS],
+          },
+          {
+            to: "/tech/warranty",
+            label: "Bảo hành",
+            permissions: [...TECH_MAINTENANCE_PERMISSIONS],
+          },
+          {
+            to: "/tech/repairs",
+            label: "Sửa chữa",
+            permissions: [...TECH_MAINTENANCE_PERMISSIONS],
+          },
+          {
+            to: "/tech/jobs",
+            label: "Lắp đặt",
+            search: { tab: "install" },
+            permissions: [...TECH_INSTALLATION_PERMISSIONS],
+          },
+          {
+            to: "/tech/jobs",
+            label: "Khảo sát",
+            search: { tab: "inspection" },
+            permissions: [...TECH_SURVEY_PERMISSIONS],
+          },
+        ],
+      },
+      { to: "/tech/schedule", label: "Lịch", icon: Calendar, permissions: [...TECH_PERMISSIONS] },
     ],
   },
 ];
 
-function SidebarItem({ 
-  item, 
-  isRouteActive, 
-  onClick 
-}: { 
-  item: NavItem; 
-  isRouteActive: (to: string, search?: Record<string, any>) => boolean; 
+function SidebarItem({
+  item,
+  isRouteActive,
+  onClick,
+}: {
+  item: NavItem;
+  isRouteActive: (to: string, search?: Record<string, any>) => boolean;
   onClick?: () => void;
 }) {
   const permissions = useCurrentPermissions();
   const location = useLocation();
   const isApp = location.pathname.startsWith("/app");
-  
-  const visibleChildren = item.children?.filter(child => 
-    !child.permissions || child.permissions.some(p => (permissions as any[]).includes(p))
+
+  const visibleChildren = item.children?.filter(
+    (child) =>
+      !child.permissions || child.permissions.some((p) => (permissions as any[]).includes(p)),
   );
 
-  const isChildActive = visibleChildren?.some(child => isRouteActive(child.to, child.search));
+  const isChildActive = visibleChildren?.some((child) => isRouteActive(child.to, child.search));
   const active = isRouteActive(item.to, item.search) || isChildActive;
   const [open, setOpen] = useState(active);
 
@@ -189,7 +294,7 @@ function SidebarItem({
             "flex w-full items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium transition-all",
             active
               ? "bg-sidebar-accent text-sidebar-accent-foreground shadow-sm"
-              : "text-sidebar-foreground/70 hover:bg-sidebar-accent/50 hover:text-sidebar-foreground"
+              : "text-sidebar-foreground/70 hover:bg-sidebar-accent/50 hover:text-sidebar-foreground",
           )}
         >
           <Icon className="h-4 w-4" />
@@ -210,7 +315,7 @@ function SidebarItem({
                     "block rounded-lg px-3 py-1.5 text-xs font-medium transition-all",
                     isRouteActive(child.to, child.search)
                       ? "text-sidebar-primary font-bold"
-                      : "text-sidebar-foreground/60 hover:text-sidebar-foreground hover:bg-sidebar-accent/30"
+                      : "text-sidebar-foreground/60 hover:text-sidebar-foreground hover:bg-sidebar-accent/30",
                   )}
                 >
                   {child.label}
@@ -232,7 +337,7 @@ function SidebarItem({
         "flex items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium transition-all",
         active
           ? "bg-sidebar-accent text-sidebar-accent-foreground shadow-sm"
-          : "text-sidebar-foreground/70 hover:bg-sidebar-accent/50 hover:text-sidebar-foreground"
+          : "text-sidebar-foreground/70 hover:bg-sidebar-accent/50 hover:text-sidebar-foreground",
       )}
     >
       <Icon className="h-4 w-4" />
@@ -241,12 +346,12 @@ function SidebarItem({
   );
 }
 
-function SidebarContent({ 
-  visibleGroups, 
+function SidebarContent({
+  visibleGroups,
   isRouteActive,
-  onItemClick
-}: { 
-  visibleGroups: any[]; 
+  onItemClick,
+}: {
+  visibleGroups: any[];
   isRouteActive: any;
   onItemClick?: () => void;
 }) {
@@ -258,7 +363,9 @@ function SidebarContent({
         </div>
         <div>
           <div className="font-bold leading-tight tracking-tight">ElevatorPro</div>
-          <div className="text-[10px] text-sidebar-foreground/50 font-medium uppercase tracking-wider">Service Management</div>
+          <div className="text-[10px] text-sidebar-foreground/50 font-medium uppercase tracking-wider">
+            Service Management
+          </div>
         </div>
       </div>
       <nav className="flex-1 overflow-y-auto px-3 py-4 space-y-6 scrollbar-hide">
@@ -269,10 +376,10 @@ function SidebarContent({
             </div>
             <div className="space-y-1">
               {g.items.map((item: NavItem) => (
-                <SidebarItem 
-                  key={item.label} 
-                  item={item} 
-                  isRouteActive={isRouteActive} 
+                <SidebarItem
+                  key={item.label}
+                  item={item}
+                  isRouteActive={isRouteActive}
                   onClick={onItemClick}
                 />
               ))}
@@ -292,12 +399,12 @@ function SidebarContent({
   );
 }
 
-export function AppShell({ 
-  children, 
+export function AppShell({
+  children,
   className,
-  secondaryNav
-}: { 
-  children: React.ReactNode; 
+  secondaryNav,
+}: {
+  children: React.ReactNode;
   className?: string;
   secondaryNav?: React.ReactNode;
 }) {
@@ -324,11 +431,13 @@ export function AppShell({
   }, [isAppPreview, isAppPreviewStored, setAppPreview]);
 
   const visibleGroups = navConfig
-        .map((g) => ({
-          ...g,
-          items: g.items.filter((item) => item.permissions.some((p) => permissions.includes(p as Permission))),
-        }))
-        .filter((g) => g.items.length > 0);
+    .map((g) => ({
+      ...g,
+      items: g.items.filter((item) =>
+        item.permissions.some((p) => permissions.includes(p as Permission)),
+      ),
+    }))
+    .filter((g) => g.items.length > 0);
 
   const initials = user.name
     .split(" ")
@@ -337,17 +446,19 @@ export function AppShell({
     .join("");
 
   const isRouteActive = (to: string, search?: Record<string, any>) => {
-    const currentPath = pathname.startsWith("/app") 
-      ? pathname.replace("/app", "") 
-      : pathname;
-    
+    const currentPath = pathname.startsWith("/app") ? pathname.replace("/app", "") : pathname;
+
     const normalizedTo = to.startsWith("/app") ? to.replace("/app", "") : to;
 
-    const isBaseActive = currentPath === normalizedTo ||
-      (normalizedTo !== "/admin" && normalizedTo !== "/tech" && normalizedTo !== "/portal" && currentPath.startsWith(normalizedTo));
-    
+    const isBaseActive =
+      currentPath === normalizedTo ||
+      (normalizedTo !== "/admin" &&
+        normalizedTo !== "/tech" &&
+        normalizedTo !== "/portal" &&
+        currentPath.startsWith(normalizedTo));
+
     if (!search || Object.keys(search).length === 0) return isBaseActive;
-    
+
     const query = new URLSearchParams(location.search);
     const searchMatch = Object.entries(search).every(([k, v]) => query.get(k) === String(v));
     return isBaseActive && searchMatch;
@@ -357,10 +468,7 @@ export function AppShell({
     <div className={cn("flex min-h-screen w-full", isAppPreview ? "bg-slate-200" : "bg-muted/30")}>
       {!isAppPreview && (
         <aside className="hidden lg:flex w-64 shrink-0 flex-col bg-sidebar text-sidebar-foreground sticky top-0 h-screen">
-          <SidebarContent 
-            visibleGroups={visibleGroups} 
-            isRouteActive={isRouteActive} 
-          />
+          <SidebarContent visibleGroups={visibleGroups} isRouteActive={isRouteActive} />
         </aside>
       )}
 
@@ -381,20 +489,23 @@ export function AppShell({
                 <X className="h-4 w-4" />
               </Button>
             </div>
-            <SidebarContent 
-              visibleGroups={visibleGroups} 
-              isRouteActive={isRouteActive} 
+            <SidebarContent
+              visibleGroups={visibleGroups}
+              isRouteActive={isRouteActive}
               onItemClick={() => setMobileSidebarOpen(false)}
             />
           </aside>
         </div>
       )}
 
-      <div className={cn(
-        "flex flex-1 flex-col min-w-0 transition-all duration-500",
-        isAppPreview ? "items-center justify-center p-4 lg:p-12 overflow-hidden" : "pb-16 lg:pb-0"
-      )}>
-        
+      <div
+        className={cn(
+          "flex flex-1 flex-col min-w-0 transition-all duration-500",
+          isAppPreview
+            ? "items-center justify-center p-4 lg:p-12 overflow-hidden"
+            : "pb-16 lg:pb-0",
+        )}
+      >
         {/* Standard Web Header - HIDDEN in App Preview */}
         {!isAppPreview && (
           <header className="sticky top-0 z-30 flex h-16 items-center gap-3 border-b bg-background px-4 lg:px-6">
@@ -436,7 +547,9 @@ export function AppShell({
                     >
                       {t.name}
                       {activeTenantId === t.id && (
-                        <Badge variant="secondary" className="ml-auto">Hiện tại</Badge>
+                        <Badge variant="secondary" className="ml-auto">
+                          Hiện tại
+                        </Badge>
                       )}
                     </DropdownMenuItem>
                   ))}
@@ -444,24 +557,30 @@ export function AppShell({
               </DropdownMenu>
             </div>
 
-            <Button 
-              variant="outline" 
-              size="sm" 
+            <Button
+              variant="outline"
+              size="sm"
               className="gap-2 h-9 px-3 rounded-full mr-2"
               onClick={() => {
-                const target = location.pathname.startsWith("/admin") 
+                const target = location.pathname.startsWith("/admin")
                   ? location.pathname.replace("/admin", "/app/admin")
                   : "/app/admin";
                 navigate({ to: target as any });
               }}
             >
               <Smartphone className="h-4 w-4" />
-              <span className="hidden xl:inline text-[10px] font-black uppercase tracking-widest text-slate-500">Xem giao diện App</span>
+              <span className="hidden xl:inline text-[10px] font-black uppercase tracking-widest text-slate-500">
+                Xem giao diện App
+              </span>
             </Button>
 
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
-                <Button variant="outline" size="sm" className="gap-2 shrink-0 max-w-[200px] truncate">
+                <Button
+                  variant="outline"
+                  size="sm"
+                  className="gap-2 shrink-0 max-w-[200px] truncate"
+                >
                   <Wrench className="h-3.5 w-3.5 shrink-0" />
                   <span className="hidden sm:inline truncate">
                     {getUserRoleLabel(user, activeTenantId)}
@@ -479,7 +598,9 @@ export function AppShell({
                       key={u.id}
                       onClick={() => {
                         setUserId(u.id);
-                        const isTech = u.memberships[0]?.permissions.some((p) => p === "tech_maintenance" || p === "tech_installation");
+                        const isTech = u.memberships[0]?.permissions.some((p) =>
+                          TECH_PERMISSIONS.includes(p as Permission),
+                        );
                         let target = isTech ? "/tech" : "/admin";
                         // If we are in app mode, stay in app mode
                         if (isAppPreview) target = `/app${target}`;
@@ -499,64 +620,74 @@ export function AppShell({
             <NotificationPanel />
 
             <Avatar className="h-8 w-8 ml-2">
-              <AvatarFallback className="bg-primary text-primary-foreground text-xs">{initials}</AvatarFallback>
+              <AvatarFallback className="bg-primary text-primary-foreground text-xs">
+                {initials}
+              </AvatarFallback>
             </Avatar>
           </header>
         )}
 
         {/* --- SMARTPHONE SIMULATOR WRAPPER --- */}
-        <div 
+        <div
           className={cn(
             "flex flex-col min-w-0 transition-all relative",
-            isAppPreview ? (
-              "mx-auto my-auto shrink-0 w-[390px] h-[844px] bg-white rounded-[48px] shadow-[0_0_0_8px_#111,0_30px_60px_rgba(0,0,0,0.3)] border-[8px] border-[#111] overflow-hidden"
-            ) : (
-              "flex-1 w-full h-full"
-            )
+            isAppPreview
+              ? "mx-auto my-auto shrink-0 w-[390px] h-[844px] bg-white rounded-[48px] shadow-[0_0_0_8px_#111,0_30px_60px_rgba(0,0,0,0.3)] border-[8px] border-[#111] overflow-hidden"
+              : "flex-1 w-full h-full",
           )}
-          style={isAppPreview ? { transform: 'scale(min(1, calc((100vh - 100px) / 844)))', transformOrigin: 'center' } : {}}
+          style={
+            isAppPreview
+              ? {
+                  transform: "scale(min(1, calc((100vh - 100px) / 844)))",
+                  transformOrigin: "center",
+                }
+              : {}
+          }
         >
-          
           {/* Simulated Status Bar (Clock, Signal, Island) */}
           {isAppPreview && (
             <div className="h-12 w-full flex items-center justify-between px-7 pt-2 shrink-0 select-none pointer-events-none bg-white z-50">
-               <div className="text-[14px] font-black tracking-tight">{new Date().getHours()}:{new Date().getMinutes().toString().padStart(2, '0')}</div>
-               {/* Apple Dynamic Island Simulation */}
-               <div className="absolute top-2.5 left-1/2 -translate-x-1/2 h-[30px] w-[100px] bg-black rounded-full shadow-sm flex items-center justify-end px-2">
-                 <div className="h-2 w-2 rounded-full bg-emerald-500 mr-1 opacity-80" />
-               </div>
-               <div className="flex items-center gap-1.5 opacity-80">
-                  <Activity className="h-3 w-3 fill-current" />
-                  <div className="h-2.5 w-5 rounded-sm border border-slate-900 relative">
-                     <div className="absolute inset-[1px] bg-slate-900 w-[70%]" />
-                  </div>
-               </div>
+              <div className="text-[14px] font-black tracking-tight">
+                {new Date().getHours()}:{new Date().getMinutes().toString().padStart(2, "0")}
+              </div>
+              {/* Apple Dynamic Island Simulation */}
+              <div className="absolute top-2.5 left-1/2 -translate-x-1/2 h-[30px] w-[100px] bg-black rounded-full shadow-sm flex items-center justify-end px-2">
+                <div className="h-2 w-2 rounded-full bg-emerald-500 mr-1 opacity-80" />
+              </div>
+              <div className="flex items-center gap-1.5 opacity-80">
+                <Activity className="h-3 w-3 fill-current" />
+                <div className="h-2.5 w-5 rounded-sm border border-slate-900 relative">
+                  <div className="absolute inset-[1px] bg-slate-900 w-[70%]" />
+                </div>
+              </div>
             </div>
           )}
 
           {/* Floating Exit/Role Controls for Preview Mode */}
           {isAppPreview && (
             <div className="absolute top-14 left-0 right-0 z-50 flex justify-center gap-2 pointer-events-auto">
-               <Button 
-                variant="secondary" 
-                size="sm" 
+              <Button
+                variant="secondary"
+                size="sm"
                 className="h-8 rounded-full bg-slate-900 text-white hover:bg-slate-800 text-[10px] font-black uppercase tracking-widest px-4 shadow-xl"
                 onClick={() => {
                   const target = location.pathname.replace("/app", "");
-                  navigate({ to: target || "/" as any });
+                  navigate({ to: target || ("/" as any) });
                   setAppPreview(false);
                 }}
-               >
-                 <X className="mr-2 h-3 w-3" /> Thoát Xem Thử
-               </Button>
+              >
+                <X className="mr-2 h-3 w-3" /> Thoát Xem Thử
+              </Button>
             </div>
           )}
 
           {/* Actual Content Area */}
-          <main className={cn(
-            "flex-1 overflow-y-auto bg-slate-50/50 relative scrollbar-hide",
-            isAppPreview ? "px-4 pb-28 pt-4" : "p-4 lg:p-6"
-          )}>
+          <main
+            className={cn(
+              "flex-1 overflow-y-auto bg-slate-50/50 relative scrollbar-hide",
+              isAppPreview ? "px-4 pb-28 pt-4" : "p-4 lg:p-6",
+            )}
+          >
             {secondaryNav && (
               <div className={cn("sticky top-0 z-40 mb-4", isAppPreview ? "-mx-4 -mt-4" : "")}>
                 {secondaryNav}
@@ -566,10 +697,10 @@ export function AppShell({
           </main>
 
           <MobileBottomNav />
-          
-          <CreateHotlineIncidentModal 
-            open={quickIncidentOpen} 
-            onOpenChange={setQuickIncidentOpen} 
+
+          <CreateHotlineIncidentModal
+            open={quickIncidentOpen}
+            onOpenChange={setQuickIncidentOpen}
           />
         </div>
       </div>

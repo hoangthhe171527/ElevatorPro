@@ -14,7 +14,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { DataPagination } from "@/components/common/DataPagination";
-import { StatusBadge } from "@/components/common/StatusBadge";
+import { StatusBadge } from "@/components/common/StatusBadge";;
 import { elevatorStatusLabel, elevatorStatusVariant } from "@/lib/status-variants";
 import { mockElevators, formatDate, getCustomer, getProject } from "@/lib/mock-data";
 import { Plus, Search, Building2, QrCode, MapPin } from "lucide-react";

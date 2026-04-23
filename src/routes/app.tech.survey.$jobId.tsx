@@ -6,7 +6,7 @@ import { TechSurveyDetail } from "./tech.survey.$jobId"; // Re-use the same comp
 export const Route = createFileRoute("/app/tech/survey/$jobId")({
   loader: ({ params }) => {
     const job = mockJobs.find((j) => j.id === params.jobId);
-    if (!job || job.type !== 'inspection') throw notFound();
+    if (!job || job.type !== "inspection") throw notFound();
     return { job };
   },
   component: TechSurveyDetail,

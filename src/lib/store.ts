@@ -2,17 +2,9 @@ import { create } from "zustand";
 import { persist } from "zustand/middleware";
 import type { Permission } from "./mock-data";
 import { mockUsers } from "./mock-data";
+import { ADMIN_PERMISSIONS, TECH_INSTALLATION_PERMISSIONS, TECH_PERMISSIONS } from "./roles";
 
 type AppRole = "admin" | "tech";
-
-const ADMIN_PERMISSIONS: Permission[] = [
-  "ceo",
-  "sales_admin",
-  "intake_operator",
-  "accountant",
-];
-
-const TECH_PERMISSIONS: Permission[] = ["tech_maintenance", "tech_installation"];
 
 function getPermissionsForTenant(userId: string, tenantId: string): Permission[] {
   const user = mockUsers.find((u) => u.id === userId);
@@ -24,10 +16,7 @@ function hasRoleInTenant(userId: string, tenantId: string, role: AppRole): boole
   const permissions = getPermissionsForTenant(userId, tenantId);
   if (!permissions.length) return false;
 
-  const rolePermissions =
-    role === "admin"
-      ? ADMIN_PERMISSIONS
-      : TECH_PERMISSIONS;
+  const rolePermissions = role === "admin" ? ADMIN_PERMISSIONS : TECH_PERMISSIONS;
   return permissions.some((p) => rolePermissions.includes(p));
 }
 
@@ -94,10 +83,10 @@ export const useAppStore = create<AppState>()(
           ? currentTenant
           : user?.memberships?.[0]?.tenantId || currentTenant;
         const mainRole = resolveRoleForUser(userId, activeTenantId, get().mainRole);
-        set({ 
-          userId, 
-          activeTenantId, 
-          mainRole, 
+        set({
+          userId,
+          activeTenantId,
+          mainRole,
           activeJobCheckIn: null,
         });
       },
@@ -134,9 +123,9 @@ export const useAppStore = create<AppState>()(
           ? currentUserId
           : findUserIdForRole(tenantId, role) || currentUserId;
         const nextRole = resolveRoleForUser(nextUserId, tenantId, role);
-        set({ 
-          userId: nextUserId, 
-          mainRole: nextRole, 
+        set({
+          userId: nextUserId,
+          mainRole: nextRole,
           activeJobCheckIn: null,
         });
       },
@@ -183,18 +172,46 @@ export function useIsSmallCompany() {
   return companySize === "small";
 }
 
-export function useCanWrite(module: "projects" | "hr" | "accounting" | "inventory" | "jobs" | "leads" | "contracts") {
+export function useCanWrite(
+  module: "projects" | "hr" | "accounting" | "inventory" | "jobs" | "leads" | "contracts",
+) {
   const permissions = useCurrentPermissions();
-  const isCEO = permissions.includes("ceo");
-  
+  const isCEO = permissions.includes("tech_manager");
+
   switch (module) {
-    case "projects": return isCEO || permissions.includes("tech_installation");
-    case "hr": return isCEO;
-    case "accounting": return isCEO || permissions.includes("accountant");
-    case "inventory": return isCEO || permissions.includes("tech_maintenance") || permissions.includes("tech_installation");
-    case "jobs": return isCEO || permissions.includes("intake_operator") || permissions.includes("tech_maintenance") || permissions.includes("tech_installation");
-    case "leads": return isCEO || permissions.includes("sales_admin") || permissions.includes("intake_operator");
-    case "contracts": return isCEO || permissions.includes("accountant") || permissions.includes("sales_admin");
-    default: return false;
+    case "projects":
+      return isCEO || permissions.some((p) => TECH_INSTALLATION_PERMISSIONS.includes(p));
+    case "hr":
+      return isCEO;
+    case "accounting":
+      return isCEO || permissions.includes("accountant");
+    case "inventory":
+      return isCEO || permissions.some((p) => TECH_PERMISSIONS.includes(p));
+    case "jobs":
+      return (
+        isCEO ||
+        permissions.includes("service_dispatcher") ||
+        permissions.includes("service_dispatcher") ||
+        permissions.some((p) => TECH_PERMISSIONS.includes(p))
+      );
+    case "leads":
+      return (
+        isCEO ||
+        permissions.includes("sales") ||
+        permissions.includes("sales_admin") ||
+        permissions.includes("tech_manager") ||
+        permissions.includes("service_dispatcher") ||
+        permissions.includes("service_dispatcher")
+      );
+    case "contracts":
+      return (
+        isCEO ||
+        permissions.includes("accountant") ||
+        permissions.includes("sales") ||
+        permissions.includes("sales_admin") ||
+        permissions.includes("tech_manager")
+      );
+    default:
+      return false;
   }
 }

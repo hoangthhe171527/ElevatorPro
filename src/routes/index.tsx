@@ -18,6 +18,7 @@ import {
   Wallet,
   Building,
   Smartphone,
+  PhoneCall,
 } from "lucide-react";
 import { useAppStore } from "@/lib/store";
 import { mockUsers } from "@/lib/mock-data";
@@ -39,19 +40,43 @@ export const Route = createFileRoute("/")({
 const personas = [
   {
     id: "u-director-2",
-    title: "CEO (Phân việc)",
+    title: "CEO / Ban giám đốc",
     desc: "Phân công công việc, duyệt tiến độ và theo dõi vận hành tổng thể.",
     href: "/admin",
     color: "bg-primary",
     icon: ShieldCheck,
   },
   {
+    id: "u-pm-2",
+    title: "PM (Quản lý dự án)",
+    desc: "Theo dõi tiến độ dự án và phối hợp các bộ phận liên quan.",
+    href: "/admin",
+    color: "bg-violet-500",
+    icon: Briefcase,
+  },
+  {
+    id: "u-sales-2",
+    title: "Sales",
+    desc: "Theo dõi cơ hội, chăm sóc khách hàng và chuyển đổi hợp đồng.",
+    href: "/admin/leads",
+    color: "bg-amber-500",
+    icon: Users,
+  },
+  {
     id: "u-sales-admin-2",
-    title: "Sale Admin",
+    title: "Sales Admin",
     desc: "Quản lý lead, khách hàng và theo dõi pipeline hợp đồng.",
     href: "/admin",
     color: "bg-orange-500",
     icon: Users,
+  },
+  {
+    id: "u-service-dispatch-2",
+    title: "Admin Service / Điều phối",
+    desc: "Nhận sự cố hotline/QR, phân loại mức độ và điều phối ticket kỹ thuật.",
+    href: "/admin/jobs",
+    color: "bg-teal-600",
+    icon: PhoneCall,
   },
   {
     id: "u-intake-2",
@@ -70,16 +95,48 @@ const personas = [
     icon: Wallet,
   },
   {
+    id: "u-tech-manager-2",
+    title: "Trưởng bộ phận kỹ thuật (Phân việc)",
+    desc: "Điều phối nhân sự kỹ thuật, phân việc và giám sát chất lượng xử lý.",
+    href: "/admin/jobs",
+    color: "bg-sky-600",
+    icon: Wrench,
+  },
+  {
+    id: "u-tech-maint-lead-2",
+    title: "Tổ trưởng bảo trì",
+    desc: "Điều phối và trực tiếp xử lý các công việc bảo trì/sửa chữa.",
+    href: "/tech",
+    color: "bg-cyan-600",
+    icon: Wrench,
+  },
+  {
     id: "u-tech-maint-2",
-    title: "Kỹ thuật bảo trì",
+    title: "Nhân viên kỹ thuật bảo trì",
     desc: "Nhận việc bảo trì, sửa chữa, bảo hành và cập nhật biên bản online.",
     href: "/tech",
     color: "bg-info",
     icon: Wrench,
   },
   {
+    id: "u-tech-install-lead-2",
+    title: "Tổ trưởng lắp đặt/khảo sát",
+    desc: "Điều phối và trực tiếp triển khai lắp đặt, khảo sát công trình.",
+    href: "/tech",
+    color: "bg-indigo-700",
+    icon: Wrench,
+  },
+  {
+    id: "u-tech-survey-2",
+    title: "Kỹ thuật khảo sát",
+    desc: "Nhận công việc khảo sát, chụp ảnh hiện trường và cập nhật trực tiếp trên mobile.",
+    href: "/tech",
+    color: "bg-indigo-400",
+    icon: Wrench,
+  },
+  {
     id: "u-tech-install-2",
-    title: "Kỹ thuật lắp đặt",
+    title: "Nhân viên kỹ thuật lắp đặt/khảo sát",
     desc: "Nhận các giai đoạn lắp đặt tại công trình và cập nhật tiến độ triển khai.",
     href: "/tech",
     color: "bg-indigo-500",
@@ -163,12 +220,24 @@ function LandingPage() {
             </a>
           </div>
           <div className="flex items-center gap-2">
-            <Link to="/app/admin" onClick={() => { setUserId("u-director-2"); setAppPreview(true); }}>
+            <Link
+              to="/app/admin"
+              onClick={() => {
+                setUserId("u-director-2");
+                setAppPreview(true);
+              }}
+            >
               <Button size="sm" variant="outline" className="hidden sm:flex gap-2">
                 <Smartphone className="h-3.5 w-3.5" /> Mobile App
               </Button>
             </Link>
-            <Link to="/admin" onClick={() => { setUserId("u-director-2"); setAppPreview(false); }}>
+            <Link
+              to="/admin"
+              onClick={() => {
+                setUserId("u-director-2");
+                setAppPreview(false);
+              }}
+            >
               <Button size="sm" className="gap-2">
                 Bản Web <ArrowRight className="h-3.5 w-3.5" />
               </Button>
@@ -191,25 +260,37 @@ function LandingPage() {
           Quản lý từ một tập thể vài người "đa nhiệm" (Multi-role) đến các tổng công ty chia tách
           độc lập các phòng Kế toán, Kinh doanh, Điều phối Kỹ thuật.
         </p>
-          <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
-            <Link to="/admin" onClick={() => { setUserId("u-director-2"); setAppPreview(false); }}>
-              <Button
-                size="lg"
-                className="gap-2 bg-primary hover:bg-primary/90 text-white border-2 border-primary shadow-lg shadow-primary/20 w-full sm:w-auto"
-              >
-                Vào hệ thống Web <Zap className="h-4 w-4" />
-              </Button>
-            </Link>
-            <Link to="/app/admin" onClick={() => { setUserId("u-director-2"); setAppPreview(true); }}>
-              <Button
-                size="lg"
-                variant="outline"
-                className="gap-2 border-2 shadow-lg w-full sm:w-auto"
-              >
-                Trải nghiệm Mobile App <Smartphone className="h-4 w-4" />
-              </Button>
-            </Link>
-          </div>
+        <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
+          <Link
+            to="/admin"
+            onClick={() => {
+              setUserId("u-director-2");
+              setAppPreview(false);
+            }}
+          >
+            <Button
+              size="lg"
+              className="gap-2 bg-primary hover:bg-primary/90 text-white border-2 border-primary shadow-lg shadow-primary/20 w-full sm:w-auto"
+            >
+              Vào hệ thống Web <Zap className="h-4 w-4" />
+            </Button>
+          </Link>
+          <Link
+            to="/app/admin"
+            onClick={() => {
+              setUserId("u-director-2");
+              setAppPreview(true);
+            }}
+          >
+            <Button
+              size="lg"
+              variant="outline"
+              className="gap-2 border-2 shadow-lg w-full sm:w-auto"
+            >
+              Trải nghiệm Mobile App <Smartphone className="h-4 w-4" />
+            </Button>
+          </Link>
+        </div>
       </section>
 
       {/* Roles */}

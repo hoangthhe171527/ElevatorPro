@@ -35,7 +35,7 @@ export function WebReports() {
     },
     {} as Record<string, number>,
   );
-  
+
   const typeLabel: Record<string, string> = {
     install: "Lắp đặt",
     maintenance: "Bảo trì",
@@ -54,7 +54,7 @@ export function WebReports() {
     },
     {} as Record<string, number>,
   );
-  
+
   const statusLabel: Record<string, string> = {
     pending: "Chờ",
     scheduled: "Đã lên lịch",

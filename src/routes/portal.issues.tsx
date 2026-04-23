@@ -15,7 +15,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { DataPagination } from "@/components/common/DataPagination";
-import { StatusBadge } from "@/components/common/StatusBadge";
+import { StatusBadge } from "@/components/common/StatusBadge";;
 import { mockIssues, mockElevators, formatDateTime, getElevator } from "@/lib/mock-data";
 import { AlertTriangle, Send, CheckCircle2, Phone, ArrowLeft } from "lucide-react";
 import { toast } from "sonner";

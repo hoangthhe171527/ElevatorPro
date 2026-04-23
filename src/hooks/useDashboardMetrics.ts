@@ -1,9 +1,15 @@
 import { useMemo } from "react";
 import { useAppStore, useCurrentPermissions, useCurrentUser } from "@/lib/store";
-import { 
-  mockProjects, 
-  mockContracts, 
-  mockElevators, 
+import {
+  TECH_INSTALLATION_PERMISSIONS,
+  TECH_MAINTENANCE_PERMISSIONS,
+  TECH_PERMISSIONS,
+  TECH_SURVEY_PERMISSIONS,
+} from "@/lib/roles";
+import {
+  mockProjects,
+  mockContracts,
+  mockElevators,
   mockCustomers,
   mockInvoices,
   mockIssues,
@@ -13,7 +19,7 @@ import {
   type Job,
   type User,
   formatDate,
-  formatDateTime
+  formatDateTime,
 } from "@/lib/mock-data";
 
 export function useDashboardMetrics() {
@@ -21,12 +27,17 @@ export function useDashboardMetrics() {
   const currentUser = useCurrentUser();
   const permissions = useCurrentPermissions();
 
-  const isCEO = permissions.includes("ceo");
-  const isSalesAdmin = permissions.includes("sales_admin");
-  const isIntake = permissions.includes("intake_operator");
+  const isCEO = permissions.includes("tech_manager");
+  const isPM = permissions.includes("tech_manager");
+  const isSalesAdmin = permissions.includes("sales_admin") || permissions.includes("sales");
+  const isDispatch =
+    permissions.includes("service_dispatcher") || permissions.includes("service_dispatcher");
+  const isIntake = isDispatch;
   const isAccountant = permissions.includes("accountant");
-  const isTechMaintenance = permissions.includes("tech_maintenance");
-  const isTechInstallation = permissions.includes("tech_installation");
+  const isTechManager = permissions.includes("tech_manager");
+  const isTechMaintenance = permissions.some((p) => TECH_MAINTENANCE_PERMISSIONS.includes(p));
+  const isTechInstallation = permissions.some((p) => TECH_INSTALLATION_PERMISSIONS.includes(p));
+  const isTechSurvey = permissions.some((p) => TECH_SURVEY_PERMISSIONS.includes(p));
 
   return useMemo(() => {
     const now = new Date();
@@ -46,7 +57,7 @@ export function useDashboardMetrics() {
       (e) => e.status === "maintenance_due" || e.status === "out_of_order",
     ).length;
 
-    const expiringWarranties = tenantElevators.filter(e => {
+    const expiringWarranties = tenantElevators.filter((e) => {
       const warrantyDate = new Date(e.warrantyUntil);
       const diffTime = warrantyDate.getTime() - now.getTime();
       const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
@@ -62,22 +73,27 @@ export function useDashboardMetrics() {
       .sort((a, b) => b.signedAt.localeCompare(a.signedAt))
       .slice(0, 5);
 
-    const monthlyJobs = tenantJobs.filter(j => {
+    const monthlyJobs = tenantJobs.filter((j) => {
       const d = new Date(j.scheduledFor);
       return d.getMonth() === currentMonth && d.getFullYear() === currentYear;
     });
 
-    const completedJobsThisMonth = monthlyJobs.filter(j => j.status === "completed").length;
-    const pendingJobsThisMonth = monthlyJobs.filter(j => j.status !== "completed").length;
-    const completionRate = monthlyJobs.length > 0 
-      ? Math.round((completedJobsThisMonth / monthlyJobs.length) * 100) 
-      : 0;
+    const completedJobsThisMonth = monthlyJobs.filter((j) => j.status === "completed").length;
+    const pendingJobsThisMonth = monthlyJobs.filter((j) => j.status !== "completed").length;
+    const completionRate =
+      monthlyJobs.length > 0 ? Math.round((completedJobsThisMonth / monthlyJobs.length) * 100) : 0;
 
     const techPerformance = mockUsers
-      .filter((u: User) => u.memberships.some(m => m.permissions.includes("tech_maintenance") || m.permissions.includes("tech_installation")))
+      .filter((u: User) =>
+        u.memberships.some((m) => m.permissions.some((p) => TECH_PERMISSIONS.includes(p))),
+      )
       .map((tech: User) => {
-        const completed = tenantJobs.filter((j: Job) => j.assignedTo === tech.id && j.status === "completed").length;
-        const inProgress = tenantJobs.filter((j: Job) => j.assignedTo === tech.id && j.status === "in_progress").length;
+        const completed = tenantJobs.filter(
+          (j: Job) => j.assignedTo === tech.id && j.status === "completed",
+        ).length;
+        const inProgress = tenantJobs.filter(
+          (j: Job) => j.assignedTo === tech.id && j.status === "in_progress",
+        ).length;
         return { ...tech, completed, inProgress };
       })
       .sort((a, b) => b.completed - a.completed)
@@ -87,22 +103,40 @@ export function useDashboardMetrics() {
     const isBeforeOrToday = (iso?: string) => !iso || iso.slice(0, 10) <= todayKey;
 
     const myJobsToday = tenantJobs.filter(
-      (j) => j.assignedTo === currentUser.id && (isToday(j.scheduledFor) || j.status === "in_progress"),
+      (j) =>
+        j.assignedTo === currentUser.id && (isToday(j.scheduledFor) || j.status === "in_progress"),
     );
-    const myMaintenanceToday = myJobsToday.filter((j) => j.type === "maintenance" || j.type === "repair");
+    const myMaintenanceToday = myJobsToday.filter(
+      (j) => j.type === "maintenance" || j.type === "repair",
+    );
     const myInstallationToday = myJobsToday.filter((j) => j.type === "install");
-    
-    const myProjectIds = Array.from(new Set(tenantJobs.filter(j => j.assignedTo === currentUser.id).map(j => j.projectId).filter(Boolean)));
-    const myProjects = mockProjects.filter(p => myProjectIds.includes(p.id));
-    const myCompletedCount = tenantJobs.filter(j => j.assignedTo === currentUser.id && j.status === "completed").length;
-    const myUrgentCount = tenantJobs.filter(j => j.assignedTo === currentUser.id && j.priority === "urgent" && j.status !== "completed").length;
 
-    const urgentJobs = tenantJobs.filter((j) => j.priority === "urgent" && j.status !== "completed");
+    const myProjectIds = Array.from(
+      new Set(
+        tenantJobs
+          .filter((j) => j.assignedTo === currentUser.id)
+          .map((j) => j.projectId)
+          .filter(Boolean),
+      ),
+    );
+    const myProjects = mockProjects.filter((p) => myProjectIds.includes(p.id));
+    const myCompletedCount = tenantJobs.filter(
+      (j) => j.assignedTo === currentUser.id && j.status === "completed",
+    ).length;
+    const myUrgentCount = tenantJobs.filter(
+      (j) => j.assignedTo === currentUser.id && j.priority === "urgent" && j.status !== "completed",
+    ).length;
+
+    const urgentJobs = tenantJobs.filter(
+      (j) => j.priority === "urgent" && j.status !== "completed",
+    );
     const pendingDispatch = tenantJobs.filter((j) => j.status === "pending");
 
-    const intakeLeadQueue = tenantLeads.filter((l) => ["new", "contacted", "quote_pending"].includes(l.status));
+    const intakeLeadQueue = tenantLeads.filter((l) => ["new", "surveying"].includes(l.status));
     const salesFollowups = tenantLeads.filter(
-      (l) => ["new", "quote_pending", "negotiating"].includes(l.status) || isBeforeOrToday(l.nextFollowUp),
+      (l) =>
+        ["new", "surveying", "surveyed", "quoted"].includes(l.status) ||
+        isBeforeOrToday(l.nextFollowUp),
     );
     const accountantMilestones = tenantContracts.flatMap((c) =>
       c.milestones
@@ -115,105 +149,185 @@ export function useDashboardMetrics() {
     const overdueInvoices = mockInvoices.filter(
       (inv) => inv.tenantId === activeTenantId && inv.status === "overdue",
     );
-    const openIssues = mockIssues.filter((x) => x.tenantId === activeTenantId && x.status === "open");
+    const openIssues = mockIssues.filter(
+      (x) => x.tenantId === activeTenantId && x.status === "open",
+    );
 
     const headerTitle = isCEO
       ? "Bảng điều khiển CEO"
-      : isSalesAdmin
-        ? "Dashboard Sale Admin"
-        : isIntake
-          ? "Dashboard Tiếp nhận"
-          : isAccountant
-            ? "Dashboard Kế toán"
-            : isTechMaintenance
-              ? "Dashboard Kỹ thuật bảo trì"
-              : "Dashboard Kỹ thuật lắp đặt";
+      : isPM
+        ? "Dashboard PM"
+        : isSalesAdmin
+          ? "Dashboard Sales"
+          : isDispatch
+            ? "Dashboard Admin Service / Điều phối"
+            : isAccountant
+              ? "Dashboard Kế toán"
+              : isTechManager
+                ? "Dashboard Trưởng bộ phận kỹ thuật"
+                : isTechSurvey
+                  ? "Dashboard Kỹ thuật khảo sát"
+                  : isTechMaintenance
+                    ? "Dashboard Kỹ thuật bảo trì"
+                    : "Dashboard Kỹ thuật lắp đặt";
 
     const headerDescription = isCEO
       ? "Theo dõi tổng thể và phân việc khẩn cấp trong ngày"
-      : isSalesAdmin
-        ? "Lead và khách hàng cần theo dõi trong hôm nay"
-        : isIntake
-          ? "Tiếp nhận, phân loại và nhập liệu yêu cầu mới"
-          : isAccountant
-            ? "Công nợ, hóa đơn và mốc thanh toán cần xử lý"
-            : isTechMaintenance
-              ? "Danh sách bảo trì/sửa chữa bạn cần hoàn tất hôm nay"
-              : "Danh sách lắp đặt bạn cần thực hiện hôm nay";
+      : isPM
+        ? "Theo dõi dự án và điều phối tiến độ giữa các bộ phận"
+        : isSalesAdmin
+          ? "Lead và khách hàng cần theo dõi trong hôm nay"
+          : isDispatch
+            ? "Tiếp nhận hotline/QR, phân loại sự cố và điều phối ticket"
+            : isAccountant
+              ? "Công nợ, hóa đơn và mốc thanh toán cần xử lý"
+              : isTechManager
+                ? "Điều phối nhân sự kỹ thuật và kiểm soát tồn đọng công việc"
+                : isTechSurvey
+                  ? "Danh sách khảo sát bạn cần xác nhận và hoàn thành hôm nay"
+                  : isTechMaintenance
+                    ? "Danh sách bảo trì/sửa chữa bạn cần hoàn tất hôm nay"
+                    : "Danh sách lắp đặt bạn cần thực hiện hôm nay";
 
-    const activeProjects = mockProjects.filter(p => p.tenantId === activeTenantId && p.status === "in_progress");
+    const activeProjects = mockProjects.filter(
+      (p) => p.tenantId === activeTenantId && p.status === "in_progress",
+    );
 
-    const focusMetrics = isCEO
-      ? [
-          { label: "Dự án lắp đặt", value: activeProjects.length, hint: "Theo dõi tiến độ hố" },
-          { label: "Việc khẩn cấp", value: urgentJobs.length, hint: "Cần xử lý ngay" },
-          { label: "Chờ CEO duyệt tiền", value: mockContracts.filter(c => c.accountantVerified && !c.ceoVerified).length, hint: "Đối soát kế toán" },
-          { label: "Việc chờ phân công", value: pendingDispatch.length, hint: "Giao việc cho thợ" },
-        ]
-      : isSalesAdmin
+    const focusMetrics =
+      isCEO || isPM || isTechManager
         ? [
-            { label: "Chờ khảo sát", value: tenantLeads.filter(l => l.status === 'new').length, hint: "Lead mới chưa có lịch" },
-            { label: "Chờ báo giá", value: tenantLeads.filter(l => l.status === 'surveying').length, hint: "Đã khảo sát xong" },
-            { label: "Khách hàng", value: tenantCustomers.length, hint: "Tổng số khách hàng" },
-            { label: "Hợp đồng", value: tenantContracts.length, hint: "Tổng số hợp đồng" },
+            { label: "Dự án lắp đặt", value: activeProjects.length, hint: "Theo dõi tiến độ hố" },
+            { label: "Việc khẩn cấp", value: urgentJobs.length, hint: "Cần xử lý ngay" },
+            {
+              label: "Chờ CEO duyệt tiền",
+              value: mockContracts.filter((c) => c.accountantVerified && !c.ceoVerified).length,
+              hint: "Đối soát kế toán",
+            },
+            {
+              label: "Việc chờ phân công",
+              value: pendingDispatch.length,
+              hint: "Giao việc cho thợ",
+            },
           ]
-        : isIntake
+        : isSalesAdmin
           ? [
-              { label: "Yêu cầu mới", value: intakeLeadQueue.length, hint: "Cần phân loại" },
-              { label: "Sự cố mở", value: openIssues.length, hint: "Cần nhập liệu/đẩy luồng" },
-              { label: "Việc chờ điều phối", value: pendingDispatch.length, hint: "Chuyển CEO phân việc" },
+              {
+                label: "Chờ khảo sát",
+                value: tenantLeads.filter((l) => l.status === "new").length,
+                hint: "Lead mới chưa có lịch",
+              },
+              {
+                label: "Chờ báo giá",
+                value: tenantLeads.filter((l) => l.status === "surveying").length,
+                hint: "Đã khảo sát xong",
+              },
+              { label: "Khách hàng", value: tenantCustomers.length, hint: "Tổng số khách hàng" },
+              { label: "Hợp đồng", value: tenantContracts.length, hint: "Tổng số hợp đồng" },
             ]
-          : isAccountant
+          : isDispatch
             ? [
-                { label: "Mốc thanh toán chưa thu", value: accountantMilestones.length, hint: "Đối soát và nhắc thu" },
-                { label: "Hóa đơn quá hạn", value: overdueInvoices.length, hint: "Xử lý ưu tiên" },
-                { label: "HĐ sắp hết hạn", value: expiringContracts, hint: "Chuẩn bị tái ký" },
+                { label: "Yêu cầu mới", value: intakeLeadQueue.length, hint: "Cần phân loại" },
+                { label: "Sự cố mở", value: openIssues.length, hint: "Cần nhập liệu/đẩy luồng" },
+                {
+                  label: "Việc chờ điều phối",
+                  value: pendingDispatch.length,
+                  hint: "Chuyển CEO phân việc",
+                },
               ]
-            : isTechMaintenance
+            : isAccountant
               ? [
-                  { label: "Việc hôm nay", value: myJobsToday.length, hint: "Cần hoàn tất trong ca" },
-                  { label: "Bảo trì/Sửa chữa", value: myMaintenanceToday.length, hint: "Trọng tâm trong ngày" },
-                  { label: "Ưu tiên cao", value: myMaintenanceToday.filter((j) => j.priority === "high" || j.priority === "urgent").length, hint: "Làm trước" },
+                  {
+                    label: "Mốc thanh toán chưa thu",
+                    value: accountantMilestones.length,
+                    hint: "Đối soát và nhắc thu",
+                  },
+                  {
+                    label: "Hóa đơn quá hạn",
+                    value: overdueInvoices.length,
+                    hint: "Xử lý ưu tiên",
+                  },
+                  { label: "HĐ sắp hết hạn", value: expiringContracts, hint: "Chuẩn bị tái ký" },
+                ]
+              : isTechMaintenance
+                ? [
+                    {
+                      label: "Việc hôm nay",
+                      value: myJobsToday.length,
+                      hint: "Cần hoàn tất trong ca",
+                    },
+                    {
+                      label: "Bảo trì/Sửa chữa",
+                      value: myMaintenanceToday.length,
+                      hint: "Trọng tâm trong ngày",
+                    },
+                    {
+                      label: "Ưu tiên cao",
+                      value: myMaintenanceToday.filter(
+                        (j) => j.priority === "high" || j.priority === "urgent",
+                      ).length,
+                      hint: "Làm trước",
+                    },
+                  ]
+                : [
+                    {
+                      label: "Việc hôm nay",
+                      value: myJobsToday.length,
+                      hint: "Cần hoàn tất trong ca",
+                    },
+                    {
+                      label: "Lắp đặt",
+                      value: myInstallationToday.length,
+                      hint: "Checklist theo giai đoạn",
+                    },
+                    {
+                      label: "Ưu tiên cao",
+                      value: myInstallationToday.filter(
+                        (j) => j.priority === "high" || j.priority === "urgent",
+                      ).length,
+                      hint: "Làm trước",
+                    },
+                  ];
+
+    const projectsWaitingEquipment = activeProjects.filter(
+      (p) => p.stage === "waiting_for_equipment",
+    ).length;
+
+    const actionList =
+      isCEO || isPM || isTechManager
+        ? [
+            projectsWaitingEquipment > 0
+              ? `Xác nhận thiết bị đã về cho ${projectsWaitingEquipment} dự án đang chờ`
+              : `Rà soát tiến độ lắp đặt của ${activeProjects.length} dự án`,
+            `Phân công ${Math.min(urgentJobs.length, 3)} việc khẩn cấp đầu tiên cho kỹ thuật phù hợp`,
+            mockContracts.filter((c) => c.accountantVerified && !c.ceoVerified).length > 0
+              ? `Duyệt đối soát tiền về từ Kế toán (${mockContracts.filter((c) => c.accountantVerified && !c.ceoVerified).length} mốc)`
+              : `Theo dõi dòng tiền từ các hợp đồng thi công`,
+            `Mời ký bảo trì cho ${expiringWarranties.length} thang sắp hết hạn bảo hành`,
+          ]
+        : isSalesAdmin
+          ? [
+              `Điều phối khảo sát cho ${tenantLeads.filter((l) => l.status === "new").length} lead mới`,
+              `Gửi báo giá cho ${tenantLeads.filter((l) => l.status === "surveying").length} lead đã khảo sát`,
+              `Follow-up ${Math.min(salesFollowups.length, 5)} lead đang thương thảo`,
+              `Rà soát khách hàng sắp hết hạn bảo hành/bảo trì`,
+            ]
+          : isDispatch
+            ? [
+                `Tiếp nhận và phân loại ${Math.min(intakeLeadQueue.length, 5)} yêu cầu mới`,
+                `Nhập liệu sự cố mở để chuyển luồng xử lý`,
+                `Tạo phiếu/đầu việc đầy đủ thông tin trước khi bàn giao`,
+              ]
+            : isAccountant
+              ? [
+                  `Đối soát ${Math.min(accountantMilestones.length, 5)} mốc thanh toán cần thu`,
+                  `Xử lý ${overdueInvoices.length} hóa đơn quá hạn`,
+                  `Theo dõi công nợ phát sinh từ hợp đồng đang chạy`,
                 ]
               : [
-                  { label: "Việc hôm nay", value: myJobsToday.length, hint: "Cần hoàn tất trong ca" },
-                  { label: "Lắp đặt", value: myInstallationToday.length, hint: "Checklist theo giai đoạn" },
-                  { label: "Ưu tiên cao", value: myInstallationToday.filter((j) => j.priority === "high" || j.priority === "urgent").length, hint: "Làm trước" },
+                  `Hoàn tất ${myJobsToday.length} việc được giao trong ngày`,
+                  `Ưu tiên xử lý các việc high/urgent trước`,
+                  `Cập nhật biên bản và trạng thái ngay sau khi xử lý`,
                 ];
-
-    const projectsWaitingEquipment = activeProjects.filter(p => p.stage === "waiting_for_equipment").length;
-
-    const actionList = isCEO
-      ? [
-          projectsWaitingEquipment > 0 ? `Xác nhận thiết bị đã về cho ${projectsWaitingEquipment} dự án đang chờ` : `Rà soát tiến độ lắp đặt của ${activeProjects.length} dự án`,
-          `Phân công ${Math.min(urgentJobs.length, 3)} việc khẩn cấp đầu tiên cho kỹ thuật phù hợp`,
-          mockContracts.filter(c => c.accountantVerified && !c.ceoVerified).length > 0 ? `Duyệt đối soát tiền về từ Kế toán (${mockContracts.filter(c => c.accountantVerified && !c.ceoVerified).length} mốc)` : `Theo dõi dòng tiền từ các hợp đồng thi công`,
-          `Mời ký bảo trì cho ${expiringWarranties.length} thang sắp hết hạn bảo hành`,
-        ]
-      : isSalesAdmin
-        ? [
-            `Điều phối khảo sát cho ${tenantLeads.filter(l => l.status === 'new').length} lead mới`,
-            `Gửi báo giá cho ${tenantLeads.filter(l => l.status === 'surveying').length} lead đã khảo sát`,
-            `Follow-up ${Math.min(salesFollowups.length, 5)} lead đang thương thảo`,
-            `Rà soát khách hàng sắp hết hạn bảo hành/bảo trì`,
-          ]
-        : isIntake
-          ? [
-              `Tiếp nhận và phân loại ${Math.min(intakeLeadQueue.length, 5)} yêu cầu mới`,
-              `Nhập liệu sự cố mở để chuyển luồng xử lý`,
-              `Tạo phiếu/đầu việc đầy đủ thông tin trước khi bàn giao`,
-            ]
-          : isAccountant
-            ? [
-                `Đối soát ${Math.min(accountantMilestones.length, 5)} mốc thanh toán cần thu`,
-                `Xử lý ${overdueInvoices.length} hóa đơn quá hạn`,
-                `Theo dõi công nợ phát sinh từ hợp đồng đang chạy`,
-              ]
-            : [
-                `Hoàn tất ${myJobsToday.length} việc được giao trong ngày`,
-                `Ưu tiên xử lý các việc high/urgent trước`,
-                `Cập nhật biên bản và trạng thái ngay sau khi xử lý`,
-              ];
 
     const personalQueue = isSalesAdmin
       ? salesFollowups.slice(0, 8).map((x) => ({
@@ -265,13 +379,17 @@ export function useDashboardMetrics() {
 
     return {
       isCEO,
+      isPM,
       isSalesAdmin,
       isIntake,
+      isDispatch,
       isAccountant,
+      isTechManager,
       isTechMaintenance,
       isTechInstallation,
+      isTechSurvey,
       currentMonth,
-      
+
       tenantContracts,
       tenantElevators,
       tenantJobs,
@@ -284,20 +402,20 @@ export function useDashboardMetrics() {
 
       upcomingJobs,
       recentContracts,
-      
+
       monthlyJobs,
       completedJobsThisMonth,
       pendingJobsThisMonth,
       completionRate,
 
       techPerformance,
-      
+
       myJobsToday,
       myMaintenanceToday,
       myInstallationToday,
       urgentJobs,
       pendingDispatch,
-      
+
       headerTitle,
       headerDescription,
       focusMetrics,
@@ -307,7 +425,20 @@ export function useDashboardMetrics() {
       expiringWarranties,
       myProjects,
       myCompletedCount,
-      myUrgentCount
+      myUrgentCount,
     };
-  }, [activeTenantId, currentUser, permissions, isCEO, isSalesAdmin, isIntake, isAccountant, isTechMaintenance, isTechInstallation]);
+  }, [
+    activeTenantId,
+    currentUser,
+    permissions,
+    isCEO,
+    isPM,
+    isSalesAdmin,
+    isDispatch,
+    isAccountant,
+    isTechManager,
+    isTechMaintenance,
+    isTechInstallation,
+    isTechSurvey,
+  ]);
 }

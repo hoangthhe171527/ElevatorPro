@@ -75,7 +75,7 @@ const SelectContent = React.forwardRef<
   React.ComponentPropsWithoutRef<typeof SelectPrimitive.Content>
 >(({ className, children, position = "popper", ...props }, ref) => {
   const normalizedChildren = React.useMemo(() => normalizeMojibakeNode(children), [children]);
-  
+
   return (
     <SelectPrimitive.Portal>
       <SelectPrimitive.Content

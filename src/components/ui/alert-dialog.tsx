@@ -33,7 +33,7 @@ const AlertDialogContent = React.forwardRef<
   React.ComponentPropsWithoutRef<typeof AlertDialogPrimitive.Content>
 >(({ className, children, ...props }, ref) => {
   const normalizedChildren = React.useMemo(() => normalizeMojibakeNode(children), [children]);
-  
+
   return (
     <AlertDialogPortal>
       <AlertDialogOverlay />

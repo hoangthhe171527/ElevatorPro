@@ -6,7 +6,7 @@ import { PageHeader } from "@/components/common/PageHeader";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { DataPagination } from "@/components/common/DataPagination";
-import { StatusBadge } from "@/components/common/StatusBadge";
+import { StatusBadge } from "@/components/common/StatusBadge";;
 import { contractStatusLabel, contractStatusVariant } from "@/lib/status-variants";
 import { Progress } from "@/components/ui/progress";
 import { mockContracts, formatVND, formatDate } from "@/lib/mock-data";

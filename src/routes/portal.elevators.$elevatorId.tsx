@@ -3,7 +3,7 @@ import { AppShell } from "@/components/layout/AppShell";
 import { PageHeader } from "@/components/common/PageHeader";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { StatusBadge } from "@/components/common/StatusBadge";
+import { StatusBadge } from "@/components/common/StatusBadge";;
 import {
   elevatorStatusLabel,
   elevatorStatusVariant,
@@ -267,12 +267,14 @@ function PortalElevatorDetail() {
                         "{j.report}"
                         {j.status === "manager_approved" && (
                           <div className="mt-4 flex justify-end">
-                            <Button 
-                              size="sm" 
+                            <Button
+                              size="sm"
                               className="bg-success hover:bg-success/90"
                               onClick={() => {
                                 // Simulate confirmation
-                                import("sonner").then(({ toast }) => toast.success("Cảm ơn bạn đã xác nhận chất lượng bảo trì!"));
+                                import("sonner").then(({ toast }) =>
+                                  toast.success("Cảm ơn bạn đã xác nhận chất lượng bảo trì!"),
+                                );
                               }}
                             >
                               <CheckCircle2 className="h-4 w-4 mr-2" /> Xác nhận hiệu quả

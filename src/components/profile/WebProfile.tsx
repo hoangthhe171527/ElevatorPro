@@ -13,19 +13,12 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
+import type { Permission } from "@/lib/mock-data";
 import { useAppStore, useCurrentUser } from "@/lib/store";
+import { ROLE_LABELS } from "@/lib/roles";
 import { User, Mail, Phone, ShieldCheck, Key, Save } from "lucide-react";
 import { ConfirmationDialog } from "@/components/common/ConfirmationDialog";
 import { toast } from "sonner";
-
-const ROLE_LABELS: Record<string, string> = {
-  ceo: "CEO",
-  sales_admin: "Sale Admin",
-  intake_operator: "Tiếp nhận & nhập liệu",
-  accountant: "Kế toán",
-  tech_maintenance: "Kỹ thuật bảo trì",
-  tech_installation: "Kỹ thuật lắp đặt",
-};
 
 export function WebProfile() {
   const user = useCurrentUser();
@@ -43,7 +36,8 @@ export function WebProfile() {
     .map((n) => n[0])
     .join("");
 
-  const activePermissions = user.memberships.find((m) => m.tenantId === activeTenantId)?.permissions || [];
+  const activePermissions =
+    user.memberships.find((m) => m.tenantId === activeTenantId)?.permissions || [];
 
   return (
     <AppShell>
@@ -63,14 +57,16 @@ export function WebProfile() {
                 </AvatarFallback>
               </Avatar>
               <h2 className="text-2xl font-black text-slate-800">{user.name}</h2>
-              <p className="text-sm font-bold text-slate-400 mt-1 uppercase tracking-widest">Mã NV: {user.id}</p>
+              <p className="text-sm font-bold text-slate-400 mt-1 uppercase tracking-widest">
+                Mã NV: {user.id}
+              </p>
               <div className="flex flex-wrap justify-center gap-2 mt-6">
                 {activePermissions.map((p) => (
                   <span
                     key={p}
                     className="text-[11px] bg-white border border-slate-200 text-slate-600 px-3 py-1 rounded-full font-bold uppercase tracking-wider shadow-sm"
                   >
-                    {ROLE_LABELS[p] || p}
+                    {ROLE_LABELS[p as Permission] || p}
                   </span>
                 ))}
               </div>
@@ -86,11 +82,19 @@ export function WebProfile() {
             <CardContent className="space-y-4 pt-6">
               <div className="flex justify-between items-center text-sm p-3 bg-slate-50 rounded-xl">
                 <span className="font-bold text-slate-600">Xác thực 2 lớp</span>
-                <span className="text-emerald-600 font-black bg-emerald-100 px-2 py-0.5 rounded uppercase tracking-wider text-[10px]">Đã bật</span>
+                <span className="text-emerald-600 font-black bg-emerald-100 px-2 py-0.5 rounded uppercase tracking-wider text-[10px]">
+                  Đã bật
+                </span>
               </div>
               <div className="flex justify-between items-center text-sm p-3 bg-slate-50 rounded-xl">
                 <span className="font-bold text-slate-600">Phiên bản Web / IP</span>
-                <span className="font-bold text-slate-800 text-right">Vừa đăng nhập<br/><span className="text-[10px] text-slate-400 uppercase tracking-widest">Hà Nội, VN</span></span>
+                <span className="font-bold text-slate-800 text-right">
+                  Vừa đăng nhập
+                  <br />
+                  <span className="text-[10px] text-slate-400 uppercase tracking-widest">
+                    Hà Nội, VN
+                  </span>
+                </span>
               </div>
             </CardContent>
           </Card>
@@ -104,16 +108,33 @@ export function WebProfile() {
               <CardTitle className="text-lg font-black text-slate-800 flex items-center gap-2">
                 <User className="h-5 w-5 text-primary" /> Thông tin liên hệ
               </CardTitle>
-              <CardDescription className="font-medium text-slate-500">Cập nhật họ tên và thông tin liên lạc chính thức.</CardDescription>
+              <CardDescription className="font-medium text-slate-500">
+                Cập nhật họ tên và thông tin liên lạc chính thức.
+              </CardDescription>
             </CardHeader>
             <CardContent className="space-y-6 pt-6">
               <div className="grid sm:grid-cols-2 gap-6">
                 <div className="space-y-3">
-                  <Label htmlFor="name" className="text-xs font-bold uppercase tracking-widest text-slate-500">Họ và tên</Label>
-                  <Input id="name" value={name} onChange={(e) => setName(e.target.value)} className="h-12 bg-slate-50 border-slate-200 focus-visible:ring-primary/20 font-medium" />
+                  <Label
+                    htmlFor="name"
+                    className="text-xs font-bold uppercase tracking-widest text-slate-500"
+                  >
+                    Họ và tên
+                  </Label>
+                  <Input
+                    id="name"
+                    value={name}
+                    onChange={(e) => setName(e.target.value)}
+                    className="h-12 bg-slate-50 border-slate-200 focus-visible:ring-primary/20 font-medium"
+                  />
                 </div>
                 <div className="space-y-3">
-                  <Label htmlFor="phone" className="text-xs font-bold uppercase tracking-widest text-slate-500">Số điện thoại</Label>
+                  <Label
+                    htmlFor="phone"
+                    className="text-xs font-bold uppercase tracking-widest text-slate-500"
+                  >
+                    Số điện thoại
+                  </Label>
                   <div className="relative">
                     <Phone className="absolute left-4 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400" />
                     <Input
@@ -126,7 +147,12 @@ export function WebProfile() {
                 </div>
               </div>
               <div className="space-y-3">
-                <Label htmlFor="email" className="text-xs font-bold uppercase tracking-widest text-slate-500">Địa chỉ Email</Label>
+                <Label
+                  htmlFor="email"
+                  className="text-xs font-bold uppercase tracking-widest text-slate-500"
+                >
+                  Địa chỉ Email
+                </Label>
                 <div className="relative">
                   <Mail className="absolute left-4 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400" />
                   <Input
@@ -139,7 +165,10 @@ export function WebProfile() {
               </div>
             </CardContent>
             <CardFooter className="bg-slate-50/50 border-t border-slate-100 py-4 flex justify-end">
-              <Button onClick={() => setConfirmSave(true)} className="h-11 px-8 rounded-xl font-bold gap-2 shadow-md">
+              <Button
+                onClick={() => setConfirmSave(true)}
+                className="h-11 px-8 rounded-xl font-bold gap-2 shadow-md"
+              >
                 <Save className="h-4 w-4" /> Lưu hồ sơ
               </Button>
             </CardFooter>
@@ -151,21 +180,51 @@ export function WebProfile() {
               <CardTitle className="text-lg font-black text-slate-800 flex items-center gap-2">
                 <Key className="h-5 w-5 text-primary" /> Bảo mật & Đăng nhập
               </CardTitle>
-              <CardDescription className="font-medium text-slate-500">Thiết lập mật khẩu định kỳ 6 tháng / lần.</CardDescription>
+              <CardDescription className="font-medium text-slate-500">
+                Thiết lập mật khẩu định kỳ 6 tháng / lần.
+              </CardDescription>
             </CardHeader>
             <CardContent className="space-y-6 pt-6">
               <div className="space-y-3">
-                <Label htmlFor="current-password" className="text-xs font-bold uppercase tracking-widest text-slate-500">Mật khẩu hiện tại</Label>
-                <Input id="current-password" type="password" placeholder="••••••••" className="h-12 bg-slate-50 border-slate-200" />
+                <Label
+                  htmlFor="current-password"
+                  className="text-xs font-bold uppercase tracking-widest text-slate-500"
+                >
+                  Mật khẩu hiện tại
+                </Label>
+                <Input
+                  id="current-password"
+                  type="password"
+                  placeholder="••••••••"
+                  className="h-12 bg-slate-50 border-slate-200"
+                />
               </div>
               <div className="grid sm:grid-cols-2 gap-6">
                 <div className="space-y-3">
-                  <Label htmlFor="new-password" className="text-xs font-bold uppercase tracking-widest text-slate-500">Mật khẩu mới</Label>
-                  <Input id="new-password" type="password" className="h-12 bg-slate-50 border-slate-200" />
+                  <Label
+                    htmlFor="new-password"
+                    className="text-xs font-bold uppercase tracking-widest text-slate-500"
+                  >
+                    Mật khẩu mới
+                  </Label>
+                  <Input
+                    id="new-password"
+                    type="password"
+                    className="h-12 bg-slate-50 border-slate-200"
+                  />
                 </div>
                 <div className="space-y-3">
-                  <Label htmlFor="confirm-password" className="text-xs font-bold uppercase tracking-widest text-slate-500">Xác nhận mật khẩu mới</Label>
-                  <Input id="confirm-password" type="password" className="h-12 bg-slate-50 border-slate-200" />
+                  <Label
+                    htmlFor="confirm-password"
+                    className="text-xs font-bold uppercase tracking-widest text-slate-500"
+                  >
+                    Xác nhận mật khẩu mới
+                  </Label>
+                  <Input
+                    id="confirm-password"
+                    type="password"
+                    className="h-12 bg-slate-50 border-slate-200"
+                  />
                 </div>
               </div>
             </CardContent>

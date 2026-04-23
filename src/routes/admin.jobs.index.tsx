@@ -10,11 +10,5 @@ export const Route = createFileRoute("/admin/jobs/")({
 
 function AdminJobsRouter() {
   const { tab, priority, status } = Route.useSearch();
-  return (
-    <WebJobsMonitor 
-      tab={tab} 
-      initialPriority={priority} 
-      initialStatus={status} 
-    />
-  );
+  return <WebJobsMonitor tab={tab} initialPriority={priority} initialStatus={status} />;
 }

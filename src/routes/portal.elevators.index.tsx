@@ -7,7 +7,7 @@ import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { DataPagination } from "@/components/common/DataPagination";
-import { StatusBadge } from "@/components/common/StatusBadge";
+import { StatusBadge } from "@/components/common/StatusBadge";;
 import { elevatorStatusLabel, elevatorStatusVariant } from "@/lib/status-variants";
 import { mockElevators, mockProjects, getProject, formatDate } from "@/lib/mock-data";
 import { Building2, QrCode, MapPin, Search, AlertTriangle } from "lucide-react";

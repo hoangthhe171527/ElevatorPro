@@ -43,15 +43,16 @@ import {
   getElevator,
   type Lead,
 } from "@/lib/mock-data";
+import { TECH_PERMISSIONS } from "@/lib/roles";
 import { useAppStore, useIsSmallCompany } from "@/lib/store";
-import { 
-  handleLeadConversion, 
-  handleMaintenanceLeadConversion, 
+import {
+  handleLeadConversion,
+  handleMaintenanceLeadConversion,
   getTechnicianWorkload,
   handleContractActivation,
   initiateWarrantyFlow,
   handleEquipmentArrival,
-  handleFinalVerification
+  handleFinalVerification,
 } from "@/lib/workflow-utils";
 import {
   CheckCircle2,
@@ -102,6 +103,7 @@ interface CreateJobModalProps {
   defaultType?: JobType;
   defaultDescription?: string;
   defaultLeadId?: string;
+  onSuccess?: (job: Job) => void;
 }
 
 const typeOptions: { value: JobType; label: string }[] = [
@@ -129,6 +131,7 @@ export function CreateJobModal({
   defaultType = "maintenance",
   defaultDescription = "",
   defaultLeadId = "",
+  onSuccess,
 }: CreateJobModalProps) {
   const [title, setTitle] = useState(defaultTitle || "");
   const [type, setType] = useState<JobType>(defaultType || "maintenance");
@@ -144,12 +147,12 @@ export function CreateJobModal({
     d.setHours(8, 0, 0, 0);
     return d.toISOString().slice(0, 16);
   });
-   const [priority, setPriority] = useState<JobPriority>("normal");
-   const [description, setDescription] = useState(defaultDescription || "");
+  const [priority, setPriority] = useState<JobPriority>("normal");
+  const [description, setDescription] = useState(defaultDescription || "");
   const [loading, setLoading] = useState(false);
 
   const technicians = mockUsers.filter((u) =>
-    u.memberships?.some((m) => m.permissions.includes("tech_maintenance") || m.permissions.includes("tech_installation")),
+    u.memberships?.some((m) => m.permissions.some((p) => TECH_PERMISSIONS.includes(p))),
   );
   // Filter elevators belonging to customer's projects
   const customerProjects = mockProjects.filter((p) => p.customerId === customerId);
@@ -166,9 +169,9 @@ export function CreateJobModal({
     }
     setLoading(true);
     await new Promise((r) => setTimeout(r, 600));
-    
+
     const newJob: Job = {
-      tenantId: useAppStore.getState().activeTenantId || 't-2',
+      tenantId: useAppStore.getState().activeTenantId || "t-2",
       id: `job-${Date.now()}`,
       code: `JOB-${Math.floor(Math.random() * 10000)}`,
       title,
@@ -184,8 +187,9 @@ export function CreateJobModal({
       afterPhotos: [],
       createdAt: new Date().toISOString(),
     };
-    
+
     mockJobs.push(newJob);
+    onSuccess?.(newJob);
 
     setLoading(false);
     toast.success(
@@ -368,12 +372,19 @@ export function CreateJobModal({
                 </SelectTrigger>
                 <SelectContent>
                   {technicians.map((u) => {
-                    const activeJobs = mockJobs.filter(j => j.assignedTo === u.id && j.status !== 'completed' && j.status !== 'cancelled').length;
+                    const activeJobs = mockJobs.filter(
+                      (j) =>
+                        j.assignedTo === u.id &&
+                        j.status !== "completed" &&
+                        j.status !== "cancelled",
+                    ).length;
                     return (
                       <SelectItem key={u.id} value={u.id}>
                         <span className="flex items-center gap-2 w-full">
                           {u.name}
-                          <span className={`ml-auto text-[10px] font-bold px-1.5 py-0.5 rounded-full ${activeJobs >= 5 ? 'bg-destructive/10 text-destructive' : activeJobs >= 3 ? 'bg-warning/10 text-warning-foreground' : 'bg-success/10 text-success'}`}>
+                          <span
+                            className={`ml-auto text-[10px] font-bold px-1.5 py-0.5 rounded-full ${activeJobs >= 5 ? "bg-destructive/10 text-destructive" : activeJobs >= 3 ? "bg-warning/10 text-warning-foreground" : "bg-success/10 text-success"}`}
+                          >
                             {activeJobs} việc
                           </span>
                         </span>
@@ -384,7 +395,18 @@ export function CreateJobModal({
               </Select>
               {techId && (
                 <p className="text-[10px] text-muted-foreground mt-1 flex items-center gap-1">
-                  💡 Gợi ý: KTV này đang có <span className="font-bold">{mockJobs.filter(j => j.assignedTo === techId && j.status !== 'completed' && j.status !== 'cancelled').length}</span> việc chưa hoàn thành
+                  💡 Gợi ý: KTV này đang có{" "}
+                  <span className="font-bold">
+                    {
+                      mockJobs.filter(
+                        (j) =>
+                          j.assignedTo === techId &&
+                          j.status !== "completed" &&
+                          j.status !== "cancelled",
+                      ).length
+                    }
+                  </span>{" "}
+                  việc chưa hoàn thành
                 </p>
               )}
             </div>
@@ -673,9 +695,10 @@ interface ConvertLeadModalProps {
   open: boolean;
   onClose: () => void;
   lead: Lead;
+  onConverted?: (payload: { leadId: string; customerId: string; contractId: string }) => void;
 }
 
-export function ConvertLeadModal({ open, onClose, lead }: ConvertLeadModalProps) {
+export function ConvertLeadModal({ open, onClose, lead, onConverted }: ConvertLeadModalProps) {
   const [name, setName] = useState(lead.name);
   const [contactPerson, setContactPerson] = useState(lead.name);
   const [phone, setPhone] = useState(lead.phone);
@@ -694,44 +717,86 @@ export function ConvertLeadModal({ open, onClose, lead }: ConvertLeadModalProps)
     await new Promise((r) => setTimeout(r, 700));
     setLoading(false);
 
-    // Call the automated logic
-    const { customer, contract } = conversionType === 'maintenance' 
-      ? handleMaintenanceLeadConversion(lead as any)
-      : handleLeadConversion(lead as any);
+    if (!lead.quoteFileUrl) {
+      toast.error("Thiếu file báo giá. Chưa thể chuyển Lead sang khách hàng.");
+      return;
+    }
+    if (!lead.contractFileUrl) {
+      toast.error("Thiếu file hợp đồng đã ký. Chưa thể chuyển Lead sang khách hàng.");
+      return;
+    }
 
-    const isSmall = useAppStore.getState().activeTenantId === 't-2';
-    
+    // Call the automated logic
+    const { customer, contract } =
+      conversionType === "maintenance"
+        ? handleMaintenanceLeadConversion(lead as any)
+        : handleLeadConversion(lead as any);
+
+    const existingCustomer = mockCustomers.find((c) => c.convertedFromLeadId === lead.id);
+    const nextCustomer = existingCustomer || customer;
+    if (!existingCustomer) {
+      mockCustomers.push(nextCustomer);
+    }
+
+    const existingContract = mockContracts.find(
+      (c) => c.customerId === nextCustomer.id && c.type === contract.type,
+    );
+    const nextContract: typeof contract = {
+      ...contract,
+      customerId: nextCustomer.id,
+      signedAt: new Date().toISOString().split("T")[0],
+      status: "active",
+      contractFileUrl: lead.contractFileUrl,
+    };
+    if (!existingContract) {
+      mockContracts.push(nextContract);
+    }
+
+    const leadRef = mockLeads.find((x) => x.id === lead.id);
+    if (leadRef) {
+      leadRef.customerId = nextCustomer.id;
+      leadRef.status = "signed";
+    }
+
+    const isSmall = useAppStore.getState().activeTenantId === "t-2";
+
     if (isSmall) {
       toast.success(`Đã chuyển đổi thành công!`, {
         description: `Khách hàng "${customer.name}" đã được tạo.`,
       });
-      
-      if (conversionType === 'install') {
-        const { project, jobs } = handleContractActivation(contract);
+
+      if (conversionType === "install") {
+        const { project, jobs } = handleContractActivation(
+          nextContract,
+          `Dự án lắp đặt - ${nextCustomer.name}`,
+        );
         if (project) mockProjects.push(project);
         if (jobs) mockJobs.push(...jobs);
-        
-        toast.info(`Tự động khởi tạo Hợp đồng: ${contract.code} và Dự án Lắp đặt: ${project?.name}`);
+
+        toast.info(
+          `Tự động khởi tạo Hợp đồng: ${nextContract.code} và Dự án Lắp đặt: ${project?.name}`,
+        );
         setTimeout(() => {
           toast.success("Đã sinh ra toàn bộ các giai đoạn công việc (Trạng thái: Chờ thiết bị).");
         }, 1500);
       } else {
-        const { jobs } = handleContractActivation(contract);
+        const { jobs } = handleContractActivation(nextContract);
         if (jobs) mockJobs.push(...jobs);
-        toast.info(`Tự động khởi tạo Hợp đồng Bảo trì: ${contract.code}`);
+        toast.info(`Tự động khởi tạo Hợp đồng Bảo trì: ${nextContract.code}`);
         setTimeout(() => {
           toast.success("Đã sinh ra các kỳ bảo trì theo hợp đồng.");
         }, 1500);
       }
-      
+
       if (customer.referredById) {
         toast.success("Hệ thống Referral: Đã cộng 100 điểm cho người giới thiệu.");
       }
     } else {
-      toast.success(`Đã chuyển lead thành khách hàng: "${customer.name}"`);
-      toast.info(`Đã tạo bản thảo hợp đồng ${contract.code} - Chờ phòng ban Sales xử lý tiếp.`);
+      toast.success(`Đã chuyển lead thành khách hàng: "${nextCustomer.name}"`);
+      toast.info(`Đã kích hoạt hợp đồng ${nextContract.code} theo flow bán hàng.`);
     }
-    
+    onConverted?.({ leadId: lead.id, customerId: nextCustomer.id, contractId: nextContract.id });
+
     onClose();
   };
 
@@ -763,7 +828,10 @@ export function ConvertLeadModal({ open, onClose, lead }: ConvertLeadModalProps)
             </div>
             <div>
               <label className="text-sm font-medium">Mục tiêu HĐ</label>
-              <Select value={conversionType} onValueChange={(v) => setConversionType(v as "install" | "maintenance")}>
+              <Select
+                value={conversionType}
+                onValueChange={(v) => setConversionType(v as "install" | "maintenance")}
+              >
                 <SelectTrigger className="mt-1">
                   <SelectValue />
                 </SelectTrigger>
@@ -873,10 +941,10 @@ export function CreateContractModal({
     setLoading(true);
     await new Promise((r) => setTimeout(r, 600));
     setLoading(false);
-    
+
     if (isSmall) {
       toast.success(`Hợp đồng ${autoCode} đã được tạo!`);
-      
+
       if (type === "install") {
         toast.info("Chế độ Công ty nhỏ: Đang chờ khách hàng ký xác nhận bản cứng/Zalo...");
         setTimeout(() => {
@@ -884,9 +952,11 @@ export function CreateContractModal({
         }, 1000);
       }
     } else {
-      toast.success(`Đã tạo hợp đồng ${autoCode} — Hệ thống sẽ tự sinh công việc theo lịch hợp đồng`);
+      toast.success(
+        `Đã tạo hợp đồng ${autoCode} — Hệ thống sẽ tự sinh công việc theo lịch hợp đồng`,
+      );
     }
-    
+
     onClose();
   };
 
@@ -1367,12 +1437,14 @@ export function ReceiveInventoryModal({
     await new Promise((r) => setTimeout(r, 400));
     setLoading(false);
     toast.success(`Đã nhập ${qty} ${itemName} vào kho`);
-    
+
     // Simulate checking for jobs waiting for this material
-    const waitingJobsCount = Math.floor(Math.random() * 2); 
+    const waitingJobsCount = Math.floor(Math.random() * 2);
     if (waitingJobsCount > 0) {
       setTimeout(() => {
-        toast.info(`Hệ thống: Đã tự động báo cho kỹ thuật viên công việc đang chờ vật tư "${itemName}" nay đã có hàng.`);
+        toast.info(
+          `Hệ thống: Đã tự động báo cho kỹ thuật viên công việc đang chờ vật tư "${itemName}" nay đã có hàng.`,
+        );
       }, 1500);
     }
 
@@ -1567,7 +1639,7 @@ export function CreateLeadModal({ open, onClose }: CreateLeadModalProps) {
     };
 
     mockLeads.push(newLead);
-    toast.success(`Đã thêm lead mới: "${name}" (${type === 'install' ? 'Lắp đặt' : 'Bảo trì'})`);
+    toast.success(`Đã thêm lead mới: "${name}" (${type === "install" ? "Lắp đặt" : "Bảo trì"})`);
     setName("");
     setType("install");
     setPhone("");
@@ -1757,7 +1829,8 @@ export function DispatchJobModal({ open, onClose, job, onDispatch }: DispatchJob
               <SelectContent>
                 {technicians.map((u) => (
                   <SelectItem key={u.id} value={u.id}>
-                    {u.name} {u.id === suggestedTechId && "(Đề xuất: Rảnh nhất)"} — {u.workload} việc đang xử lý
+                    {u.name} {u.id === suggestedTechId && "(Đề xuất: Rảnh nhất)"} — {u.workload}{" "}
+                    việc đang xử lý
                   </SelectItem>
                 ))}
               </SelectContent>
@@ -1846,7 +1919,6 @@ export function PaySalaryModal({ open, onClose, users }: PaySalaryModalProps) {
   );
 }
 
-
 // ─────────────────────────────────────────────
 // 14. MODAL CHUYỂN KHO
 // ─────────────────────────────────────────────
@@ -1913,14 +1985,14 @@ export function TransferInventoryModal({ open, onClose }: { open: boolean; onClo
 // ─────────────────────────────────────────────
 // 10. MODAL TẢI LÊN TÀI LIỆU (CEO)
 // ─────────────────────────────────────────────
-export function UploadDocumentModal({ 
-  open, 
-  onClose, 
-  title, 
-  onUploadSuccess 
-}: { 
-  open: boolean; 
-  onClose: () => void; 
+export function UploadDocumentModal({
+  open,
+  onClose,
+  title,
+  onUploadSuccess,
+}: {
+  open: boolean;
+  onClose: () => void;
   title: string;
   onUploadSuccess: (url: string) => void;
 }) {
@@ -1933,7 +2005,7 @@ export function UploadDocumentModal({
       return;
     }
     setLoading(true);
-    await new Promise(r => setTimeout(r, 1000));
+    await new Promise((r) => setTimeout(r, 1000));
     setLoading(false);
     toast.success(`Đã tải lên ${title} thành công!`);
     onUploadSuccess(`https://example.com/mock-upload-${Date.now()}.pdf`);
@@ -1949,22 +2021,26 @@ export function UploadDocumentModal({
           </DialogTitle>
         </DialogHeader>
         <div className="py-6 flex flex-col items-center justify-center border-2 border-dashed rounded-xl border-muted-foreground/20 bg-muted/5">
-          <input 
-            type="file" 
-            className="hidden" 
-            id="file-upload" 
+          <input
+            type="file"
+            className="hidden"
+            id="file-upload"
             onChange={(e) => setFile(e.target.files?.[0] || null)}
           />
           <label htmlFor="file-upload" className="cursor-pointer flex flex-col items-center gap-2">
             <div className="h-12 w-12 rounded-full bg-primary/10 flex items-center justify-center text-primary">
               <Upload className="h-6 w-6" />
             </div>
-            <span className="text-sm font-medium">{file ? file.name : "Chọn file từ máy tính (PDF, DOCX)"}</span>
+            <span className="text-sm font-medium">
+              {file ? file.name : "Chọn file từ máy tính (PDF, DOCX)"}
+            </span>
             <span className="text-xs text-muted-foreground">Dung lượng tối đa 10MB</span>
           </label>
         </div>
         <DialogFooter>
-          <Button variant="outline" onClick={onClose}>Hủy</Button>
+          <Button variant="outline" onClick={onClose}>
+            Hủy
+          </Button>
           <Button onClick={handleUpload} disabled={loading || !file}>
             {loading ? "Đang tải lên..." : "Tải lên ngay"}
           </Button>
@@ -1982,7 +2058,7 @@ export function AccountantPaymentModal({
   onClose,
   contract,
   stage, // 1 | 2 | 3
-  onSuccess
+  onSuccess,
 }: {
   open: boolean;
   onClose: () => void;
@@ -1992,7 +2068,7 @@ export function AccountantPaymentModal({
 }) {
   const [amount, setAmount] = useState<string>("");
   const [loading, setLoading] = useState(false);
-  const lead = mockLeads.find(l => l.customerId === contract.customerId);
+  const lead = mockLeads.find((l) => l.customerId === contract.customerId);
 
   const handle = async () => {
     const numValue = parseFloat(amount);
@@ -2005,7 +2081,7 @@ export function AccountantPaymentModal({
       return;
     }
     setLoading(true);
-    await new Promise(r => setTimeout(r, 800));
+    await new Promise((r) => setTimeout(r, 800));
     setLoading(false);
     toast.success(`Đã cập nhận thanh toán giai đoạn ${stage}`);
     onSuccess(numValue);
@@ -2022,59 +2098,74 @@ export function AccountantPaymentModal({
           <div className="p-8 text-center text-muted-foreground">Không tìm thấy hợp đồng</div>
         ) : (
           <div className="space-y-4 py-4">
-          <div className="p-3 bg-primary/5 rounded-lg text-sm flex flex-col gap-1">
-            <span className="text-muted-foreground uppercase font-black text-[10px]">Đang kiểm tra HĐ</span>
-            <span className="font-bold">{contract.code}</span>
-            <span className="text-xs">Tổng giá trị: {new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(contract.value)}</span>
-          </div>
+            <div className="p-3 bg-primary/5 rounded-lg text-sm flex flex-col gap-1">
+              <span className="text-muted-foreground uppercase font-black text-[10px]">
+                Đang kiểm tra HĐ
+              </span>
+              <span className="font-bold">{contract.code}</span>
+              <span className="text-xs">
+                Tổng giá trị:{" "}
+                {new Intl.NumberFormat("vi-VN", { style: "currency", currency: "VND" }).format(
+                  contract.value,
+                )}
+              </span>
+            </div>
 
-          <div className="space-y-2">
-            <label className="text-[10px] font-black uppercase text-muted-foreground">Hồ sơ đính kèm (CEO đã tải lên)</label>
-            <div className="grid grid-cols-2 gap-2">
-              <Button 
-                variant="outline" 
-                size="sm" 
-                className="justify-start text-xs h-8"
-                disabled={!lead?.quoteFileUrl}
-                onClick={() => window.open(lead?.quoteFileUrl, '_blank')}
-              >
-                <FileText className="h-3.5 w-3.5 mr-1.5 text-orange-500" />
-                {lead?.quoteFileUrl ? "Xem Báo giá" : "Chưa có Báo giá"}
-                {lead?.quoteFileUrl && <ExternalLink className="h-3 w-3 ml-auto opacity-50" />}
-              </Button>
-              <Button 
-                variant="outline" 
-                size="sm" 
-                className="justify-start text-xs h-8"
-                disabled={!contract.contractFileUrl}
-                onClick={() => window.open(contract.contractFileUrl, '_blank')}
-              >
-                <FileText className="h-3.5 w-3.5 mr-1.5 text-blue-500" />
-                {contract.contractFileUrl ? "Xem Hợp đồng" : "Chưa có Hợp đồng"}
-                {contract.contractFileUrl && <ExternalLink className="h-3 w-3 ml-auto opacity-50" />}
-              </Button>
+            <div className="space-y-2">
+              <label className="text-[10px] font-black uppercase text-muted-foreground">
+                Hồ sơ đính kèm (CEO đã tải lên)
+              </label>
+              <div className="grid grid-cols-2 gap-2">
+                <Button
+                  variant="outline"
+                  size="sm"
+                  className="justify-start text-xs h-8"
+                  disabled={!lead?.quoteFileUrl}
+                  onClick={() => window.open(lead?.quoteFileUrl, "_blank")}
+                >
+                  <FileText className="h-3.5 w-3.5 mr-1.5 text-orange-500" />
+                  {lead?.quoteFileUrl ? "Xem Báo giá" : "Chưa có Báo giá"}
+                  {lead?.quoteFileUrl && <ExternalLink className="h-3 w-3 ml-auto opacity-50" />}
+                </Button>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  className="justify-start text-xs h-8"
+                  disabled={!contract.contractFileUrl}
+                  onClick={() => window.open(contract.contractFileUrl, "_blank")}
+                >
+                  <FileText className="h-3.5 w-3.5 mr-1.5 text-blue-500" />
+                  {contract.contractFileUrl ? "Xem Hợp đồng" : "Chưa có Hợp đồng"}
+                  {contract.contractFileUrl && (
+                    <ExternalLink className="h-3 w-3 ml-auto opacity-50" />
+                  )}
+                </Button>
+              </div>
+            </div>
+
+            <div>
+              <label className="text-sm font-medium">Số tiền thu thực tế (VNĐ)</label>
+              <input
+                type="number"
+                placeholder="Ví dụ: 100000000"
+                value={amount}
+                onChange={(e) => setAmount(e.target.value)}
+                className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 mt-1"
+              />
+            </div>
+            <div className="flex items-center gap-2 p-3 bg-yellow-50 border border-yellow-100 rounded text-yellow-800 text-[11px]">
+              <AlertCircle className="h-4 w-4 shrink-0" />
+              Vui lòng kiểm tra kỹ file báo giá và hợp đồng CEO đã tải lên trước khi nhập số tiền.
             </div>
           </div>
-
-          <div>
-            <label className="text-sm font-medium">Số tiền thu thực tế (VNĐ)</label>
-            <input 
-              type="number" 
-              placeholder="Ví dụ: 100000000" 
-              value={amount} 
-              onChange={(e) => setAmount(e.target.value)}
-              className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 mt-1"
-            />
-          </div>
-          <div className="flex items-center gap-2 p-3 bg-yellow-50 border border-yellow-100 rounded text-yellow-800 text-[11px]">
-            <AlertCircle className="h-4 w-4 shrink-0" />
-            Vui lòng kiểm tra kỹ file báo giá và hợp đồng CEO đã tải lên trước khi nhập số tiền.
-          </div>
-        </div>
         )}
         <DialogFooter>
-          <Button variant="outline" onClick={onClose}>Hủy</Button>
-          <Button onClick={handle} disabled={!contract}>Xác nhận & Cập nhật</Button>
+          <Button variant="outline" onClick={onClose}>
+            Hủy
+          </Button>
+          <Button onClick={handle} disabled={!contract}>
+            Xác nhận & Cập nhật
+          </Button>
         </DialogFooter>
       </DialogContent>
     </Dialog>
@@ -2089,7 +2180,7 @@ export function CEOFinalApprovalModal({
   onClose,
   contract,
   enteredTotal,
-  onApproved
+  onApproved,
 }: {
   open: boolean;
   onClose: () => void;
@@ -2098,8 +2189,10 @@ export function CEOFinalApprovalModal({
   onApproved: () => void;
 }) {
   const [loading, setLoading] = useState(false);
-  const result = contract ? handleFinalVerification(contract, enteredTotal) : { success: false, message: "Dữ liệu hợp đồng không hợp lệ" };
-  const lead = contract ? mockLeads.find(l => l.customerId === contract.customerId) : null;
+  const result = contract
+    ? handleFinalVerification(contract, enteredTotal)
+    : { success: false, message: "Dữ liệu hợp đồng không hợp lệ" };
+  const lead = contract ? mockLeads.find((l) => l.customerId === contract.customerId) : null;
 
   const handleApprove = async () => {
     if (!result.success) {
@@ -2107,7 +2200,7 @@ export function CEOFinalApprovalModal({
       return;
     }
     setLoading(true);
-    await new Promise(r => setTimeout(r, 1200));
+    await new Promise((r) => setTimeout(r, 1200));
     setLoading(false);
     onApproved();
     onClose();
@@ -2122,60 +2215,88 @@ export function CEOFinalApprovalModal({
           </DialogTitle>
         </DialogHeader>
         {!contract ? (
-           <div className="p-8 text-center text-muted-foreground">Không tìm thấy hồ sơ hợp đồng</div>
+          <div className="p-8 text-center text-muted-foreground">Không tìm thấy hồ sơ hợp đồng</div>
         ) : (
           <div className="space-y-4 py-4">
-          <div className="grid grid-cols-2 gap-4">
-            <div className="p-3 bg-muted rounded-lg">
-              <div className="text-[10px] font-black uppercase text-muted-foreground mb-1">Giá trị Hợp đồng</div>
-              <div className="text-sm font-bold">{new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(contract.value)}</div>
+            <div className="grid grid-cols-2 gap-4">
+              <div className="p-3 bg-muted rounded-lg">
+                <div className="text-[10px] font-black uppercase text-muted-foreground mb-1">
+                  Giá trị Hợp đồng
+                </div>
+                <div className="text-sm font-bold">
+                  {new Intl.NumberFormat("vi-VN", { style: "currency", currency: "VND" }).format(
+                    contract.value,
+                  )}
+                </div>
+              </div>
+              <div className="p-3 bg-primary/10 rounded-lg border border-primary/20">
+                <div className="text-[10px] font-black uppercase text-primary mb-1">
+                  Kế toán đã nhập
+                </div>
+                <div className="text-sm font-bold text-primary">
+                  {new Intl.NumberFormat("vi-VN", { style: "currency", currency: "VND" }).format(
+                    enteredTotal,
+                  )}
+                </div>
+              </div>
             </div>
-            <div className="p-3 bg-primary/10 rounded-lg border border-primary/20">
-              <div className="text-[10px] font-black uppercase text-primary mb-1">Kế toán đã nhập</div>
-              <div className="text-sm font-bold text-primary">{new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(enteredTotal)}</div>
-            </div>
-          </div>
 
-          <div className="p-3 border rounded-lg bg-muted/30">
-            <div className="text-[10px] font-black uppercase text-muted-foreground mb-2">Hồ sơ đối soát</div>
-            <div className="flex gap-4">
-              <a 
-                href={lead?.quoteFileUrl} 
-                target="_blank" 
-                className={`text-xs flex items-center gap-1.5 ${lead?.quoteFileUrl ? 'text-primary hover:underline' : 'text-muted-foreground pointer-events-none'}`}
-              >
-                <FileText className="h-3.5 w-3.5" /> File Báo giá
-              </a>
-              <a 
-                href={contract.contractFileUrl} 
-                target="_blank" 
-                className={`text-xs flex items-center gap-1.5 ${contract.contractFileUrl ? 'text-primary hover:underline' : 'text-muted-foreground pointer-events-none'}`}
-              >
-                <FileText className="h-3.5 w-3.5" /> File Hợp đồng đã ký
-              </a>
+            <div className="p-3 border rounded-lg bg-muted/30">
+              <div className="text-[10px] font-black uppercase text-muted-foreground mb-2">
+                Hồ sơ đối soát
+              </div>
+              <div className="flex gap-4">
+                <a
+                  href={lead?.quoteFileUrl}
+                  target="_blank"
+                  className={`text-xs flex items-center gap-1.5 ${lead?.quoteFileUrl ? "text-primary hover:underline" : "text-muted-foreground pointer-events-none"}`}
+                >
+                  <FileText className="h-3.5 w-3.5" /> File Báo giá
+                </a>
+                <a
+                  href={contract.contractFileUrl}
+                  target="_blank"
+                  className={`text-xs flex items-center gap-1.5 ${contract.contractFileUrl ? "text-primary hover:underline" : "text-muted-foreground pointer-events-none"}`}
+                >
+                  <FileText className="h-3.5 w-3.5" /> File Hợp đồng đã ký
+                </a>
+              </div>
             </div>
-          </div>
 
-          <div className={`p-4 rounded-xl border flex gap-3 ${result.success ? 'bg-success/5 border-success/20 text-success' : 'bg-destructive/5 border-destructive/20 text-destructive'}`}>
-            {result.success ? <CheckCircle2 className="h-5 w-5 shrink-0" /> : <AlertCircle className="h-5 w-5 shrink-0" />}
-            <div className="text-sm">
-              <div className="font-bold mb-0.5">{result.success ? "Khớp số liệu" : "Lệch số liệu"}</div>
-              <div className="opacity-80">{result.message}</div>
+            <div
+              className={`p-4 rounded-xl border flex gap-3 ${result.success ? "bg-success/5 border-success/20 text-success" : "bg-destructive/5 border-destructive/20 text-destructive"}`}
+            >
+              {result.success ? (
+                <CheckCircle2 className="h-5 w-5 shrink-0" />
+              ) : (
+                <AlertCircle className="h-5 w-5 shrink-0" />
+              )}
+              <div className="text-sm">
+                <div className="font-bold mb-0.5">
+                  {result.success ? "Khớp số liệu" : "Lệch số liệu"}
+                </div>
+                <div className="opacity-80">{result.message}</div>
+              </div>
             </div>
           </div>
-        </div>
         )}
         <DialogFooter>
-          <Button variant="outline" onClick={onClose}>Hủy</Button>
-          {contract && (!result.success ? (
-            <Button variant="destructive" onClick={() => toast.info("Đã gửi yêu cầu Kế toán kiểm tra lại hồ sơ.")}>
-              Yêu cầu Kế toán sửa lại
-            </Button>
-          ) : (
-            <Button className="bg-success hover:bg-success/90" onClick={handleApprove}>
-              Phê duyệt & Chuyển Bảo hành
-            </Button>
-          ))}
+          <Button variant="outline" onClick={onClose}>
+            Hủy
+          </Button>
+          {contract &&
+            (!result.success ? (
+              <Button
+                variant="destructive"
+                onClick={() => toast.info("Đã gửi yêu cầu Kế toán kiểm tra lại hồ sơ.")}
+              >
+                Yêu cầu Kế toán sửa lại
+              </Button>
+            ) : (
+              <Button className="bg-success hover:bg-success/90" onClick={handleApprove}>
+                Phê duyệt & Chuyển Bảo hành
+              </Button>
+            ))}
         </DialogFooter>
       </DialogContent>
     </Dialog>
@@ -2196,7 +2317,13 @@ export function CreateHotlineIncidentModal({
   const [issue, setIssue] = useState("");
 
   const filteredElevators = mockElevators.filter((e) => e.tenantId === activeTenantId);
-  const technicians = mockUsers.filter((u) => u.memberships.some(m => m.tenantId === activeTenantId && (m.permissions.includes('tech_maintenance') || m.permissions.includes('tech_installation'))));
+  const technicians = mockUsers.filter((u) =>
+    u.memberships.some(
+      (m) =>
+        m.tenantId === activeTenantId &&
+        (m.permissions.includes("tech_maintenance") || m.permissions.includes("tech_installation")),
+    ),
+  );
 
   const handleCreate = async () => {
     if (!selectedElevatorId || !techId || !issue) {
@@ -2206,7 +2333,7 @@ export function CreateHotlineIncidentModal({
     setLoading(true);
     await new Promise((r) => setTimeout(r, 800));
     const elev = getElevator(selectedElevatorId);
-    
+
     toast.success(`Đã tạo sự cố khẩn cấp ${elev?.code} và điều động kỹ thuật!`);
     setLoading(false);
     onOpenChange(false);
@@ -2226,7 +2353,9 @@ export function CreateHotlineIncidentModal({
 
         <div className="space-y-4 py-4">
           <div className="space-y-2">
-            <label className="text-sm font-bold uppercase tracking-tight">Chọn Thang máy báo lỗi</label>
+            <label className="text-sm font-bold uppercase tracking-tight">
+              Chọn Thang máy báo lỗi
+            </label>
             <Select value={selectedElevatorId} onValueChange={setSelectedElevatorId}>
               <SelectTrigger>
                 <SelectValue placeholder="-- Chọn thang máy --" />
@@ -2242,9 +2371,11 @@ export function CreateHotlineIncidentModal({
           </div>
 
           <div className="space-y-2">
-            <label className="text-sm font-bold uppercase tracking-tight">Mô tả sự cố (HOTLINE)</label>
-            <Textarea 
-              placeholder="Khách báo kẹt thang, thang rung lắc mạnh..." 
+            <label className="text-sm font-bold uppercase tracking-tight">
+              Mô tả sự cố (HOTLINE)
+            </label>
+            <Textarea
+              placeholder="Khách báo kẹt thang, thang rung lắc mạnh..."
               value={issue}
               onChange={(e) => setIssue(e.target.value)}
               className="min-h-[100px]"
@@ -2252,7 +2383,9 @@ export function CreateHotlineIncidentModal({
           </div>
 
           <div className="space-y-2">
-            <label className="text-sm font-bold uppercase tracking-tight">Điều phối thợ xử lý</label>
+            <label className="text-sm font-bold uppercase tracking-tight">
+              Điều phối thợ xử lý
+            </label>
             <Select value={techId} onValueChange={setTechId}>
               <SelectTrigger>
                 <SelectValue placeholder="-- Chọn kỹ thuật viên --" />
@@ -2269,9 +2402,15 @@ export function CreateHotlineIncidentModal({
         </div>
 
         <DialogFooter>
-          <Button variant="outline" onClick={() => onOpenChange(false)}>Hủy</Button>
+          <Button variant="outline" onClick={() => onOpenChange(false)}>
+            Hủy
+          </Button>
           <Button variant="destructive" onClick={handleCreate} disabled={loading} className="gap-2">
-            {loading ? <RefreshCw className="h-4 w-4 animate-spin" /> : <Send className="h-4 w-4" />}
+            {loading ? (
+              <RefreshCw className="h-4 w-4 animate-spin" />
+            ) : (
+              <Send className="h-4 w-4" />
+            )}
             XÁC NHẬN & ĐIỀU PHỐI GẤP
           </Button>
         </DialogFooter>

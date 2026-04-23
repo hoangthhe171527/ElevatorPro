@@ -35,7 +35,7 @@ const DialogContent = React.forwardRef<
   React.ComponentPropsWithoutRef<typeof DialogPrimitive.Content>
 >(({ className, children, ...props }, ref) => {
   const normalizedChildren = React.useMemo(() => normalizeMojibakeNode(children), [children]);
-  
+
   return (
     <DialogPortal>
       <DialogOverlay />
@@ -77,7 +77,10 @@ const DialogTitle = React.forwardRef<
 >(({ className, ...props }, ref) => (
   <DialogPrimitive.Title
     ref={ref}
-    className={cn("text-lg font-semibold leading-none tracking-tight [font-family:var(--font-app)]", className)}
+    className={cn(
+      "text-lg font-semibold leading-none tracking-tight [font-family:var(--font-app)]",
+      className,
+    )}
     {...props}
   />
 ));

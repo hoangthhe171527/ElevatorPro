@@ -1,8 +1,8 @@
-import { 
-  INSTALL_STAGES_TEMPLATE, 
+import {
+  INSTALL_STAGES_TEMPLATE,
   MAINTENANCE_STEPS_TEMPLATE,
-  type Project, 
-  type Job, 
+  type Project,
+  type Job,
   type Contract,
   type Customer,
   type Lead,
@@ -10,18 +10,18 @@ import {
   type InvoiceStatus,
   mockContracts,
   mockProjects,
-  mockJobs
+  mockJobs,
 } from "./mock-data";
 
 /**
  * PHASE 1: CRM - Lead to Customer Conversion
  */
 export function handleLeadConversion(
-  lead: Lead, 
-  referralSourceId?: string
+  lead: Lead,
+  referralSourceId?: string,
 ): { customer: Customer; contract: Contract } {
   const customerId = `c-auto-${Date.now()}`;
-  
+
   const customer: Customer = {
     tenantId: lead.tenantId,
     id: customerId,
@@ -49,8 +49,8 @@ export function handleLeadConversion(
     type: "install",
     value: lead.estimatedValue,
     paid: 0,
-    startDate: new Date().toISOString().split('T')[0],
-    endDate: new Date(Date.now() + 365 * 24 * 60 * 60 * 1000).toISOString().split('T')[0],
+    startDate: new Date().toISOString().split("T")[0],
+    endDate: new Date(Date.now() + 365 * 24 * 60 * 60 * 1000).toISOString().split("T")[0],
     status: "draft",
     items: ["Cung cấp và lắp đặt thang máy trọn gói"],
     signedAt: "",
@@ -67,20 +67,25 @@ export function handleLeadConversion(
  * Utility to calculate technician workload (count of active/scheduled jobs)
  */
 export function getTechnicianWorkload(techId: string): number {
-  return mockJobs.filter(j => 
-    j.assignedTo === techId && 
-    (j.status === "scheduled" || j.status === "in_progress" || j.status === "appointment_confirmed" || j.status === "waiting_for_materials")
+  return mockJobs.filter(
+    (j) =>
+      j.assignedTo === techId &&
+      (j.status === "scheduled" ||
+        j.status === "in_progress" ||
+        j.status === "appointment_confirmed" ||
+        j.status === "waiting_for_materials"),
   ).length;
 }
 
 /**
  * PHASE 1.5: Maintenance Lead Conversion
  */
-export function handleMaintenanceLeadConversion(
-  lead: Lead
-): { customer: Customer; contract: Contract } {
+export function handleMaintenanceLeadConversion(lead: Lead): {
+  customer: Customer;
+  contract: Contract;
+} {
   const customerId = `c-maint-${Date.now()}`;
-  
+
   const customer: Customer = {
     tenantId: lead.tenantId,
     id: customerId,
@@ -106,8 +111,8 @@ export function handleMaintenanceLeadConversion(
     type: "maintenance",
     value: lead.estimatedValue,
     paid: 0,
-    startDate: new Date().toISOString().split('T')[0],
-    endDate: new Date(Date.now() + 365 * 24 * 60 * 60 * 1000).toISOString().split('T')[0],
+    startDate: new Date().toISOString().split("T")[0],
+    endDate: new Date(Date.now() + 365 * 24 * 60 * 60 * 1000).toISOString().split("T")[0],
     status: "draft",
     items: ["Dịch vụ bảo trì thang máy định kỳ mẫu"],
     signedAt: "",
@@ -127,13 +132,13 @@ export function handleMaintenanceLeadConversion(
  */
 export function handleContractActivation(
   contract: Contract,
-  projectName?: string
+  projectName?: string,
 ): { project?: Project; jobs: Job[] } {
   if (contract.type === "maintenance") {
     const jobs: Job[] = Array.from({ length: 12 }).map((_, index) => {
       const scheduledDate = new Date(contract.startDate);
       scheduledDate.setMonth(scheduledDate.getMonth() + index);
-      
+
       return {
         tenantId: contract.tenantId,
         id: `j-maint-${contract.id}-${index + 1}`,
@@ -150,9 +155,9 @@ export function handleContractActivation(
         beforePhotos: [],
         afterPhotos: [],
         createdAt: new Date().toISOString(),
-        maintenanceSteps: MAINTENANCE_STEPS_TEMPLATE.map(step => ({
+        maintenanceSteps: MAINTENANCE_STEPS_TEMPLATE.map((step) => ({
           ...step,
-          result: step.result as "pending" | "ok" | "repair" | "replace"
+          result: step.result as "pending" | "ok" | "repair" | "replace",
         })),
       };
     });
@@ -160,22 +165,22 @@ export function handleContractActivation(
   }
 
   const projectId = `p-auto-${contract.id}`;
-  
+
   const project: Project = {
     tenantId: contract.tenantId,
     id: projectId,
     name: projectName || `Lắp đặt thang máy - ${contract.code}`,
     address: "Địa chỉ theo hợp đồng",
     customerId: contract.customerId,
-    startDate: new Date().toISOString().split('T')[0],
+    startDate: new Date().toISOString().split("T")[0],
     status: "in_progress",
-    stage: "waiting_for_equipment", 
+    stage: "waiting_for_equipment",
   };
 
   const jobs: Job[] = INSTALL_STAGES_TEMPLATE.map((stage, index) => {
     const scheduledDate = new Date();
-    scheduledDate.setDate(scheduledDate.getDate() + (index * 7) + 7);
-    
+    scheduledDate.setDate(scheduledDate.getDate() + index * 7 + 7);
+
     return {
       tenantId: project.tenantId,
       id: `j-auto-${project.id}-${stage.id}`,
@@ -203,14 +208,11 @@ export function handleContractActivation(
  * PHASE 3: Equipment Arrival -> Installation Jobs Activation
  * When CEO confirms equipment arrival, system activates the installation jobs (sets first one to scheduled).
  */
-export function handleEquipmentArrival(
-  project: Project,
-  existingJobs: Job[]
-): { jobs: Job[] } {
-  const projectJobs = existingJobs.filter(j => j.projectId === project.id);
-  
+export function handleEquipmentArrival(project: Project, existingJobs: Job[]): { jobs: Job[] } {
+  const projectJobs = existingJobs.filter((j) => j.projectId === project.id);
+
   // Activate ALL installation jobs for this project
-  const activatedJobs = projectJobs.map(j => {
+  const activatedJobs = projectJobs.map((j) => {
     if (j.type === "install" && j.status === "pending") {
       // Set the first one to scheduled, others stay pending but visible
       if (j.code === "JOB-INSTALL-1") {
@@ -230,20 +232,20 @@ export function handleEquipmentArrival(
  */
 export function handleFinalVerification(
   contract: Contract,
-  enteredTotal: number
+  enteredTotal: number,
 ): { success: boolean; message: string } {
   const isMatch = Math.abs(contract.value - enteredTotal) < 1000; // allow for tiny rounding if any
-  
+
   if (!isMatch) {
-    return { 
-      success: false, 
-      message: "Số tiền Kế toán nhập bị lệch so với Hợp đồng. CEO từ chối phê duyệt." 
+    return {
+      success: false,
+      message: "Số tiền Kế toán nhập bị lệch so với Hợp đồng. CEO từ chối phê duyệt.",
     };
   }
 
-  return { 
-    success: true, 
-    message: "CEO đã phê duyệt số tiền. Dự án đủ điều kiện chuyển sang Bảo hành." 
+  return {
+    success: true,
+    message: "CEO đã phê duyệt số tiền. Dự án đủ điều kiện chuyển sang Bảo hành.",
   };
 }
 
@@ -252,7 +254,7 @@ export function handleFinalVerification(
  */
 export function initiateWarrantyFlow(
   project: Project,
-  contractValue: number
+  contractValue: number,
 ): { invoice: Invoice; warrantyProject: Project } {
   const invoice: Invoice = {
     tenantId: project.tenantId,
@@ -262,7 +264,7 @@ export function initiateWarrantyFlow(
     targetType: "project",
     targetId: project.id,
     amount: contractValue * 0.2, // Dummy 20%
-    dueDate: new Date().toISOString().split('T')[0],
+    dueDate: new Date().toISOString().split("T")[0],
     status: "paid",
     description: "Hóa đơn quyết toán cuối sau khi bàn giao (Đã CEO duyệt)",
     createdAt: new Date().toISOString(),
@@ -274,8 +276,8 @@ export function initiateWarrantyFlow(
     name: `Bảo hành: ${project.name}`,
     address: project.address,
     customerId: project.customerId,
-    startDate: new Date().toISOString().split('T')[0],
-    endDate: new Date(Date.now() + 365 * 24 * 60 * 60 * 1000).toISOString().split('T')[0],
+    startDate: new Date().toISOString().split("T")[0],
+    endDate: new Date(Date.now() + 365 * 24 * 60 * 60 * 1000).toISOString().split("T")[0],
     status: "in_progress",
     stage: "transition",
   };

@@ -1,4 +1,4 @@
-import { createFileRoute, notFound } from '@tanstack/react-router'
+import { createFileRoute, notFound } from "@tanstack/react-router";
 import { WebMaintenanceJobDetail } from "@/components/tech/web/WebTechMaintenanceDetail";
 import { mockJobs } from "@/lib/mock-data";
 

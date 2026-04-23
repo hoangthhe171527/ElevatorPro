@@ -13,7 +13,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { StatCard } from "@/components/common/StatCard";
-import { StatusBadge } from "@/components/common/StatusBadge";
+import { StatusBadge } from "@/components/common/StatusBadge";;
 import { priorityLabel, priorityVariant } from "@/lib/status-variants";
 import { RouteMap } from "@/components/common/RouteMap";
 import { mockJobs, optimizeRoute, formatDateTime, getCustomer } from "@/lib/mock-data";

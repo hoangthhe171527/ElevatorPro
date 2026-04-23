@@ -46,7 +46,6 @@ export const leadStatusVariant: Record<string, StatusVariant> = {
   surveying: "primary",
   surveyed: "warning",
   quoted: "warning",
-  negotiating: "warning",
   signed: "success",
   lost: "destructive",
 };
@@ -56,7 +55,6 @@ export const leadStatusLabel: Record<string, string> = {
   surveying: "Đang chờ khảo sát",
   surveyed: "Đã khảo sát",
   quoted: "Đã báo giá",
-  negotiating: "Đang thương thảo",
   signed: "Đã ký",
   lost: "Thất bại",
 };

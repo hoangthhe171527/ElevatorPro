@@ -18,7 +18,14 @@ import {
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { mockContracts, markMilestonePaid, formatVND, formatDate, mockJobs, getCustomer } from "@/lib/mock-data";
+import {
+  mockContracts,
+  markMilestonePaid,
+  formatVND,
+  formatDate,
+  mockJobs,
+  getCustomer,
+} from "@/lib/mock-data";
 import { useState } from "react";
 import { useAppStore, useCanWrite } from "@/lib/store";
 import { toast } from "sonner";
@@ -59,10 +66,10 @@ function AccountingPage() {
   const sortedMilestones = pendingMilestones.sort((a, b) => {
     const isOverdueA = new Date(a.dueDate) < new Date();
     const isOverdueB = new Date(b.dueDate) < new Date();
-    
+
     if (isOverdueA && !isOverdueB) return -1;
     if (!isOverdueA && isOverdueB) return 1;
-    
+
     return new Date(a.dueDate).getTime() - new Date(b.dueDate).getTime();
   });
 
@@ -167,13 +174,15 @@ function AccountingPage() {
           <div className="divide-y">
             {paginatedMilestones.map((ms) => {
               const isOverdue = new Date(ms.dueDate) < new Date();
-              const isUrgent = isOverdue || (new Date(ms.dueDate).getTime() - new Date().getTime() < 3 * 24 * 60 * 60 * 1000); // Overdue or within 3 days
+              const isUrgent =
+                isOverdue ||
+                new Date(ms.dueDate).getTime() - new Date().getTime() < 3 * 24 * 60 * 60 * 1000; // Overdue or within 3 days
               return (
                 <div
                   key={ms.id}
                   className={cn(
                     "p-4 flex items-center justify-between hover:bg-muted/50 transition-colors",
-                    isOverdue ? "bg-destructive/5" : ""
+                    isOverdue ? "bg-destructive/5" : "",
                   )}
                 >
                   <div className="flex gap-4">
@@ -214,10 +223,16 @@ function AccountingPage() {
                         Hạn chót: {formatDate(ms.dueDate)}
                       </div>
                       <div className="flex gap-3 mt-2">
-                        <button className="text-[10px] font-bold text-primary flex items-center gap-1 hover:underline" onClick={() => toast.info("Đang mở file Báo giá...")}>
+                        <button
+                          className="text-[10px] font-bold text-primary flex items-center gap-1 hover:underline"
+                          onClick={() => toast.info("Đang mở file Báo giá...")}
+                        >
                           <FileText className="h-3 w-3" /> XEM BÁO GIÁ
                         </button>
-                        <button className="text-[10px] font-bold text-primary flex items-center gap-1 hover:underline" onClick={() => toast.info("Đang mở file Hợp đồng...")}>
+                        <button
+                          className="text-[10px] font-bold text-primary flex items-center gap-1 hover:underline"
+                          onClick={() => toast.info("Đang mở file Hợp đồng...")}
+                        >
                           <ShieldCheck className="h-3 w-3" /> XEM HỢP ĐỒNG
                         </button>
                       </div>
@@ -270,10 +285,18 @@ function AccountingPage() {
         </CardHeader>
         <CardContent>
           <div className="divide-y">
-            {contracts.filter(c => c.paid > 0 && !c.accountantVerified && !c.ceoVerified).map(c => {
-               const totalStages = (c.paymentStages.stage1Paid || 0) + (c.paymentStages.stage2Paid || 0) + (c.paymentStages.stage3Paid || 0);
-               return (
-                 <div key={c.id} className="p-4 flex items-center justify-between hover:bg-muted/50 transition-colors">
+            {contracts
+              .filter((c) => c.paid > 0 && !c.accountantVerified && !c.ceoVerified)
+              .map((c) => {
+                const totalStages =
+                  (c.paymentStages.stage1Paid || 0) +
+                  (c.paymentStages.stage2Paid || 0) +
+                  (c.paymentStages.stage3Paid || 0);
+                return (
+                  <div
+                    key={c.id}
+                    className="p-4 flex items-center justify-between hover:bg-muted/50 transition-colors"
+                  >
                     <div className="flex gap-4">
                       <div className="mt-1 flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-primary/10 text-primary">
                         <FileText className="h-5 w-5" />
@@ -281,18 +304,24 @@ function AccountingPage() {
                       <div>
                         <div className="font-semibold">{c.code}</div>
                         <div className="text-sm text-muted-foreground mt-1">
-                          Tổng thực thu kế toán đã nhập: <span className="font-bold text-foreground">{formatVND(totalStages)}</span> / {formatVND(c.value)}
+                          Tổng thực thu kế toán đã nhập:{" "}
+                          <span className="font-bold text-foreground">
+                            {formatVND(totalStages)}
+                          </span>{" "}
+                          / {formatVND(c.value)}
                         </div>
                         <div className="text-xs text-muted-foreground mt-0.5">
                           Click để chốt số liệu và gửi CEO kiểm tra đối soát.
                         </div>
                       </div>
                     </div>
-                    <Button 
+                    <Button
                       size="sm"
                       className="gap-1.5"
                       onClick={() => {
-                        const updated = contracts.map(item => item.id === c.id ? { ...item, accountantVerified: true } : item);
+                        const updated = contracts.map((item) =>
+                          item.id === c.id ? { ...item, accountantVerified: true } : item,
+                        );
                         setContracts(updated);
                         // In a real app, this would update the backend
                         toast.success(`Đã gửi báo cáo HĐ ${c.code} lên CEO.`);
@@ -300,10 +329,11 @@ function AccountingPage() {
                     >
                       <Send className="h-4 w-4" /> Gửi CEO duyệt
                     </Button>
-                 </div>
-               );
-            })}
-            {contracts.filter(c => c.paid > 0 && !c.accountantVerified && !c.ceoVerified).length === 0 && (
+                  </div>
+                );
+              })}
+            {contracts.filter((c) => c.paid > 0 && !c.accountantVerified && !c.ceoVerified)
+              .length === 0 && (
               <div className="p-8 text-center text-muted-foreground">
                 <p className="text-sm italic">Tất cả số liệu đã được gửi hoặc CEO đã duyệt.</p>
               </div>
@@ -322,55 +352,76 @@ function AccountingPage() {
         </CardHeader>
         <CardContent>
           <div className="divide-y">
-            {contracts.filter(c => c.accountantVerified && !c.ceoVerified).map(c => {
-              const totalPaid = c.paymentStages.stage1Paid + c.paymentStages.stage2Paid + c.paymentStages.stage3Paid;
-              const remaining = c.value - totalPaid;
-              return (
-                <div key={c.id} className="p-4 flex items-center justify-between hover:bg-muted/50 transition-colors">
-                  <div className="flex gap-4">
-                    <div className="mt-1 flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-indigo-500/10 text-indigo-600">
-                      <ShieldCheck className="h-5 w-5" />
+            {contracts
+              .filter((c) => c.accountantVerified && !c.ceoVerified)
+              .map((c) => {
+                const totalPaid =
+                  c.paymentStages.stage1Paid +
+                  c.paymentStages.stage2Paid +
+                  c.paymentStages.stage3Paid;
+                const remaining = c.value - totalPaid;
+                return (
+                  <div
+                    key={c.id}
+                    className="p-4 flex items-center justify-between hover:bg-muted/50 transition-colors"
+                  >
+                    <div className="flex gap-4">
+                      <div className="mt-1 flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-indigo-500/10 text-indigo-600">
+                        <ShieldCheck className="h-5 w-5" />
+                      </div>
+                      <div>
+                        <div className="flex items-center gap-2">
+                          <div className="font-semibold">{c.code}</div>
+                          <Badge className="bg-indigo-100 text-indigo-700 text-[10px]">
+                            Kế toán đã xác nhận
+                          </Badge>
+                        </div>
+                        <div className="text-sm text-muted-foreground mt-1">
+                          Tổng HĐ:{" "}
+                          <span className="font-medium text-foreground">{formatVND(c.value)}</span>{" "}
+                          • Đã thu:{" "}
+                          <span className="text-success font-medium">{formatVND(totalPaid)}</span> •
+                          Còn lại:{" "}
+                          <span className="text-warning-foreground font-medium">
+                            {formatVND(remaining)}
+                          </span>
+                        </div>
+                        <div className="text-xs text-muted-foreground mt-0.5">
+                          Thiết bị về: {formatVND(c.paymentStages.stage1Paid)} • Hoàn thành lắp:{" "}
+                          {formatVND(c.paymentStages.stage2Paid)} • Quyết toán:{" "}
+                          {formatVND(c.paymentStages.stage3Paid)}
+                        </div>
+                      </div>
                     </div>
-                    <div>
-                      <div className="flex items-center gap-2">
-                        <div className="font-semibold">{c.code}</div>
-                        <Badge className="bg-indigo-100 text-indigo-700 text-[10px]">Kế toán đã xác nhận</Badge>
-                      </div>
-                      <div className="text-sm text-muted-foreground mt-1">
-                        Tổng HĐ: <span className="font-medium text-foreground">{formatVND(c.value)}</span> • 
-                        Đã thu: <span className="text-success font-medium">{formatVND(totalPaid)}</span> • 
-                        Còn lại: <span className="text-warning-foreground font-medium">{formatVND(remaining)}</span>
-                      </div>
-                      <div className="text-xs text-muted-foreground mt-0.5">
-                        Thiết bị về: {formatVND(c.paymentStages.stage1Paid)} • Hoàn thành lắp: {formatVND(c.paymentStages.stage2Paid)} • Quyết toán: {formatVND(c.paymentStages.stage3Paid)}
-                      </div>
+                    <div className="flex items-center gap-2">
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        className="text-destructive border-destructive/30 hover:bg-destructive/5"
+                        onClick={() => toast.info("Đã gửi yêu cầu kế toán đối soát lại số liệu.")}
+                      >
+                        Yêu cầu đối soát
+                      </Button>
+                      <Button
+                        size="sm"
+                        className="bg-success hover:bg-success/90 gap-1.5"
+                        onClick={() => {
+                          const updated = contracts.map((item) =>
+                            item.id === c.id ? { ...item, ceoVerified: true } : item,
+                          );
+                          setContracts(updated);
+                          toast.success(
+                            `CEO đã duyệt đối soát HĐ ${c.code}. Hệ thống đã ghi nhận hoàn tất thanh toán.`,
+                          );
+                        }}
+                      >
+                        <CheckCircle2 className="h-4 w-4" /> CEO Duyệt
+                      </Button>
                     </div>
                   </div>
-                  <div className="flex items-center gap-2">
-                    <Button 
-                      variant="outline" 
-                      size="sm"
-                      className="text-destructive border-destructive/30 hover:bg-destructive/5"
-                      onClick={() => toast.info("Đã gửi yêu cầu kế toán đối soát lại số liệu.")}
-                    >
-                      Yêu cầu đối soát
-                    </Button>
-                    <Button 
-                      size="sm"
-                      className="bg-success hover:bg-success/90 gap-1.5"
-                      onClick={() => {
-                        const updated = contracts.map(item => item.id === c.id ? { ...item, ceoVerified: true } : item);
-                        setContracts(updated);
-                        toast.success(`CEO đã duyệt đối soát HĐ ${c.code}. Hệ thống đã ghi nhận hoàn tất thanh toán.`);
-                      }}
-                    >
-                      <CheckCircle2 className="h-4 w-4" /> CEO Duyệt
-                    </Button>
-                  </div>
-                </div>
-              );
-            })}
-            {contracts.filter(c => c.accountantVerified && !c.ceoVerified).length === 0 && (
+                );
+              })}
+            {contracts.filter((c) => c.accountantVerified && !c.ceoVerified).length === 0 && (
               <div className="p-8 text-center text-muted-foreground">
                 <CheckCircle2 className="h-10 w-10 mx-auto text-muted-foreground/30 mb-3" />
                 <p>Không có hợp đồng nào chờ CEO duyệt đối soát.</p>
@@ -395,55 +446,85 @@ function AccountingPage() {
         </CardHeader>
         <CardContent className="p-0">
           <div className="divide-y">
-            {mockJobs.filter(j => (j.type === 'repair' || j.type === 'maintenance') && j.status === 'completed' && j.repairQuote).map(j => {
-              const cus = getCustomer(j.customerId);
-              return (
-                <div key={j.id} className="p-4 flex items-center justify-between hover:bg-muted/50 transition-colors">
-                  <div className="flex gap-4">
-                    <div className={`mt-1 flex h-10 w-10 shrink-0 items-center justify-center rounded-full ${j.type === 'repair' ? 'bg-orange-500/10 text-orange-600' : 'bg-blue-500/10 text-blue-600'}`}>
-                      <Wrench className="h-5 w-5" />
+            {mockJobs
+              .filter(
+                (j) =>
+                  (j.type === "repair" || j.type === "maintenance") &&
+                  j.status === "completed" &&
+                  j.repairQuote,
+              )
+              .map((j) => {
+                const cus = getCustomer(j.customerId);
+                return (
+                  <div
+                    key={j.id}
+                    className="p-4 flex items-center justify-between hover:bg-muted/50 transition-colors"
+                  >
+                    <div className="flex gap-4">
+                      <div
+                        className={`mt-1 flex h-10 w-10 shrink-0 items-center justify-center rounded-full ${j.type === "repair" ? "bg-orange-500/10 text-orange-600" : "bg-blue-500/10 text-blue-600"}`}
+                      >
+                        <Wrench className="h-5 w-5" />
+                      </div>
+                      <div>
+                        <div className="flex items-center gap-2">
+                          <span className="font-semibold">{j.code}</span>
+                          <Badge variant="secondary" className="text-[10px]">
+                            {j.type === "repair" ? "Sửa chữa" : "Bảo trì"}
+                          </Badge>
+                        </div>
+                        <div className="text-sm mt-1">{j.title}</div>
+                        <div className="text-xs text-muted-foreground mt-0.5">
+                          KH: {cus?.name} • Tổng:{" "}
+                          <span className="font-bold text-foreground">
+                            {formatVND(j.repairQuote?.total || j.cost || 0)}
+                          </span>
+                        </div>
+                      </div>
                     </div>
-                    <div>
-                      <div className="flex items-center gap-2">
-                        <span className="font-semibold">{j.code}</span>
-                        <Badge variant="secondary" className="text-[10px]">{j.type === 'repair' ? 'Sửa chữa' : 'Bảo trì'}</Badge>
-                      </div>
-                      <div className="text-sm mt-1">{j.title}</div>
-                      <div className="text-xs text-muted-foreground mt-0.5">
-                        KH: {cus?.name} • Tổng: <span className="font-bold text-foreground">{formatVND(j.repairQuote?.total || j.cost || 0)}</span>
-                      </div>
+                    <div className="flex items-center gap-2">
+                      <Button
+                        size="sm"
+                        variant="outline"
+                        className="gap-1.5"
+                        onClick={() => {
+                          toast.success(
+                            `Đã xuất hóa đơn VAT cho công việc ${j.code}. File PDF đã được tạo.`,
+                          );
+                          setTimeout(
+                            () =>
+                              toast.info("Hệ thống tự động gửi hóa đơn cho khách hàng qua email."),
+                            1000,
+                          );
+                        }}
+                      >
+                        <FileText className="h-3.5 w-3.5" /> Xuất HĐ VAT
+                      </Button>
+                      <Button
+                        size="sm"
+                        className="gap-1.5"
+                        onClick={() => {
+                          toast.success(`Đã gửi hóa đơn cho ${cus?.name}. Đang chờ thanh toán.`);
+                        }}
+                      >
+                        <Send className="h-3.5 w-3.5" /> Gửi KH
+                      </Button>
                     </div>
                   </div>
-                  <div className="flex items-center gap-2">
-                    <Button 
-                      size="sm" 
-                      variant="outline"
-                      className="gap-1.5"
-                      onClick={() => {
-                        toast.success(`Đã xuất hóa đơn VAT cho công việc ${j.code}. File PDF đã được tạo.`);
-                        setTimeout(() => toast.info("Hệ thống tự động gửi hóa đơn cho khách hàng qua email."), 1000);
-                      }}
-                    >
-                      <FileText className="h-3.5 w-3.5" /> Xuất HĐ VAT
-                    </Button>
-                    <Button 
-                      size="sm" 
-                      className="gap-1.5"
-                      onClick={() => {
-                        toast.success(`Đã gửi hóa đơn cho ${cus?.name}. Đang chờ thanh toán.`);
-                      }}
-                    >
-                      <Send className="h-3.5 w-3.5" /> Gửi KH
-                    </Button>
-                  </div>
-                </div>
-              );
-            })}
-            {mockJobs.filter(j => (j.type === 'repair' || j.type === 'maintenance') && j.status === 'completed' && j.repairQuote).length === 0 && (
+                );
+              })}
+            {mockJobs.filter(
+              (j) =>
+                (j.type === "repair" || j.type === "maintenance") &&
+                j.status === "completed" &&
+                j.repairQuote,
+            ).length === 0 && (
               <div className="p-8 text-center text-muted-foreground">
                 <Wrench className="h-10 w-10 mx-auto text-muted-foreground/30 mb-3" />
                 <p>Không có hóa đơn sửa chữa/bảo trì nào cần xử lý.</p>
-                <p className="text-xs mt-1">Hóa đơn sẽ xuất hiện khi kỹ thuật viên hoàn thành sửa chữa có báo giá.</p>
+                <p className="text-xs mt-1">
+                  Hóa đơn sẽ xuất hiện khi kỹ thuật viên hoàn thành sửa chữa có báo giá.
+                </p>
               </div>
             )}
           </div>

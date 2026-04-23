@@ -57,7 +57,5 @@ export function normalizeMojibakeNode(node: React.ReactNode): React.ReactNode {
   const normalizedChildren = normalizeMojibakeNode(props.children as React.ReactNode);
   changed = changed || normalizedChildren !== props.children;
 
-  return changed
-    ? React.cloneElement(node, nextProps, normalizedChildren)
-    : node;
+  return changed ? React.cloneElement(node, nextProps, normalizedChildren) : node;
 }

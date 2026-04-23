@@ -3,12 +3,17 @@
 // a real backend later without changing UI code.
 
 export type Permission =
-  | "sales_admin" // Sale Admin (Lead/Khách hàng)
-  | "intake_operator" // Tiếp nhận thông tin/Phân loại/Nhập liệu
-  | "ceo" // CEO (Phân việc/Điều phối)
-  | "tech_maintenance" // Kỹ thuật bảo trì
+  | "sales" // Sales (Người bán hàng)
+  | "sales_admin" // Sales Admin (Hỗ trợ bán hàng)
+  | "tech_survey" // Kỹ thuật khảo sát
+  | "tech_manager" // Quản lý kỹ thuật Tech Manager, PM
+  | "tech_installation_lead" // Tổ trưởng lắp đặt
   | "tech_installation" // Kỹ thuật lắp đặt
-  | "accountant"; // Kế toán (Tài chính/Hóa đơn)
+  | "accountant" // Kế toán
+  | "tech_maintenance" // Kỹ thuật bảo trì
+  | "tech_maintenance_lead" // Tổ trưởng bảo trì
+  | "service_dispatcher" // Admin Service / Điều phối
+  | "tech_troubleshooter"; // Kỹ thuật xử lý sự cố
 
 export type LeadType = "install" | "maintenance";
 
@@ -147,7 +152,7 @@ const _mockLeads_t2: Lead[] = [
     status: "lost",
     note: "Khách chốt với bên khác do họ có sẵn hàng trong kho, giao ngay được trong 15 ngày.",
     createdAt: "2024-03-20T10:00:00Z",
-  }
+  },
 ];
 
 export type ContractStatus = "active" | "expiring" | "expired" | "draft";
@@ -200,9 +205,9 @@ export interface Customer {
   lat: number;
   lng: number;
   referralPoints?: number;
-  referredById?: string; 
+  referredById?: string;
   convertedFromLeadId?: string;
-  customerType: "buying" | "service_only"; 
+  customerType: "buying" | "service_only";
 }
 
 export type InvoiceStatus = "draft" | "sent" | "partially_paid" | "paid" | "overdue" | "cancelled";
@@ -230,7 +235,13 @@ export type ProjectStage =
   | "completion" // GĐ5: Nghiệm thu hoàn thành
   | "transition"; // GĐ6: Chuyển sang bảo hành
 
-export type RequestType = "material" | "budget" | "project_advance" | "completion" | "lead_quote" | "contract_approval";
+export type RequestType =
+  | "material"
+  | "budget"
+  | "project_advance"
+  | "completion"
+  | "lead_quote"
+  | "contract_approval";
 export type RequestStatus = "pending" | "approved" | "rejected";
 
 export interface ApprovalRequest {
@@ -273,14 +284,35 @@ export interface WorkflowGate {
 }
 
 export const STRATEGIC_WORKFLOW: Record<string, Record<ProjectStage, WorkflowGate>> = {
-  "t-2": { // SMALL COMPANY (Simplified - Flexible)
-    lead: { approvers: ["ceo", "sales_admin"], label: "CEO/Sale Admin mở Lead và phát lệnh khảo sát", isFlexible: true },
-    contract: { approvers: ["ceo"], label: "CEO tải báo giá + hợp đồng đã ký", isFlexible: true },
-    waiting_for_equipment: { approvers: ["ceo"], label: "CEO xác nhận thiết bị đã về công trình", isFlexible: true },
-    installation: { approvers: ["tech_installation", "ceo"], label: "Kỹ thuật thi công, CEO giám sát tiến độ", isFlexible: true },
-    completion: { approvers: ["ceo"], label: "CEO xác nhận hoàn tất và chốt bàn giao", isFlexible: true },
-    transition: { approvers: ["ceo", "tech_maintenance"], label: "Chuyển sang bảo hành cho đội bảo trì", isFlexible: true },
-  }
+  "t-2": {
+    // SMALL COMPANY (Simplified - Flexible)
+    lead: {
+      approvers: ["tech_manager", "sales_admin"],
+      label: "CEO/Sales Admin mở Lead và phát lệnh khảo sát",
+      isFlexible: true,
+    },
+    contract: { approvers: ["tech_manager"], label: "CEO tải báo giá + hợp đồng đã ký", isFlexible: true },
+    waiting_for_equipment: {
+      approvers: ["tech_manager"],
+      label: "CEO xác nhận thiết bị đã về công trình",
+      isFlexible: true,
+    },
+    installation: {
+      approvers: ["tech_installation", "tech_manager"],
+      label: "Kỹ thuật thi công, CEO giám sát tiến độ",
+      isFlexible: true,
+    },
+    completion: {
+      approvers: ["tech_manager"],
+      label: "CEO xác nhận hoàn tất và chốt bàn giao",
+      isFlexible: true,
+    },
+    transition: {
+      approvers: ["tech_manager", "tech_maintenance"],
+      label: "Chuyển sang bảo hành cho đội bảo trì",
+      isFlexible: true,
+    },
+  },
 };
 
 export interface StageTask {
@@ -301,39 +333,119 @@ export const INSTALL_STAGES_TEMPLATE = [
 ];
 
 export const MAINTENANCE_STEPS_TEMPLATE: MaintenanceStep[] = [
-  { id: "m-step-1", label: "Kiểm tra sơ bộ", description: "Kiểm tra tổng quát vận hành, tiếng động lạ, rung lắc.", result: "pending", resolved: false },
-  { id: "m-step-2", label: "Kiểm tra phòng máy", description: "Kiểm tra động cơ, tủ điều khiển, phanh và cáp tải.", result: "pending", resolved: false },
-  { id: "m-step-3", label: "Kiểm tra Cabin", description: "Bảng điều khiển, nút bấm, đèn chiếu sáng, quạt thông gió.", result: "pending", resolved: false },
-  { id: "m-step-4", label: "An toàn & Vệ sinh", description: "Cảm biến cửa, cứu hộ tự động, vệ sinh rãnh dẫn hướng.", result: "pending", resolved: false },
+  {
+    id: "m-step-1",
+    label: "Kiểm tra sơ bộ",
+    description: "Kiểm tra tổng quát vận hành, tiếng động lạ, rung lắc.",
+    result: "pending",
+    resolved: false,
+  },
+  {
+    id: "m-step-2",
+    label: "Kiểm tra phòng máy",
+    description: "Kiểm tra động cơ, tủ điều khiển, phanh và cáp tải.",
+    result: "pending",
+    resolved: false,
+  },
+  {
+    id: "m-step-3",
+    label: "Kiểm tra Cabin",
+    description: "Bảng điều khiển, nút bấm, đèn chiếu sáng, quạt thông gió.",
+    result: "pending",
+    resolved: false,
+  },
+  {
+    id: "m-step-4",
+    label: "An toàn & Vệ sinh",
+    description: "Cảm biến cửa, cứu hộ tự động, vệ sinh rãnh dẫn hướng.",
+    result: "pending",
+    resolved: false,
+  },
 ];
 
 export const STAGE_SUB_TASKS: Record<ProjectStage, StageTask[]> = {
   lead: [
-    { id: "lead_create", label: "CEO hoặc Sale Admin tạo Lead và nhập thông tin khách hàng", requiredRole: ["ceo", "sales_admin"] },
-    { id: "survey_job_create", label: "CEO hoặc Sale Admin tạo công việc khảo sát", requiredRole: ["ceo", "sales_admin"] },
-    { id: "survey_schedule_confirm", label: "Kỹ thuật liên hệ khách và xác nhận lịch khảo sát", requiredRole: "tech_installation" },
-    { id: "survey_done_report", label: "Kỹ thuật khảo sát thực tế, hoàn thành job và gửi báo cáo", requiredRole: "tech_installation" },
+    {
+      id: "lead_create",
+      label: "CEO hoặc Sales Admin tạo Lead và nhập thông tin khách hàng",
+      requiredRole: ["tech_manager", "sales_admin"],
+    },
+    {
+      id: "survey_job_create",
+      label: "CEO hoặc Sales Admin tạo công việc khảo sát",
+      requiredRole: ["tech_manager", "sales_admin"],
+    },
+    {
+      id: "survey_schedule_confirm",
+      label: "Kỹ thuật liên hệ khách và xác nhận lịch khảo sát",
+      requiredRole: ["tech_survey", "tech_installation_lead"],
+    },
+    {
+      id: "survey_done_report",
+      label: "Kỹ thuật khảo sát thực tế, hoàn thành job và gửi báo cáo",
+      requiredRole: ["tech_survey", "tech_installation_lead"],
+    },
   ],
   contract: [
-    { id: "quote_upload", label: "CEO tạo báo giá ngoài hệ thống và upload file báo giá", requiredRole: "ceo" },
-    { id: "contract_upload", label: "CEO tạo và upload hợp đồng đã ký", requiredRole: "ceo" },
-    { id: "contract_confirm", label: "CEO xác nhận hợp đồng để hệ thống tự tạo project lắp đặt", requiredRole: "ceo" },
+    {
+      id: "quote_upload",
+      label: "CEO tạo báo giá ngoài hệ thống và upload file báo giá",
+      requiredRole: "tech_manager",
+    },
+    { id: "contract_upload", label: "CEO tạo và upload hợp đồng đã ký", requiredRole: "tech_manager" },
+    {
+      id: "contract_confirm",
+      label: "CEO xác nhận hợp đồng để hệ thống tự tạo project lắp đặt",
+      requiredRole: "tech_manager",
+    },
   ],
   waiting_for_equipment: [
-    { id: "eq_arrival_confirm", label: "CEO xác nhận thiết bị về công trình để kích hoạt việc lắp đặt", requiredRole: "ceo" },
+    {
+      id: "eq_arrival_confirm",
+      label: "CEO xác nhận thiết bị về công trình để kích hoạt việc lắp đặt",
+      requiredRole: "tech_manager",
+    },
   ],
   installation: [
-    { id: "work_assignment", label: "CEO phân công/kích hoạt các giai đoạn công việc", requiredRole: "ceo" },
-    { id: "field_installation", label: "Kỹ thuật lắp đặt thực hiện từng giai đoạn", requiredRole: "tech_installation" },
-    { id: "progress_update", label: "Kỹ thuật chụp ảnh hiện trường và cập nhật tiến độ", requiredRole: "tech_installation" },
+    {
+      id: "work_assignment",
+      label: "CEO phân công/kích hoạt các giai đoạn công việc",
+      requiredRole: "tech_manager",
+    },
+    {
+      id: "field_installation",
+      label: "Kỹ thuật lắp đặt thực hiện từng giai đoạn",
+      requiredRole: "tech_installation",
+    },
+    {
+      id: "progress_update",
+      label: "Kỹ thuật chụp ảnh hiện trường và cập nhật tiến độ",
+      requiredRole: "tech_installation",
+    },
   ],
   completion: [
-    { id: "installation_done", label: "Kỹ thuật xác nhận đã hoàn tất toàn bộ các giai đoạn lắp đặt", requiredRole: "tech_installation" },
-    { id: "ceo_acceptance", label: "CEO xác nhận hoàn thành để chuyển sang bảo hành", requiredRole: "ceo" },
+    {
+      id: "installation_done",
+      label: "Kỹ thuật xác nhận đã hoàn tất toàn bộ các giai đoạn lắp đặt",
+      requiredRole: "tech_installation",
+    },
+    {
+      id: "ceo_acceptance",
+      label: "CEO xác nhận hoàn thành để chuyển sang bảo hành",
+      requiredRole: "tech_manager",
+    },
   ],
   transition: [
-    { id: "handover_maintenance", label: "Bàn giao hồ sơ cho đội kỹ thuật bảo trì", requiredRole: "tech_maintenance" },
-    { id: "warranty_start", label: "CEO xác nhận khởi động giai đoạn bảo hành", requiredRole: "ceo" },
+    {
+      id: "handover_maintenance",
+      label: "Bàn giao hồ sơ cho đội kỹ thuật bảo trì",
+      requiredRole: "tech_maintenance",
+    },
+    {
+      id: "warranty_start",
+      label: "CEO xác nhận khởi động giai đoạn bảo hành",
+      requiredRole: "tech_manager",
+    },
   ],
 };
 
@@ -407,7 +519,6 @@ const _mockProjects: Omit<Project, "tenantId">[] = [
     stage: "transition",
   },
 ];
-
 
 export interface PaymentMilestone {
   id: string;
@@ -567,9 +678,7 @@ export interface IssueReport {
 
 // ---------- USERS ----------
 // ---------- TENANTS ----------
-export const mockTenants: Tenant[] = [
-  { id: "t-2", name: "CÔNG TY NHỎ (Kiêm nhiệm)" },
-];
+export const mockTenants: Tenant[] = [{ id: "t-2", name: "CÔNG TY NHỎ (Kiêm nhiệm)" }];
 
 // ---------- USERS ----------
 export const mockUsers: User[] = [
@@ -582,23 +691,58 @@ export const mockUsers: User[] = [
     memberships: [
       {
         tenantId: "t-2",
-        permissions: ["ceo"],
+        permissions: ["tech_manager"],
       },
     ],
   },
   {
     id: "u-sales-admin-2",
-    name: "Trang Sale Admin",
+    name: "Trang Sales Admin",
     email: "sales-admin@smallco.vn",
     phone: "0902 119 119",
     memberships: [{ tenantId: "t-2", permissions: ["sales_admin"] }],
+  },
+  {
+    id: "u-sales-2",
+    name: "Nam Sales",
+    email: "sales@smallco.vn",
+    phone: "0902 117 117",
+    memberships: [{ tenantId: "t-2", permissions: ["sales"] }],
+  },
+  {
+    id: "u-pm-2",
+    name: "Huy PM",
+    email: "pm@smallco.vn",
+    phone: "0902 116 116",
+    memberships: [{ tenantId: "t-2", permissions: ["tech_manager"] }],
+  },
+  {
+    id: "u-tech-manager-2",
+    name: "Quang Trưởng bộ phận kỹ thuật",
+    email: "tech-manager@smallco.vn",
+    phone: "0902 223 223",
+    memberships: [{ tenantId: "t-2", permissions: ["tech_manager"] }],
+  },
+  {
+    id: "u-service-dispatch-2",
+    name: "Hà Admin Service / Điều phối",
+    email: "service-dispatch@smallco.vn",
+    phone: "0902 115 115",
+    memberships: [{ tenantId: "t-2", permissions: ["service_dispatcher"] }],
   },
   {
     id: "u-intake-2",
     name: "Minh Điều phối nhập liệu",
     email: "intake@smallco.vn",
     phone: "0902 118 118",
-    memberships: [{ tenantId: "t-2", permissions: ["intake_operator"] }],
+    memberships: [{ tenantId: "t-2", permissions: ["service_dispatcher"] }],
+  },
+  {
+    id: "u-tech-maint-lead-2",
+    name: "Long Tổ trưởng bảo trì",
+    email: "tech-maint-lead@smallco.vn",
+    phone: "0902 225 225",
+    memberships: [{ tenantId: "t-2", permissions: ["tech_maintenance_lead"] }],
   },
   {
     id: "u-tech-maint-2",
@@ -606,6 +750,20 @@ export const mockUsers: User[] = [
     email: "tech-maint@smallco.vn",
     phone: "0902 222 222",
     memberships: [{ tenantId: "t-2", permissions: ["tech_maintenance"] }],
+  },
+  {
+    id: "u-tech-install-lead-2",
+    name: "Tuấn Tổ trưởng lắp đặt/khảo sát",
+    email: "tech-install-lead@smallco.vn",
+    phone: "0902 226 226",
+    memberships: [{ tenantId: "t-2", permissions: ["tech_installation_lead"] }],
+  },
+  {
+    id: "u-tech-survey-2",
+    name: "Phúc Kỹ thuật khảo sát",
+    email: "tech-survey@smallco.vn",
+    phone: "0902 227 227",
+    memberships: [{ tenantId: "t-2", permissions: ["tech_survey"] }],
   },
   {
     id: "u-tech-install-2",
@@ -820,7 +978,7 @@ const _mockCustomers: Omit<Customer, "tenantId">[] = [
     elevatorCount: 48,
     createdAt: "2023-05-20",
     lat: 21.0173,
-    lng: 105.7840,
+    lng: 105.784,
     customerType: "service_only",
   },
   {
@@ -853,7 +1011,7 @@ export const mockInvoices: Invoice[] = [
     status: "paid",
     description: "Thanh toán đợt 1 - Nhà Phố Anh Hoàng",
     createdAt: "2026-04-09",
-  }
+  },
 ];
 
 // ---------- LEADS ----------
@@ -868,7 +1026,7 @@ const _mockLeads: Omit<Lead, "tenantId">[] = [
     address: "Bằng Lăng 3, Vinhomes Harmony",
     note: "Khách cần lắp thang máy gia đình kính 450kg",
     status: "new",
-    assignedTo: "u-director-2",
+    assignedTo: "u-sales-2",
     estimatedValue: 480000000,
     nextFollowUp: "2026-04-24",
     createdAt: "2026-04-22",
@@ -883,7 +1041,7 @@ const _mockLeads: Omit<Lead, "tenantId">[] = [
     address: "B2-01 Saritown, KĐT Sala, Quận 2",
     note: "Đã khảo sát hiện trạng hố thang, cần báo giá gấp",
     status: "surveyed",
-    assignedTo: "u-director-2",
+    assignedTo: "u-sales-admin-2",
     estimatedValue: 650000000,
     nextFollowUp: "2026-04-23",
     createdAt: "2026-04-20",
@@ -898,7 +1056,7 @@ const _mockLeads: Omit<Lead, "tenantId">[] = [
     address: "88 Láng Hạ, Đống Đa, Hà Nội",
     note: "Đã gửi báo giá, khách đang cân nhắc ký HĐ trong tuần",
     status: "quoted",
-    assignedTo: "u-director-2",
+    assignedTo: "u-sales-2",
     estimatedValue: 1200000000,
     nextFollowUp: "2026-04-24",
     createdAt: "2026-04-18",
@@ -914,7 +1072,7 @@ const _mockLeads: Omit<Lead, "tenantId">[] = [
     address: "136 Hồ Tùng Mậu, Bắc Từ Liêm",
     note: "Cần lắp 4 thang máy mới cho block C",
     status: "surveyed",
-    assignedTo: "u-director-2",
+    assignedTo: "u-sales-admin-2",
     estimatedValue: 2400000000,
     nextFollowUp: "2026-04-25",
     createdAt: "2026-03-12",
@@ -930,7 +1088,7 @@ const _mockLeads: Omit<Lead, "tenantId">[] = [
     address: "109 Trần Hưng Đạo, Hoàn Kiếm",
     note: "Quan tâm dịch vụ bảo trì 6 thang",
     status: "quoted",
-    assignedTo: "u-director-2",
+    assignedTo: "u-sales-2",
     estimatedValue: 540000000,
     nextFollowUp: "2026-04-22",
     createdAt: "2026-03-28",
@@ -945,7 +1103,7 @@ const _mockLeads: Omit<Lead, "tenantId">[] = [
     address: "Mỹ Đình, Nam Từ Liêm",
     note: "Lắp 1 thang gia đình 5 tầng",
     status: "surveying",
-    assignedTo: "u-director-2",
+    assignedTo: "u-sales-admin-2",
     estimatedValue: 380000000,
     nextFollowUp: "2026-04-20",
     createdAt: "2026-04-05",
@@ -960,7 +1118,7 @@ const _mockLeads: Omit<Lead, "tenantId">[] = [
     address: "1E Trường Chinh, Thanh Xuân",
     note: "Cải tạo 3 thang cũ",
     status: "new",
-    assignedTo: "u-director-2",
+    assignedTo: "u-sales-2",
     estimatedValue: 720000000,
     nextFollowUp: "2026-04-19",
     createdAt: "2026-04-15",
@@ -975,7 +1133,7 @@ const _mockLeads: Omit<Lead, "tenantId">[] = [
     address: "6 Bảo Khánh, Hoàn Kiếm",
     note: "Cần báo giá bảo trì",
     status: "signed",
-    assignedTo: "u-director-2",
+    assignedTo: "u-sales-admin-2",
     estimatedValue: 180000000,
     nextFollowUp: "2026-04-30",
     createdAt: "2026-02-20",
@@ -990,7 +1148,7 @@ const _mockLeads: Omit<Lead, "tenantId">[] = [
     address: "21 Cát Linh, Đống Đa",
     note: "Đang khảo sát",
     status: "lost",
-    assignedTo: "u-director-2",
+    assignedTo: "u-sales-2",
     estimatedValue: 290000000,
     nextFollowUp: "",
     createdAt: "2026-01-15",
@@ -1005,7 +1163,7 @@ const _mockLeads: Omit<Lead, "tenantId">[] = [
     address: "Long Biên, Hà Nội",
     note: "Bảo trì 6 thang",
     status: "surveyed",
-    assignedTo: "u-director-2",
+    assignedTo: "u-sales-admin-2",
     estimatedValue: 432000000,
     nextFollowUp: "2026-04-23",
     createdAt: "2026-03-30",
@@ -1020,7 +1178,7 @@ const _mockLeads: Omit<Lead, "tenantId">[] = [
     address: "Sầm Sơn, Thanh Hóa",
     note: "Lắp mới 8 thang",
     status: "quoted",
-    assignedTo: "u-director-2",
+    assignedTo: "u-sales-2",
     estimatedValue: 5600000000,
     nextFollowUp: "2026-04-28",
     createdAt: "2026-02-10",
@@ -1035,7 +1193,7 @@ const _mockLeads: Omit<Lead, "tenantId">[] = [
     address: "Vinhomes Riverside, Long Biên",
     note: "Thang gia đình 4 tầng",
     status: "surveying",
-    assignedTo: "u-director-2",
+    assignedTo: "u-sales-admin-2",
     estimatedValue: 320000000,
     nextFollowUp: "2026-04-21",
     createdAt: "2026-04-08",
@@ -1050,7 +1208,7 @@ const _mockLeads: Omit<Lead, "tenantId">[] = [
     address: "Tây Hồ, Hà Nội",
     note: "Cải tạo + bảo trì",
     status: "new",
-    assignedTo: "u-director-2",
+    assignedTo: "u-sales-2",
     estimatedValue: 980000000,
     nextFollowUp: "2026-04-24",
     createdAt: "2026-04-14",
@@ -1065,7 +1223,7 @@ const _mockLeads: Omit<Lead, "tenantId">[] = [
     address: "Phạm Hùng, Cầu Giấy",
     note: "1 thang chở hàng",
     status: "new",
-    assignedTo: "u-director-2",
+    assignedTo: "u-sales-admin-2",
     estimatedValue: 450000000,
     nextFollowUp: "2026-04-26",
     createdAt: "2026-04-16",
@@ -1080,7 +1238,7 @@ const _mockLeads: Omit<Lead, "tenantId">[] = [
     address: "Hoài Đức, Hà Nội",
     note: "12 thang block A,B,C",
     status: "quoted",
-    assignedTo: "u-director-2",
+    assignedTo: "u-sales-2",
     estimatedValue: 7200000000,
     nextFollowUp: "2026-05-02",
     createdAt: "2026-04-03",
@@ -1680,7 +1838,7 @@ const _mockJobs: Omit<Job, "tenantId">[] = [
     title: "Khảo sát thang Goldmark City",
     description: "Khảo sát hiện trạng để báo giá lắp mới",
     customerId: "c-1",
-    assignedTo: "u-tech-install-2",
+    assignedTo: "u-tech-survey-2",
     priority: "normal",
     status: "pending",
     scheduledFor: "2026-04-22T14:00:00",
@@ -1782,7 +1940,7 @@ const _mockJobs: Omit<Job, "tenantId">[] = [
     title: "Khảo sát BV An Việt",
     description: "Khảo sát cải tạo 3 thang cũ",
     customerId: "c-3",
-    assignedTo: "u-tech-install-2",
+    assignedTo: "u-tech-survey-2",
     priority: "normal",
     status: "pending",
     scheduledFor: "2026-04-24T14:00:00",
@@ -2245,7 +2403,8 @@ const _mockJobs: Omit<Job, "tenantId">[] = [
     code: "LD-AUTO-001",
     type: "install",
     title: "Lắp đặt: Cơ khí hố thang - Golden Park",
-    description: "Giai đoạn 2: Lắp đặt hệ thống ray dẫn hướng và khung đối trọng. Cần thợ lắp đặt chuyên nghiệp.",
+    description:
+      "Giai đoạn 2: Lắp đặt hệ thống ray dẫn hướng và khung đối trọng. Cần thợ lắp đặt chuyên nghiệp.",
     customerId: "c-3",
     elevatorId: "e-8",
     projectId: "p-3",
@@ -2437,22 +2596,14 @@ const _mockIssues: Omit<IssueReport, "tenantId">[] = [
   },
 ];
 
-export const mockCustomers = _mockCustomers.map(
-  (x) => ({ ...x, tenantId: "t-2" }) as Customer,
-);
+export const mockCustomers = _mockCustomers.map((x) => ({ ...x, tenantId: "t-2" }) as Customer);
 export const mockLeads: Lead[] = [
   ..._mockLeads_t2,
   ..._mockLeads.map((x) => ({ ...x, tenantId: "t-2" }) as Lead),
 ];
-export const mockContracts = _mockContracts.map(
-  (x) => ({ ...x, tenantId: "t-2" }) as Contract,
-);
-export const mockProjects = _mockProjects.map(
-  (x) => ({ ...x, tenantId: "t-2" }) as Project,
-);
-export const mockElevators = _mockElevators.map(
-  (x) => ({ ...x, tenantId: "t-2" }) as Elevator,
-);
+export const mockContracts = _mockContracts.map((x) => ({ ...x, tenantId: "t-2" }) as Contract);
+export const mockProjects = _mockProjects.map((x) => ({ ...x, tenantId: "t-2" }) as Project);
+export const mockElevators = _mockElevators.map((x) => ({ ...x, tenantId: "t-2" }) as Elevator);
 export const mockJobs = _mockJobs.map((x) => ({ ...x, tenantId: "t-2" }) as Job);
 export const mockInventory = _mockInventory.map(
   (x) => ({ ...x, tenantId: "t-2" }) as InventoryItem,
@@ -2605,7 +2756,7 @@ export function projectLatLng(lat: number, lng: number, width: number, height: n
 }
 
 export function getTechnicianWorkload(userId: string): number {
-  return mockJobs.filter(j => j.assignedTo === userId && j.status !== "completed").length;
+  return mockJobs.filter((j) => j.assignedTo === userId && j.status !== "completed").length;
 }
 
 export function haversineKm(a: { lat: number; lng: number }, b: { lat: number; lng: number }) {

@@ -17,7 +17,7 @@ export const Route = createFileRoute("/app/tech/jobs/$jobId")({
 
 function AppTechJobDetailContainer() {
   const { job } = Route.useLoaderData();
-  
+
   if (job.type === "maintenance") {
     return <WebMaintenanceJobDetail job={job} />;
   }

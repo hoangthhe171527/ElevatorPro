@@ -12,10 +12,18 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { DataPagination } from "@/components/common/DataPagination";
-import { StatusBadge } from "@/components/common/StatusBadge";
+import { StatusBadge } from "@/components/common/StatusBadge";;
 import { contractStatusLabel, contractStatusVariant } from "@/lib/status-variants";
 import { Progress } from "@/components/ui/progress";
-import { mockContracts, formatVND, formatDate, getCustomer, mockProjects, mockJobs, type Contract } from "@/lib/mock-data";
+import {
+  mockContracts,
+  formatVND,
+  formatDate,
+  getCustomer,
+  mockProjects,
+  mockJobs,
+  type Contract,
+} from "@/lib/mock-data";
 import { Plus, Search, FileText, Calendar, User, Banknote, AlertCircle } from "lucide-react";
 import {
   RecordPaymentModal,
@@ -37,10 +45,10 @@ const typeLabel: Record<string, string> = {
 
 export function WebContracts() {
   const permissions = useCurrentPermissions();
-  const isDirector = permissions.includes("ceo");
+  const isDirector = permissions.includes("tech_manager") || permissions.includes("tech_manager");
   const isAccountant = permissions.includes("accountant");
   const canCreate = useCanWrite("contracts");
-  
+
   const [page, setPage] = useState(1);
   const [search, setSearch] = useState("");
   const [statusFilter, setStatusFilter] = useState("all");
@@ -51,7 +59,7 @@ export function WebContracts() {
   const [confirmSignId, setConfirmSignId] = useState<string | null>(null);
   const [uploadContractId, setUploadContractId] = useState<string | null>(null);
   const [accountingVerifyId, setAccountingVerifyId] = useState<string | null>(null);
-  const isSmall = useAppStore(s => s.activeTenantId === 't-2');
+  const isSmall = useAppStore((s) => s.activeTenantId === "t-2");
 
   const filtered = mockContracts.filter((c) => {
     const cus = getCustomer(c.customerId);
@@ -83,15 +91,21 @@ export function WebContracts() {
 
       <div className="grid gap-4 sm:grid-cols-3 mb-6">
         <Card className="p-4 shadow-sm border-slate-100">
-          <div className="text-xs text-muted-foreground uppercase tracking-wider font-bold">Tổng giá trị</div>
+          <div className="text-xs text-muted-foreground uppercase tracking-wider font-bold">
+            Tổng giá trị
+          </div>
           <div className="mt-1 text-2xl font-black text-primary">{formatVND(totalValue)}</div>
         </Card>
         <Card className="p-4 shadow-sm border-slate-100">
-          <div className="text-xs text-muted-foreground uppercase tracking-wider font-bold">Đã thu</div>
+          <div className="text-xs text-muted-foreground uppercase tracking-wider font-bold">
+            Đã thu
+          </div>
           <div className="mt-1 text-2xl font-black text-success">{formatVND(totalPaid)}</div>
         </Card>
         <Card className="p-4 shadow-sm border-slate-100">
-          <div className="text-xs text-muted-foreground uppercase tracking-wider font-bold">Còn nợ</div>
+          <div className="text-xs text-muted-foreground uppercase tracking-wider font-bold">
+            Còn nợ
+          </div>
           <div className="mt-1 text-2xl font-black text-warning-foreground">
             {formatVND(totalValue - totalPaid)}
           </div>
@@ -112,25 +126,41 @@ export function WebContracts() {
               }}
             />
           </div>
-          <Select value={typeFilter} onValueChange={(v) => { setTypeFilter(v); setPage(1); }}>
+          <Select
+            value={typeFilter}
+            onValueChange={(v) => {
+              setTypeFilter(v);
+              setPage(1);
+            }}
+          >
             <SelectTrigger className="w-full sm:w-40 h-10 border-slate-200">
               <SelectValue placeholder="Loại" />
             </SelectTrigger>
             <SelectContent>
               <SelectItem value="all">Tất cả loại</SelectItem>
               {Object.entries(typeLabel).map(([k, v]) => (
-                <SelectItem key={k} value={k}>{v}</SelectItem>
+                <SelectItem key={k} value={k}>
+                  {v}
+                </SelectItem>
               ))}
             </SelectContent>
           </Select>
-          <Select value={statusFilter} onValueChange={(v) => { setStatusFilter(v); setPage(1); }}>
+          <Select
+            value={statusFilter}
+            onValueChange={(v) => {
+              setStatusFilter(v);
+              setPage(1);
+            }}
+          >
             <SelectTrigger className="w-full sm:w-44 h-10 border-slate-200">
               <SelectValue placeholder="Trạng thái" />
             </SelectTrigger>
             <SelectContent>
               <SelectItem value="all">Tất cả trạng thái</SelectItem>
               {Object.entries(contractStatusLabel).map(([k, v]) => (
-                <SelectItem key={k} value={k}>{v}</SelectItem>
+                <SelectItem key={k} value={k}>
+                  {v}
+                </SelectItem>
               ))}
             </SelectContent>
           </Select>
@@ -141,13 +171,13 @@ export function WebContracts() {
             const cus = getCustomer(c.customerId);
             const percent = c.value > 0 ? Math.round((c.paid / c.value) * 100) : 0;
             const remaining = c.value - c.paid;
-            
+
             const today = new Date();
             const endDate = new Date(c.endDate);
             const diffTime = endDate.getTime() - today.getTime();
             const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
             const isNearingExpiry = c.status === "active" && diffDays >= 0 && diffDays <= 15;
-            
+
             return (
               <div key={c.id} className="p-4 hover:bg-slate-50/50 transition-colors">
                 <div className="flex flex-col lg:flex-row gap-6">
@@ -169,9 +199,10 @@ export function WebContracts() {
                         <User className="h-4 w-4" /> {cus?.name}
                       </div>
                       <div className="mt-1.5 text-xs text-slate-500 font-medium flex items-center gap-1.5">
-                        <Calendar className="h-3.5 w-3.5" /> {formatDate(c.startDate)} → {formatDate(c.endDate)}
+                        <Calendar className="h-3.5 w-3.5" /> {formatDate(c.startDate)} →{" "}
+                        {formatDate(c.endDate)}
                       </div>
-                      
+
                       {isNearingExpiry && (
                         <div className="mt-3 p-3 rounded-xl bg-orange-50 border border-orange-200 text-orange-700 flex items-center gap-2">
                           <AlertCircle className="h-5 w-5 shrink-0 animate-pulse" />
@@ -190,14 +221,18 @@ export function WebContracts() {
                   <div className="lg:w-80 flex flex-col gap-3 p-4 bg-slate-50 rounded-2xl border border-slate-100">
                     <div className="space-y-2.5">
                       <div className="flex items-baseline justify-between gap-2">
-                        <span className="text-xs font-bold text-slate-500 uppercase">Tổng giá trị</span>
-                        <span className="font-black text-primary text-lg">{formatVND(c.value)}</span>
+                        <span className="text-xs font-bold text-slate-500 uppercase">
+                          Tổng giá trị
+                        </span>
+                        <span className="font-black text-primary text-lg">
+                          {formatVND(c.value)}
+                        </span>
                       </div>
                       <div className="flex items-baseline justify-between gap-2">
-                        <span className="text-xs font-bold text-slate-500 uppercase">Đã thu ({percent}%)</span>
-                        <span className="text-sm font-black text-success">
-                          {formatVND(c.paid)}
+                        <span className="text-xs font-bold text-slate-500 uppercase">
+                          Đã thu ({percent}%)
                         </span>
+                        <span className="text-sm font-black text-success">{formatVND(c.paid)}</span>
                       </div>
                       <Progress value={percent} className="h-2 bg-slate-200" />
                       {remaining > 0 && (
@@ -226,34 +261,34 @@ export function WebContracts() {
                           Chờ thanh toán
                         </div>
                       )}
-                       {c.status === "draft" && isDirector && (
-                            <Button
-                              size="sm"
-                              className="flex-1 bg-primary text-white hover:bg-primary/90"
-                              onClick={() => {
-                                if (!c.contractFileUrl) {
-                                  setUploadContractId(c.id);
-                                } else {
-                                  setConfirmSignId(c.id);
-                                }
-                              }}
-                            >
-                              <FileText className="h-4 w-4 mr-1.5" /> 
-                              {c.contractFileUrl ? "Ký HĐ & Vận hành" : "CEO tải lên HĐ"}
-                            </Button>
-                          )}
-                          
-                          {c.status === "active" && !c.accountantVerified && isAccountant && (
-                             <Button
-                               size="sm"
-                               variant="outline"
-                               className="border-success text-success bg-success/5 hover:bg-success hover:text-white"
-                               onClick={() => setAccountingVerifyId(c.id)}
-                             >
-                               <Banknote className="h-4 w-4 mr-1.5" /> KT thu lần 1
-                             </Button>
-                          )}
-                     </div>
+                      {c.status === "draft" && isDirector && (
+                        <Button
+                          size="sm"
+                          className="flex-1 bg-primary text-white hover:bg-primary/90"
+                          onClick={() => {
+                            if (!c.contractFileUrl) {
+                              setUploadContractId(c.id);
+                            } else {
+                              setConfirmSignId(c.id);
+                            }
+                          }}
+                        >
+                          <FileText className="h-4 w-4 mr-1.5" />
+                          {c.contractFileUrl ? "Ký HĐ & Vận hành" : "CEO tải lên HĐ"}
+                        </Button>
+                      )}
+
+                      {c.status === "active" && !c.accountantVerified && isAccountant && (
+                        <Button
+                          size="sm"
+                          variant="outline"
+                          className="border-success text-success bg-success/5 hover:bg-success hover:text-white"
+                          onClick={() => setAccountingVerifyId(c.id)}
+                        >
+                          <Banknote className="h-4 w-4 mr-1.5" /> KT thu lần 1
+                        </Button>
+                      )}
+                    </div>
                   </div>
                 </div>
               </div>
@@ -308,7 +343,7 @@ export function WebContracts() {
             const { project, jobs } = handleContractActivation(c);
             if (project) mockProjects.push(project);
             if (jobs && jobs.length > 0) mockJobs.push(...jobs);
-            
+
             toast.success(`Hợp đồng ${c.code} đã chính thức có hiệu lực!`);
             c.status = "active";
           }
@@ -318,38 +353,38 @@ export function WebContracts() {
         variant="success"
       />
 
-       {uploadContractId && (
-         <UploadDocumentModal 
-           open={true}
-           onClose={() => setUploadContractId(null)}
-           title="Hợp đồng đã ký xác nhận"
-           onUploadSuccess={(url) => {
-             const c = mockContracts.find(x => x.id === uploadContractId);
-             if (c) {
-               c.contractFileUrl = url;
-               toast.success("Đã lưu Hợp đồng.");
-             }
-           }}
-         />
-       )}
+      {uploadContractId && (
+        <UploadDocumentModal
+          open={true}
+          onClose={() => setUploadContractId(null)}
+          title="Hợp đồng đã ký xác nhận"
+          onUploadSuccess={(url) => {
+            const c = mockContracts.find((x) => x.id === uploadContractId);
+            if (c) {
+              c.contractFileUrl = url;
+              toast.success("Đã lưu Hợp đồng.");
+            }
+          }}
+        />
+      )}
 
-       {accountingVerifyId && (
-         <AccountantPaymentModal 
-           open={true}
-           onClose={() => setAccountingVerifyId(null)}
-           contract={mockContracts.find(x => x.id === accountingVerifyId)}
-           stage={1}
-           onSuccess={(amount) => {
-             const c = mockContracts.find(x => x.id === accountingVerifyId);
-             if (c) {
-               c.paymentStages.stage1Paid = amount;
-               c.paid += amount;
-               c.accountantVerified = true;
-               toast.success("Đã xác nhận tiền đợt 1.");
-             }
-           }}
-         />
-       )}
+      {accountingVerifyId && (
+        <AccountantPaymentModal
+          open={true}
+          onClose={() => setAccountingVerifyId(null)}
+          contract={mockContracts.find((x) => x.id === accountingVerifyId)}
+          stage={1}
+          onSuccess={(amount) => {
+            const c = mockContracts.find((x) => x.id === accountingVerifyId);
+            if (c) {
+              c.paymentStages.stage1Paid = amount;
+              c.paid += amount;
+              c.accountantVerified = true;
+              toast.success("Đã xác nhận tiền đợt 1.");
+            }
+          }}
+        />
+      )}
     </AppShell>
   );
 }

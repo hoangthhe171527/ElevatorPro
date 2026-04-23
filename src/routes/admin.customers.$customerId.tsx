@@ -6,7 +6,7 @@ import { PageHeader } from "@/components/common/PageHeader";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { StatusBadge } from "@/components/common/StatusBadge";
+import { StatusBadge } from "@/components/common/StatusBadge";;
 import {
   contractStatusLabel,
   contractStatusVariant,
@@ -78,13 +78,15 @@ function CustomerDetail() {
   const customerProjects = mockProjects.filter((p) => p.customerId === customer.id);
   const projectIds = customerProjects.map((p) => p.id);
   const elevators = mockElevators.filter((e) => projectIds.includes(e.projectId));
-  
-  const selectedElevator = elevators.find(e => e.id === selectedElevatorId);
-  const elevatorContracts = selectedElevator 
-    ? mockContracts.filter(c => c.elevatorId === selectedElevator.id || c.projectId === selectedElevator.projectId)
+
+  const selectedElevator = elevators.find((e) => e.id === selectedElevatorId);
+  const elevatorContracts = selectedElevator
+    ? mockContracts.filter(
+        (c) => c.elevatorId === selectedElevator.id || c.projectId === selectedElevator.projectId,
+      )
     : [];
 
-  const expiringContract = elevatorContracts.find(c => c.status === 'expiring');
+  const expiringContract = elevatorContracts.find((c) => c.status === "expiring");
 
   const handleBack = () => {
     if (selectedElevatorId) {
@@ -106,17 +108,22 @@ function CustomerDetail() {
           <div>
             <h1 className="text-3xl font-black text-slate-900 tracking-tight flex items-center gap-3">
               {customer.name}
-              <Badge variant="secondary" className="bg-blue-50 text-blue-700 hover:bg-blue-50 border-blue-100 uppercase text-[10px] font-bold">
-                {customer.type === 'business' ? 'Doanh nghiệp' : 'Cá nhân'}
+              <Badge
+                variant="secondary"
+                className="bg-blue-50 text-blue-700 hover:bg-blue-50 border-blue-100 uppercase text-[10px] font-bold"
+              >
+                {customer.type === "business" ? "Doanh nghiệp" : "Cá nhân"}
               </Badge>
             </h1>
             <p className="text-slate-500 font-medium mt-1">
-              {selectedElevatorId ? `Chi tiết thang máy: ${selectedElevator?.code}` : `Quản lý danh sách thang máy và hợp đồng của khách hàng`}
+              {selectedElevatorId
+                ? `Chi tiết thang máy: ${selectedElevator?.code}`
+                : `Quản lý danh sách thang máy và hợp đồng của khách hàng`}
             </p>
           </div>
-          
+
           {!selectedElevatorId && (
-            <Button 
+            <Button
               className="rounded-xl px-6 h-11 bg-primary hover:bg-primary/90 shadow-lg shadow-primary/20 font-bold"
               onClick={() => setElevatorOpen(true)}
             >
@@ -130,8 +137,8 @@ function CustomerDetail() {
         /* LIST OF ELEVATORS */
         <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
           {elevators.map((e) => (
-            <Card 
-              key={e.id} 
+            <Card
+              key={e.id}
               className="p-5 hover:border-primary/50 cursor-pointer transition-all hover:shadow-md group relative overflow-hidden"
               onClick={() => setSelectedElevatorId(e.id)}
             >
@@ -144,10 +151,14 @@ function CustomerDetail() {
                 <Building2 className="h-6 w-6" />
               </div>
               <h3 className="font-black text-slate-800 text-lg mb-1">{e.code}</h3>
-              <p className="text-sm text-slate-500 font-medium mb-4">{e.brand} · {e.model} · {e.floors} Tầng</p>
-              
+              <p className="text-sm text-slate-500 font-medium mb-4">
+                {e.brand} · {e.model} · {e.floors} Tầng
+              </p>
+
               <div className="flex items-center justify-between pt-4 border-t border-slate-50">
-                <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Xem chi tiết & Hợp đồng</span>
+                <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest">
+                  Xem chi tiết & Hợp đồng
+                </span>
                 <QrCode className="h-4 w-4 text-slate-300" />
               </div>
             </Card>
@@ -161,7 +172,11 @@ function CustomerDetail() {
               <p className="text-slate-500 text-sm max-w-[250px] mt-2">
                 Bắt đầu bằng cách thêm thang máy đầu tiên cho khách hàng này.
               </p>
-              <Button variant="outline" className="mt-6 rounded-xl" onClick={() => setElevatorOpen(true)}>
+              <Button
+                variant="outline"
+                className="mt-6 rounded-xl"
+                onClick={() => setElevatorOpen(true)}
+              >
                 Thêm ngay
               </Button>
             </Card>
@@ -170,7 +185,12 @@ function CustomerDetail() {
       ) : (
         /* ELEVATOR DETAIL VIEW */
         <div className="space-y-6 animate-in fade-in slide-in-from-bottom-4 duration-500">
-          <Button variant="ghost" size="sm" onClick={handleBack} className="font-bold text-primary hover:bg-primary/5">
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={handleBack}
+            className="font-bold text-primary hover:bg-primary/5"
+          >
             <ArrowLeft className="h-4 w-4 mr-2" /> Quay lại danh sách thang
           </Button>
 
@@ -186,8 +206,10 @@ function CustomerDetail() {
                 </StatusBadge>
               </div>
               <h2 className="text-2xl font-black mb-1">{selectedElevator?.code}</h2>
-              <p className="text-white/60 text-sm font-medium mb-6">{selectedElevator?.brand} {selectedElevator?.model}</p>
-              
+              <p className="text-white/60 text-sm font-medium mb-6">
+                {selectedElevator?.brand} {selectedElevator?.model}
+              </p>
+
               <div className="space-y-4 pt-6 border-t border-white/10">
                 <div className="flex items-center justify-between text-sm">
                   <span className="text-white/40">Vị trí</span>
@@ -200,8 +222,8 @@ function CustomerDetail() {
               </div>
 
               {/* ACTION: CREATE CONTRACT (Logic: Multi-elevator + New) */}
-              {(elevators.length >= 2) && (
-                <Button 
+              {elevators.length >= 2 && (
+                <Button
                   className="w-full mt-8 bg-white text-slate-900 hover:bg-white/90 rounded-xl font-black py-6 h-auto"
                   onClick={() => setContractOpen(true)}
                 >
@@ -223,8 +245,9 @@ function CustomerDetail() {
                   <div>
                     <h4 className="font-bold text-amber-900 text-sm">Hợp đồng sắp hết hạn!</h4>
                     <p className="text-amber-700 text-xs mt-1">
-                      Hợp đồng {expiringContract.code} sẽ hết hạn vào {formatDate(expiringContract.endDate)}. 
-                      Cần liên hệ khách hàng để tư vấn tái ký ngay.
+                      Hợp đồng {expiringContract.code} sẽ hết hạn vào{" "}
+                      {formatDate(expiringContract.endDate)}. Cần liên hệ khách hàng để tư vấn tái
+                      ký ngay.
                     </p>
                   </div>
                 </div>
@@ -239,7 +262,11 @@ function CustomerDetail() {
                         <div className="flex items-center gap-2">
                           <span className="font-black text-slate-800">{c.code}</span>
                           <Badge variant="secondary" className="text-[9px] uppercase font-bold">
-                            {c.type === 'install' ? 'Lắp đặt' : c.type === 'maintenance' ? 'Bảo trì' : 'Sửa chữa'}
+                            {c.type === "install"
+                              ? "Lắp đặt"
+                              : c.type === "maintenance"
+                                ? "Bảo trì"
+                                : "Sửa chữa"}
                           </Badge>
                         </div>
                         <StatusBadge variant={contractStatusVariant[c.status]}>
@@ -249,11 +276,17 @@ function CustomerDetail() {
 
                       <div className="flex items-center gap-6 text-sm mb-6">
                         <div>
-                          <div className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1">Thời hạn</div>
-                          <div className="font-bold text-slate-700">{formatDate(c.startDate)} — {formatDate(c.endDate)}</div>
+                          <div className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1">
+                            Thời hạn
+                          </div>
+                          <div className="font-bold text-slate-700">
+                            {formatDate(c.startDate)} — {formatDate(c.endDate)}
+                          </div>
                         </div>
                         <div>
-                          <div className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1">Giá trị</div>
+                          <div className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1">
+                            Giá trị
+                          </div>
                           <div className="font-bold text-primary">{formatVND(c.value)}</div>
                         </div>
                       </div>
@@ -270,7 +303,9 @@ function CustomerDetail() {
                 })}
                 {elevatorContracts.length === 0 && (
                   <div className="p-12 text-center bg-slate-50 rounded-2xl border border-dashed border-slate-200">
-                    <p className="text-slate-500 font-medium">Thang máy này chưa có hợp đồng dịch vụ.</p>
+                    <p className="text-slate-500 font-medium">
+                      Thang máy này chưa có hợp đồng dịch vụ.
+                    </p>
                   </div>
                 )}
               </div>

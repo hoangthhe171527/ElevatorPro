@@ -14,7 +14,7 @@ import {
 } from "@/components/ui/select";
 import { DataPagination } from "@/components/common/DataPagination";
 import { Progress } from "@/components/ui/progress";
-import { StatusBadge } from "@/components/common/StatusBadge";
+import { StatusBadge } from "@/components/common/StatusBadge";;
 import { mockInventory, formatVND, type InventoryItem } from "@/lib/mock-data";
 import {
   Plus,

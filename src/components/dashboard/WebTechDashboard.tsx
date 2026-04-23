@@ -4,7 +4,7 @@ import { PageHeader } from "@/components/common/PageHeader";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { StatCard } from "@/components/common/StatCard";
-import { StatusBadge } from "@/components/common/StatusBadge";
+import { StatusBadge } from "@/components/common/StatusBadge";;
 import { Badge } from "@/components/ui/badge";
 import {
   jobStatusLabel,
@@ -22,14 +22,14 @@ export function WebTechDashboard() {
     myCompletedCount: completed,
     myUrgentCount: urgent,
     myProjects,
-    isTechInstallation
+    isTechInstallation,
   } = useDashboardMetrics();
 
   return (
     <AppShell>
-      <PageHeader 
-        title="Hôm nay" 
-        description="Công việc của bạn cần xử lý" 
+      <PageHeader
+        title="Hôm nay"
+        description="Công việc của bạn cần xử lý"
         actions={
           <Link to="/tech/route-plan">
             <Button className="gap-2">
@@ -47,47 +47,60 @@ export function WebTechDashboard() {
 
       {isTechInstallation && (
         <div className="mb-6">
-        <div className="flex items-center justify-between mb-3">
-          <h3 className="font-bold text-lg flex items-center gap-2">
-            <Hammer className="h-5 w-5 text-primary" />
-            Dự án đang triển khai
-          </h3>
-          <Link to="/tech/jobs" search={{ tab: 'install' }} className="text-xs text-primary font-bold hover:underline">Xem tất cả</Link>
-        </div>
-        <div className="grid gap-4 sm:grid-cols-2">
-          {myProjects.map(p => (
-            <Link key={p.id} to="/tech/projects/$projectId" params={{ projectId: p.id }}>
-              <Card className="p-4 hover:shadow-md transition-all group border-l-4 border-l-primary">
-                <div className="flex justify-between items-start mb-2">
-                  <h4 className="font-bold group-hover:text-primary transition-colors">{p.name}</h4>
-                  <Badge variant="outline" className="text-[10px] uppercase font-bold">Giai đoạn: {p.stage}</Badge>
-                </div>
-                <div className="text-xs text-muted-foreground flex items-center gap-1.5 mb-3">
-                  <MapPin className="h-3 w-3" /> {p.address}
-                </div>
-                <div className="flex items-center justify-between text-[10px] font-bold uppercase tracking-tight text-primary">
-                  <span>Xem 8 giai đoạn lắp đặt</span>
-                  <div className="flex gap-1">
-                    {Array.from({ length: 8 }).map((_, i) => (
-                      <div key={i} className={`h-1.5 w-3 rounded-full ${i === 1 ? 'bg-primary' : i < 1 ? 'bg-success' : 'bg-muted'}`} />
-                    ))}
-                  </div>
-                </div>
-              </Card>
+          <div className="flex items-center justify-between mb-3">
+            <h3 className="font-bold text-lg flex items-center gap-2">
+              <Hammer className="h-5 w-5 text-primary" />
+              Dự án đang triển khai
+            </h3>
+            <Link
+              to="/tech/jobs"
+              search={{ tab: "install" }}
+              className="text-xs text-primary font-bold hover:underline"
+            >
+              Xem tất cả
             </Link>
-          ))}
-          {myProjects.length === 0 && (
-            <div className="sm:col-span-2 p-6 text-center bg-muted/20 rounded-xl border-2 border-dashed">
-              <p className="text-sm text-muted-foreground">Bạn chưa có dự án lắp đặt nào được gán.</p>
-            </div>
-          )}
+          </div>
+          <div className="grid gap-4 sm:grid-cols-2">
+            {myProjects.map((p) => (
+              <Link key={p.id} to="/tech/projects/$projectId" params={{ projectId: p.id }}>
+                <Card className="p-4 hover:shadow-md transition-all group border-l-4 border-l-primary">
+                  <div className="flex justify-between items-start mb-2">
+                    <h4 className="font-bold group-hover:text-primary transition-colors">
+                      {p.name}
+                    </h4>
+                    <Badge variant="outline" className="text-[10px] uppercase font-bold">
+                      Giai đoạn: {p.stage}
+                    </Badge>
+                  </div>
+                  <div className="text-xs text-muted-foreground flex items-center gap-1.5 mb-3">
+                    <MapPin className="h-3 w-3" /> {p.address}
+                  </div>
+                  <div className="flex items-center justify-between text-[10px] font-bold uppercase tracking-tight text-primary">
+                    <span>Xem 8 giai đoạn lắp đặt</span>
+                    <div className="flex gap-1">
+                      {Array.from({ length: 8 }).map((_, i) => (
+                        <div
+                          key={i}
+                          className={`h-1.5 w-3 rounded-full ${i === 1 ? "bg-primary" : i < 1 ? "bg-success" : "bg-muted"}`}
+                        />
+                      ))}
+                    </div>
+                  </div>
+                </Card>
+              </Link>
+            ))}
+            {myProjects.length === 0 && (
+              <div className="sm:col-span-2 p-6 text-center bg-muted/20 rounded-xl border-2 border-dashed">
+                <p className="text-sm text-muted-foreground">
+                  Bạn chưa có dự án lắp đặt nào được gán.
+                </p>
+              </div>
+            )}
+          </div>
         </div>
-      </div>
-    )}
+      )}
 
-      <h3 className="font-bold mb-3 text-lg">
-        Công việc tiếp theo
-      </h3>
+      <h3 className="font-bold mb-3 text-lg">Công việc tiếp theo</h3>
       <div className="space-y-3 mb-8">
         {today.map((j: Job) => {
           const cus = getCustomer(j.customerId);
@@ -118,8 +131,10 @@ export function WebTechDashboard() {
                       <Clock className="h-3 w-3" /> {formatDateTime(j.scheduledFor)}
                     </div>
                     <div className="flex items-start gap-1.5 line-clamp-2">
-                      <MapPin className="h-3 w-3 shrink-0 mt-0.5" /> 
-                      <span>{cus?.name} {cus?.address ? `— ${cus?.address}` : ''}</span>
+                      <MapPin className="h-3 w-3 shrink-0 mt-0.5" />
+                      <span>
+                        {cus?.name} {cus?.address ? `— ${cus?.address}` : ""}
+                      </span>
                     </div>
                   </div>
                 </div>

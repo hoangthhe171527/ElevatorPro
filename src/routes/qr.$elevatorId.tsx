@@ -12,7 +12,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { StatusBadge } from "@/components/common/StatusBadge";
+import { StatusBadge } from "@/components/common/StatusBadge";;
 import { elevatorStatusLabel, elevatorStatusVariant } from "@/lib/status-variants";
 import {
   mockElevators,
@@ -115,7 +115,21 @@ function QRPage() {
   const permissions = useCurrentPermissions();
   const isStaff = permissions.length > 0;
   const isAdmin = permissions.some((p) =>
-    ["ceo", "tech_maintenance", "tech_installation", "accountant", "sales_admin", "intake_operator"].includes(p),
+    [
+      "tech_manager",
+      "tech_manager",
+      "sales",
+      "sales_admin",
+      "service_dispatcher",
+      "service_dispatcher",
+      "accountant",
+      "tech_manager",
+      "tech_maintenance_lead",
+      "tech_maintenance",
+      "tech_installation_lead",
+      "tech_installation",
+      "tech_survey",
+    ].includes(p),
   );
 
   // Report form state
@@ -139,7 +153,7 @@ function QRPage() {
     setVerifying(true);
     await new Promise((r) => setTimeout(r, 600));
     setVerifying(false);
-    
+
     const correctDigits = (customer?.phone || "").replace(/\D/g, "").slice(-6);
     if (last6Digits === correctDigits) {
       setIsVerified(true);
@@ -210,49 +224,55 @@ function QRPage() {
         {!isVerified && (
           <div className="space-y-6 py-8 animate-in fade-in zoom-in duration-500">
             <div className="text-center space-y-2">
-               <div className="h-16 w-16 bg-primary/10 rounded-full flex items-center justify-center mx-auto mb-4 border-2 border-primary/20">
-                  <Shield size={32} className="text-primary" />
-               </div>
-               <h2 className="text-2xl font-black tracking-tight">Xác thực chủ sở hữu</h2>
-               <p className="text-sm text-muted-foreground px-6">
-                  Vui lòng nhập 6 số cuối của số điện thoại đã đăng ký với hệ thống để xem thông tin chi tiết thang máy.
-               </p>
+              <div className="h-16 w-16 bg-primary/10 rounded-full flex items-center justify-center mx-auto mb-4 border-2 border-primary/20">
+                <Shield size={32} className="text-primary" />
+              </div>
+              <h2 className="text-2xl font-black tracking-tight">Xác thực chủ sở hữu</h2>
+              <p className="text-sm text-muted-foreground px-6">
+                Vui lòng nhập 6 số cuối của số điện thoại đã đăng ký với hệ thống để xem thông tin
+                chi tiết thang máy.
+              </p>
             </div>
 
             <Card className="p-6 shadow-xl border-t-4 border-t-primary">
-               <div className="space-y-4">
-                  <div className="space-y-2">
-                     <label className="text-[10px] font-black uppercase tracking-widest text-muted-foreground">Mã xác thực (6 số cuối SĐT)</label>
-                     <Input 
-                        type="password" 
-                        pattern="[0-9]*" 
-                        inputMode="numeric"
-                        placeholder="••••••" 
-                        className="text-center text-2xl h-14 tracking-[0.5em] font-black"
-                        maxLength={6}
-                        value={last6Digits}
-                        onChange={(e) => setLast6Digits(e.target.value.replace(/\D/g, ""))}
-                     />
-                  </div>
-                  <Button 
-                    className="w-full h-12 rounded-xl bg-primary hover:bg-primary/90 font-bold shadow-lg shadow-primary/20"
-                    onClick={handleVerify}
-                    disabled={verifying}
-                  >
-                    {verifying ? (
-                      <RefreshCw className="h-4 w-4 animate-spin mr-2" />
-                    ) : (
-                      <CheckCircle2 className="h-4 w-4 mr-2" />
-                    )}
-                    XÁC NHẬN TRUY CẬP
-                  </Button>
-               </div>
+              <div className="space-y-4">
+                <div className="space-y-2">
+                  <label className="text-[10px] font-black uppercase tracking-widest text-muted-foreground">
+                    Mã xác thực (6 số cuối SĐT)
+                  </label>
+                  <Input
+                    type="password"
+                    pattern="[0-9]*"
+                    inputMode="numeric"
+                    placeholder="••••••"
+                    className="text-center text-2xl h-14 tracking-[0.5em] font-black"
+                    maxLength={6}
+                    value={last6Digits}
+                    onChange={(e) => setLast6Digits(e.target.value.replace(/\D/g, ""))}
+                  />
+                </div>
+                <Button
+                  className="w-full h-12 rounded-xl bg-primary hover:bg-primary/90 font-bold shadow-lg shadow-primary/20"
+                  onClick={handleVerify}
+                  disabled={verifying}
+                >
+                  {verifying ? (
+                    <RefreshCw className="h-4 w-4 animate-spin mr-2" />
+                  ) : (
+                    <CheckCircle2 className="h-4 w-4 mr-2" />
+                  )}
+                  XÁC NHẬN TRUY CẬP
+                </Button>
+              </div>
             </Card>
 
             <div className="text-center">
-               <a href="tel:19001234" className="text-xs font-bold text-muted-foreground hover:text-primary transition-colors flex items-center justify-center gap-2">
-                  <Phone size={14} /> Bạn gặp khó khăn? Liên hệ 1900 1234
-               </a>
+              <a
+                href="tel:19001234"
+                className="text-xs font-bold text-muted-foreground hover:text-primary transition-colors flex items-center justify-center gap-2"
+              >
+                <Phone size={14} /> Bạn gặp khó khăn? Liên hệ 1900 1234
+              </a>
             </div>
           </div>
         )}
@@ -287,13 +307,21 @@ function QRPage() {
                     <Calendar size={20} />
                   </div>
                   <div>
-                    <div className="text-[10px] font-black uppercase text-muted-foreground leading-none mb-1">Lịch bảo trì tiếp theo</div>
-                    <div className="text-sm font-black text-primary">{formatDate(elevator.nextMaintenance)}</div>
+                    <div className="text-[10px] font-black uppercase text-muted-foreground leading-none mb-1">
+                      Lịch bảo trì tiếp theo
+                    </div>
+                    <div className="text-sm font-black text-primary">
+                      {formatDate(elevator.nextMaintenance)}
+                    </div>
                   </div>
                 </div>
                 <div className="text-right">
-                   <div className="text-[10px] font-bold text-muted-foreground uppercase leading-none mb-1">Trạng thái</div>
-                   <Badge variant="outline" className="text-[10px] bg-white">Sắp tới</Badge>
+                  <div className="text-[10px] font-bold text-muted-foreground uppercase leading-none mb-1">
+                    Trạng thái
+                  </div>
+                  <Badge variant="outline" className="text-[10px] bg-white">
+                    Sắp tới
+                  </Badge>
                 </div>
               </div>
             </Card>
@@ -308,8 +336,12 @@ function QRPage() {
                   <AlertTriangle className="h-6 w-6" />
                 </div>
                 <div>
-                  <div className="font-black text-xs uppercase tracking-tight text-destructive">Báo sự cố</div>
-                  <div className="text-[10px] text-muted-foreground mt-0.5 font-medium">Yêu cầu sửa chữa</div>
+                  <div className="font-black text-xs uppercase tracking-tight text-destructive">
+                    Báo sự cố
+                  </div>
+                  <div className="text-[10px] text-muted-foreground mt-0.5 font-medium">
+                    Yêu cầu sửa chữa
+                  </div>
                 </div>
               </button>
 
@@ -321,8 +353,12 @@ function QRPage() {
                   <Wrench className="h-6 w-6" />
                 </div>
                 <div>
-                  <div className="font-black text-xs uppercase tracking-tight text-primary underline underline-offset-4 decoration-primary/30">Lịch sử thang</div>
-                  <div className="text-[10px] text-muted-foreground mt-0.5 font-medium">Kỹ thuật & bảo trì</div>
+                  <div className="font-black text-xs uppercase tracking-tight text-primary underline underline-offset-4 decoration-primary/30">
+                    Lịch sử thang
+                  </div>
+                  <div className="text-[10px] text-muted-foreground mt-0.5 font-medium">
+                    Kỹ thuật & bảo trì
+                  </div>
                 </div>
               </button>
             </div>
@@ -330,22 +366,33 @@ function QRPage() {
             {/* Repair/Maintenance History Detail (Expandable) */}
             {historyOpen && (
               <div className="space-y-3 animate-in slide-in-from-top-2 duration-300 pt-2">
-                 <h4 className="text-[11px] font-black uppercase text-muted-foreground tracking-widest px-1">Nhật ký vận hành</h4>
-                 <div className="space-y-2">
-                    {history.map(j => (
-                      <Card key={j.id} className="p-3 shadow-sm hover:shadow-md transition-shadow border-muted/50">
-                        <div className="flex justify-between items-start mb-2">
-                           <div className="flex items-center gap-2">
-                              <Badge variant="secondary" className="text-[10px]">{j.type === 'maintenance' ? 'Bảo trì' : 'Sửa chữa'}</Badge>
-                              <span className="text-xs font-mono font-bold">{j.code}</span>
-                           </div>
-                           <span className="text-[10px] font-medium text-muted-foreground">{formatDate(j.scheduledFor)}</span>
+                <h4 className="text-[11px] font-black uppercase text-muted-foreground tracking-widest px-1">
+                  Nhật ký vận hành
+                </h4>
+                <div className="space-y-2">
+                  {history.map((j) => (
+                    <Card
+                      key={j.id}
+                      className="p-3 shadow-sm hover:shadow-md transition-shadow border-muted/50"
+                    >
+                      <div className="flex justify-between items-start mb-2">
+                        <div className="flex items-center gap-2">
+                          <Badge variant="secondary" className="text-[10px]">
+                            {j.type === "maintenance" ? "Bảo trì" : "Sửa chữa"}
+                          </Badge>
+                          <span className="text-xs font-mono font-bold">{j.code}</span>
                         </div>
-                        <div className="text-xs font-bold truncate mb-1">{j.title}</div>
-                        <div className="text-[10px] text-muted-foreground line-clamp-2">{j.report || "Hoàn thành quy trình tiêu chuẩn."}</div>
-                      </Card>
-                    ))}
-                 </div>
+                        <span className="text-[10px] font-medium text-muted-foreground">
+                          {formatDate(j.scheduledFor)}
+                        </span>
+                      </div>
+                      <div className="text-xs font-bold truncate mb-1">{j.title}</div>
+                      <div className="text-[10px] text-muted-foreground line-clamp-2">
+                        {j.report || "Hoàn thành quy trình tiêu chuẩn."}
+                      </div>
+                    </Card>
+                  ))}
+                </div>
               </div>
             )}
 
@@ -361,7 +408,11 @@ function QRPage() {
                     <Row label="Model" value={elevator.model} />
                     <Row label="Số tầng" value={`${elevator.floors} tập tầng`} />
                     <Row label="Ngày lắp đặt" value={formatDate(elevator.installedAt)} />
-                    <Row label="Bảo hành đến" value={formatDate(elevator.warrantyUntil)} highlight />
+                    <Row
+                      label="Bảo hành đến"
+                      value={formatDate(elevator.warrantyUntil)}
+                      highlight
+                    />
                   </div>
                 </Card>
 
@@ -384,8 +435,7 @@ function QRPage() {
                 <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-destructive text-white shadow-lg shadow-destructive/20 animate-pulse">
                   <Phone className="h-5 w-5" />
                 </div>
-                <div className="flex-1">
-                </div>
+                <div className="flex-1"></div>
                 <a href="tel:19001234">
                   <Button size="sm" variant="destructive" className="gap-1.5">
                     <Phone className="h-3.5 w-3.5" /> 1900 1234
@@ -399,12 +449,12 @@ function QRPage() {
               <button
                 className="w-full flex items-center justify-between px-4 py-3 hover:bg-muted/30 transition-colors"
                 onClick={() => {
-                   if (!isVerified) {
-                      toast.info("Vui lòng xác minh chủ thang để xem lịch sử bảo trì");
-                      setStep("info"); // Redirect to verification card in info step
-                   } else {
-                      setHistoryOpen((v) => !v);
-                   }
+                  if (!isVerified) {
+                    toast.info("Vui lòng xác minh chủ thang để xem lịch sử bảo trì");
+                    setStep("info"); // Redirect to verification card in info step
+                  } else {
+                    setHistoryOpen((v) => !v);
+                  }
                 }}
               >
                 <span className="font-medium text-sm flex items-center gap-2">
@@ -671,31 +721,36 @@ function QRPage() {
 
             {!isVerified && (
               <Card className="p-6 border-primary/20 bg-primary/5">
-                 <div className="text-center mb-4">
-                    <Shield className="h-10 w-10 text-primary mx-auto mb-2" />
-                    <h3 className="font-bold">Xác thực chủ sở hữu</h3>
-                    <p className="text-xs text-muted-foreground mt-1">Để xem chi tiết lịch sử bảo trì và thông số kỹ thuật, vui lòng xác nhận bằng số điện thoại đăng ký.</p>
-                 </div>
-                 <div className="space-y-3">
-                    <div className="relative">
-                       <Input 
-                          placeholder="Nhập 6 số cuối SĐT" 
-                          className="pl-3 pr-20 h-12 text-center text-lg font-mono tracking-[0.5em]"
-                          maxLength={6}
-                          type="tel"
-                          value={last6Digits}
-                          onChange={(e) => setLast6Digits(e.target.value.replace(/\D/g, ""))}
-                       />
-                       <Button 
-                          className="absolute right-1 top-1 bottom-1 px-3" 
-                          onClick={handleVerify}
-                          disabled={verifying || last6Digits.length < 6}
-                       >
-                          {verifying ? "..." : "Xác nhận"}
-                       </Button>
-                    </div>
-                    <p className="text-[10px] text-center text-muted-foreground italic">Gợi ý: Số điện thoại đại diện của {customer?.name}</p>
-                 </div>
+                <div className="text-center mb-4">
+                  <Shield className="h-10 w-10 text-primary mx-auto mb-2" />
+                  <h3 className="font-bold">Xác thực chủ sở hữu</h3>
+                  <p className="text-xs text-muted-foreground mt-1">
+                    Để xem chi tiết lịch sử bảo trì và thông số kỹ thuật, vui lòng xác nhận bằng số
+                    điện thoại đăng ký.
+                  </p>
+                </div>
+                <div className="space-y-3">
+                  <div className="relative">
+                    <Input
+                      placeholder="Nhập 6 số cuối SĐT"
+                      className="pl-3 pr-20 h-12 text-center text-lg font-mono tracking-[0.5em]"
+                      maxLength={6}
+                      type="tel"
+                      value={last6Digits}
+                      onChange={(e) => setLast6Digits(e.target.value.replace(/\D/g, ""))}
+                    />
+                    <Button
+                      className="absolute right-1 top-1 bottom-1 px-3"
+                      onClick={handleVerify}
+                      disabled={verifying || last6Digits.length < 6}
+                    >
+                      {verifying ? "..." : "Xác nhận"}
+                    </Button>
+                  </div>
+                  <p className="text-[10px] text-center text-muted-foreground italic">
+                    Gợi ý: Số điện thoại đại diện của {customer?.name}
+                  </p>
+                </div>
               </Card>
             )}
 
